@@ -18,14 +18,13 @@ import Foundation
 import SourceKittenFramework
 
 func generateMocks(_ srcDir: String, inputMockPaths: [String], destinationDir: String) {
-
+    
     var candidates = [String: String]()
     var parentMocks = [String: (String, Structure)]()
     
     let outputPath = "Mocks.swift"
     let mockgenQueue = DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
-    let q2 = DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
-
+    
     let t0 = CFAbsoluteTimeGetCurrent()
     print("Build a map of input mocks to be inherited...")
     _ = processFiles(inputMockPaths, queue: mockgenQueue) { (s: Structure, file: File) in
@@ -36,12 +35,12 @@ func generateMocks(_ srcDir: String, inputMockPaths: [String], destinationDir: S
     
     let t1 = CFAbsoluteTimeGetCurrent()
     print("Took", t1-t0)
-
+    
     print("Render a mock output for annotated protocols...")
-    _ = processRendering([srcDir], inputMocks: parentMocks, queue: q2) { (s: Structure, file: File, mockString: String) in
-            if !mockString.isEmpty {
-                candidates[s.name] = mockString
-            }
+    _ = processRendering([srcDir], inputMocks: parentMocks, queue: mockgenQueue) { (s: Structure, file: File, mockString: String) in
+        if !mockString.isEmpty {
+            candidates[s.name] = mockString
+        }
     }
     
     let t2 = CFAbsoluteTimeGetCurrent()
@@ -57,7 +56,7 @@ func generateMocks(_ srcDir: String, inputMockPaths: [String], destinationDir: S
     print("Write the output to a file...")
     let outputFile = destinationDir + "/" + outputPath
     _ = try? ret.write(toFile: outputFile, atomically: true, encoding: String.Encoding.utf8)
-
+    
     let t4 = CFAbsoluteTimeGetCurrent()
     print("Took", t4-t3)
 }
