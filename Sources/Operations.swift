@@ -19,104 +19,74 @@ import SourceKittenFramework
 
 typealias MockMap = (candidates: [String: String], parents: [String: String], parentMocks: [String: (String, Structure)])
 
-let AnnotationString = "@CreateMock"
-let MockTypeString = "protocol "
+func processImports(_ file: File) -> [String] {
+    let imports = file.lines.filter { (line: Line) -> Bool in
+        return line.content.trimmingCharacters(in: CharacterSet.whitespaces).starts(with: "import ")
+        }.map { (line: Line) -> String in
+            return line.content
+    }
+    return imports
+}
 
-let excludeList = ["Mock.swift",
-                   "Mocks.swift",
-                   "Test.swift",
-                   "Tests.swift",
-                   "Model.swift",
-                   "Models.swift",
-                   "Service.swift",
-                   "Services.swift",
-                   "NeedleGenerated.swift"]
+func lookupEntities(name: String, inputMocks: [String: (Structure, File)], annotatedProtocolMap: [String: (Structure, File, [String])]) -> [String] {
+   var result = [""]
+    if let cur = annotatedProtocolMap[name] {
+        let curStructure = cur.0
+        let curEntities = cur.2
+        result.append(contentsOf: curEntities)
 
-extension String {
-    var shouldFilter: Bool {
-        
-        for el in excludeList {
-            if hasSuffix(el) {
-                return false
+        for parent in curStructure.inheritedTypes {
+            if parent != "class", parent != "Any", parent != "AnyObject" {
+                let parentResult = lookupEntities(name: parent, inputMocks: inputMocks, annotatedProtocolMap: annotatedProtocolMap)
+                result.append(contentsOf: parentResult)
             }
         }
-        return shouldParse
-        //            excludeList.filter{ contains($0) }.count == 0
+    } else if let val = inputMocks["\(name)Mock"] {
+        let parentResult = val.0.extractPart(val.1.contents)
+        result.append(parentResult)
     }
+    
+    return result
 }
 
 func renderMock(_ path: String,
                 lock: NSLock? = nil,
-                inputMocks: [String: (String, Structure)],
+                inputMocks: [String: (Structure, File)],
+                exclude: [String]?,
+                annotatedProtocolMap: [String: (Structure, File, [String])],
                 process: (Structure, File, String) -> ()) -> Bool {
     let fileName = URL(fileURLWithPath: path).lastPathComponent
     // Filter out non-swift, tests, mocks, model files, etc.
-    guard fileName.shouldFilter else { return false }
+    guard fileName.shouldParse(with: exclude) else { return false }
     guard let file = File(path: path) else { return false }
     if let topstructure = try? Structure(file: file) {
         for substructure in topstructure.substructures {
             var mockString = ""
-            
-            if substructure.isProtocol {
-                let annotatedLinesInFile = file.lines.filter { (line: Line) -> Bool in
-                    return line.content.contains(AnnotationString)
-                }
-                let currentLines = file.lines.filter { (line: Line) -> Bool in
-                    if line.content.contains(substructure.name) {
-                        let parts = line.content.components(separatedBy: MockTypeString)
-                        let name = parts.last?.components(separatedBy: CharacterSet(charactersIn: ": {")).first
-                        return name == substructure.name
-                    }
-                    return false
+            if substructure.isProtocol, annotatedProtocolMap[substructure.name] != nil {
+                
+                let result = lookupEntities(name: substructure.name, inputMocks: inputMocks, annotatedProtocolMap: annotatedProtocolMap)
+                let resultSet = Set(result)
+                
+                /// TODO: Add uninherited public parent mocks as well to propagate down to child modules
+                mockString = """
+                class \(substructure.name)Mock: \(substructure.name) {
+                \(resultSet.joined(separator: "\n"))
                 }
                 
-                let annotatedLines = currentLines.filter { (line: Line) -> Bool in
-                    return annotatedLinesInFile.contains(where: { (l: Line) -> Bool in
-                        return l.index == line.index - 1
-                    })
-                }
+                """
                 
-                if annotatedLines.count > 0 {
-                    
-                    let parentMocks = substructure.inheritedTypes
-                                        .filter { (parent: String) -> Bool in
-                                            return (parent != "class" && parent != "Any" && parent != "AnyObject")
-                                        }.map { (parent: String) -> String in
-                                            let parentMockName = "\(parent)Mock"
-                                            if let parentMockEntity = inputMocks[parentMockName] {
-                                            let parentMockResult = parentMockEntity.1.extractPart(parentMockEntity.0)
-                                            return parentMockResult
-                                            }
-                                            return ""
-                                    }
-                    
-                    let children = substructure.substructures.map { (child: Structure) -> String in
-                        return renderProperties(child)
-                    }
-                    
-                    /// TODO: Add uninherited parent mocks as well to propagate down to child modules
-                    mockString = """
-                    class \(substructure.name)Mock: \(substructure.name) {
-                    \(parentMocks.joined())
-                    \(children.joined())
-                    }
-                    
-                    """
-                }
+                lock?.lock()
+                process(substructure, file, mockString)
+                lock?.unlock()
             }
-            
-            lock?.lock()
-            process(substructure, file, mockString)
-            lock?.unlock()
         }
-        
         return true
     }
-    
     return false
 }
 
 func processFiles(_ paths: [String],
+                  exclude: [String]? = nil,
                   queue: DispatchQueue?,
                   process: @escaping (Structure, File) -> ()) -> Int {
     var count = 0
@@ -125,7 +95,7 @@ func processFiles(_ paths: [String],
         
         for filePath in paths {
             queue.async {
-                let result = fileParse(filePath, lock: lock, process: process)
+                let result = fileParse(filePath, lock: lock, exclusionList: exclude, process: process)
                 count += result ? 1 : 0
             }
         }
@@ -133,7 +103,7 @@ func processFiles(_ paths: [String],
         queue.sync(flags: .barrier) {}
     } else {
         for filePath in paths {
-            let result = fileParse(filePath, lock: nil, process: process)
+            let result = fileParse(filePath, lock: nil, exclusionList: exclude, process: process)
             count += result ? 1 : 0
         }
     }
@@ -141,8 +111,84 @@ func processFiles(_ paths: [String],
     return count
 }
 
+func filterMockType(_ path: String,
+                    lock: NSLock?,
+                    exclude: [String]? = nil,
+                    process: @escaping (Structure, File, [String]) -> ()) -> Bool {
+    let fileName = URL(fileURLWithPath: path).lastPathComponent
+    // Filter out non-swift, tests, mocks, model files, etc.
+    guard fileName.shouldParse(with: exclude) else { return false }
+    guard let file = File(path: path) else { return false }
+    if let topstructure = try? Structure(file: file) {
+        
+        let allAnnotatedLinesInFile = file.lines.filter { (line: Line) -> Bool in
+            return line.content.contains(AnnotationString)
+            }.map{$0.index}
+        guard allAnnotatedLinesInFile.count > 0 else { return false }
+        
+        let allDeclLines = file.lines.filter { (line: Line) -> Bool in
+            line.content.trimmingCharacters(in: CharacterSet.whitespaces).hasPrefix(MockTypeString)
+        }.map{$0.index}
+        
+        for substructure in topstructure.substructures {
+            if substructure.isProtocol,
+                let curLine = substructure.currentLine(in: file),
+                curLine.isAnnotated(annotatedLines: allAnnotatedLinesInFile, declLines: allDeclLines) {
+                let entities = substructure.substructures.map { (child: Structure) -> String in
+                    return renderProperties(child, line: curLine, file: file)
+                }
+                
+                lock?.lock()
+                process(substructure, file, entities)
+                lock?.unlock()
+            }
+        }
+        
+        return true
+    }
+    
+    return false
+}
+
+func processMockTypeMap(_ paths: [String],
+                        exclude: [String]? = nil,
+                        queue: DispatchQueue?,
+                        process: @escaping (Structure, File, [String]) -> ()) -> Int {
+    var count = 0
+    
+    if let queue = queue {
+        let lock = NSLock()
+        
+        scanPaths(paths) { filePath in
+            queue.async {
+                let result = filterMockType(filePath,
+                                            lock: lock,
+                                            exclude: exclude,
+                                            process: process)
+                count += result ? 1 : 0
+            }
+        }
+        
+        // Wait for queue to drain
+        queue.sync(flags: .barrier) {}
+    } else {
+        scanPaths(paths) { filePath in
+            let result = filterMockType(filePath,
+                                        lock: nil,
+                                        exclude: exclude,
+                                        process: process)
+            count += result ? 1 : 0
+        }
+    }
+    
+    return count
+    
+}
+
 func processRendering(_ paths: [String],
-                      inputMocks: [String: (String, Structure)],
+                      inputMocks: [String: (Structure, File)],
+                      exclude: [String]?,
+                      annotatedProtocolMap: [String: (Structure, File, [String])],
                       queue: DispatchQueue?,
                       process: @escaping (Structure, File, String) -> ()) -> Int {
     
@@ -156,6 +202,8 @@ func processRendering(_ paths: [String],
                 let result = renderMock(filePath,
                                         lock: lock,
                                         inputMocks: inputMocks,
+                                        exclude: exclude,
+                                        annotatedProtocolMap: annotatedProtocolMap,
                                         process: process)
                 count += result ? 1 : 0
             }
@@ -168,6 +216,8 @@ func processRendering(_ paths: [String],
             let result = renderMock(filePath,
                                     lock: nil,
                                     inputMocks: inputMocks,
+                                    exclude: exclude,
+                                    annotatedProtocolMap: annotatedProtocolMap,
                                     process: process)
             count += result ? 1 : 0
         }

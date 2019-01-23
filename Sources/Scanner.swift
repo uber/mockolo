@@ -49,9 +49,41 @@ extension Structure {
     var typeName: String {
         return dictionary["key.typename"] as? String ?? unknown
     }
+
+    var hasAvailableAttribute: Bool {
+        return kind == SwiftDeclarationAttributeKind.available.rawValue
+    }
     
-    var isVariable: Bool {
-        return kind == "source.lang.swift.decl.var.instance"
+    var attributes: [String]? {
+        if let subs = dictionary["key.attributes"] as? [SourceKitRepresentable] {
+            let result = subs.compactMap { (sub: SourceKitRepresentable) -> String? in
+                if let child = sub as? [String: SourceKitRepresentable], let val = child["key.attribute"] as? String, let leaf = val.components(separatedBy: ".").last {
+                    return leaf
+                }
+                return nil
+            }
+            return result
+        }
+        return nil
+    }
+    
+    var accessControlLevel: String {
+        if let access = dictionary["key.accessibility"] as? String, let acl = access.components(separatedBy: ".").last {
+            return acl
+        }
+        return unknown
+    }
+    
+    var isInstanceVariable: Bool {
+        return kind == SwiftDeclarationKind.varInstance.rawValue
+    }
+    
+    var isStaticVariable: Bool {
+        return kind == SwiftDeclarationKind.varStatic.rawValue
+    }
+    
+    var isStaticMethod: Bool {
+        return kind == SwiftDeclarationKind.functionMethodStatic.rawValue
     }
     
     var isProtocol: Bool {
@@ -62,8 +94,8 @@ extension Structure {
         return kind == SwiftDeclarationKind.class.rawValue
     }
     
-    var isMethod: Bool {
-        return kind == "source.lang.swift.decl.function.method.instance"
+    var isInstanceMethod: Bool {
+        return kind == SwiftDeclarationKind.functionMethodInstance.rawValue
     }
     
     var isParameter: Bool {
@@ -94,7 +126,7 @@ extension Structure {
         }
     }
 }
-    
+
 func scanDirectory(_ path: String, with callBack: (String) -> Void) {
     let errorHandler = { (url: URL, error: Error) -> Bool in
         fatalError("Failed to traverse \(url) with error \(error).")
@@ -114,27 +146,23 @@ func scanPaths(_ paths: [String], with callBack: (String) -> Void) {
     }
 }
 
-extension String {
-    var shouldParse: Bool {
-        return hasSuffix(".swift")
-    }
-}
-
 func fileParse(_ path: String,
                lock: NSLock? = nil,
+               exclusionList: [String]? = nil,
                process: (Structure, File) -> ()) -> Bool {
     let fileName = URL(fileURLWithPath: path).lastPathComponent
-    guard fileName.shouldParse else { return false }
-
+    guard fileName.shouldParse(with: exclusionList) else { return false }
+    
     guard let file = File(path: path) else { return false }
     
     if let result = try? Structure(file: file) {
-        lock?.lock()
         for substructure in result.substructures {
+            lock?.lock()
             process(substructure, file)
+            lock?.unlock()
         }
-        lock?.unlock()
     }
     
     return true
 }
+

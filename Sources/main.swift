@@ -15,16 +15,27 @@
 //
 import Foundation
 
+
+let exclusionList = ["Mock.swift",
+                     "Mocks.swift",
+                     "Test.swift",
+                     "Tests.swift",
+                     "Model.swift",
+                     "Models.swift",
+                     "Service.swift",
+                     "Services.swift",
+                     "NeedleGenerated.swift"]
+
 func main() {
     var args = CommandLine.arguments
     let execName = args.removeFirst()
     print("Start of", execName)
-
+    
     if args.count > 2 {
         let srcDir = args.removeFirst()
         let destDir = args.removeFirst()
         print("Running MockGen on", srcDir, "output: ", destDir)
-        generateMocks(srcDir, inputMockPaths: args, destinationDir: destDir)
+        generateMocks(srcDir, exclude: exclusionList, inputMockPaths: args, destinationDir: destDir)
     }
     
     print("End of", execName)

@@ -17,29 +17,41 @@
 import Foundation
 import SourceKittenFramework
 
-func generateMocks(_ srcDir: String, inputMockPaths: [String], destinationDir: String) {
+func generateMocks(_ srcDir: String, exclude: [String], inputMockPaths: [String], destinationDir: String) {
     
     var candidates = [String: String]()
-    var parentMocks = [String: (String, Structure)]()
-    
-    let outputPath = "Mocks.swift"
+    var parentMocks = [String: (Structure, File)]()
+    var annotatedProtocolMap = [String: (Structure, File, [String])]()
+    var importLines = [String: [String]]()
+    let outputPath = "SMocks.swift"
     let mockgenQueue = DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
     
     let t0 = CFAbsoluteTimeGetCurrent()
     print("Build a map of input mocks to be inherited...")
-    _ = processFiles(inputMockPaths, queue: mockgenQueue) { (s: Structure, file: File) in
+    _ = processFiles(inputMockPaths, exclude: exclude, queue: mockgenQueue) { (s: Structure, file: File) in
         if s.isClass, s.name.hasSuffix("Mock") {
-            parentMocks[s.name] = (file.contents, s)
+            parentMocks[s.name] = (s, file)
+            
+            if let fpath = file.path, importLines[fpath] == nil {
+                importLines[fpath] = processImports(file)
+            }
         }
+    }
+    
+    _ = processMockTypeMap([srcDir], exclude: exclude, queue: mockgenQueue) { (s: Structure, file: File, entites: [String]) in
+        annotatedProtocolMap[s.name] = (s, file, entites)
     }
     
     let t1 = CFAbsoluteTimeGetCurrent()
     print("Took", t1-t0)
     
     print("Render a mock output for annotated protocols...")
-    _ = processRendering([srcDir], inputMocks: parentMocks, queue: mockgenQueue) { (s: Structure, file: File, mockString: String) in
-        if !mockString.isEmpty {
-            candidates[s.name] = mockString
+    _ = processRendering([srcDir], inputMocks: parentMocks, exclude: exclude, annotatedProtocolMap: annotatedProtocolMap, queue: mockgenQueue) { (s: Structure, file: File, mockString: String) in
+        
+        candidates[s.name] = mockString
+        
+        if let fpath = file.path, importLines[fpath] == nil {
+            importLines[fpath] = processImports(file)
         }
     }
     
@@ -47,8 +59,13 @@ func generateMocks(_ srcDir: String, inputMockPaths: [String], destinationDir: S
     print("Took", t2-t1)
     
     print("Combine all of mock output into one...")
+    let imports = importLines.values.flatMap{$0}
+    let importsSet = Set(imports)
+    
     let entities = candidates.map{$0.1}
-    let ret = entities.joined()
+    var ret = importsSet.joined(separator: "\n")
+    ret.append("\n")
+    ret.append(entities.joined())
     
     let t3 = CFAbsoluteTimeGetCurrent()
     print("Took", t3-t2)
