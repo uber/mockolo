@@ -51,6 +51,30 @@ extension Structure {
     }
 }
 
+
+func extract(_ source: [String: SourceKitRepresentable], from content: String) -> String? {
+    let substring = range(for: source).flatMap { range -> String? in
+        guard let subdata = content.data(using: .utf8)?.subdata(in: Int(range.offset)..<Int(range.offset + range.length)) else {
+            return nil
+        }
+        return String(data: subdata, encoding: .utf8)
+    }
+    
+    return substring?.isEmpty == true ? nil : substring?.trimmingCharacters(in: .whitespacesAndNewlines)
+}
+
+func range(`for` source: [String: SourceKitRepresentable]) -> (offset: Int64, length: Int64)? {
+    func extract(_ offset: SwiftDocKey, _ length: SwiftDocKey) -> (offset: Int64, length: Int64)? {
+        if let offset = source[offset.rawValue] as? Int64, let length = source[length.rawValue] as? Int64 {
+            return (offset, length)
+        }
+        return nil
+    }
+
+    return extract(.offset, .length)
+}
+
+
 func defaultVal(of typeName: String) -> String? {
     if typeName.hasSuffix("?") {
         return "nil"
@@ -78,4 +102,3 @@ func defaultVal(of typeName: String) -> String? {
     }
     return nil
 }
-

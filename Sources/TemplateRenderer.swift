@@ -3,9 +3,10 @@ import Foundation
 import SourceKittenFramework
 
 func renderMethod(_ element: Structure, attributes: String) -> String {
+    
     var comps = element.name.components(separatedBy: CharacterSet(charactersIn: "():"))
     let methodShortName = comps.removeFirst()
-    let paramStructures = element.substructures.filter{$0.isParameter}
+    let paramStructures = element.substructures.filter{$0.isVarParameter}
     
     let paramDecls = renderMethodParamDecls(paramStructures, words: comps)
     let handlerParamDecls = renderUnderlyingMethodParamDecls(paramStructures)
@@ -15,7 +16,8 @@ func renderMethod(_ element: Structure, attributes: String) -> String {
     let returnDefaultStr = renderUnderlyingMethodReturnDefaultStatement(element)
     let returnType = element.typeName != "Unknown" ? element.typeName : ""
     
-    let result = applyMethodTemplate(methodShortName: methodShortName,
+    let result = applyMethodTemplate(element,
+                                     methodShortName: methodShortName,
                                      attributes: attributes,
                                      suffixes: suffixes,
                                      paramDecls: paramDecls,
@@ -33,35 +35,6 @@ func renderVariable(_ element: Structure, attributes: String) -> String {
     return applyVariableTemplate(element, attributes: attributes)
 }
 
-func renderAttributes(_ element: Structure, content: String) -> String {
-    var attributesStr = ""
-    if let attributes = element.attributes {
-        let result = attributes.map { (str: String) -> String in
-            if str == "available" {
-                return "@" + str + "(iOS 10.0, *)"
-                //                let lastLines = line.lastLines(4, file: file)
-                //                let targetLines = lastLines.filter{ (l: Line) -> Bool in
-                //                    l.content.contains(str)
-                //                }
-                //
-                //                if let targetLine = targetLines.first, let range = targetLine.content.range(of: "\(str)(\\d+, *)", options: String.CompareOptions.regularExpression, range: nil, locale: nil) {
-                //                    let result = targetLine.content.substring(with: range)
-                //                    return "@" + result
-                //                }
-            } else if str == element.accessControlLevel {
-                return ""
-            }
-            return "@" + str
-        }
-        
-        attributesStr = result.joined(separator: " ")
-        
-        if attributes.contains(element.accessControlLevel) {
-            attributesStr = "\(attributesStr) \(element.accessControlLevel)"
-        }
-    }
-    return attributesStr
-}
 
 private func renderMethodParamDecls(_ elements: [Structure], words: [String]) -> [String] {
     return zip(elements, words).map { (element: Structure, word: String) -> String in
@@ -155,7 +128,7 @@ func applyVariableTemplate(_ element: Structure, attributes: String) -> String {
     var \(underlyingSetCallCount) = 0
     var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
     \(attributes)
-    var \(element.name): \(element.typeName) {
+    \(element.accessControlLevelDescription) var \(element.name): \(element.typeName) {
         get {
              return \(underlyingName)
         }
@@ -183,7 +156,7 @@ func applyRxVariableTemplate(_ element: Structure, attributes: String) -> String
             }
         }
         \(attributes)
-        var \(element.name): \(element.typeName) {
+        \(element.accessControlLevelDescription) var \(element.name): \(element.typeName) {
             return \(underlying)
         }
         """
@@ -193,7 +166,8 @@ func applyRxVariableTemplate(_ element: Structure, attributes: String) -> String
 }
 
 
-func applyMethodTemplate(methodShortName: String,
+func applyMethodTemplate(_ element: Structure,
+                         methodShortName: String,
                          attributes: String,
                          suffixes: [String],
                          paramDecls: [String],
@@ -213,7 +187,7 @@ func applyMethodTemplate(methodShortName: String,
     var \(callCount) = 0
     var \(handlerName): ((\(handlerParamStr)) \(returnType.isEmpty ? "-> ()" : "-> \(returnType)"))?
     \(attributes)
-    func \(methodShortName)(\(paramDeclsStr)) \(returnType.isEmpty ? "" : "-> \(returnType)") {
+    \(element.accessControlLevelDescription) func \(methodShortName)(\(paramDeclsStr)) \(returnType.isEmpty ? "" : "-> \(returnType)") {
         \(callCount) += 1
         if let \(handlerName) = \(handlerName) {
             return \(handlerName)(\(handlerParamValsStr))

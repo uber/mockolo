@@ -18,12 +18,16 @@ import Foundation
 import SourceKittenFramework
 
 func renderProperties(_ element: Structure, line: Line, file: File) -> String {
-    let attributeStr = renderAttributes(element, content: file.contents)
+    var attributesStr = ""
+    if let attributes = element.extractAttributes(file.contents) {
+        attributesStr = attributes.joined(separator: " ")
+    }
+
     var str = ""
     if element.isInstanceVariable || element.isStaticVariable {
-        str = renderVariable(element, attributes: attributeStr)
+        str = renderVariable(element, attributes: attributesStr)
     } else if element.isInstanceMethod  || element.isStaticMethod {
-        str = renderMethod(element, attributes: attributeStr)
+        str = renderMethod(element, attributes: attributesStr)
     }
     return str
 }

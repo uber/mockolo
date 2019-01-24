@@ -49,27 +49,18 @@ extension Structure {
     var typeName: String {
         return dictionary["key.typename"] as? String ?? unknown
     }
-
+    
     var hasAvailableAttribute: Bool {
         return kind == SwiftDeclarationAttributeKind.available.rawValue
     }
-    
-    var attributes: [String]? {
-        if let subs = dictionary["key.attributes"] as? [SourceKitRepresentable] {
-            let result = subs.compactMap { (sub: SourceKitRepresentable) -> String? in
-                if let child = sub as? [String: SourceKitRepresentable], let val = child["key.attribute"] as? String, let leaf = val.components(separatedBy: ".").last {
-                    return leaf
-                }
-                return nil
-            }
-            return result
-        }
-        return nil
+
+    var accessControlLevelDescription: String {
+        return accessControlLevel == "internal" ? "" : accessControlLevel
     }
     
     var accessControlLevel: String {
-        if let access = dictionary["key.accessibility"] as? String, let acl = access.components(separatedBy: ".").last {
-            return acl
+        if let access = dictionary["key.accessibility"] as? String, let level = access.components(separatedBy: ".").last {
+            return level
         }
         return unknown
     }
@@ -98,7 +89,7 @@ extension Structure {
         return kind == SwiftDeclarationKind.functionMethodInstance.rawValue
     }
     
-    var isParameter: Bool {
+    var isVarParameter: Bool {
         return kind == "source.lang.swift.decl.var.parameter"
     }
     
@@ -109,6 +100,22 @@ extension Structure {
         }
     }
     
+    func extractAttributes(_ content: String) -> [String]? {
+        if let attributeDict = dictionary["key.attributes"] as? [SourceKitRepresentable] {
+            return attributeDict.compactMap { (attr: SourceKitRepresentable) -> String? in
+                if let attribute = attr as? [String: SourceKitRepresentable] {
+                    if let key = attribute["key.attribute"] as? String, key.hasSuffix(self.accessControlLevel) {
+                        return nil
+                    }
+                    return extract(attribute, from: content)
+                }
+                return nil
+            }
+        }
+        return nil
+    }
+    
+    // This extracts the body of this structure, i.e. it doens't include the decl or signature
     func extractPart(_ file: String) -> String {
         let start = dictionary["key.bodyoffset"] as? Int64 ?? -1
         let len = dictionary["key.bodylength"] as? Int64 ?? 0

@@ -67,9 +67,14 @@ func renderMock(_ path: String,
                 let result = lookupEntities(name: substructure.name, inputMocks: inputMocks, annotatedProtocolMap: annotatedProtocolMap)
                 let resultSet = Set(result)
                 
+                /// TODO: if @available(..) is found in resultSet, add it to this (enclosing classs attributes)
+                let attributeStr = substructure.extractAttributes(file.contents)?.joined(separator: " ") ?? ""
+                
                 /// TODO: Add uninherited public parent mocks as well to propagate down to child modules
                 mockString = """
-                class \(substructure.name)Mock: \(substructure.name) {
+                
+                \(attributeStr)
+                \(substructure.accessControlLevelDescription) class \(substructure.name)Mock: \(substructure.name) {
                 \(resultSet.joined(separator: "\n"))
                 }
                 
