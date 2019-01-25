@@ -14,31 +14,27 @@
 //  limitations under the License.
 //
 import Foundation
-
-
-let exclusionList = ["Mock.swift",
-                     "Mocks.swift",
-                     "Test.swift",
-                     "Tests.swift",
-                     "Model.swift",
-                     "Models.swift",
-                     "Service.swift",
-                     "Services.swift",
-                     "NeedleGenerated.swift"]
+import Utility
+import Basic
 
 func main() {
-    var args = CommandLine.arguments
-    let execName = args.removeFirst()
-    print("Start of", execName)
-    
-    if args.count > 2 {
-        let srcDir = args.removeFirst()
-        let destDir = args.removeFirst()
-        print("Running MockGen on", srcDir, "output: ", destDir)
-        generateMocks(srcDir, exclude: exclusionList, inputMockPaths: args, destinationDir: destDir)
+    let parser = ArgumentParser(usage: "<subcommand> <options>", overview: "Swift mock generator.")
+    let command = GenerateCommand(name: "mockgen", overview: "Generate mocks on Swift source files in a directory.", parser: parser)
+    let inputs = Array(CommandLine.arguments.dropFirst())
+
+    print("Start...")
+    do {
+        /* Example: [path_to_SwiftMockGen_executable] mockgen --source-files-dir [path_to_source_dir]
+         --exclude-suffixes "Mocks" "Tests" "Models" "Services" --output-filepath [path_to_dest_dir/ResultMocks.swift]
+         */
+        let args = try parser.parse(inputs)
+        command.execute(with: args)
+    } catch {
+        fatalError("Command-line pasing error (use --help for help): \(error)")
     }
     
-    print("End of", execName)
+    print("Done.")
 }
+
 
 main()
