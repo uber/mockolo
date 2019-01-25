@@ -54,7 +54,7 @@ class GenerateCommand {
     ///
     /// - parameter parser: The argument parser to use.
     private func setupArguments(with parser: ArgumentParser) {
-        loggingLevel = parser.add(option: "--logging-level", shortName: "-lv", kind: String.self, usage: "The logging level to use.")
+        loggingLevel = parser.add(option: "--logging-level", shortName: "-v", kind: String.self, usage: "The logging level to use.")
         sourceFilesDir = parser.add(option: "--source-files-dir", kind: String.self, usage: "The directory of the Swift source files to be processed for mock generation.", completion: .filename)
         dependentFilePaths = parser.add(option: "--dependent-filepaths", kind: [String].self, usage: "The directory of the Swift source files to be processed for mock generation.", completion: .filename)
         outputFilePath = parser.add(option: "--output-filepath", kind: String.self, usage: "Path to the destination file of generated Swift mock code.", completion: .filename)
@@ -78,7 +78,7 @@ class GenerateCommand {
             if let sourceRootPaths = arguments.get(sourceFilesDir) {
                 let excludeSuffixes = arguments.get(self.excludeSuffixes) ?? []
                 let dependentFilePaths = arguments.get(self.dependentFilePaths) ?? []
-                let concurrencyLimit = arguments.get(self.concurrencyLimit) ?? nil
+                let concurrencyLimit = arguments.get(self.concurrencyLimit)
                 let parsingTimeout = arguments.get(self.parsingTimeout) ?? defaultTimeout
                 let retryParsingOnTimeoutLimit = arguments.get(self.retryParsingOnTimeoutLimit) ?? 0
                 let shouldCollectParsingInfo = arguments.get(self.shouldCollectParsingInfo) ?? false

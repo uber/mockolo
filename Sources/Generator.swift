@@ -81,7 +81,7 @@ func generate(from srcDir: String,
     print("Took", t3-t2)
     
     print("Write the output to a file...")
-    _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: String.Encoding.utf8)
+    _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
     
     let t4 = CFAbsoluteTimeGetCurrent()
     print("Took", t4-t3)
