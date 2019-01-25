@@ -28,7 +28,7 @@ func processImports(_ file: File) -> [String] {
     return imports
 }
 
-func lookupEntities(name: String, inputMocks: [String: (Structure, File)], annotatedProtocolMap: [String: (Structure, File, [String])]) -> [String] {
+func lookupEntities(name: String, inheritanceMap: [String: (Structure, File)], annotatedProtocolMap: [String: (Structure, File, [String])]) -> [String] {
    var result = [""]
     if let cur = annotatedProtocolMap[name] {
         let curStructure = cur.0
@@ -37,11 +37,11 @@ func lookupEntities(name: String, inputMocks: [String: (Structure, File)], annot
 
         for parent in curStructure.inheritedTypes {
             if parent != "class", parent != "Any", parent != "AnyObject" {
-                let parentResult = lookupEntities(name: parent, inputMocks: inputMocks, annotatedProtocolMap: annotatedProtocolMap)
+                let parentResult = lookupEntities(name: parent, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
                 result.append(contentsOf: parentResult)
             }
         }
-    } else if let val = inputMocks["\(name)Mock"] {
+    } else if let val = inheritanceMap["\(name)Mock"] {
         let parentResult = val.0.extractPart(val.1.contents)
         result.append(parentResult)
     }
@@ -51,8 +51,8 @@ func lookupEntities(name: String, inputMocks: [String: (Structure, File)], annot
 
 func renderMock(_ path: String,
                 lock: NSLock? = nil,
-                inputMocks: [String: (Structure, File)],
                 exclude: [String]?,
+                inheritanceMap: [String: (Structure, File)],
                 annotatedProtocolMap: [String: (Structure, File, [String])],
                 process: (Structure, File, String) -> ()) -> Bool {
     let fileName = URL(fileURLWithPath: path).lastPathComponent
@@ -64,7 +64,7 @@ func renderMock(_ path: String,
             var mockString = ""
             if substructure.isProtocol, annotatedProtocolMap[substructure.name] != nil {
                 
-                let result = lookupEntities(name: substructure.name, inputMocks: inputMocks, annotatedProtocolMap: annotatedProtocolMap)
+                let result = lookupEntities(name: substructure.name, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
                 let resultSet = Set(result)
                 
                 /// TODO: if @available(..) is found in resultSet, add it to this (enclosing classs attributes)
@@ -75,7 +75,7 @@ func renderMock(_ path: String,
                 
                 \(attributeStr)
                 \(substructure.accessControlLevelDescription) class \(substructure.name)Mock: \(substructure.name) {
-                \(resultSet.joined(separator: "\n"))
+                    \(resultSet.joined(separator: "\n"))
                 }
                 
                 """
@@ -90,7 +90,7 @@ func renderMock(_ path: String,
     return false
 }
 
-func processFiles(_ paths: [String],
+func processDependentFiles(_ paths: [String],
                   exclude: [String]? = nil,
                   queue: DispatchQueue?,
                   process: @escaping (Structure, File) -> ()) -> Int {
@@ -191,8 +191,8 @@ func processMockTypeMap(_ paths: [String],
 }
 
 func processRendering(_ paths: [String],
-                      inputMocks: [String: (Structure, File)],
                       exclude: [String]?,
+                      inheritanceMap: [String: (Structure, File)],
                       annotatedProtocolMap: [String: (Structure, File, [String])],
                       queue: DispatchQueue?,
                       process: @escaping (Structure, File, String) -> ()) -> Int {
@@ -206,8 +206,8 @@ func processRendering(_ paths: [String],
             queue.async {
                 let result = renderMock(filePath,
                                         lock: lock,
-                                        inputMocks: inputMocks,
                                         exclude: exclude,
+                                        inheritanceMap: inheritanceMap,
                                         annotatedProtocolMap: annotatedProtocolMap,
                                         process: process)
                 count += result ? 1 : 0
@@ -220,8 +220,8 @@ func processRendering(_ paths: [String],
         scanPaths(paths) { filePath in
             let result = renderMock(filePath,
                                     lock: nil,
-                                    inputMocks: inputMocks,
                                     exclude: exclude,
+                                    inheritanceMap: inheritanceMap,
                                     annotatedProtocolMap: annotatedProtocolMap,
                                     process: process)
             count += result ? 1 : 0
