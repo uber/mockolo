@@ -6,7 +6,7 @@ SwiftMockGen is a lightweight framework for creating mocks in Swift.  It uses a 
 scanner and `SourceKittenFramework` for parsing and a custom template renderer for generating a mock output.  
 
 
-## Building and developing
+## Build
 
 First resolve the dependencies:
 
@@ -26,14 +26,22 @@ Or create an Xcode project and build using the IDE:
 $ swift package generate-xcodeproj 
 ```
 
-## Running the program
+## Run
 
-SwiftMockGen produces a commandline executable. To run it, pass in the source file directory of a module, destination directory for the mock output, and a list of any mock files that are needed for the module. 
+SwiftMockGen produces a commandline executable. To run it, pass in the source file directory of a module, destination filepath for the mock output, any suffixes that need to be excluded if any, and a list of any mock files that are needed for the module. 
 
 ```swift
-swift-mockgen /Users/myName/myApp/src/myModule /Users/myName/myApp/dst/myModule /Users/myName/myApp/src/moduleX/XMocks.swift /Users/myName/myApp/src/moduleY/YMocks.swift /Users/myName/myApp/src/moduleZ/ZMocks.swift 
+[path to SwiftMockGen executable] mockgen --source-files-dir [path to source files dir] --exclude-suffixes [suffix string1] [suffix string2] --dependent-filepaths [path to filepath1] [path to filepath2] [path to filepath3] --output-filepath [path to output filepath]
 ```
-The above will run the program on the source files in `/Users/myName/myApp/src/myModule` using the input mock files `XMocks.swift`, `YMocks.swift`, and `ZMocks.swift`, and generates the final mock output file at `/Users/myName/myApp/dst/myModule`.
+
+For example,  
+```swift
+./SwiftMockGen mockgen --source-files-dir /Users/dev/app/src/moduleA 
+                       --exclude-suffixes "Tests" "Mocks"
+                       --dependent-filepaths /Users/dev/app/src/moduleB/file1.swift /Users/dev/app/src/moduleC/file2.swift
+                       --output-filepath /Users/dev/app/src/moduleA/ResultMocks.swift
+```
+The above will run the program on the source files in `/Users/dev/app/src/moduleA` excluding any files with suffixes "Tests" or "Mocks", by taking dependent files `file1.swift` and `file2.swift`, and generate the resulting mock output at the `ResultMocks.swift` file.
 
 
 
