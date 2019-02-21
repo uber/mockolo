@@ -35,7 +35,7 @@ For example,
 
 .build/release/swiftmockgen generate --outputfile apps/result/Mocks.swift 
 --sourcefiles apps/src/File1.swift, apps/src/File2.swift 
---mockfiles "apps/libFoo/FooMocks.swift", "apps/libBar/BarMocks.swift"
+--mockfiles apps/libFoo/FooMocks.swift, apps/libBar/BarMocks.swift
 --exclude-suffixes "Mocks", "Tests", "Models", "Services"
 ```
 
