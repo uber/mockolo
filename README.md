@@ -2,8 +2,7 @@
 
 # SwiftMockGen
 
-SwiftMockGen is a lightweight framework for creating mocks in Swift.  It uses a concurrent swift file 
-scanner and `SourceKittenFramework` for parsing and a custom template renderer for generating a mock output.  
+`SwiftMockGen` is a lightweight commandline tool that uses the `SwiftMockGenCore` framework for creating mocks in Swift.  It uses a concurrent swift file scanner and `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  
 
 
 ## Build
@@ -28,20 +27,19 @@ $ swift package generate-xcodeproj
 
 ## Run
 
-SwiftMockGen produces a commandline executable. To run it, pass in the source file directory of a module, destination filepath for the mock output, any suffixes that need to be excluded if any, and a list of any mock files that are needed for the module. 
+SwiftMockGen produces a commandline executable. To run it, pass in a list of the source file paths of a build target, the ouptut filepath for the mock output, any file name suffixes that need to be excluded if any, and a list of any mock files that are needed to generate mocks for the current build target. 
+
+For example,
 
 ```swift
-[path to SwiftMockGen executable] mockgen --source-files-dir [path to source files dir] --exclude-suffixes [suffix string1] [suffix string2] --dependent-filepaths [path to filepath1] [path to filepath2] [path to filepath3] --output-filepath [path to output filepath]
+
+.build/release/swiftmockgen generate --outputfile apps/result/Mocks.swift 
+--sourcefiles apps/src/File1.swift, apps/src/File2.swift 
+--mockfiles "apps/libFoo/FooMocks.swift", "apps/libBar/BarMocks.swift"
+--exclude-suffixes "Mocks", "Tests", "Models", "Services"
 ```
 
-For example,  
-```swift
-./SwiftMockGen mockgen --source-files-dir /Users/dev/app/src/moduleA 
-                       --exclude-suffixes "Tests" "Mocks"
-                       --dependent-filepaths /Users/dev/app/src/moduleB/file1.swift /Users/dev/app/src/moduleC/file2.swift
-                       --output-filepath /Users/dev/app/src/moduleA/ResultMocks.swift
-```
-The above will run the program on the source files in `/Users/dev/app/src/moduleA` excluding any files with suffixes "Tests" or "Mocks", by taking dependent files `file1.swift` and `file2.swift`, and generate the resulting mock output at the `ResultMocks.swift` file.
+The above will run the program on the source files passed in, excluding any files with suffixes "Tests", "Mocks", etc, use input mock files `FooMocks.swift` and `BarMocks.swift` to resolve inheritance if needed, and generate the mock output to the `Mocks.swift` file.
 
 
 
