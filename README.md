@@ -27,7 +27,7 @@ $ swift package generate-xcodeproj
 
 ## Run
 
-SwiftMockGen produces a commandline executable. To run it, pass in a list of the source file paths of a build target, the ouptut filepath for the mock output, any file name suffixes that need to be excluded if any, and a list of any mock files that are needed to generate mocks for the current build target. 
+`SwiftMockGen` produces a commandline executable. To run it, pass in a list of the source file paths of a build target, the ouptut filepath for the mock output, any file name suffixes that need to be excluded if any, and a list of any mock files that are needed to generate mocks for the current build target. 
 
 For example,
 
