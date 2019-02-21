@@ -15,19 +15,17 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
-func renderProperties(_ element: Structure, line: Line, file: File) -> String {
-    var attributesStr = ""
-    if let attributes = element.extractAttributes(file.contents) {
-        attributesStr = attributes.joined(separator: " ")
+func applyClassTemplate(name: String,
+                        identifier: String,
+                        accessControlLevelDescription: String,
+                        attribute: String,
+                        entities: [String]) -> String {
+    let result = """
+    \(attribute)
+    \(accessControlLevelDescription)class \(name): \(identifier) {
+        \(entities.joined(separator: "\n"))
     }
-
-    var str = ""
-    if element.isInstanceVariable || element.isStaticVariable {
-        str = renderVariable(element, attributes: attributesStr)
-    } else if element.isInstanceMethod  || element.isStaticMethod {
-        str = renderMethod(element, attributes: attributesStr)
-    }
-    return str
+    """
+    return result
 }

@@ -20,7 +20,7 @@ import SourceKittenFramework
 
 /// TODO: remove this file once SwiftScanner is added as a dependency and the following ACLs become public.
 
-private let unknown = "Unknown"
+let UnknownVal = "Unknown"
 
 extension Structure {
     
@@ -40,20 +40,20 @@ extension Structure {
     
     var name: String {
         // A type must have a name.
-        return dictionary["key.name"] as? String ?? unknown
+        return dictionary["key.name"] as? String ?? UnknownVal
     }
     
     var kind: String {
-        return dictionary["key.kind"] as? String ?? unknown
+        return dictionary["key.kind"] as? String ?? UnknownVal
     }
     var typeName: String {
-        return dictionary["key.typename"] as? String ?? unknown
+        return dictionary["key.typename"] as? String ?? UnknownVal
     }
     
     var hasAvailableAttribute: Bool {
         return kind == SwiftDeclarationAttributeKind.available.rawValue
     }
-
+    
     var accessControlLevelDescription: String {
         return accessControlLevel == "internal" ? "" : accessControlLevel
     }
@@ -62,7 +62,7 @@ extension Structure {
         if let access = dictionary["key.accessibility"] as? String, let level = access.components(separatedBy: ".").last {
             return level
         }
-        return unknown
+        return UnknownVal
     }
     
     var isInstanceVariable: Bool {
@@ -85,12 +85,24 @@ extension Structure {
         return kind == SwiftDeclarationKind.class.rawValue
     }
     
+    var isVariable: Bool {
+        return isStaticVariable || isInstanceVariable
+    }
+    
     var isInstanceMethod: Bool {
         return kind == SwiftDeclarationKind.functionMethodInstance.rawValue
     }
     
     var isVarParameter: Bool {
         return kind == "source.lang.swift.decl.var.parameter"
+    }
+    
+    var isMethod: Bool {
+        return isInstanceMethod || isStaticMethod
+    }
+    
+    var isClosure: Bool {
+        return isVariable && typeName.contains("->")
     }
     
     var inheritedTypes: [String] {
@@ -100,37 +112,29 @@ extension Structure {
         }
     }
     
-    func extractAttributes(_ content: String) -> [String]? {
-        if let attributeDict = dictionary["key.attributes"] as? [SourceKitRepresentable] {
-            return attributeDict.compactMap { (attr: SourceKitRepresentable) -> String? in
-                if let attribute = attr as? [String: SourceKitRepresentable] {
-                    if let key = attribute["key.attribute"] as? String, key.hasSuffix(self.accessControlLevel) {
-                        return nil
-                    }
-                    return extract(attribute, from: content)
-                }
-                return nil
+    func extract(offset: Int64, startOffset: Int64 = 0, length: Int64, content: String) -> String {
+        let end = offset + length
+        let start = offset + startOffset
+        
+        if start >= 0 && length > 0 {
+            if end > content.count {
+                print("No content found", start, length, end, content.count)
+                return ""
             }
+            
+            let startIdx = content.index(content.startIndex, offsetBy: start)
+            let endIdx = content.index(content.startIndex, offsetBy: end)
+            let body = content[startIdx ..< endIdx]
+            return String(body)
         }
-        return nil
+        return ""
     }
     
     // This extracts the body of this structure, i.e. it doens't include the decl or signature
-    func extractPart(_ file: String) -> String {
+    func extractBody(_ file: String) -> String {
         let start = dictionary["key.bodyoffset"] as? Int64 ?? -1
         let len = dictionary["key.bodylength"] as? Int64 ?? 0
-        if start >= 0 && len > 0 {
-            if start - 1 + len > file.count {
-                print("No content found", start, len, start - 1 + len, file.count)
-                return ""
-            }
-            let begin = file.index(file.startIndex, offsetBy: start - 1)
-            let end = file.index(file.startIndex, offsetBy: start - 1 + len)
-            let body = file[begin ..< end]
-            return String(body)
-        } else {
-            return ""
-        }
+        return extract(offset: start, length: len, content: file)
     }
 }
 
@@ -151,25 +155,5 @@ func scanPaths(_ paths: [String], with callBack: (String) -> Void) {
     for path in paths {
         scanDirectory(path, with: callBack)
     }
-}
-
-func fileParse(_ path: String,
-               lock: NSLock? = nil,
-               exclusionList: [String]? = nil,
-               process: (Structure, File) -> ()) -> Bool {
-    let fileName = URL(fileURLWithPath: path).lastPathComponent
-    guard fileName.shouldParse(with: exclusionList) else { return false }
-    
-    guard let file = File(path: path) else { return false }
-    
-    if let result = try? Structure(file: file) {
-        for substructure in result.substructures {
-            lock?.lock()
-            process(substructure, file)
-            lock?.unlock()
-        }
-    }
-    
-    return true
 }
 
