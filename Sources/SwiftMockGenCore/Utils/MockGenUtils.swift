@@ -64,8 +64,8 @@ extension Structure {
     }
     
     func extractDocComment(_ content: String) -> String {
-        let len = dictionary["key.doclength"] as? Int64 ?? 0
-        let offset = dictionary["key.docoffset"] as? Int64 ?? -1
+        let len = dictionary["key.doclength"] as? Int ?? 0
+        let offset = dictionary["key.docoffset"] as? Int ?? -1
         
         return extract(offset: offset, length: len, content: content)
     }
@@ -85,9 +85,9 @@ extension Structure {
         return nil
     }
     
-    func extract(_ source: [String: SourceKitRepresentable], startOffset: Int64, from content: String) -> String {
-        if let offset = source[SwiftDocKey.offset.rawValue] as? Int64,
-            let len = source[SwiftDocKey.length.rawValue] as? Int64 {
+    func extract(_ source: [String: SourceKitRepresentable], startOffset: Int, from content: String) -> String {
+        if let offset = source[SwiftDocKey.offset.rawValue] as? Int,
+            let len = source[SwiftDocKey.length.rawValue] as? Int {
             return extract(offset: offset, startOffset: startOffset, length: len, content: content)
         }
         return ""
