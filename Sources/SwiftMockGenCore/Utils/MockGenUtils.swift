@@ -70,19 +70,20 @@ extension Structure {
         return extract(offset: offset, length: len, content: content)
     }
     
-    func extractAttributes(_ content: String, filterOn: String? = nil) -> [String]? {
-        if let attributeDict = dictionary["key.attributes"] as? [SourceKitRepresentable] {
-            return attributeDict.compactMap { (attr: SourceKitRepresentable) -> String? in
-                if let attribute = attr as? [String: SourceKitRepresentable], let attributeVal = attribute["key.attribute"] as? String {
-                    if let filterAttribute = filterOn, attributeVal != filterAttribute {
-                        return nil
-                    }
-                    return extract(attribute, startOffset: -1, from: content)
-                }
-                return nil
-            }
+    func extractAttributes(_ content: String, filterOn: String? = nil) -> [String] {
+        guard let attributeDict = dictionary["key.attributes"] as? [SourceKitRepresentable]  else {
+            return []
         }
-        return nil
+
+        return attributeDict.compactMap { (attr: SourceKitRepresentable) -> String? in
+            if let attribute = attr as? [String: SourceKitRepresentable], let attributeVal = attribute["key.attribute"] as? String {
+                if let filterAttribute = filterOn, attributeVal != filterAttribute {
+                    return nil
+                }
+                return extract(attribute, startOffset: -1, from: content)
+            }
+            return nil
+        }
     }
     
     func extract(_ source: [String: SourceKitRepresentable], startOffset: Int64, from content: String) -> String {

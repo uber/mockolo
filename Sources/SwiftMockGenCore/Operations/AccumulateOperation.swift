@@ -48,8 +48,8 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
                                  lock: NSLock? = nil,
                                  process: @escaping (Structure, File, String) -> ()) -> Bool {
     if let val = annotatedProtocolMap[key] {
-        let protocolStructure = val.0
-        let file = val.1
+        let protocolStructure = val.structure
+        let file = val.file
         
         let (models, attributes, processedResults) = lookupEntities(name: key, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
         

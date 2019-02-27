@@ -18,7 +18,7 @@ import Foundation
 import SourceKittenFramework
 
 func lookupEntities(name: String,
-                    inheritanceMap: [String: (Structure, File, [Model])],
+                    inheritanceMap: [String: (structure: Structure, file: File, models: [Model])],
                     annotatedProtocolMap: [String: ProtocolMapEntryType]) -> ([Model], [String], [String]) {
     
     var models = [Model]()
@@ -26,9 +26,9 @@ func lookupEntities(name: String,
     var processedResults = [""]
     // Look up the mock entities of a protocol specified by the name.
     if let current = annotatedProtocolMap[name] {
-        let curStructure = current.0
-        let curModels = current.2
-        let curAttributes = current.3
+        let curStructure = current.structure
+        let curModels = current.models
+        let curAttributes = current.other
         
         models.append(contentsOf: curModels)
         attributes.append(contentsOf: curAttributes)
@@ -44,16 +44,15 @@ func lookupEntities(name: String,
         }
     } else if let parentMock = inheritanceMap["\(name)Mock"] {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        let parentStructure = parentMock.0
-        let parentFile = parentMock.1
-        let parentModels = parentMock.2
+        let parentStructure = parentMock.structure
+        let parentFile = parentMock.file
+        let parentModels = parentMock.models
         models.append(contentsOf: parentModels)
         let body = parentStructure.extractBody(parentFile.contents)
         processedResults.append(body)
         
-        if let parentAttributes = parentStructure.extractAttributes(parentFile.contents, filterOn: SwiftDeclarationAttributeKind.available.rawValue) {
-            attributes.append(contentsOf: parentAttributes)
-        }
+        let parentAttributes = parentStructure.extractAttributes(parentFile.contents, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+        attributes.append(contentsOf: parentAttributes)
     }
     
     return (models, attributes, processedResults)
