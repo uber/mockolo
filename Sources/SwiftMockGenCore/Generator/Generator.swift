@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-typealias ProtocolMapEntryType = (structure: Structure, file: File, models: [Model], other: [String])
+typealias ProtocolMapEntryType = (structure: Structure, file: File, models: [Model], attributes: [String])
 
 public func generate(sourceDir: String?,
                      sourceFiles: [String]?,

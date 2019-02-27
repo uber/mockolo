@@ -28,7 +28,7 @@ func lookupEntities(name: String,
     if let current = annotatedProtocolMap[name] {
         let curStructure = current.structure
         let curModels = current.models
-        let curAttributes = current.other
+        let curAttributes = current.attributes
         
         models.append(contentsOf: curModels)
         attributes.append(contentsOf: curAttributes)
