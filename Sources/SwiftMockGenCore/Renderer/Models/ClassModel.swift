@@ -34,9 +34,8 @@ struct ClassModel: Model {
         self.entities = entities
         
         var mutableAttributes = additionalAttributes
-        if let curAttributes = ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) {
-            mutableAttributes.append(contentsOf: curAttributes)
-        }
+        let curAttributes = ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+        mutableAttributes.append(contentsOf: curAttributes)
         let attributeSet = Set(mutableAttributes)
         self.attribute = attributeSet.joined(separator: " ")
         

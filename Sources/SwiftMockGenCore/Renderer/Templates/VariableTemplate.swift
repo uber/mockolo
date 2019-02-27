@@ -18,7 +18,7 @@ import Foundation
 import SourceKittenFramework
 
 private func resolveDefaultVal(typeName: String) -> String {
-    if typeName.hasSuffix("?"){
+    if typeName.hasSuffix("?") {
         return "nil"
     } else {
         // TODO: 2. handle a comma case, e.g. in Observable<Int, String>, (Array<Int, String>, String)
@@ -54,7 +54,7 @@ func applyVariableTemplate(name: String,
         }
     }
     
-    let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
+    let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
     
     let template =
@@ -84,7 +84,7 @@ func applyRxVariableTemplate(name: String,
         let underlying = "\(name)Subject"
         let underlyingSetCallCount = "\(underlying)SetCallCount"
         let underlyingType = "PublishSubject<\(typeParamStr)>"
-        let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
+        let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
 
         let template =

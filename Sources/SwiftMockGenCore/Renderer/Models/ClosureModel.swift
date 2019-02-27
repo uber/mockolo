@@ -22,16 +22,16 @@ struct ClosureModel: Model {
     var type: String
     let nameSuffix = "Handler"
     var longName: String
-    let defaultValue: String?
+    let defaultValue: String
     let defaultReturnType: String
     let staticKind: String
-    let paramNames: [String]?
-    let paramTypes: [String]?
+    let paramNames: [String]
+    let paramTypes: [String]
     
-    init(name: String, longName: String, paramNames: [String]?, paramTypes: [String]?, returnType: String, staticKind: String) {
+    init(name: String, longName: String, paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
         self.name = name + nameSuffix
         self.longName = longName + nameSuffix
-        let paramStr = paramTypes?.joined(separator: ", ") ?? ""
+        let paramStr = paramTypes.joined(separator: ", ")
         let returnStr = returnType == UnknownVal ? "" : returnType  
         self.type = "((" + paramStr + ") -> (" + returnStr + "))?"
         self.defaultReturnType = returnType

@@ -23,7 +23,7 @@ struct MethodModel: Model {
     var longName: String
     var useLongName: Bool = false
     let accessControlLevelDescription: String
-    let attributes: [String]?
+    let attributes: [String]
     let defaultValue: String?
     let staticKind: String
     let params: [ParamModel]
@@ -49,7 +49,7 @@ struct MethodModel: Model {
         self.handler = ClosureModel(name: name, longName: longName, paramNames: paramNames, paramTypes: paramTypes, returnType: ast.typeName, staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.defaultValue = defaultVal(typeName: ast.typeName)
-        self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
+        self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
     
     func render(with identifier: String) -> String? {

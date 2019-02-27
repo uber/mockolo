@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-typealias ProtocolMapEntryType = (Structure, File, [Model], [String])
+typealias ProtocolMapEntryType = (structure: Structure, file: File, models: [Model], attributes: [String])
 
 public func generate(sourceDir: String?,
                      sourceFiles: [String]?,
@@ -98,10 +98,10 @@ public func generate(sourceDir: String?,
     
     print("Put together mock results and import lines...")
     // 4. Accumulate import lines
-    let imports = importLines.values.flatMap{$0}
+    let imports = importLines.values.flatMap { $0 }
     let importsSet = Set(imports)
-    let entities = candidates.map{$0.1}
-    
+    let entities = candidates.values
+
     let ret = [HeaderDoc, PoundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), PoundEndIf].joined(separator: "\n")
     
     let t4 = CFAbsoluteTimeGetCurrent()
