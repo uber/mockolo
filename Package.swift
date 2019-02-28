@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:4.2
 import PackageDescription
 
 let package = Package(
@@ -23,9 +23,14 @@ let package = Package(
                     dependencies: [
                         "SourceKittenFramework"
                     ]
-        )
-
-    ],
-    swiftLanguageVersions: [4]
+        ),
+        .testTarget(
+            name: "SwiftMockGenTests",
+            dependencies: [
+                "SwiftMockGenCore",
+                ],
+            path: "Tests"
+            )
+    ]
 )
 

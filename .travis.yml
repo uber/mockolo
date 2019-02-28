@@ -1,0 +1,8 @@
+language: objective-c
+osx_image: xcode10.1
+matrix:
+    include:
+        - name: "SwiftMockGenTests"
+          script: swift test -Xswiftc -DDEBUG
+        - name: "SwiftMockGenBinary"
+          script: swift build -c release -Xswiftc -static-stdlib
