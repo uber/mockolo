@@ -112,7 +112,7 @@ extension Structure {
         }
     }
     
-    func extract(offset: Int, startOffset: Int = 0, length: Int, content: String) -> String {
+    func extract(offset: Int64, startOffset: Int64 = 0, length: Int64, content: String) -> String {
         let end = offset + length
         let start = offset + startOffset
         
@@ -122,8 +122,8 @@ extension Structure {
                 return ""
             }
             
-            let startIdx = content.index(content.startIndex, offsetBy: start)
-            let endIdx = content.index(content.startIndex, offsetBy: end)
+            let startIdx = content.index(content.startIndex, offsetBy: Int(start))
+            let endIdx = content.index(content.startIndex, offsetBy: Int(end))
             let body = content[startIdx ..< endIdx]
             return String(body)
         }
@@ -132,8 +132,8 @@ extension Structure {
     
     // This extracts the body of this structure, i.e. it doens't include the decl or signature
     func extractBody(_ file: String) -> String {
-        let start = dictionary["key.bodyoffset"] as? Int ?? -1
-        let len = dictionary["key.bodylength"] as? Int ?? 0
+        let start = dictionary["key.bodyoffset"] as? Int64 ?? -1
+        let len = dictionary["key.bodylength"] as? Int64 ?? 0
         return extract(offset: start, length: len, content: file)
     }
 }
