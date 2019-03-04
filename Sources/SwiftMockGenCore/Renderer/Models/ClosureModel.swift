@@ -22,6 +22,7 @@ struct ClosureModel: Model {
     var type: String
     let nameSuffix = "Handler"
     var longName: String
+    var offset: Int64 = INT64_MAX
     let defaultValue: String
     let defaultReturnType: String
     let staticKind: String

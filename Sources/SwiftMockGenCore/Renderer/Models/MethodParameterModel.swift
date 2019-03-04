@@ -20,6 +20,7 @@ import SourceKittenFramework
 struct ParamModel: Model {
     var name: String
     var longName: String
+    var offset: Int64 = INT64_MAX
     var type: String
     let label: String?
     init(_ ast: Structure, label: String) {

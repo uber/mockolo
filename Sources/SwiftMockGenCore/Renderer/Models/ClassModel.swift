@@ -20,18 +20,26 @@ import SourceKittenFramework
 struct ClassModel: Model {
     var name: String
     var longName: String
+    var offset: Int64 = INT64_MAX
     var type: String
     let attribute: String
     let accessControlLevelDescription: String
     let identifier: String
     let entities: [String]
+    let initParams: [VarWithOffset]
     
-    init(_ ast: Structure, content: String, identifier: String, additionalAttributes: [String], entities: [String]) {
+    init(_ ast: Structure,
+         content: String,
+         identifier: String,
+         additionalAttributes: [String],
+         initParams: [VarWithOffset],
+         entities: [String]) {
         self.identifier = identifier
         self.name = identifier + "Mock"
         self.longName = self.name
         self.type = "class"
         self.entities = entities
+        self.initParams = initParams
         
         var mutableAttributes = additionalAttributes
         let curAttributes = ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
@@ -43,6 +51,6 @@ struct ClassModel: Model {
     }
     
     func render(with identifier: String) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, initParams: initParams, entities: entities)
     }
 }
