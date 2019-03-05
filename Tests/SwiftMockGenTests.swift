@@ -1,9 +1,9 @@
 import XCTest
 import SwiftMockGenCore
 
-class Tests: XCTestCase {
+class SwiftMockGenTests: XCTestCase {
     
-    let bundle = Bundle(for: Tests.self)
+    let bundle = Bundle(for: SwiftMockGenTests.self)
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
