@@ -18,7 +18,6 @@
 import Foundation
 import SourceKittenFramework
 
-public let MockAnnotation = "@CreateMock"
 let MockTypeString = "protocol"
 let StaticKindString = "static"
 let ObservableVarPrefix = "Observable<"
@@ -29,6 +28,7 @@ let CallCountSuffix = "CallCount"
 let ClosureVarSuffix = "Handler"
 let InitializerPrefix = "init("
 let ImportString = "import "
+public let MockAnnotation = "@CreateMock"
 public let PoundIfMock = "#if MOCK"
 public let PoundEndIf = "#endif"
 public let HeaderDoc = """

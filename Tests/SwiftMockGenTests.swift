@@ -13,7 +13,8 @@ class Tests: XCTestCase {
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        FileManager.default.createFile(atPath: dstFilePath, contents: nil, attributes: nil)
+        let created = FileManager.default.createFile(atPath: dstFilePath, contents: nil, attributes: nil)
+        XCTAssert(created)
     }
     
     override func tearDown() {
@@ -42,8 +43,9 @@ class Tests: XCTestCase {
     }
     
     private func verify(srcFilePath: String, srcContent: String, dstContent: String) {
-        FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
-        
+        let created = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
+        XCTAssert(created)
+
         try? generate(sourceDir: nil,
                       sourceFiles: [srcFilePath],
                       excludeSuffixes: ["Mocks", "Tests"],
