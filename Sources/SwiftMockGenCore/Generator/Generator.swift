@@ -17,17 +17,18 @@
 import Foundation
 import SourceKittenFramework
 
-typealias ProtocolMapEntryType = (structure: Structure, file: File, models: [Model], attributes: [String])
+public let DefaultParsingTimeout = 10
+public let DefaultRetryParsingLimit = 3
 
 public func generate(sourceDir: String?,
                      sourceFiles: [String]?,
                      excludeSuffixes: [String],
-                     mockFilePaths: [String]?,
+                     mockFilePaths: [String]? = nil,
                      to outputFilePath: String,
-                     concurrencyLimit: Int?,
-                     parsingTimeout: Int,
-                     retryParsingOnTimeoutLimit: Int,
-                     shouldCollectParsingInfo: Bool) throws {
+                     concurrencyLimit: Int? = nil,
+                     parsingTimeout: Int = DefaultParsingTimeout,
+                     retryParsingOnTimeoutLimit: Int = DefaultRetryParsingLimit,
+                     shouldCollectParsingInfo: Bool = false) throws {
     
     assert(sourceDir != nil || sourceFiles != nil)
     
