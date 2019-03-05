@@ -47,8 +47,19 @@ func lookupEntities(name: String,
         let parentStructure = parentMock.structure
         let parentFile = parentMock.file
         let parentModels = parentMock.models
+        
+        let content = parentFile.contents
         models.append(contentsOf: parentModels)
-        let body = parentStructure.extractBody(parentFile.contents)
+        var body = parentStructure.extractBody(content)
+
+        // Remove an initializer from the parent mock class as the leaf mock class will have its own
+        if let initStructure = parentStructure.substructures.filter({$0.isInitializer}).first {
+            let offset = Int(initStructure.offset - parentStructure.bodyOffset)
+            let len = Int(initStructure.length)
+            if let range = Range(NSRange(location: offset, length: len), in: body) {
+                body.removeSubrange(range)
+            }
+        }
         processedResults.append(body)
         
         let parentAttributes = parentStructure.extractAttributes(parentFile.contents, filterOn: SwiftDeclarationAttributeKind.available.rawValue)

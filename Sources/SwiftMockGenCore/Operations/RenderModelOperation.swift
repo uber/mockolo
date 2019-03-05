@@ -124,9 +124,6 @@ private func generateModelsToRender(_ path: String,
         
         for substructure in topstructure.substructures {
             if substructure.isProtocol,
-                // TODO: 1. Doc comment handling
-                // A. Need to add linter to require all @CreateMock are preceded by /// (doc comment), and not CreateMocks.
-                // B. Edge case: Add // or /// above the annotation line in case of preceding /*....  */ comments.
                 substructure.isAnnotated(with: MockAnnotation, in: file.contents) {
                 
                 let childEntities = substructure.substructures.compactMap { (child: Structure) -> Model? in

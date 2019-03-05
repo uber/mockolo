@@ -64,6 +64,9 @@ extension Structure {
         }
         return UnknownVal
     }
+    var isInitializer: Bool {
+        return name.hasPrefix(InitializerPrefix) && isInstanceMethod
+    }
     
     var isInstanceVariable: Bool {
         return kind == SwiftDeclarationKind.varInstance.rawValue
@@ -96,7 +99,11 @@ extension Structure {
     var isVarParameter: Bool {
         return kind == "source.lang.swift.decl.var.parameter"
     }
-    
+
+    var isTypeNonOptional: Bool {
+        return !typeName.hasSuffix("?")
+    }
+
     var isMethod: Bool {
         return isInstanceMethod || isStaticMethod
     }
@@ -112,6 +119,17 @@ extension Structure {
         }
     }
     
+    var offset: Int64 {
+        return dictionary[SwiftDocKey.offset.rawValue] as? Int64 ?? -1
+    }
+
+    var length: Int64 {
+        return dictionary[SwiftDocKey.length.rawValue] as? Int64 ?? 0
+    }
+    var bodyOffset: Int64 {
+        return dictionary[SwiftDocKey.bodyOffset.rawValue] as? Int64 ?? -1
+    }
+
     func extract(offset: Int64, startOffset: Int64 = 0, length: Int64, content: String) -> String {
         let end = offset + length
         let start = offset + startOffset

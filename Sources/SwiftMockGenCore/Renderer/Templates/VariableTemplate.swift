@@ -41,7 +41,7 @@ func applyVariableTemplate(name: String,
                            staticKind: String,
                            accessControlLevelDescription: String) -> String {
     let underlyingName = "underlying\(name.capitlizeFirstLetter())"
-    let underlyingSetCallCount = "\(name)SetCallCount"
+    let underlyingSetCallCount = "\(name)Set\(CallCountSuffix)"
     let underlyingVarDefaultVal = resolveDefaultVal(typeName: typeName)
     
     var underlyingType = typeName
@@ -78,11 +78,11 @@ func applyRxVariableTemplate(name: String,
                              typeName: String,
                              staticKind: String,
                              accessControlLevelDescription: String) -> String? {
-    if let range = typeName.range(of: "Observable<"), let lastIdx = typeName.lastIndex(of: ">") {
+    if let range = typeName.range(of: ObservableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {
         let typeParamStr = typeName[range.upperBound..<lastIdx]
         
         let underlying = "\(name)Subject"
-        let underlyingSetCallCount = "\(underlying)SetCallCount"
+        let underlyingSetCallCount = "\(underlying)Set\(CallCountSuffix)"
         let underlyingType = "PublishSubject<\(typeParamStr)>"
         let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "

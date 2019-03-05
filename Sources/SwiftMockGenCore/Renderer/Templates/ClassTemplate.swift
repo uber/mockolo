@@ -20,10 +20,25 @@ func applyClassTemplate(name: String,
                         identifier: String,
                         accessControlLevelDescription: String,
                         attribute: String,
+                        initParams: [VarWithOffset],
                         entities: [String]) -> String {
+    
+    let params = initParams
+        .map { (offset: Int64, name: String, typeName: String) -> String in
+            if let val = defaultVal(typeName: typeName) {
+                return "\(name): \(typeName) = \(val)"
+            }
+            return "\(name): \(typeName)"
+        }
+        .joined(separator: ", ")
+    
+    let paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
     let result = """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
+        \(accessControlLevelDescription)init(\(params)) {
+            \(paramsAssign)
+        }
         \(entities.joined(separator: "\n"))
     }
     """

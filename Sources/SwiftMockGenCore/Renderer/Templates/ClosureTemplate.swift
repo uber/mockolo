@@ -39,8 +39,6 @@ func applyClosureTemplate(name: String,
 
 private func renderReturnDefaultStatement(name: String, type: String) -> String {
     if type != UnknownVal {
-        let errorMsg = "fatalError"
-        
         var typeName = type
         if type.hasPrefix("("), type.hasSuffix(")") {
             typeName.removeFirst()
@@ -48,22 +46,19 @@ private func renderReturnDefaultStatement(name: String, type: String) -> String 
         }
         let subtypes = typeName.components(separatedBy: ",")
         // TODO: 2. need to handle ',' in return type like Hashtable<Int, String>, (Observable<(Int, String)>, Bool)
-        // TODO: 3. initializer - add args?
         let returnStmts = subtypes.compactMap { (subType: String) -> String? in
             if subType.isEmpty {
                 return nil
-            }
-            if let val = defaultVal(typeName: subType) {
+            } else if let val = defaultVal(typeName: subType) {
                 return val
+            } else if subType.hasPrefix(ObservableVarPrefix) {
+                return ObservableEmpty
             }
-            if subType.hasPrefix("Observable<") {
-                return "Observable.empty()"
-            }
-            return errorMsg
+            return FatalErrorMsg
         }
         
-        if returnStmts.contains(errorMsg) {
-            return "\(errorMsg)(\"\(name) returns can't have a default value thus its handler must be set\")"
+        if returnStmts.contains(FatalErrorMsg) {
+            return "\(FatalErrorMsg)(\"\(name) returns can't have a default value thus its handler must be set\")"
         } else if returnStmts.count > 1 {
             return "return (\(returnStmts.joined(separator: ", ")))"
         } else if let returnStmts = returnStmts.first {

@@ -27,7 +27,7 @@ func applyMethodTemplate(name: String,
                          handlerVarType: String,
                          handlerReturn: String) -> String {
     // identifier.contains(suffixStr) ? methodShortName : methodShortName + suffixStr
-    let callCount = "\(identifier)CallCount"
+    let callCount = "\(identifier)\(CallCountSuffix)"
     let paramDeclsStr = paramDecls.joined(separator: ", ")
     let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
     let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"

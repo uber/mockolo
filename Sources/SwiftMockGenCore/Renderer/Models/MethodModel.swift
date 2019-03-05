@@ -21,6 +21,7 @@ struct MethodModel: Model {
     var name: String
     var type: String
     var longName: String
+    var offset: Int64 = .max
     var useLongName: Bool = false
     let accessControlLevelDescription: String
     let attributes: [String]
@@ -32,7 +33,6 @@ struct MethodModel: Model {
     init(_ ast: Structure, content: String) {
         var nameComps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
         self.name = nameComps.removeFirst()
-        
         self.type = ast.typeName == UnknownVal ? "" : ast.typeName  
         self.staticKind = ast.isStaticMethod ? StaticKindString : ""
         

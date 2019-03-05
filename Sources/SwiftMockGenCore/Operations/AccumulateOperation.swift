@@ -53,12 +53,19 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
         
         let (models, attributes, processedResults) = lookupEntities(name: key, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
         
-        let uniqueVals = uniqueEntities(in: models)
+        let uniqueVals = uniqueEntities(in: models).sorted { $0.value.offset < $1.value.offset }
         let renderedEntities = uniqueVals.compactMap { (name: String, model: Model) -> String? in
             return model.render(with: name)
         }
-        
-        let mockModel = ClassModel(protocolStructure, content: file.contents, identifier: key, additionalAttributes: attributes, entities: [processedResults.joined(), renderedEntities.joined(separator: "\n")])
+
+        let nonOptionalOrRxVarList = nonOptionalOrRxVars(in: models)
+
+        let mockModel = ClassModel(protocolStructure,
+                                   content: file.contents,
+                                   identifier: key,
+                                   additionalAttributes: attributes,
+                                   initParams: nonOptionalOrRxVarList,
+                                   entities: [processedResults.joined(), renderedEntities.joined(separator: "\n")])
         if let mockString = mockModel.render(with: key), !mockString.isEmpty {
             lock?.lock()
             process(protocolStructure, file, mockString)
@@ -67,7 +74,6 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
     }
     return false
 }
-
 
 private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     let entities = Dictionary(grouping: models) { $0.name }
@@ -83,3 +89,27 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     
     return result
 }
+
+
+private func nonOptionalOrRxVars(`in` models: [Model]) -> [VarWithOffset] {
+
+    var result = models.compactMap { (model: Model) -> [VarWithOffset]? in
+        if let processed = model as? ProcessedModel {
+            return processed.nonOptionalOrRxVarList
+        }
+        return nil
+        }.flatMap {$0}
+    
+    let varlist = models.compactMap { (model: Model) -> VarWithOffset? in
+        if let varModel = model as? VariableModel,
+            varModel.isTypeNonOptional,
+            !varModel.type.hasPrefix(ObservableVarPrefix) {
+            return (varModel.offset, varModel.name, varModel.type)
+        }
+        return nil
+        }.sorted {$0.offset < $1.offset}
+    
+    result.append(contentsOf: varlist)
+    return result
+}
+

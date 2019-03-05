@@ -21,6 +21,13 @@ import SourceKittenFramework
 let MockAnnotation = "@CreateMock"
 let MockTypeString = "protocol"
 let StaticKindString = "static"
+let ObservableVarPrefix = "Observable<"
+let ObservableEmpty = "Observable.empty()"
+let FatalErrorMsg = "fatalError"
+let UnderlyingVarPrefix = "underlying"
+let CallCountSuffix = "CallCount"
+let ClosureVarSuffix = "Handler"
+let InitializerPrefix = "init("
 let ImportString = "import "
 let PoundIfMock = "#if MOCK"
 let PoundEndIf = "#endif"
@@ -31,6 +38,9 @@ let HeaderDoc = """
 //  swiftlint:disable custom_rules
 
 """
+
+typealias VarWithOffset = (offset: Int64, name: String, typeName: String)
+
 
 extension File {
     func lines(starting keyword: String) -> [String] {

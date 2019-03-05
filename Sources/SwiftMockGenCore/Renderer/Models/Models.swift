@@ -20,7 +20,7 @@ protocol Model {
     var name: String { get set }
     var longName: String { get set }
     var type: String { get set }
-    
+    var offset: Int64 { get set }
     func render(with identifier: String) -> String?
 }
 

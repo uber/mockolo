@@ -5,6 +5,8 @@ struct VariableModel: Model {
     var name: String
     var type: String
     var longName: String
+    var offset: Int64
+    let isTypeNonOptional: Bool
     let accessControlLevelDescription: String
     let attributes: [String]?
     let defaultValue: String?
@@ -14,6 +16,8 @@ struct VariableModel: Model {
         name = ast.name
         type = ast.typeName
         longName = name
+        offset = ast.offset
+        isTypeNonOptional = ast.isTypeNonOptional
         staticKind = ast.isStaticVariable ? StaticKindString : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
         defaultValue = defaultVal(typeName: ast.typeName)
