@@ -20,7 +20,7 @@ import SourceKittenFramework
 struct ClassModel: Model {
     var name: String
     var longName: String
-    var offset: Int64 = INT64_MAX
+    var offset: Int64 = .max
     var type: String
     let attribute: String
     let accessControlLevelDescription: String

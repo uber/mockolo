@@ -29,12 +29,13 @@ struct ProcessedModel: Model {
         self.longName = ast.name
         self.type = ast.typeName
         self.offset = ast.offset
-        self.nonOptionalOrRxVarList = ast.substructures.filter { $0.isVariable &&
-            !$0.isTypeNonOptional &&
-            !$0.typeName.hasPrefix(ObservableVarPrefix) &&
-            !$0.name.hasPrefix(UnderlyingVarPrefix) &&
-            !$0.name.hasSuffix(CallCountSuffix) &&
-            !$0.name.hasSuffix(ClosureVarSuffix)}
+        self.nonOptionalOrRxVarList = ast.substructures
+            .filter { $0.isVariable &&
+                !$0.isTypeNonOptional &&
+                !$0.typeName.hasPrefix(ObservableVarPrefix) &&
+                !$0.name.hasPrefix(UnderlyingVarPrefix) &&
+                !$0.name.hasSuffix(CallCountSuffix) &&
+                !$0.name.hasSuffix(ClosureVarSuffix)}
             .map{ ($0.offset, $0.name, $0.typeName) }
             .sorted {$0.offset < $1.offset}
     }

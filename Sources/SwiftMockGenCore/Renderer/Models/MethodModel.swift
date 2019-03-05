@@ -21,7 +21,7 @@ struct MethodModel: Model {
     var name: String
     var type: String
     var longName: String
-    var offset: Int64 = INT64_MAX
+    var offset: Int64 = .max
     var useLongName: Bool = false
     let accessControlLevelDescription: String
     let attributes: [String]

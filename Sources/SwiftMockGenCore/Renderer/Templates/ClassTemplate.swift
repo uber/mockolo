@@ -23,13 +23,15 @@ func applyClassTemplate(name: String,
                         initParams: [VarWithOffset],
                         entities: [String]) -> String {
     
-    let params = initParams.map { (offset: Int64, name: String, typeName: String) -> String in
-        if let val = defaultVal(typeName: typeName) {
-            return "\(name): \(typeName) = \(val)"
+    let params = initParams
+        .map { (offset: Int64, name: String, typeName: String) -> String in
+            if let val = defaultVal(typeName: typeName) {
+                return "\(name): \(typeName) = \(val)"
+            }
+            return "\(name): \(typeName)"
         }
-        return "\(name): \(typeName)"
-    }.joined(separator: ", ")
-
+        .joined(separator: ", ")
+    
     let paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
     let result = """
     \(attribute)
