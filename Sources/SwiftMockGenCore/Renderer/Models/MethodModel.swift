@@ -21,7 +21,7 @@ struct MethodModel: Model {
     var name: String
     var type: String
     var longName: String
-    var offset: Int64 = .max
+    var offset: Int64
     var useLongName: Bool = false
     let accessControlLevelDescription: String
     let attributes: [String]
@@ -35,7 +35,7 @@ struct MethodModel: Model {
         self.name = nameComps.removeFirst()
         self.type = ast.typeName == UnknownVal ? "" : ast.typeName  
         self.staticKind = ast.isStaticMethod ? StaticKindString : ""
-        
+        self.offset = ast.offset
         let paramDecls = ast.substructures.filter{$0.isVarParameter}
         assert(paramDecls.count == nameComps.count)
         
@@ -44,7 +44,7 @@ struct MethodModel: Model {
         let paramTypes = paramDecls.map {$0.typeName}
         let paramNames = paramDecls.map {$0.name}
 
-        self.longName = self.name + paramNames.map{$0.capitlizeFirstLetter()}.joined()
+        self.longName = self.name + paramNames.map{$0.capitlizeFirstLetter()}.joined() + self.type.components(separatedBy: CharacterSet(charactersIn: ": ,-<>()[]")).map{$0.capitlizeFirstLetter()}.joined()
 
         self.handler = ClosureModel(name: name, longName: longName, paramNames: paramNames, paramTypes: paramTypes, returnType: ast.typeName, staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription

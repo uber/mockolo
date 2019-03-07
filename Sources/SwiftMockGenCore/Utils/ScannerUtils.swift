@@ -112,6 +112,10 @@ extension Structure {
         return isVariable && typeName.contains("->")
     }
     
+    var canBeInitParam: Bool {
+        return isVariable && isTypeNonOptional && !typeName.hasPrefix(ObservableVarPrefix) && !typeName.hasPrefix(RxObservableVarPrefix)
+    }
+    
     var inheritedTypes: [String] {
         let types = dictionary["key.inheritedtypes"] as? [SourceKitRepresentable] ?? []
         return types.compactMap { (item: SourceKitRepresentable) -> String? in

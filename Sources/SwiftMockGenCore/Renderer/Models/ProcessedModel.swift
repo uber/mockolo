@@ -30,9 +30,7 @@ struct ProcessedModel: Model {
         self.type = ast.typeName
         self.offset = ast.offset
         self.nonOptionalOrRxVarList = ast.substructures
-            .filter { $0.isVariable &&
-                !$0.isTypeNonOptional &&
-                !$0.typeName.hasPrefix(ObservableVarPrefix) &&
+            .filter { $0.canBeInitParam &&
                 !$0.name.hasPrefix(UnderlyingVarPrefix) &&
                 !$0.name.hasSuffix(CallCountSuffix) &&
                 !$0.name.hasSuffix(ClosureVarSuffix)}

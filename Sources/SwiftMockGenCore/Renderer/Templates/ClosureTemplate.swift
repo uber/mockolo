@@ -49,10 +49,9 @@ private func renderReturnDefaultStatement(name: String, type: String) -> String 
         let returnStmts = subtypes.compactMap { (subType: String) -> String? in
             if subType.isEmpty {
                 return nil
-            } else if let val = defaultVal(typeName: subType) {
+            }
+            if let val = defaultVal(typeName: subType) {
                 return val
-            } else if subType.hasPrefix(ObservableVarPrefix) {
-                return ObservableEmpty
             }
             return FatalErrorMsg
         }

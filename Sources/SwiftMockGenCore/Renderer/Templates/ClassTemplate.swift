@@ -25,7 +25,7 @@ func applyClassTemplate(name: String,
     
     let params = initParams
         .map { (offset: Int64, name: String, typeName: String) -> String in
-            if let val = defaultVal(typeName: typeName) {
+            if let val = defaultVal(typeName: typeName), !val.isEmpty {
                 return "\(name): \(typeName) = \(val)"
             }
             return "\(name): \(typeName)"

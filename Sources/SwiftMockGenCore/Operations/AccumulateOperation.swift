@@ -100,10 +100,15 @@ private func nonOptionalOrRxVars(`in` models: [Model]) -> [VarWithOffset] {
         return nil
         }.flatMap {$0}
     
+    // Named params in init should be unique. Get the list of the
+    // init params from the processed model to compare with the
+    // VariableModels below, so no duplicate init params are added.
+    let processedModelParamKeys = result.map {$0.name}
+    
     let varlist = models.compactMap { (model: Model) -> VarWithOffset? in
         if let varModel = model as? VariableModel,
-            varModel.isTypeNonOptional,
-            !varModel.type.hasPrefix(ObservableVarPrefix) {
+            varModel.canBeInitParam,
+            !processedModelParamKeys.contains(varModel.name) {
             return (varModel.offset, varModel.name, varModel.type)
         }
         return nil

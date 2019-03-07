@@ -1,20 +1,20 @@
 import SwiftMockGenCore
 
-let protocolWithFunc = """
+let simpleFunc = """
 import Foundation
 
 /// \(MockAnnotation)
-protocol Bar {
+protocol SimpleFunc {
     func update(arg: Int) -> String
 }
 """
 
-let protocolWithFuncMock = """
+let simpleFuncMock = """
 \(HeaderDoc)
 \(PoundIfMock)
 import Foundation
 
-class BarMock: Bar {
+class SimpleFuncMock: SimpleFunc {
 init() {
 }
 
