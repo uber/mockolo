@@ -1,9 +1,13 @@
 import SwiftMockGenCore
 
+
 let duplicateFuncNames = """
 
 /// \(MockAnnotation)
 protocol DuplicateFuncNames {
+func display()
+func display(x: Int)
+func display(y: Int)
 func update()
 func update() -> Int
 func update(arg: Int)
@@ -25,6 +29,33 @@ init() {
 
 }
 
+var displayCallCount = 0
+var displayHandler: (() -> ())?
+func display()  {
+displayCallCount += 1
+if let displayHandler = displayHandler {
+return displayHandler()
+}
+
+}
+var displayXCallCount = 0
+var displayXHandler: ((Int) -> ())?
+func display(x: Int)  {
+displayXCallCount += 1
+if let displayXHandler = displayXHandler {
+return displayXHandler(x)
+}
+
+}
+var displayYCallCount = 0
+var displayYHandler: ((Int) -> ())?
+func display(y: Int)  {
+displayYCallCount += 1
+if let displayYHandler = displayYHandler {
+return displayYHandler(y)
+}
+
+}
 var updateCallCount = 0
 var updateHandler: (() -> ())?
 func update()  {
@@ -61,21 +92,21 @@ return updateArgFloatHandler(arg)
 }
 
 }
-var updateArgIntSomeFloatCallCount = 0
-var updateArgIntSomeFloatHandler: ((Int, Float) -> ())?
+var updateArgSomeCallCount = 0
+var updateArgSomeHandler: ((Int, Float) -> ())?
 func update(arg: Int, some: Float)  {
-updateArgIntSomeFloatCallCount += 1
-if let updateArgIntSomeFloatHandler = updateArgIntSomeFloatHandler {
-return updateArgIntSomeFloatHandler(arg, some)
+updateArgSomeCallCount += 1
+if let updateArgSomeHandler = updateArgSomeHandler {
+return updateArgSomeHandler(arg, some)
 }
 
 }
-var updateArgIntSomeFloatIntCallCount = 0
-var updateArgIntSomeFloatIntHandler: ((Int, Float) -> (Int))?
+var updateArgSomeIntCallCount = 0
+var updateArgSomeIntHandler: ((Int, Float) -> (Int))?
 func update(arg: Int, some: Float) -> Int {
-updateArgIntSomeFloatIntCallCount += 1
-if let updateArgIntSomeFloatIntHandler = updateArgIntSomeFloatIntHandler {
-return updateArgIntSomeFloatIntHandler(arg, some)
+updateArgSomeIntCallCount += 1
+if let updateArgSomeIntHandler = updateArgSomeIntHandler {
+return updateArgSomeIntHandler(arg, some)
 }
 return 0
 }

@@ -117,4 +117,3 @@ public func generate(sourceDir: String?,
     
     print("TOTAL", t5-t0)
 }
-
