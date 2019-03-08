@@ -79,18 +79,25 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     let entities = Dictionary(grouping: models) { $0.name }
     var result = [String: Model]()
     
-    _ = entities.map { (key: String, value: [Model]) in
+    entities.forEach { (key: String, value: [Model]) in
         if value.count > 1 {
-            let entitiesByLongName = Dictionary(grouping: value) { $0.longName }
-            _ = entitiesByLongName.map { (k: String, v: [Model]) in
+            let entitiesByMediumName = Dictionary(grouping: value) { $0.mediumName }
+            entitiesByMediumName.forEach { (k: String, v: [Model]) in
                 if v.count > 1 {
-                    _ = v.map { result[$0.fullName] = $0 }
+                    let entitiesByLongName = Dictionary(grouping: value) { $0.longName }
+                    entitiesByLongName.forEach { (k: String, v: [Model]) in
+                        if v.count > 1 {
+                            v.forEach{ result[$0.fullName] = $0 }
+                        } else {
+                            v.forEach{ result[$0.longName] = $0 }
+                        }
+                    }
                 } else {
-                    _ = v.map { result[$0.longName] = $0 }
+                    v.forEach { result[$0.mediumName] = $0 }
                 }
             }
         } else {
-            _ = value.map { result[$0.name] = $0 }
+            value.forEach { result[$0.name] = $0 }
         }
     }
     

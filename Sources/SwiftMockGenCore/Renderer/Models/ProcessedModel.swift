@@ -19,6 +19,7 @@ import SourceKittenFramework
 
 struct ProcessedModel: Model {
     var name: String
+    var mediumName: String
     var longName: String
     var fullName: String
     var type: String
@@ -27,6 +28,7 @@ struct ProcessedModel: Model {
     
     init(_ ast: Structure, content: String) {
         self.name = ast.name
+        self.mediumName = ast.name
         self.longName = ast.name
         self.fullName = ast.name
         self.type = ast.typeName

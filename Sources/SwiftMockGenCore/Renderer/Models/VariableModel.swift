@@ -5,6 +5,7 @@ struct VariableModel: Model {
     
     var name: String
     var type: String
+    var mediumName: String
     var longName: String
     var fullName: String
     var offset: Int64
@@ -17,6 +18,7 @@ struct VariableModel: Model {
     init(_ ast: Structure, content: String) {
         name = ast.name
         type = ast.typeName
+        mediumName = name
         longName = name
         fullName = name
         offset = ast.offset

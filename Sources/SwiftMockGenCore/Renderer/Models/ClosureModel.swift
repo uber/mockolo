@@ -21,6 +21,7 @@ struct ClosureModel: Model {
     var name: String
     var type: String
     let nameSuffix = "Handler"
+    var mediumName: String
     var longName: String
     var fullName: String
     var offset: Int64 = .max
@@ -30,8 +31,9 @@ struct ClosureModel: Model {
     let paramNames: [String]
     let paramTypes: [String]
     
-    init(name: String, longName: String, fullName: String, paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
+    init(name: String, mediumName: String, longName: String, fullName: String, paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
         self.name = name + nameSuffix
+        self.mediumName = mediumName + nameSuffix
         self.longName = longName + nameSuffix
         self.fullName = fullName + nameSuffix
         let paramStr = paramTypes.joined(separator: ", ")
