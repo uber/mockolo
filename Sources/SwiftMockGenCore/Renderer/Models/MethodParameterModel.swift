@@ -20,12 +20,14 @@ import SourceKittenFramework
 struct ParamModel: Model {
     var name: String
     var longName: String
+    var fullName: String
     var offset: Int64 = .max
     var type: String
     let label: String?
     init(_ ast: Structure, label: String) {
         self.name = ast.name
         self.longName = self.name
+        self.fullName = self.name
         self.type = ast.typeName
         self.label = self.name != label ? label: nil
     }

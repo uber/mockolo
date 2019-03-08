@@ -4,6 +4,8 @@ let duplicateFuncNames = """
 
 /// \(MockAnnotation)
 protocol DuplicateFuncNames {
+func update()
+func update() -> Int
 func update(arg: Int)
 func update(arg: Float)
 func update(arg: Int, some: Float)
@@ -18,12 +20,29 @@ let duplicateFuncNamesMock = """
 \(HeaderDoc)
 \(PoundIfMock)
 
-
 class DuplicateFuncNamesMock: DuplicateFuncNames {
 init() {
 
 }
 
+var updateCallCount = 0
+var updateHandler: (() -> ())?
+func update()  {
+updateCallCount += 1
+if let updateHandler = updateHandler {
+return updateHandler()
+}
+
+}
+var updateIntCallCount = 0
+var updateIntHandler: (() -> (Int))?
+func update() -> Int {
+updateIntCallCount += 1
+if let updateIntHandler = updateIntHandler {
+return updateIntHandler()
+}
+return 0
+}
 var updateArgIntCallCount = 0
 var updateArgIntHandler: ((Int) -> ())?
 func update(arg: Int)  {
@@ -60,32 +79,32 @@ return updateArgIntSomeFloatIntHandler(arg, some)
 }
 return 0
 }
-var updateArgIntSomeFloatObservableIntCallCount = 0
-var updateArgIntSomeFloatObservableIntHandler: ((Int, Float) -> (Observable<Int>))?
+var updateArgSomeObservableIntCallCount = 0
+var updateArgSomeObservableIntHandler: ((Int, Float) -> (Observable<Int>))?
 func update(arg: Int, some: Float) -> Observable<Int> {
-updateArgIntSomeFloatObservableIntCallCount += 1
-if let updateArgIntSomeFloatObservableIntHandler = updateArgIntSomeFloatObservableIntHandler {
-return updateArgIntSomeFloatObservableIntHandler(arg, some)
+updateArgSomeObservableIntCallCount += 1
+if let updateArgSomeObservableIntHandler = updateArgSomeObservableIntHandler {
+return updateArgSomeObservableIntHandler(arg, some)
 }
 return Observable.empty()
 }
-var updateArgIntSomeFloatStringObservableDoubleCallCount = 0
-var updateArgIntSomeFloatStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
+var updateArgSomeStringObservableDoubleCallCount = 0
+var updateArgSomeStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
 func update(arg: Int, some: Float) -> (String) -> Observable<Double> {
-updateArgIntSomeFloatStringObservableDoubleCallCount += 1
-if let updateArgIntSomeFloatStringObservableDoubleHandler = updateArgIntSomeFloatStringObservableDoubleHandler {
-return updateArgIntSomeFloatStringObservableDoubleHandler(arg, some)
+updateArgSomeStringObservableDoubleCallCount += 1
+if let updateArgSomeStringObservableDoubleHandler = updateArgSomeStringObservableDoubleHandler {
+return updateArgSomeStringObservableDoubleHandler(arg, some)
 }
-fatalError("updateArgIntSomeFloatStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
+fatalError("updateArgSomeStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
 }
-var updateArgIntSomeFloatArrayStringFloatCallCount = 0
-var updateArgIntSomeFloatArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
+var updateArgSomeArrayStringFloatCallCount = 0
+var updateArgSomeArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
 func update(arg: Int, some: Float) -> Array<String, Float> {
-updateArgIntSomeFloatArrayStringFloatCallCount += 1
-if let updateArgIntSomeFloatArrayStringFloatHandler = updateArgIntSomeFloatArrayStringFloatHandler {
-return updateArgIntSomeFloatArrayStringFloatHandler(arg, some)
+updateArgSomeArrayStringFloatCallCount += 1
+if let updateArgSomeArrayStringFloatHandler = updateArgSomeArrayStringFloatHandler {
+return updateArgSomeArrayStringFloatHandler(arg, some)
 }
-fatalError("updateArgIntSomeFloatArrayStringFloatHandler returns can't have a default value thus its handler must be set")
+fatalError("updateArgSomeArrayStringFloatHandler returns can't have a default value thus its handler must be set")
 }
 }
 \(PoundEndIf)

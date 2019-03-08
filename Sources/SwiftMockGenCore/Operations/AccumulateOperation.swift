@@ -78,10 +78,26 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
 private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     let entities = Dictionary(grouping: models) { $0.name }
     var result = [String: Model]()
+
+    var keydByReturnType = [String: [Model]]()
     
     _ = entities.map { (key: String, value: [Model]) in
         if value.count > 1 {
-            _ = value.map { result[$0.longName] = $0 }
+            _ = value.map { ($0.type, $0) }.map{ (t: String, mdl: Model)  in
+                if keydByReturnType[t] == nil {
+                    keydByReturnType[t] = [mdl]
+                } else {
+                    keydByReturnType[t]?.append(mdl)
+                }
+            }
+            
+            keydByReturnType.forEach{ (t: String, mdls: [Model]) in
+                if mdls.count > 1 {
+                    mdls.map { result[$0.fullName] = $0 }
+                } else {
+                    mdls.map { result[$0.longName] = $0 }
+                }
+            }
         } else {
             _ = value.map { result[$0.name] = $0 }
         }

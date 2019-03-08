@@ -20,6 +20,7 @@ import SourceKittenFramework
 struct ProcessedModel: Model {
     var name: String
     var longName: String
+    var fullName: String
     var type: String
     var offset: Int64
     var nonOptionalOrRxVarList: [(offset: Int64, name: String, typeName: String)]
@@ -27,6 +28,7 @@ struct ProcessedModel: Model {
     init(_ ast: Structure, content: String) {
         self.name = ast.name
         self.longName = ast.name
+        self.fullName = ast.name
         self.type = ast.typeName
         self.offset = ast.offset
         self.nonOptionalOrRxVarList = ast.substructures

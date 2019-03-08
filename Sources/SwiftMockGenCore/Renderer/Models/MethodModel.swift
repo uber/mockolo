@@ -21,6 +21,7 @@ struct MethodModel: Model {
     var name: String
     var type: String
     var longName: String
+    var fullName: String
     var offset: Int64
     var useLongName: Bool = false
     let accessControlLevelDescription: String
@@ -44,9 +45,10 @@ struct MethodModel: Model {
         let paramTypes = paramDecls.map {$0.typeName}
         let paramNames = paramDecls.map {$0.name}
 
-        self.longName = self.name + zip(paramNames, paramTypes).map{$0.capitlizeFirstLetter() + $1.displayableForType()}.joined() + self.type.displayableForType()
+        self.longName = self.name + paramNames.map{$0.capitlizeFirstLetter()}.joined() + self.type.displayableForType()
+        self.fullName = self.name + zip(paramNames, paramTypes).map{$0.capitlizeFirstLetter() + $1.displayableForType()}.joined() + self.type.displayableForType()
 
-        self.handler = ClosureModel(name: name, longName: longName, paramNames: paramNames, paramTypes: paramTypes, returnType: ast.typeName, staticKind: staticKind)
+        self.handler = ClosureModel(name: self.name, longName: self.longName, fullName: self.fullName, paramNames: paramNames, paramTypes: paramTypes, returnType: ast.typeName, staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.defaultValue = defaultVal(typeName: ast.typeName)
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
@@ -55,7 +57,7 @@ struct MethodModel: Model {
     func render(with identifier: String) -> String? {
         let paramDecls = params.compactMap{$0.render(with: "")}
         let returnType = type != UnknownVal ? type : ""
-        let handlerName = name == identifier ? handler.name : handler.longName
+        let handlerName = (identifier == name ? handler.name : (identifier == longName ? handler.longName : handler.fullName))
         let handlerReturn = handler.render(with: handlerName) ?? ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,

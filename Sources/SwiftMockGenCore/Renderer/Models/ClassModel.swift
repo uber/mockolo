@@ -20,6 +20,7 @@ import SourceKittenFramework
 struct ClassModel: Model {
     var name: String
     var longName: String
+    var fullName: String
     var offset: Int64 = .max
     var type: String
     let attribute: String
@@ -37,6 +38,7 @@ struct ClassModel: Model {
         self.identifier = identifier
         self.name = identifier + "Mock"
         self.longName = self.name
+        self.fullName = self.name
         self.type = "class"
         self.entities = entities
         self.initParams = initParams
