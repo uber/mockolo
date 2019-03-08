@@ -16,11 +16,19 @@
 
 import Foundation
 
+/// Represents entities such as var, func, class, etc. to be
+/// rendered (with templates) for mock output.
 protocol Model {
+    // Identifier
     var name: String { get set }
+    // Used to differentiate multiple entities with the same name
     var longName: String { get set }
+    // Used to differentiate multiple entities with the same long name
     var fullName: String { get set }
+    // Return type for var/func and decl type for class/struct/protocol/enum etc.
     var type: String { get set }
+    // Offset where this type is declared
     var offset: Int64 { get set }
+    // Applies a corresponding template to this model
     func render(with identifier: String) -> String?
 }

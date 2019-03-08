@@ -45,8 +45,17 @@ struct MethodModel: Model {
         let paramTypes = paramDecls.map {$0.typeName}
         let paramNames = paramDecls.map {$0.name}
 
-        self.longName = self.name + paramNames.map{$0.capitlizeFirstLetter()}.joined() + self.type.displayableForType()
-        self.fullName = self.name + zip(paramNames, paramTypes).map{$0.capitlizeFirstLetter() + $1.displayableForType()}.joined() + self.type.displayableForType()
+        // Used to differentiate multiple functions with the same name by
+        // adding arg names and return type
+        self.longName = self.name +
+            paramNames.map{$0.capitlizeFirstLetter()}.joined() +
+            self.type.displayableForType()
+        
+        // Used to differentiate multiple functions with the same long name by
+        // adding arg names/types and return type
+        self.fullName = self.name +
+            zip(paramNames, paramTypes).map{$0.capitlizeFirstLetter() + $1.displayableForType()}.joined() +
+            self.type.displayableForType()
 
         self.handler = ClosureModel(name: self.name, longName: self.longName, fullName: self.fullName, paramNames: paramNames, paramTypes: paramTypes, returnType: ast.typeName, staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
