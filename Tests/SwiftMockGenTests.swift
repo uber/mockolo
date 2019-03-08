@@ -23,16 +23,23 @@ class SwiftMockGenTests: XCTestCase {
         try? FileManager.default.removeItem(atPath: srcFilePath)
     }
     
-    func testVar() {
-        verify(srcFilePath: srcFilePath,
-               srcContent: protocolWithVar,
-               dstContent: protocolWithVarMock)
+    func testDuplicateFuncNames() {
+        verify(srcContent: duplicateFuncNames,
+               dstContent: duplicateFuncNamesMock)
     }
     
-    func testFunc() {
-        verify(srcFilePath: srcFilePath,
-               srcContent: protocolWithFunc,
-               dstContent: protocolWithFuncMock)
+    func testSimpleVar() {
+        verify(srcContent: simpleVar,
+               dstContent: simpleVarMock)
+    }
+    
+    func testNonSimpleVars() {
+        verify(srcContent: nonSimpleVars,
+               dstContent: nonSimpleVarsMock)
+    }
+    func testSimpleFunc() {
+        verify(srcContent: simpleFunc,
+               dstContent: simpleFuncMock)
     }
     
     func testPerformanceExample() {
@@ -42,7 +49,7 @@ class SwiftMockGenTests: XCTestCase {
         }
     }
     
-    private func verify(srcFilePath: String, srcContent: String, dstContent: String) {
+    private func verify(srcContent: String, dstContent: String) {
         let created = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(created)
 
@@ -56,4 +63,6 @@ class SwiftMockGenTests: XCTestCase {
         let fixtureContents = dstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         XCTAssert(fixtureContents == outputContents)
     }
+    
+    
 }

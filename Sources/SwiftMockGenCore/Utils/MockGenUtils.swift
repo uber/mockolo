@@ -21,6 +21,7 @@ import SourceKittenFramework
 let MockTypeString = "protocol"
 let StaticKindString = "static"
 let ObservableVarPrefix = "Observable<"
+let RxObservableVarPrefix = "RxSwift.Observable<"
 let ObservableEmpty = "Observable.empty()"
 let FatalErrorMsg = "fatalError"
 let UnderlyingVarPrefix = "underlying"
@@ -66,6 +67,10 @@ extension String {
         }
         return false
     }
+    
+    func displayableForType() -> String {
+        return self.components(separatedBy: CharacterSet(charactersIn: ": ,-<>()[]")).map{$0.capitlizeFirstLetter()}.joined()
+    }
 }
 
 extension Structure {
@@ -106,10 +111,18 @@ extension Structure {
     }
 }
 
+
 func defaultVal(typeName: String) -> String? {
+    // TODO: add more robust handling
+    
     if typeName.hasSuffix("?") {
         return "nil"
     }
+    
+    if typeName.hasPrefix(ObservableVarPrefix) || typeName.hasPrefix(RxObservableVarPrefix) {
+        return ObservableEmpty
+    }
+    
     if (typeName.hasPrefix("[") && typeName.hasSuffix("]")) ||
         typeName.hasPrefix("Array") ||
         typeName.hasPrefix("Dictionary") {

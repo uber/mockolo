@@ -17,32 +17,13 @@
 import Foundation
 import SourceKittenFramework
 
-private func resolveDefaultVal(typeName: String) -> String {
-    if typeName.hasSuffix("?") {
-        return "nil"
-    } else {
-        // TODO: 2. handle a comma case, e.g. in Observable<Int, String>, (Array<Int, String>, String)
-        let subTypes = typeName.trimmingCharacters(in: CharacterSet(charactersIn: "()")).components(separatedBy: ",")
-        let subTypeDefaultVals = subTypes.compactMap { (subType: String) -> String? in
-            return defaultVal(typeName: subType)
-        }
-        
-        if subTypeDefaultVals.count > 1 {
-            return "(\(subTypeDefaultVals.joined(separator: ", ")))"
-        } else if let val = subTypeDefaultVals.first {
-            return val
-        }
-    }
-    return ""
-}
-
 func applyVariableTemplate(name: String,
                            typeName: String,
                            staticKind: String,
                            accessControlLevelDescription: String) -> String {
     let underlyingName = "underlying\(name.capitlizeFirstLetter())"
     let underlyingSetCallCount = "\(name)Set\(CallCountSuffix)"
-    let underlyingVarDefaultVal = resolveDefaultVal(typeName: typeName)
+    let underlyingVarDefaultVal = defaultVal(typeName: typeName) ?? ""
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {

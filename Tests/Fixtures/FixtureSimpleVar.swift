@@ -1,20 +1,20 @@
 import SwiftMockGenCore
 
-let protocolWithVar = """
+let simpleVar = """
 import Foundation
 
 /// \(MockAnnotation)
-protocol Foo {
+protocol SimpleVar {
     var name: Int { get set }
 }
 """
 
-let protocolWithVarMock = """
+let simpleVarMock = """
 \(HeaderDoc)
 \(PoundIfMock)
 import Foundation
     
-class FooMock: Foo {
+class SimpleVarMock: SimpleVar {
     init(name: Int = 0) {
         self.name = name
     }

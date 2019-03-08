@@ -79,11 +79,25 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     let entities = Dictionary(grouping: models) { $0.name }
     var result = [String: Model]()
     
-    _ = entities.map { (key: String, value: [Model]) in
+    entities.forEach { (key: String, value: [Model]) in
         if value.count > 1 {
-            _ = value.map { result[$0.longName] = $0 }
+            let entitiesByMediumName = Dictionary(grouping: value) { $0.mediumName }
+            entitiesByMediumName.forEach { (k: String, v: [Model]) in
+                if v.count > 1 {
+                    let entitiesByLongName = Dictionary(grouping: value) { $0.longName }
+                    entitiesByLongName.forEach { (k: String, v: [Model]) in
+                        if v.count > 1 {
+                            v.forEach{ result[$0.fullName] = $0 }
+                        } else {
+                            v.forEach{ result[$0.longName] = $0 }
+                        }
+                    }
+                } else {
+                    v.forEach { result[$0.mediumName] = $0 }
+                }
+            }
         } else {
-            _ = value.map { result[$0.name] = $0 }
+            value.forEach { result[$0.name] = $0 }
         }
     }
     
@@ -100,10 +114,15 @@ private func nonOptionalOrRxVars(`in` models: [Model]) -> [VarWithOffset] {
         return nil
         }.flatMap {$0}
     
+    // Named params in init should be unique. Get the list of the
+    // init params from the processed model to compare with the
+    // VariableModels below, so no duplicate init params are added.
+    let processedModelParamKeys = result.map {$0.name}
+    
     let varlist = models.compactMap { (model: Model) -> VarWithOffset? in
         if let varModel = model as? VariableModel,
-            varModel.isTypeNonOptional,
-            !varModel.type.hasPrefix(ObservableVarPrefix) {
+            varModel.canBeInitParam,
+            !processedModelParamKeys.contains(varModel.name) {
             return (varModel.offset, varModel.name, varModel.type)
         }
         return nil

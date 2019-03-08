@@ -19,20 +19,22 @@ import SourceKittenFramework
 
 struct ProcessedModel: Model {
     var name: String
+    var mediumName: String
     var longName: String
+    var fullName: String
     var type: String
     var offset: Int64
     var nonOptionalOrRxVarList: [(offset: Int64, name: String, typeName: String)]
     
     init(_ ast: Structure, content: String) {
         self.name = ast.name
+        self.mediumName = ast.name
         self.longName = ast.name
+        self.fullName = ast.name
         self.type = ast.typeName
         self.offset = ast.offset
         self.nonOptionalOrRxVarList = ast.substructures
-            .filter { $0.isVariable &&
-                !$0.isTypeNonOptional &&
-                !$0.typeName.hasPrefix(ObservableVarPrefix) &&
+            .filter { $0.canBeInitParam &&
                 !$0.name.hasPrefix(UnderlyingVarPrefix) &&
                 !$0.name.hasSuffix(CallCountSuffix) &&
                 !$0.name.hasSuffix(ClosureVarSuffix)}
