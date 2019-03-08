@@ -44,7 +44,7 @@ struct MethodModel: Model {
         let paramTypes = paramDecls.map {$0.typeName}
         let paramNames = paramDecls.map {$0.name}
 
-        self.longName = self.name + paramNames.map{$0.capitlizeFirstLetter()}.joined() + self.type.components(separatedBy: CharacterSet(charactersIn: ": ,-<>()[]")).map{$0.capitlizeFirstLetter()}.joined()
+        self.longName = self.name + zip(paramNames, paramTypes).map{$0.capitlizeFirstLetter() + $1.displayableForType()}.joined() + self.type.displayableForType()
 
         self.handler = ClosureModel(name: name, longName: longName, paramNames: paramNames, paramTypes: paramTypes, returnType: ast.typeName, staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription

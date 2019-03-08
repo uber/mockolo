@@ -67,6 +67,10 @@ extension String {
         }
         return false
     }
+    
+    func displayableForType() -> String {
+        return self.components(separatedBy: CharacterSet(charactersIn: ": ,-<>()[]")).map{$0.capitlizeFirstLetter()}.joined()
+    }
 }
 
 extension Structure {
@@ -106,6 +110,7 @@ extension Structure {
         return ""
     }
 }
+
 
 func defaultVal(typeName: String) -> String? {
     // TODO: add more robust handling

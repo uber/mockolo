@@ -63,4 +63,6 @@ class SwiftMockGenTests: XCTestCase {
         let fixtureContents = dstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         XCTAssert(fixtureContents == outputContents)
     }
+    
+    
 }
