@@ -72,7 +72,7 @@ extension String {
     }
     
     func displayableForType() -> String {
-        return self.components(separatedBy: CharacterSet(charactersIn: ": ,-<>()[]")).map{$0.capitlizeFirstLetter()}.joined()
+        return self.components(separatedBy: CharacterSet(charactersIn: ":?! ,-<>()[]")).map{$0.capitlizeFirstLetter()}.joined()
     }
 }
 
