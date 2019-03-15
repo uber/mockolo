@@ -54,9 +54,8 @@ func lookupEntities(name: String,
 
         // Remove an initializer from the parent mock class as the leaf mock class will have its own
         if let initStructure = parentStructure.substructures.filter({$0.isInitializer}).first {
-            let offset = Int(initStructure.offset - parentStructure.bodyOffset)
-            let len = Int(initStructure.length)
-            if let range = Range(NSRange(location: offset, length: len), in: body) {
+            let result = initStructure.range
+            if let range = Range(NSRange(location: Int(result.offset - parentStructure.bodyOffset), length: Int(result.length)), in: body) {
                 body.removeSubrange(range)
             }
         }

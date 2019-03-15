@@ -14,8 +14,9 @@ struct VariableModel: Model {
     let defaultValue: String?
     let staticKind: String
     let canBeInitParam: Bool
+    let processed: Bool
     
-    init(_ ast: Structure, content: String) {
+    init(_ ast: Structure, content: String, processed: Bool) {
         name = ast.name
         type = ast.typeName
         mediumName = name
@@ -27,10 +28,13 @@ struct VariableModel: Model {
         accessControlLevelDescription = ast.accessControlLevelDescription
         defaultValue = defaultVal(typeName: ast.typeName)
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
+        self.processed = processed
     }
     
     
     func render(with identifier: String) -> String? {
+        guard !processed else { return nil }
+
         if let rxVar = applyRxVariableTemplate(name: identifier,
                                                typeName: type,
                                                staticKind: staticKind,

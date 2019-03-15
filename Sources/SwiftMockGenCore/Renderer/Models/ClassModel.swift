@@ -28,13 +28,13 @@ struct ClassModel: Model {
     let accessControlLevelDescription: String
     let identifier: String
     let entities: [String]
-    let initParams: [VarWithOffset]
+    let initParams: [VariableModel]
     
     init(_ ast: Structure,
          content: String,
          identifier: String,
          additionalAttributes: [String],
-         initParams: [VarWithOffset],
+         initParams: [VariableModel],
          entities: [String]) {
         self.identifier = identifier
         self.name = identifier + "Mock"

@@ -20,15 +20,15 @@ func applyClassTemplate(name: String,
                         identifier: String,
                         accessControlLevelDescription: String,
                         attribute: String,
-                        initParams: [VarWithOffset],
+                        initParams: [VariableModel],
                         entities: [String]) -> String {
     
     let params = initParams
-        .map { (offset: Int64, name: String, typeName: String) -> String in
-            if let val = defaultVal(typeName: typeName), !val.isEmpty {
-                return "\(name): \(typeName) = \(val)"
+        .map { (element: VariableModel) -> String in
+            if let val = defaultVal(typeName: element.type), !val.isEmpty {
+                return "\(element.name): \(element.type) = \(val)"
             }
-            return "\(name): \(typeName)"
+            return "\(element.name): \(element.type)"
         }
         .joined(separator: ", ")
     

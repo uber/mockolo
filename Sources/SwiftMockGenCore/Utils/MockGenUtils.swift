@@ -40,7 +40,6 @@ public let HeaderDoc = """
 
 """
 
-typealias VarWithOffset = (offset: Int64, name: String, typeName: String)
 typealias ProtocolMapEntryType = (structure: Structure, file: File, models: [Model], attributes: [String])
 
 extension File {
