@@ -25,12 +25,14 @@ struct ParamModel: Model {
     var offset: Int64 = .max
     var type: String
     let label: String?
-    init(_ ast: Structure, label: String) {
+    let isGeneric: Bool
+    init(_ ast: Structure, label: String, isGeneric: Bool = false) {
         self.name = ast.name
         self.mediumName = ast.name
         self.longName = ast.name
         self.fullName = ast.name
-        self.type = ast.typeName
+        self.isGeneric = isGeneric
+        self.type = isGeneric ? (ast.inheritedTypes.first ?? UnknownVal) : ast.typeName
         self.label = ast.name != label ? label: nil
     }
     

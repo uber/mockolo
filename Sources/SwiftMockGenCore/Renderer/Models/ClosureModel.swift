@@ -25,28 +25,50 @@ struct ClosureModel: Model {
     var longName: String
     var fullName: String
     var offset: Int64 = .max
-    let defaultValue: String
+    let returnAs: String
     let defaultReturnType: String
     let staticKind: String
+    let genericTypeNames: [String]
     let paramNames: [String]
     let paramTypes: [String]
     
-    init(name: String, mediumName: String, longName: String, fullName: String, paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
+    init(name: String, mediumName: String, longName: String, fullName: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
         self.name = name + nameSuffix
         self.mediumName = mediumName + nameSuffix
         self.longName = longName + nameSuffix
         self.fullName = fullName + nameSuffix
-        let paramStr = paramTypes.joined(separator: ", ")
-        let returnStr = returnType == UnknownVal ? "" : returnType  
-        self.type = "((" + paramStr + ") -> (" + returnStr + "))?"
-        self.defaultReturnType = returnType
-        self.defaultValue = "nil"
         self.staticKind = staticKind
+
+        let genericTypeNameList = genericTypeParams.map {$0.name}
         self.paramNames = paramNames
         self.paramTypes = paramTypes
+        let displayableParamTypes = paramTypes.map { (t: String) -> String in
+            let comps = t.components(separatedBy: CharacterSet(charactersIn: "()-> "))
+            return genericTypeNameList.filter({comps.contains($0)}).isEmpty ? t : AnyString
+        }
+        self.genericTypeNames = genericTypeNameList
+        let displayableParamStr = displayableParamTypes.joined(separator: ", ")
+        let funcReturnType = returnType == UnknownVal ? "" : returnType
+        var displayableReturnType = funcReturnType
+        let returnComps = funcReturnType.components(separatedBy: CharacterSet(charactersIn: "()-> "))
+        
+        var returnAsStr = ""
+        if !genericTypeNameList.filter({returnComps.contains($0)}).isEmpty {
+            displayableReturnType = AnyString
+            returnAsStr = funcReturnType
+        }
+        self.type = "((" + displayableParamStr + ") -> (" + displayableReturnType + "))?"
+        self.defaultReturnType = displayableReturnType
+        self.returnAs = returnAsStr
     }
     
     func render(with identifier: String) -> String? {
-        return applyClosureTemplate(name: identifier, type: type, paramVals: paramNames, paramTypes: paramTypes, returnDefaultVal: defaultValue, returnDefaultType: defaultReturnType)
+        return applyClosureTemplate(name: identifier,
+                                    type: type,
+                                    genericTypeNames: genericTypeNames,
+                                    paramVals: paramNames,
+                                    paramTypes: paramTypes,
+                                    returnAs: returnAs,
+                                    returnDefaultType: defaultReturnType)
     }
 }

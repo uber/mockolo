@@ -41,7 +41,7 @@ struct ClassModel: Model {
         self.mediumName = self.name
         self.longName = self.name
         self.fullName = self.name
-        self.type = "class"
+        self.type = ClassString
         self.entities = entities
         self.initParams = initParams
         

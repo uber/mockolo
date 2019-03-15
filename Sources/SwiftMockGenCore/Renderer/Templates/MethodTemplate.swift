@@ -18,7 +18,8 @@ import Foundation
 import SourceKittenFramework
 
 func applyMethodTemplate(name: String,
-                         identifier: String, 
+                         identifier: String,
+                         genericTypeDecls: [String],
                          paramDecls: [String],
                          returnType: String,
                          staticKind: String,
@@ -29,15 +30,16 @@ func applyMethodTemplate(name: String,
     // identifier.contains(suffixStr) ? methodShortName : methodShortName + suffixStr
     let callCount = "\(identifier)\(CallCountSuffix)"
     let paramDeclsStr = paramDecls.joined(separator: ", ")
+    let genericTypeDeclsStr = genericTypeDecls.joined(separator: ", ")
+    let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
     let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
     let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-
     let template =
     """
         \(staticStr)var \(callCount) = 0
         \(staticStr)var \(handlerVarName): \(handlerVarType)
-        \(acl)\(staticStr)func \(name)(\(paramDeclsStr)) \(returnStr) {
+        \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(returnStr) {
             \(callCount) += 1
             \(handlerReturn)
         }

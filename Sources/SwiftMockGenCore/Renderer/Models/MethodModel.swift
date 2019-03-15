@@ -24,11 +24,11 @@ struct MethodModel: Model {
     var longName: String
     var fullName: String
     var offset: Int64
-    var useLongName: Bool = false
     let accessControlLevelDescription: String
     let attributes: [String]
     let defaultValue: String?
     let staticKind: String
+    let genericTypeParams: [ParamModel]
     let params: [ParamModel]
     let handler: ClosureModel
     
@@ -58,10 +58,14 @@ struct MethodModel: Model {
             zip(paramNames, paramTypes).map{$0.capitlizeFirstLetter() + $1.displayableForType()}.joined() +
             self.type.displayableForType()
         
+        self.genericTypeParams = ast.substructures
+                .filter {$0.isGenericTypeParam}
+            .map { ParamModel($0, label: $0.name, isGeneric: true) }
         self.handler = ClosureModel(name: self.name,
                                     mediumName: self.mediumName,
                                     longName: self.longName,
                                     fullName: self.fullName,
+                                    genericTypeParams: genericTypeParams,
                                     paramNames: paramNames,
                                     paramTypes: paramTypes,
                                     returnType: ast.typeName,
@@ -72,6 +76,7 @@ struct MethodModel: Model {
     }
     
     func render(with identifier: String) -> String? {
+        let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}
         let paramDecls = params.compactMap{$0.render(with: "")}
         let returnType = type != UnknownVal ? type : ""
         let handlerName = (identifier == name ? handler.name :
@@ -81,6 +86,7 @@ struct MethodModel: Model {
         let handlerReturn = handler.render(with: handlerName) ?? ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
+                                         genericTypeDecls: genericTypeDecls,
                                          paramDecls: paramDecls,
                                          returnType: returnType,
                                          staticKind: staticKind,

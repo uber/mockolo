@@ -112,6 +112,13 @@ extension Structure {
         return isVariable && typeName.contains("->")
     }
     
+    var isGenericTypeParam: Bool {
+        return kind == SwiftDeclarationKind.genericTypeParam.rawValue
+    }
+    var isGenericMethod: Bool {
+        return isMethod && substructures.filter({$0.kind == SwiftDeclarationKind.genericTypeParam.rawValue}).count > 0
+    }
+    
     var canBeInitParam: Bool {
         return isVariable && isTypeNonOptional && !typeName.hasPrefix(ObservableVarPrefix) && !typeName.hasPrefix(RxObservableVarPrefix)
     }
@@ -178,4 +185,3 @@ func scanPaths(_ paths: [String], with callBack: (String) -> Void) {
         scanDirectory(path, with: callBack)
     }
 }
-

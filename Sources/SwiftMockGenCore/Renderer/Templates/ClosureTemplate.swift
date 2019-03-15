@@ -19,19 +19,26 @@ import SourceKittenFramework
 
 func applyClosureTemplate(name: String,
                           type: String,
+                          genericTypeNames: [String],
                           paramVals: [String]?,
                           paramTypes: [String]?,
-                          returnDefaultVal: String?,
+                          returnAs: String,
                           returnDefaultType: String) -> String {
     let handlerParamValsStr = paramVals?.joined(separator: ", ") ?? ""
     let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
 
-    let result =
-    """
-            if let \(name) = \(name) {
-                return \(name)(\(handlerParamValsStr))
-            }
-            \(handlerReturnDefault)
+    var returnTypeCast = ""
+    if !returnAs.isEmpty {
+        // TODO: add a better check for optional
+        let asSuffix = !returnAs.hasSuffix("?") ? "!" : "?"
+        returnTypeCast = " as\(asSuffix) " + returnAs
+    }
+    
+    let result = """
+        if let \(name) = \(name) {
+            return \(name)(\(handlerParamValsStr))\(returnTypeCast)
+        }
+        \(handlerReturnDefault)
     """
     
     return result

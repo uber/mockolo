@@ -49,6 +49,11 @@ class SwiftMockGenTests: XCTestCase {
         }
     }
     
+    func testGenericFunc() {
+        verify(srcContent: genericFunc,
+               dstContent: genericFuncMock)
+    }
+    
     private func verify(srcContent: String, dstContent: String) {
         let created = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(created)

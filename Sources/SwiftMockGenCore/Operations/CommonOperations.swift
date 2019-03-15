@@ -35,7 +35,7 @@ func lookupEntities(name: String,
         
         // If the protocol inherits other protocols, look up their entities as well.
         for parent in curStructure.inheritedTypes {
-            if parent != "class", parent != "Any", parent != "AnyObject" {
+            if parent != ClassString, parent != AnyString, parent != AnyObjectString {
                 let (parentModels, parentAttributes, parentResults) = lookupEntities(name: parent, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
                 models.append(contentsOf: parentModels)
                 attributes.append(contentsOf: parentAttributes)
