@@ -123,22 +123,18 @@ extension Structure {
         }
     }
     
-    var attributes: [[String: Any]]? {
-        return dictionary["key.attributes"] as? [[String: Any]]
-    }
-    
     var range: (offset: Int64, length: Int64) {
         var offsetMin: Int64 = .max
         var offsetMax: Int64 = -1
-        if let atts = attributes {
-            
-            let result = atts.reduce((.max, -1), { (prevResult, curAttribute) -> (Int64, Int64) in
+        // Get the min/max offsets for attributes if any (e.g. @objc, public, static, etc) for this node
+        if let attributes = dictionary["key.attributes"] as? [[String: SourceKitRepresentable]] {
+            let result = attributes.reduce((.max, -1), { (prevResult, curAttribute) -> (Int64, Int64) in
                 var (minOffset, maxOffset) = prevResult
-                if let offset = curAttribute["key.offset"] as? Int64 {
+                if let offset = curAttribute[SwiftDocKey.offset.rawValue] as? Int64 {
                     if minOffset > offset {
                         minOffset = offset
                     }
-                    if let len = curAttribute["key.length"] as? Int64, maxOffset < offset + len {
+                    if let len = curAttribute[SwiftDocKey.length.rawValue] as? Int64, maxOffset < offset + len {
                         maxOffset = offset + len
                     }
                 }
@@ -148,15 +144,15 @@ extension Structure {
             offsetMax = result.1
         }
         
+        // Compare with the offset and length of this node
         if offsetMin > offset {
             offsetMin = offset
         }
-        
         if offsetMax < offset + length {
             offsetMax = offset + length
         }
-        
         let len = offsetMax - offsetMin + 1
+        // Return the start offset and the length
         return (offsetMin, len)
     }
     
