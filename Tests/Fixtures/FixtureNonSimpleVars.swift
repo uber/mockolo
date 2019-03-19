@@ -3,7 +3,7 @@ import SwiftMockGenCore
 let nonSimpleVars = """
 import Foundation
 
-/// \(MockAnnotation)
+/// \(String.mockAnnotation)
 protocol NonSimpleVars {
 var dict: Dictionary<String, Int> { get set }
 }
@@ -11,8 +11,8 @@ var dict: Dictionary<String, Int> { get set }
 
 let nonSimpleVarsMock = """
 
-\(HeaderDoc)
-\(PoundIfMock)
+\(String.headerDoc)
+\(String.poundIfMock)
 import Foundation
 
 class NonSimpleVarsMock: NonSimpleVars {
@@ -32,5 +32,5 @@ dictSetCallCount += 1
 }
 }
 }
-\(PoundEndIf)
+\(String.poundEndIf)
 """

@@ -1,17 +1,18 @@
 import SwiftMockGenCore
 
+
 let simpleVar = """
 import Foundation
 
-/// \(MockAnnotation)
+/// \(String.mockAnnotation)
 protocol SimpleVar {
     var name: Int { get set }
 }
 """
 
 let simpleVarMock = """
-\(HeaderDoc)
-\(PoundIfMock)
+\(String.headerDoc)
+\(String.poundIfMock)
 import Foundation
     
 class SimpleVarMock: SimpleVar {
@@ -31,5 +32,5 @@ class SimpleVarMock: SimpleVar {
         }
     }
 }
-\(PoundEndIf)
+\(String.poundEndIf)
 """
