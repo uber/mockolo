@@ -7,13 +7,13 @@ class SwiftMockGenTests: XCTestCase {
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
-    lazy var mockFilePath: String = {
-        return bundle.bundlePath + "/Mocks.swift"
-    }()
     lazy var srcFilePath: String = {
         return bundle.bundlePath + "/Src.swift"
     }()
-
+    lazy var mockFilePath: String = {
+        return bundle.bundlePath + "/Mocks.swift"
+    }()
+    
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         let created = FileManager.default.createFile(atPath: dstFilePath, contents: nil, attributes: nil)
@@ -53,7 +53,6 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: simpleFuncMock)
     }
     
-
     func testInit() {
         verify(srcContent: simpleInit,
                mockContent: simpleInitParentMock,
@@ -64,7 +63,7 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: genericFunc,
                dstContent: genericFuncMock)
     }
-
+    
     func testSimpleDupes() {
         verify(srcContent: simpleDuplicates,
                dstContent: simpleDuplicatesMock)
@@ -77,7 +76,7 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: duplicateFuncsInheritance,
                dstContent: duplicateFuncsInheritanceMock)
     }
-
+    
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)
@@ -88,7 +87,7 @@ class SwiftMockGenTests: XCTestCase {
         try? generate(sourceDirs: nil,
                       sourceFiles: [srcFilePath],
                       excludeSuffixes: ["Mocks", "Tests"],
-                      mockFilePaths: nil,
+                      mockFilePaths: [mockFilePath],
                       to: dstFilePath)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
