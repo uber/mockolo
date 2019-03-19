@@ -57,7 +57,7 @@ struct MethodModel: Model {
         
         self.mediumName = self.name + genericNameTypes + paramNames.map{ nameString.lowercased().contains($0.lowercased()) ? "" :  $0.capitlizeFirstLetter}.joined()
 
-        self.mediumLongName =  self.name + genericNameTypes + self.type.displayableForType
+        self.mediumLongName = self.name + genericNameTypes + self.type.displayableForType
 
         self.longName = self.mediumName + self.type.displayableForType
 

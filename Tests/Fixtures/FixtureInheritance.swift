@@ -4,14 +4,14 @@ let funcsInheritance = """
 import Foundation
 
 /// \(String.mockAnnotation)
-public protocol ViewableStateRouterNavigatable_DEPRECATED: StateRouterNavigatable_DEPRECATED {
+public protocol InheritedFuncs: Parent {
     
     func navigateBack(_ transitionStyle: TransitionStyle) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?)
     func navigateBack(_ toState: RouterState_DEPRECATED?, transitionStyle: TransitionStyle) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?)
 }
     
 /// \(String.mockAnnotation)
-public protocol StateRouterNavigatable_DEPRECATED: class {
+public protocol Parent: class {
     
     func navigateBack() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?)
     func navigateBack(_ toState: RouterState_DEPRECATED?) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?)
@@ -22,35 +22,9 @@ public protocol StateRouterNavigatable_DEPRECATED: class {
 let funcsInheritanceMock = """
 \(String.headerDoc)
 \(String.poundIfMock)
-
 import Foundation
 
-public class StateRouterNavigatable_DEPRECATEDMock: StateRouterNavigatable_DEPRECATED {
-    public init() {
-        
-    }
-    
-    var navigateBackCallCount = 0
-    var navigateBackHandler: (() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?))?
-    public func navigateBack() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?) {
-        navigateBackCallCount += 1
-        if let navigateBackHandler = navigateBackHandler {
-            return navigateBackHandler()
-        }
-        return (nil, nil, nil, nil)
-    }
-    var navigateBackToStateCallCount = 0
-    var navigateBackToStateHandler: ((RouterState_DEPRECATED?) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?))?
-    public func navigateBack(_ toState: RouterState_DEPRECATED?) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?) {
-        navigateBackToStateCallCount += 1
-        if let navigateBackToStateHandler = navigateBackToStateHandler {
-            return navigateBackToStateHandler(toState)
-        }
-        return (nil, nil, nil, nil)
-    }
-}
-
-public class ViewableStateRouterNavigatable_DEPRECATEDMock: ViewableStateRouterNavigatable_DEPRECATED {
+public class InheritedFuncsMock: InheritedFuncs {
     public init() {
         
     }
@@ -73,6 +47,31 @@ public class ViewableStateRouterNavigatable_DEPRECATEDMock: ViewableStateRouterN
         }
         return (nil, nil, nil, nil)
     }
+    var navigateBackCallCount = 0
+    var navigateBackHandler: (() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?))?
+    public func navigateBack() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?) {
+        navigateBackCallCount += 1
+        if let navigateBackHandler = navigateBackHandler {
+            return navigateBackHandler()
+        }
+        return (nil, nil, nil, nil)
+    }
+    var navigateBackToStateCallCount = 0
+    var navigateBackToStateHandler: ((RouterState_DEPRECATED?) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?))?
+    public func navigateBack(_ toState: RouterState_DEPRECATED?) -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?) {
+        navigateBackToStateCallCount += 1
+        if let navigateBackToStateHandler = navigateBackToStateHandler {
+            return navigateBackToStateHandler(toState)
+        }
+        return (nil, nil, nil, nil)
+    }
+}
+
+public class ParentMock: Parent {
+    public init() {
+        
+    }
+    
     var navigateBackCallCount = 0
     var navigateBackHandler: (() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?))?
     public func navigateBack() -> (currentState: RouterState_DEPRECATED?, currentStateRouter: Routing?, previousStateRouter: Routing?, detachedTransientRouter: Routing?) {

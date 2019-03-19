@@ -57,9 +57,9 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
         let renderedEntities = uniqueVals.compactMap { (name: String, model: Model) -> String? in
             return model.render(with: name)
         }
-
+        
         let nonOptionalOrRxVarList = nonOptionalOrRxVars(in: models)
-
+        
         let mockModel = ClassModel(protocolStructure,
                                    content: file.contents,
                                    identifier: key,
@@ -79,25 +79,36 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     let entities = Dictionary(grouping: models) { $0.name }
     var result = [String: Model]()
     
-    entities.forEach { (key: String, value: [Model]) in
-        if value.count > 1 {
-            let entitiesByMediumName = Dictionary(grouping: value) { $0.mediumName }
-            entitiesByMediumName.forEach { (k: String, v: [Model]) in
-                if v.count > 1 {
-                    let entitiesByLongName = Dictionary(grouping: value) { $0.longName }
-                    entitiesByLongName.forEach { (k: String, v: [Model]) in
-                        if v.count > 1 {
-                            v.forEach{ result[$0.fullName] = $0 }
-                        } else {
-                            v.forEach{ result[$0.longName] = $0 }
+    entities.forEach { (key: String, modelsByName: [Model]) in
+        
+        if modelsByName.count > 1 {
+            Dictionary(grouping: modelsByName) { $0.mediumName }
+                .forEach { (k: String, modelsByMedName: [Model]) in
+                    
+                    if modelsByMedName.count > 1 {
+                        Dictionary(grouping: modelsByMedName) { $0.mediumLongName }
+                            .forEach { (k: String, modelsByMedLongName: [Model]) in
+                                
+                                if modelsByMedLongName.count > 1 {
+                                    Dictionary(grouping: modelsByMedLongName) { $0.longName }
+                                        .forEach { (k: String, modelsByLongName: [Model]) in
+                                            
+                                            if modelsByLongName.count > 1 {
+                                                modelsByLongName.forEach{ result[$0.fullName] = $0 }
+                                            } else {
+                                                modelsByLongName.forEach{ result[$0.longName] = $0 }
+                                            }
+                                    }
+                                } else {
+                                    modelsByMedLongName.forEach { result[$0.mediumLongName] = $0 }
+                                }
                         }
+                    } else {
+                        modelsByMedName.forEach { result[$0.mediumName] = $0 }
                     }
-                } else {
-                    v.forEach { result[$0.mediumName] = $0 }
-                }
             }
         } else {
-            value.forEach { result[$0.name] = $0 }
+            modelsByName.forEach { result[$0.name] = $0 }
         }
     }
     
@@ -110,7 +121,7 @@ private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {
     let parentVarNames = parentVars.map {$0.name}
     // Named params in init should be unique. Add a duplicate param check to ensure it.
     let curVars = paramsForInit.filter { !$0.processed && !parentVarNames.contains($0.name) }
-                                .sorted {$0.offset < $1.offset}
+        .sorted {$0.offset < $1.offset}
     let result = [parentVars, curVars].flatMap{$0}
     return result
 }

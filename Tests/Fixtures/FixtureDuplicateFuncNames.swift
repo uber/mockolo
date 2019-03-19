@@ -142,68 +142,50 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         
     }
-    var updateArgSomeCallCount = 0
-    var updateArgSomeHandler: ((Int, Float) -> ())?
-    func update(arg: Int, some: Float)  {
-        updateArgSomeCallCount += 1
-        if let updateArgSomeHandler = updateArgSomeHandler {
-            return updateArgSomeHandler(arg, some)
-        }
-        
-    }
-    var updateArgSomeIntCallCount = 0
-    var updateArgSomeIntHandler: ((Int, Float) -> (Int))?
-    func update(arg: Int, some: Float) -> Int {
-        updateArgSomeIntCallCount += 1
-        if let updateArgSomeIntHandler = updateArgSomeIntHandler {
-            return updateArgSomeIntHandler(arg, some)
-        }
-        return 0
-    }
-    var updateArgSomeObservableIntCallCount = 0
-    var updateArgSomeObservableIntHandler: ((Int, Float) -> (Observable<Int>))?
+    var updateObservableIntCallCount = 0
+    var updateObservableIntHandler: ((Int, Float) -> (Observable<Int>))?
     func update(arg: Int, some: Float) -> Observable<Int> {
-        updateArgSomeObservableIntCallCount += 1
-        if let updateArgSomeObservableIntHandler = updateArgSomeObservableIntHandler {
-            return updateArgSomeObservableIntHandler(arg, some)
+        updateObservableIntCallCount += 1
+        if let updateObservableIntHandler = updateObservableIntHandler {
+            return updateObservableIntHandler(arg, some)
         }
         return Observable.empty()
     }
-    var updateArgSomeStringObservableDoubleCallCount = 0
-    var updateArgSomeStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
+    var updateStringObservableDoubleCallCount = 0
+    var updateStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
     func update(arg: Int, some: Float) -> (String) -> Observable<Double> {
-        updateArgSomeStringObservableDoubleCallCount += 1
-        if let updateArgSomeStringObservableDoubleHandler = updateArgSomeStringObservableDoubleHandler {
-            return updateArgSomeStringObservableDoubleHandler(arg, some)
+        updateStringObservableDoubleCallCount += 1
+        if let updateStringObservableDoubleHandler = updateStringObservableDoubleHandler {
+            return updateStringObservableDoubleHandler(arg, some)
         }
-        fatalError("updateArgSomeStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
+        fatalError("updateStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
     }
-    var updateArgSomeArrayStringFloatCallCount = 0
-    var updateArgSomeArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
+    var updateArrayStringFloatCallCount = 0
+    var updateArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
     func update(arg: Int, some: Float) -> Array<String, Float> {
-        updateArgSomeArrayStringFloatCallCount += 1
-        if let updateArgSomeArrayStringFloatHandler = updateArgSomeArrayStringFloatHandler {
-            return updateArgSomeArrayStringFloatHandler(arg, some)
+        updateArrayStringFloatCallCount += 1
+        if let updateArrayStringFloatHandler = updateArrayStringFloatHandler {
+            return updateArrayStringFloatHandler(arg, some)
         }
-        fatalError("updateArgSomeArrayStringFloatHandler returns can't have a default value thus its handler must be set")
+        fatalError("updateArrayStringFloatHandler returns can't have a default value thus its handler must be set")
     }
-    var collectionViewIndexStringCallCount = 0
-    var collectionViewIndexStringHandler: ((UICollectionView, Int) -> (String?))?
+    var collectionViewStringCallCount = 0
+    var collectionViewStringHandler: ((UICollectionView, Int) -> (String?))?
     func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
-        collectionViewIndexStringCallCount += 1
-        if let collectionViewIndexStringHandler = collectionViewIndexStringHandler {
-            return collectionViewIndexStringHandler(collectionView, index)
+        collectionViewStringCallCount += 1
+        if let collectionViewStringHandler = collectionViewStringHandler {
+            return collectionViewStringHandler(collectionView, index)
         }
         return nil
     }
-    var collectionViewIndexCGSizeCallCount = 0
-    var collectionViewIndexCGSizeHandler: ((UICollectionView, Int) -> (CGSize))?
+    var collectionViewCGSizeCallCount = 0
+    var collectionViewCGSizeHandler: ((UICollectionView, Int) -> (CGSize))?
     func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize {
-        collectionViewIndexCGSizeCallCount += 1
-        if let collectionViewIndexCGSizeHandler = collectionViewIndexCGSizeHandler {
-            return collectionViewIndexCGSizeHandler(collectionView, index)
+        collectionViewCGSizeCallCount += 1
+        if let collectionViewCGSizeHandler = collectionViewCGSizeHandler {
+            return collectionViewCGSizeHandler(collectionView, index)
         }
-        fatalError("collectionViewIndexCGSizeHandler returns can't have a default value thus its handler must be set")
+        fatalError("collectionViewCGSizeHandler returns can't have a default value thus its handler must be set")
     }
     var collectionViewCellUICollectionViewCellIndexIntCallCount = 0
     var collectionViewCellUICollectionViewCellIndexIntHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
