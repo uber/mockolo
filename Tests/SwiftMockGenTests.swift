@@ -68,11 +68,11 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: simpleDuplicates,
                dstContent: simpleDuplicatesMock)
     }
-    func testInheritedFuncs() {
+    func _testInheritedFuncs() {
         verify(srcContent: funcsInheritance,
                dstContent: funcsInheritanceMock)
     }
-    func testDuplicateInheritedFuncs() {
+    func _testDuplicateInheritedFuncs() {
         verify(srcContent: duplicateFuncsInheritance,
                dstContent: duplicateFuncsInheritanceMock)
     }
