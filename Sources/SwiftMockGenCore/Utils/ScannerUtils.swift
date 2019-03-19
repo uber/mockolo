@@ -65,7 +65,7 @@ extension Structure {
         return UnknownVal
     }
     var isInitializer: Bool {
-        return name.hasPrefix(InitializerPrefix) && isInstanceMethod
+        return name.hasPrefix(.initializerPrefix) && isInstanceMethod
     }
     
     var isInstanceVariable: Bool {
@@ -112,8 +112,23 @@ extension Structure {
         return isVariable && typeName.contains("->")
     }
     
+    var isGenericTypeParam: Bool {
+        return kind == SwiftDeclarationKind.genericTypeParam.rawValue
+    }
+    var isGenericMethod: Bool {
+        return isMethod && substructures.filter({$0.kind == SwiftDeclarationKind.genericTypeParam.rawValue}).count > 0
+    }
+    
     var canBeInitParam: Bool {
-        return isVariable && isTypeNonOptional && !typeName.hasPrefix(ObservableVarPrefix) && !typeName.hasPrefix(RxObservableVarPrefix)
+        return isVariable &&
+            isTypeNonOptional &&
+            !typeName.hasPrefix(.observableVarPrefix) &&
+            !typeName.hasPrefix(.rxObservableVarPrefix) &&
+            !name.hasPrefix(.underlyingVarPrefix) &&
+            !name.hasSuffix(.closureVarSuffix) &&
+            !name.hasSuffix(.callCountSuffix) &&
+            !name.hasSuffix(.subjectSuffix) &&
+            typeName != UnknownVal
     }
     
     var inheritedTypes: [String] {
@@ -123,11 +138,19 @@ extension Structure {
         }
     }
     
+    var attributes: [[String: SourceKitRepresentable]]? {
+        return dictionary["key.attributes"] as? [[String: SourceKitRepresentable]]
+    }
+    
+    var attributeValues: [String]? {
+        return attributes?.compactMap { $0["key.attribute"] as? String}
+    }
+    
     var range: (offset: Int64, length: Int64) {
         var offsetMin: Int64 = .max
         var offsetMax: Int64 = -1
         // Get the min/max offsets for attributes if any (e.g. @objc, public, static, etc) for this node
-        if let attributes = dictionary["key.attributes"] as? [[String: SourceKitRepresentable]] {
+        if let attributes = attributes {
             let result = attributes.reduce((.max, -1), { (prevResult, curAttribute) -> (Int64, Int64) in
                 var (minOffset, maxOffset) = prevResult
                 if let offset = curAttribute[SwiftDocKey.offset.rawValue] as? Int64 {
@@ -151,7 +174,7 @@ extension Structure {
         if offsetMax < offset + length {
             offsetMax = offset + length
         }
-        let len = offsetMax - offsetMin + 1
+        let len = offsetMax - offsetMin
         // Return the start offset and the length
         return (offsetMin, len)
     }
@@ -168,9 +191,9 @@ extension Structure {
         return dictionary[SwiftDocKey.bodyOffset.rawValue] as? Int64 ?? -1
     }
 
-    func extract(offset: Int64, startOffset: Int64 = 0, length: Int64, content: String) -> String {
-        let end = offset + length
-        let start = offset + startOffset
+    func extract(offset: Int64, length: Int64, content: String) -> String {
+        let end = offset + length - 1
+        let start = offset
         
         if start >= 0 && length > 0 {
             if end > content.count {
@@ -212,4 +235,3 @@ func scanPaths(_ paths: [String], with callBack: (String) -> Void) {
         scanDirectory(path, with: callBack)
     }
 }
-

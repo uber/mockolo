@@ -31,7 +31,7 @@ class ExecuteCommand {
     private var loggingLevel: OptionArgument<String>!
     private var outputFilePath: OptionArgument<String>!
     private var mockFilePaths: OptionArgument<[String]>!
-    private var sourceFilesDir: OptionArgument<String>!
+    private var sourceDirs: OptionArgument<[String]>!
     private var sourceFiles: OptionArgument<[String]>!
     private var excludeSuffixes: OptionArgument<[String]>!
     private var concurrencyLimit: OptionArgument<Int>!
@@ -58,7 +58,7 @@ class ExecuteCommand {
     private func setupArguments(with parser: ArgumentParser) {
         loggingLevel = parser.add(option: "--logging-level", shortName: "-v", kind: String.self, usage: "The logging level to use.")
         sourceFiles = parser.add(option: "--sourcefiles", shortName: "-srcs", kind: [String].self, usage: "List of source files (separated by a comma or a space) to generate mocks for. If no value is given, the --srcdir value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.", completion: .filename)
-        sourceFilesDir = parser.add(option: "--sourcedir", shortName: "-srcdir", kind: String.self, usage: "Path to the directory containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.", completion: .filename)
+        sourceDirs = parser.add(option: "--sourcedirs", shortName: "-srcdirs", kind: [String].self, usage: "Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.", completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles", shortName: "-mocks", kind: [String].self, usage: "List of mock files (separated by a comma or a space) from modules this target depends on. ", completion: .filename)
         outputFilePath = parser.add(option: "--outputfile", shortName: "-output", kind: String.self, usage: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.", completion: .filename)
         excludeSuffixes = parser.add(option: "--exclude-suffixes", kind: [String].self, usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).", completion: .filename)
@@ -80,9 +80,9 @@ class ExecuteCommand {
         //        }
         guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         
-        let sourceDir = arguments.get(sourceFilesDir)
+        let srcDirs = arguments.get(sourceDirs)
         let srcs = arguments.get(sourceFiles)
-        if sourceDir == nil, srcs == nil {
+        if sourceDirs == nil, srcs == nil {
             fatalError("Missing source files or their directory")
         }
         
@@ -94,8 +94,9 @@ class ExecuteCommand {
         let shouldCollectParsingInfo = arguments.get(self.shouldCollectParsingInfo) ?? false
         
         do {
+
             // TODO: add sourcekitutilities to kill sourcekitd
-            try generate(sourceDir: sourceDir,
+            try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
                          excludeSuffixes: excludeSuffixes,
                          mockFilePaths: mockFilePaths,

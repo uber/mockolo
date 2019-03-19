@@ -20,7 +20,7 @@ import SourceKittenFramework
 public let DefaultParsingTimeout = 10
 public let DefaultRetryParsingLimit = 3
 
-public func generate(sourceDir: String?,
+public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,
                      excludeSuffixes: [String],
                      mockFilePaths: [String]? = nil,
@@ -30,7 +30,7 @@ public func generate(sourceDir: String?,
                      retryParsingOnTimeoutLimit: Int = DefaultRetryParsingLimit,
                      shouldCollectParsingInfo: Bool = false) throws {
     
-    assert(sourceDir != nil || sourceFiles != nil)
+    assert(sourceDirs != nil || sourceFiles != nil)
     
     var candidates = [String: String]()
     var parentMocks = [String: (Structure, File, [Model])]()
@@ -59,7 +59,7 @@ public func generate(sourceDir: String?,
                                     parentMocks[s.name] = (s, file, models)
                                     if let fpath = file.path, importLines[fpath] == nil {
                                         // Map between filepaths and import lines of the files.
-                                        importLines[fpath] = file.lines(starting: ImportString)
+                                        importLines[fpath] = file.lines(starting: .import)
                                     }
         }
     }
@@ -69,7 +69,7 @@ public func generate(sourceDir: String?,
     
     print("Generate mocks for annotated protocols and store the results in a protocol map...")
     // 2. Generate mocks for annotated protocols in source dir and store the results in a map.
-    _ = generateModelsForAnnotatedTypes(sourceDir: sourceDir,
+    _ = generateModelsForAnnotatedTypes(sourceDirs: sourceDirs,
                                         sourceFiles: sourceFiles,
                                         exclude: excludeSuffixes,
                                         semaphore: sema,
@@ -77,7 +77,7 @@ public func generate(sourceDir: String?,
                                         queue: mockgenQueue) { (s: Structure, file: File, entites: [Model], attributes: [String]) in
                                             annotatedProtocolMap[s.name] = (s, file, entites, attributes)
                                             if let fpath = file.path, importLines[fpath] == nil {
-                                                importLines[fpath] = file.lines(starting: ImportString)
+                                                importLines[fpath] = file.lines(starting: .import)
                                             }
     }
     
@@ -103,7 +103,7 @@ public func generate(sourceDir: String?,
     let importsSet = Set(imports)
     let entities = candidates.values
 
-    let ret = [HeaderDoc, PoundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), PoundEndIf].joined(separator: "\n")
+    let ret = [.headerDoc, .poundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), .poundEndIf].joined(separator: "\n")
     
     let t4 = CFAbsoluteTimeGetCurrent()
     print("Took", t4-t3)

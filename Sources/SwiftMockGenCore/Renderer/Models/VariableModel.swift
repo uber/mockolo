@@ -6,6 +6,7 @@ struct VariableModel: Model {
     var name: String
     var type: String
     var mediumName: String
+    var mediumLongName: String
     var longName: String
     var fullName: String
     var offset: Int64
@@ -20,11 +21,12 @@ struct VariableModel: Model {
         name = ast.name
         type = ast.typeName
         mediumName = name
+        mediumLongName = name
         longName = name
         fullName = name
         offset = ast.offset
         canBeInitParam = ast.canBeInitParam
-        staticKind = ast.isStaticVariable ? StaticKindString : ""
+        staticKind = ast.isStaticVariable ? .static : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
         defaultValue = defaultVal(typeName: ast.typeName)
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil

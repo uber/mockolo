@@ -26,6 +26,9 @@ protocol Model {
     var mediumName: String { get set }
 
     // Used to differentiate multiple entities with the same medium name
+    var mediumLongName: String { get set }
+
+    // Used to differentiate multiple entities with the same mediumLong name
     var longName: String { get set }
 
     // Used to differentiate multiple entities with the same long name
