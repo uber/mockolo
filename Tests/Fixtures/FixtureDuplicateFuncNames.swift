@@ -16,8 +16,6 @@ detachTransition: Float?)
 """
 
 let simpleDuplicatesMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 
 public class SimpleDuplicateMock: SimpleDuplicate {
     public init() {
@@ -40,11 +38,8 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         if let pushStateFlagAttachTransitionDetachTransitionHandler = pushStateFlagAttachTransitionDetachTransitionHandler {
             return pushStateFlagAttachTransitionDetachTransitionHandler(state, flag, attachTransition, detachTransition)
         }
-        
     }
 }
-
-\(String.poundEndIf)
 """
 
 
@@ -79,8 +74,6 @@ func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: I
 """
 
 let duplicateFuncNamesMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 import UIKit
 
 class DuplicateFuncNamesMock: DuplicateFuncNames {
@@ -225,5 +218,4 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     }
 }
 
-\(String.poundEndIf)
 """

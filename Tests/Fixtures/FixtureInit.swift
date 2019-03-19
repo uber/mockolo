@@ -11,20 +11,15 @@ var title: String { get set }
 """
 
 let simpleInitParentMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 public class ParentMock: Parent {
 let num: Int
 public init(arg: Int) {
 self.num = arg
 }
 }
-\(String.poundEndIf)
 """
 
 let simpleInitResultMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 
 import Foundation
 
@@ -47,5 +42,4 @@ public class CurrentMock: Current {
         }
     }
 }
-\(String.poundEndIf)
 """

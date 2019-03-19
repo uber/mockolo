@@ -11,8 +11,6 @@ var dict: Dictionary<String, Int> { get set }
 
 let nonSimpleVarsMock = """
 
-\(String.headerDoc)
-\(String.poundIfMock)
 import Foundation
 
 class NonSimpleVarsMock: NonSimpleVars {
@@ -32,5 +30,4 @@ dictSetCallCount += 1
 }
 }
 }
-\(String.poundEndIf)
 """

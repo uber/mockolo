@@ -20,8 +20,6 @@ public protocol Parent: class {
 """
     
 let funcsInheritanceMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 import Foundation
 
 public class InheritedFuncsMock: InheritedFuncs {
@@ -92,7 +90,6 @@ public class ParentMock: Parent {
     }
 }
 
-\(String.poundEndIf)
 """
     
 
@@ -114,8 +111,6 @@ import Foundation
 """
     
 let duplicateFuncsInheritanceMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 import Foundation
 
 public class StateRouterNavigatable_DEPRECATEDMock: StateRouterNavigatable_DEPRECATED {
@@ -158,8 +153,4 @@ public class ViewableStateRouterNavigatable_DEPRECATEDMock: ViewableStateRouterN
         return (nil, nil)
     }
 }
-
-
-    
-\(String.poundEndIf)
 """

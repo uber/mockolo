@@ -68,11 +68,11 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: simpleDuplicates,
                dstContent: simpleDuplicatesMock)
     }
-    func _testInheritedFuncs() {
+    func testInheritedFuncs() {
         verify(srcContent: funcsInheritance,
                dstContent: funcsInheritanceMock)
     }
-    func _testDuplicateInheritedFuncs() {
+    func testDuplicateInheritedFuncs() {
         verify(srcContent: duplicateFuncsInheritance,
                dstContent: duplicateFuncsInheritanceMock)
     }
@@ -81,9 +81,23 @@ class SwiftMockGenTests: XCTestCase {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)
         if let mockContent = mockContent {
-            let mockCreated = FileManager.default.createFile(atPath: mockFilePath, contents: mockContent.data(using: .utf8), attributes: nil)
+            let formattedMockContent = """
+            \(String.headerDoc)
+            \(String.poundIfMock)
+            \(mockContent)
+            \(String.poundEndIf)
+            """
+            let mockCreated = FileManager.default.createFile(atPath: mockFilePath, contents: formattedMockContent.data(using: .utf8), attributes: nil)
             XCTAssert(mockCreated)
         }
+        
+        let formattedDstContent = """
+        \(String.headerDoc)
+        \(String.poundIfMock)
+        \(dstContent)
+        \(String.poundEndIf)
+       """
+        
         try? generate(sourceDirs: nil,
                       sourceFiles: [srcFilePath],
                       excludeSuffixes: ["Mocks", "Tests"],
@@ -91,7 +105,7 @@ class SwiftMockGenTests: XCTestCase {
                       to: dstFilePath)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-        let fixtureContents = dstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
+        let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         XCTAssert(fixtureContents == outputContents)
     }
     

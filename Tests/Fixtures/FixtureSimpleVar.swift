@@ -11,8 +11,6 @@ protocol SimpleVar {
 """
 
 let simpleVarMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 import Foundation
     
 class SimpleVarMock: SimpleVar {
@@ -32,5 +30,4 @@ class SimpleVarMock: SimpleVar {
         }
     }
 }
-\(String.poundEndIf)
 """

@@ -19,8 +19,6 @@ func registerMessage<ModelType: RealtimeDecodable>(_ messageType: ResponseMessag
 
 let genericFuncMock = """
 
-\(String.headerDoc)
-\(String.poundIfMock)
 import Foundation
 
 class GenericFuncMock: GenericFunc {
@@ -84,6 +82,5 @@ class GenericFuncMock: GenericFunc {
     }
 }
 
-\(String.poundEndIf)
 """
 

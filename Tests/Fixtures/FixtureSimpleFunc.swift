@@ -10,8 +10,6 @@ protocol SimpleFunc {
 """
 
 let simpleFuncMock = """
-\(String.headerDoc)
-\(String.poundIfMock)
 
 import Foundation
 
@@ -30,5 +28,4 @@ class SimpleFuncMock: SimpleFunc {
         return ""
     }
 }
-\(String.poundEndIf)
 """
