@@ -22,6 +22,7 @@ struct ClosureModel: Model {
     var type: String
     let nameSuffix = "Handler"
     var mediumName: String
+    var mediumLongName: String
     var longName: String
     var fullName: String
     var offset: Int64 = .max
@@ -32,9 +33,10 @@ struct ClosureModel: Model {
     let paramNames: [String]
     let paramTypes: [String]
     
-    init(name: String, mediumName: String, longName: String, fullName: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
+    init(name: String, mediumName: String, mediumLongName: String, longName: String, fullName: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
         self.name = name + nameSuffix
         self.mediumName = mediumName + nameSuffix
+        self.mediumLongName = mediumLongName + nameSuffix
         self.longName = longName + nameSuffix
         self.fullName = fullName + nameSuffix
         self.staticKind = staticKind
@@ -43,21 +45,28 @@ struct ClosureModel: Model {
         self.paramNames = paramNames
         self.paramTypes = paramTypes
         let displayableParamTypes = paramTypes.map { (t: String) -> String in
-            let comps = t.components(separatedBy: CharacterSet(charactersIn: "()-> "))
-            return genericTypeNameList.filter({comps.contains($0)}).isEmpty ? t : AnyString
+            return genericTypeNameList.filter({t.displayableComponents.contains($0)}).isEmpty ? t : .any
         }
         self.genericTypeNames = genericTypeNameList
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
         let funcReturnType = returnType == UnknownVal ? "" : returnType
         var displayableReturnType = funcReturnType
-        let returnComps = funcReturnType.components(separatedBy: CharacterSet(charactersIn: "()-> "))
+        let returnComps = funcReturnType.displayableComponents
         
         var returnAsStr = ""
         if !genericTypeNameList.filter({returnComps.contains($0)}).isEmpty {
-            displayableReturnType = AnyString
+            displayableReturnType = .any
             returnAsStr = funcReturnType
         }
-        self.type = "((" + displayableParamStr + ") -> (" + displayableReturnType + "))?"
+
+        let isSimpleTuple = displayableReturnType.hasPrefix("(") &&
+            displayableReturnType.hasSuffix(")") &&
+            displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter ({!$0.isEmpty}).count <= 1
+        
+        if !isSimpleTuple {
+            displayableReturnType = "(\(displayableReturnType))"
+        }
+        self.type = "((\(displayableParamStr)) -> \(displayableReturnType))?"
         self.defaultReturnType = displayableReturnType
         self.returnAs = returnAsStr
     }

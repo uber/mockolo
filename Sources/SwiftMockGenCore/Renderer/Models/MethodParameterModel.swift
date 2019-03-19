@@ -20,27 +20,32 @@ import SourceKittenFramework
 struct ParamModel: Model {
     var name: String
     var mediumName: String
+    var mediumLongName: String
     var longName: String
     var fullName: String
     var offset: Int64 = .max
     var type: String
-    let label: String?
+    let label: String
     let isGeneric: Bool
-    init(_ ast: Structure, label: String, isGeneric: Bool = false) {
+    init(_ ast: Structure, label: String = "", isGeneric: Bool = false) {
         self.name = ast.name
         self.mediumName = ast.name
+        self.mediumLongName = ast.name
         self.longName = ast.name
         self.fullName = ast.name
         self.isGeneric = isGeneric
         self.type = isGeneric ? (ast.inheritedTypes.first ?? UnknownVal) : ast.typeName
-        self.label = ast.name != label ? label: nil
+        self.label = ast.name != label ? label: ""
     }
     
     func render(with identifier: String) -> String? {
-        var labelStr = ""
-        if let label = label {
-            labelStr = "\(label) "
+        var result = name
+        if !label.isEmpty {
+            result = "\(label) \(name)"
         }
-        return "\(labelStr)\(name): \(type)"
+        if !type.isEmpty, type != UnknownVal {
+            result = "\(result): \(type)"
+        }
+        return result
     }
 }

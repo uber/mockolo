@@ -20,6 +20,7 @@ import SourceKittenFramework
 struct ClassModel: Model {
     var name: String
     var mediumName: String
+    var mediumLongName: String
     var longName: String
     var fullName: String
     var offset: Int64 = .max
@@ -28,20 +29,21 @@ struct ClassModel: Model {
     let accessControlLevelDescription: String
     let identifier: String
     let entities: [String]
-    let initParams: [VarWithOffset]
+    let initParams: [VariableModel]
     
     init(_ ast: Structure,
          content: String,
          identifier: String,
          additionalAttributes: [String],
-         initParams: [VarWithOffset],
+         initParams: [VariableModel],
          entities: [String]) {
         self.identifier = identifier
         self.name = identifier + "Mock"
         self.mediumName = self.name
+        self.mediumLongName = self.name
         self.longName = self.name
         self.fullName = self.name
-        self.type = ClassString
+        self.type = .class
         self.entities = entities
         self.initParams = initParams
         

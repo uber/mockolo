@@ -27,8 +27,7 @@ func applyMethodTemplate(name: String,
                          handlerVarName: String,
                          handlerVarType: String,
                          handlerReturn: String) -> String {
-    // identifier.contains(suffixStr) ? methodShortName : methodShortName + suffixStr
-    let callCount = "\(identifier)\(CallCountSuffix)"
+    let callCount = "\(identifier)\(String.callCountSuffix)"
     let paramDeclsStr = paramDecls.joined(separator: ", ")
     let genericTypeDeclsStr = genericTypeDecls.joined(separator: ", ")
     let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
@@ -49,7 +48,7 @@ func applyMethodTemplate(name: String,
 
 private func renderMethodParamNames(_ elements: [Structure], capitalized: Bool) -> [String] {
     return elements.map { (element: Structure) -> String in
-        return capitalized ? element.name.capitlizeFirstLetter() : element.name
+        return capitalized ? element.name.capitlizeFirstLetter : element.name
     }
 }
 

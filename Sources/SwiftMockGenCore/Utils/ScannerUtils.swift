@@ -65,7 +65,7 @@ extension Structure {
         return UnknownVal
     }
     var isInitializer: Bool {
-        return name.hasPrefix(InitializerPrefix) && isInstanceMethod
+        return name.hasPrefix(.initializerPrefix) && isInstanceMethod
     }
     
     var isInstanceVariable: Bool {
@@ -120,7 +120,15 @@ extension Structure {
     }
     
     var canBeInitParam: Bool {
-        return isVariable && isTypeNonOptional && !typeName.hasPrefix(ObservableVarPrefix) && !typeName.hasPrefix(RxObservableVarPrefix)
+        return isVariable &&
+            isTypeNonOptional &&
+            !typeName.hasPrefix(.observableVarPrefix) &&
+            !typeName.hasPrefix(.rxObservableVarPrefix) &&
+            !name.hasPrefix(.underlyingVarPrefix) &&
+            !name.hasSuffix(.closureVarSuffix) &&
+            !name.hasSuffix(.callCountSuffix) &&
+            !name.hasSuffix(.subjectSuffix) &&
+            typeName != UnknownVal
     }
     
     var inheritedTypes: [String] {
@@ -129,6 +137,48 @@ extension Structure {
             (item as? [String: String])?["key.name"]
         }
     }
+    
+    var attributes: [[String: SourceKitRepresentable]]? {
+        return dictionary["key.attributes"] as? [[String: SourceKitRepresentable]]
+    }
+    
+    var attributeValues: [String]? {
+        return attributes?.compactMap { $0["key.attribute"] as? String}
+    }
+    
+    var range: (offset: Int64, length: Int64) {
+        var offsetMin: Int64 = .max
+        var offsetMax: Int64 = -1
+        // Get the min/max offsets for attributes if any (e.g. @objc, public, static, etc) for this node
+        if let attributes = attributes {
+            let result = attributes.reduce((.max, -1), { (prevResult, curAttribute) -> (Int64, Int64) in
+                var (minOffset, maxOffset) = prevResult
+                if let offset = curAttribute[SwiftDocKey.offset.rawValue] as? Int64 {
+                    if minOffset > offset {
+                        minOffset = offset
+                    }
+                    if let len = curAttribute[SwiftDocKey.length.rawValue] as? Int64, maxOffset < offset + len {
+                        maxOffset = offset + len
+                    }
+                }
+                return (minOffset, maxOffset)
+            })
+            offsetMin = result.0
+            offsetMax = result.1
+        }
+        
+        // Compare with the offset and length of this node
+        if offsetMin > offset {
+            offsetMin = offset
+        }
+        if offsetMax < offset + length {
+            offsetMax = offset + length
+        }
+        let len = offsetMax - offsetMin
+        // Return the start offset and the length
+        return (offsetMin, len)
+    }
+    
     
     var offset: Int64 {
         return dictionary[SwiftDocKey.offset.rawValue] as? Int64 ?? -1
@@ -141,9 +191,9 @@ extension Structure {
         return dictionary[SwiftDocKey.bodyOffset.rawValue] as? Int64 ?? -1
     }
 
-    func extract(offset: Int64, startOffset: Int64 = 0, length: Int64, content: String) -> String {
-        let end = offset + length
-        let start = offset + startOffset
+    func extract(offset: Int64, length: Int64, content: String) -> String {
+        let end = offset + length - 1
+        let start = offset
         
         if start >= 0 && length > 0 {
             if end > content.count {

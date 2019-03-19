@@ -7,6 +7,9 @@ class SwiftMockGenTests: XCTestCase {
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
+    lazy var mockFilePath: String = {
+        return bundle.bundlePath + "/Mocks.swift"
+    }()
     lazy var srcFilePath: String = {
         return bundle.bundlePath + "/Src.swift"
     }()
@@ -23,6 +26,13 @@ class SwiftMockGenTests: XCTestCase {
         try? FileManager.default.removeItem(atPath: srcFilePath)
     }
     
+    func testPerformanceExample() {
+        // This is an example of a performance test case.
+        self.measure {
+            // Put the code you want to measure the time of here.
+        }
+    }
+    
     func testDuplicateFuncNames() {
         verify(srcContent: duplicateFuncNames,
                dstContent: duplicateFuncNamesMock)
@@ -37,28 +47,45 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: nonSimpleVars,
                dstContent: nonSimpleVarsMock)
     }
+    
     func testSimpleFunc() {
         verify(srcContent: simpleFunc,
                dstContent: simpleFuncMock)
     }
     
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
+
+    func testInit() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock)
     }
     
-    func testGenericFunc() {
+    func testGenericFuncs() {
         verify(srcContent: genericFunc,
                dstContent: genericFuncMock)
     }
-    
-    private func verify(srcContent: String, dstContent: String) {
-        let created = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
-        XCTAssert(created)
 
-        try? generate(sourceDir: nil,
+    func testSimpleDupes() {
+        verify(srcContent: simpleDuplicates,
+               dstContent: simpleDuplicatesMock)
+    }
+    func testInheritedFuncs() {
+        verify(srcContent: funcsInheritance,
+               dstContent: funcsInheritanceMock)
+    }
+    func testDuplicateInheritedFuncs() {
+        verify(srcContent: duplicateFuncsInheritance,
+               dstContent: duplicateFuncsInheritanceMock)
+    }
+
+    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
+        let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
+        XCTAssert(srcCreated)
+        if let mockContent = mockContent {
+            let mockCreated = FileManager.default.createFile(atPath: mockFilePath, contents: mockContent.data(using: .utf8), attributes: nil)
+            XCTAssert(mockCreated)
+        }
+        try? generate(sourceDirs: nil,
                       sourceFiles: [srcFilePath],
                       excludeSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: nil,

@@ -104,31 +104,14 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     return result
 }
 
-
-private func nonOptionalOrRxVars(`in` models: [Model]) -> [VarWithOffset] {
-
-    var result = models.compactMap { (model: Model) -> [VarWithOffset]? in
-        if let processed = model as? ProcessedModel {
-            return processed.nonOptionalOrRxVarList
-        }
-        return nil
-        }.flatMap {$0}
-    
-    // Named params in init should be unique. Get the list of the
-    // init params from the processed model to compare with the
-    // VariableModels below, so no duplicate init params are added.
-    let processedModelParamKeys = result.map {$0.name}
-    
-    let varlist = models.compactMap { (model: Model) -> VarWithOffset? in
-        if let varModel = model as? VariableModel,
-            varModel.canBeInitParam,
-            !processedModelParamKeys.contains(varModel.name) {
-            return (varModel.offset, varModel.name, varModel.type)
-        }
-        return nil
-        }.sorted {$0.offset < $1.offset}
-    
-    result.append(contentsOf: varlist)
+private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {
+    let paramsForInit = models.compactMap {$0 as? VariableModel}.filter { $0.canBeInitParam }
+    let parentVars = paramsForInit.filter {$0.processed}.sorted { $0.offset < $1.offset }
+    let parentVarNames = parentVars.map {$0.name}
+    // Named params in init should be unique. Add a duplicate param check to ensure it.
+    let curVars = paramsForInit.filter { !$0.processed && !parentVarNames.contains($0.name) }
+                                .sorted {$0.offset < $1.offset}
+    let result = [parentVars, curVars].flatMap{$0}
     return result
 }
 

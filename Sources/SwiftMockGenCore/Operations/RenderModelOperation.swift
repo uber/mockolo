@@ -17,15 +17,15 @@
 import Foundation
 import SourceKittenFramework
 
-func generateModelsForAnnotatedTypes(sourceDir: String?,
+func generateModelsForAnnotatedTypes(sourceDirs: [String]?,
                                      sourceFiles: [String]?,
                                      exclude: [String]? = nil,
                                      semaphore: DispatchSemaphore?,
                                      timeout: Int,
                                      queue: DispatchQueue?,
                                      process: @escaping (Structure, File, [Model], [String]) -> ()) -> Int {
-    if let sourceDir = sourceDir {
-        return generateModels(dirs: [sourceDir], exclude: exclude, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
+    if let sourceDirs = sourceDirs {
+        return generateModels(dirs: sourceDirs, exclude: exclude, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
         return generateModels(files: sourceFiles, exclude: exclude, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     }
@@ -124,7 +124,7 @@ private func generateModelsToRender(_ path: String,
         
         for substructure in topstructure.substructures {
             if substructure.isProtocol,
-                substructure.isAnnotated(with: MockAnnotation, in: file.contents) {
+                substructure.isAnnotated(with: .mockAnnotation, in: file.contents) {
                 
                 let childEntities = substructure.substructures.compactMap { (child: Structure) -> Model? in
                     return model(for: child, content: file.contents)

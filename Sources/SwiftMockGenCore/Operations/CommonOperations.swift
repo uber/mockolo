@@ -35,7 +35,7 @@ func lookupEntities(name: String,
         
         // If the protocol inherits other protocols, look up their entities as well.
         for parent in curStructure.inheritedTypes {
-            if parent != ClassString, parent != AnyString, parent != AnyObjectString {
+            if parent != .class, parent != .any, parent != .anyObject {
                 let (parentModels, parentAttributes, parentResults) = lookupEntities(name: parent, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
                 models.append(contentsOf: parentModels)
                 attributes.append(contentsOf: parentAttributes)
@@ -54,9 +54,8 @@ func lookupEntities(name: String,
 
         // Remove an initializer from the parent mock class as the leaf mock class will have its own
         if let initStructure = parentStructure.substructures.filter({$0.isInitializer}).first {
-            let offset = Int(initStructure.offset - parentStructure.bodyOffset)
-            let len = Int(initStructure.length)
-            if let range = Range(NSRange(location: offset, length: len), in: body) {
+            let result = initStructure.range
+            if let range = Range(NSRange(location: Int(result.offset - parentStructure.bodyOffset - 1), length: Int(result.length)), in: body) {
                 body.removeSubrange(range)
             }
         }
