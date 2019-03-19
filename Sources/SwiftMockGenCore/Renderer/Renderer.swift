@@ -18,14 +18,10 @@ import Foundation
 import SourceKittenFramework
 
 func model(for element: Structure, content: String, processed: Bool = false) -> Model? {
-    if processed {
-        return ProcessedModel(element, content: content)
-    }
-
     if element.isVariable {
-        return VariableModel(element, content: content)
+        return VariableModel(element, content: content, processed: processed)
     } else if element.isMethod {
-        return MethodModel(element, content: content)
+        return MethodModel(element, content: content, processed: processed)
     }
     
     return nil

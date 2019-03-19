@@ -10,6 +10,9 @@ class SwiftMockGenTests: XCTestCase {
     lazy var srcFilePath: String = {
         return bundle.bundlePath + "/Src.swift"
     }()
+    lazy var mockFilePath: String = {
+        return bundle.bundlePath + "/Mocks.swift"
+    }()
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -42,6 +45,12 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: simpleFuncMock)
     }
     
+    func testInit() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock)
+    }
+    
     func testPerformanceExample() {
         // This is an example of a performance test case.
         self.measure {
@@ -49,14 +58,17 @@ class SwiftMockGenTests: XCTestCase {
         }
     }
     
-    private func verify(srcContent: String, dstContent: String) {
-        let created = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
-        XCTAssert(created)
-
+    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
+        let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
+        XCTAssert(srcCreated)
+        if let mockContent = mockContent {
+            let mockCreated = FileManager.default.createFile(atPath: mockFilePath, contents: mockContent.data(using: .utf8), attributes: nil)
+            XCTAssert(mockCreated)
+        }
         try? generate(sourceDir: nil,
                       sourceFiles: [srcFilePath],
                       excludeSuffixes: ["Mocks", "Tests"],
-                      mockFilePaths: nil,
+                      mockFilePaths: [mockFilePath],
                       to: dstFilePath)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}

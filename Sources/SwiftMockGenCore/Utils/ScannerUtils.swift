@@ -123,6 +123,40 @@ extension Structure {
         }
     }
     
+    var range: (offset: Int64, length: Int64) {
+        var offsetMin: Int64 = .max
+        var offsetMax: Int64 = -1
+        // Get the min/max offsets for attributes if any (e.g. @objc, public, static, etc) for this node
+        if let attributes = dictionary["key.attributes"] as? [[String: SourceKitRepresentable]] {
+            let result = attributes.reduce((.max, -1), { (prevResult, curAttribute) -> (Int64, Int64) in
+                var (minOffset, maxOffset) = prevResult
+                if let offset = curAttribute[SwiftDocKey.offset.rawValue] as? Int64 {
+                    if minOffset > offset {
+                        minOffset = offset
+                    }
+                    if let len = curAttribute[SwiftDocKey.length.rawValue] as? Int64, maxOffset < offset + len {
+                        maxOffset = offset + len
+                    }
+                }
+                return (minOffset, maxOffset)
+            })
+            offsetMin = result.0
+            offsetMax = result.1
+        }
+        
+        // Compare with the offset and length of this node
+        if offsetMin > offset {
+            offsetMin = offset
+        }
+        if offsetMax < offset + length {
+            offsetMax = offset + length
+        }
+        let len = offsetMax - offsetMin + 1
+        // Return the start offset and the length
+        return (offsetMin, len)
+    }
+    
+    
     var offset: Int64 {
         return dictionary[SwiftDocKey.offset.rawValue] as? Int64 ?? -1
     }

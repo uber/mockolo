@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-struct ProcessedModel: Model {
+struct UnProcessedModel: Model {
     var name: String
     var mediumName: String
     var longName: String

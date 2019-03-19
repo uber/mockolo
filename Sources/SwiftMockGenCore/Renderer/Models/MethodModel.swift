@@ -31,12 +31,14 @@ struct MethodModel: Model {
     let staticKind: String
     let params: [ParamModel]
     let handler: ClosureModel
+    let processed: Bool
     
-    init(_ ast: Structure, content: String) {
+    init(_ ast: Structure, content: String, processed: Bool) {
         var nameComps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
         self.name = nameComps.removeFirst()
         self.type = ast.typeName == UnknownVal ? "" : ast.typeName  
         self.staticKind = ast.isStaticMethod ? StaticKindString : ""
+        self.processed = processed
         self.offset = ast.offset
         let paramDecls = ast.substructures.filter{$0.isVarParameter}
         assert(paramDecls.count == nameComps.count)
@@ -72,6 +74,8 @@ struct MethodModel: Model {
     }
     
     func render(with identifier: String) -> String? {
+        
+        guard !processed else { return nil }
         let paramDecls = params.compactMap{$0.render(with: "")}
         let returnType = type != UnknownVal ? type : ""
         let handlerName = (identifier == name ? handler.name :
