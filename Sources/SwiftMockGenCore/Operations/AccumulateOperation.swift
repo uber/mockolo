@@ -94,7 +94,7 @@ private func filterDuplicates(group: [String: [Model]], level: Int, buffer: [Str
                 result.merge(filterDuplicates(group: Dictionary(grouping: models[1...]) { $0.nameByLevel(level+1) }, level: level+1, buffer: result)){$1}
             } else {
                 // There are no duplicate entities at this point so map them by their (verbose) name
-                models.forEach { result.merge([$0.nameByLevel(level+1) : $0]){$1} }
+                models.forEach { result.merge([$0.nameByLevel(level) : $0]){$1} }
             }
         }
     }

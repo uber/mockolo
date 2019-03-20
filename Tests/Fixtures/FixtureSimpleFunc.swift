@@ -13,16 +13,17 @@ let simpleFuncMock = """
 import Foundation
 
 class SimpleFuncMock: SimpleFunc {
+    
     init() {
         
     }
     
-    var updateArgCallCount = 0
-    var updateArgHandler: ((Int) -> (String))?
+    var updateCallCount = 0
+    var updateHandler: ((Int) -> (String))?
     func update(arg: Int) -> String {
-        updateArgCallCount += 1
-        if let updateArgHandler = updateArgHandler {
-            return updateArgHandler(arg)
+        updateCallCount += 1
+        if let updateHandler = updateHandler {
+            return updateHandler(arg)
         }
         return ""
     }

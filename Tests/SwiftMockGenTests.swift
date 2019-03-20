@@ -32,12 +32,6 @@ class SwiftMockGenTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
-    func testDuplicateFuncNames() {
-        verify(srcContent: duplicateFuncNames,
-               dstContent: duplicateFuncNamesMock)
-    }
-    
     func testSimpleVar() {
         verify(srcContent: simpleVar,
                dstContent: simpleVarMock)
@@ -59,15 +53,21 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: simpleInitResultMock)
     }
     
+    func testSimpleDuplicates() {
+        verify(srcContent: simpleDuplicates,
+               dstContent: simpleDuplicatesMock)
+    }
+
+    func testDuplicateFuncNames() {
+        verify(srcContent: duplicateFuncNames,
+               dstContent: duplicateFuncNamesMock)
+    }
+
     func testGenericFuncs() {
         verify(srcContent: genericFunc,
                dstContent: genericFuncMock)
     }
     
-    func testSimpleDupes() {
-        verify(srcContent: simpleDuplicates,
-               dstContent: simpleDuplicatesMock)
-    }
     func _testInheritedFuncs() {
         verify(srcContent: funcsInheritance,
                dstContent: funcsInheritanceMock)

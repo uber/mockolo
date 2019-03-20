@@ -17,6 +17,7 @@ detachTransition: Float?)
 
 let simpleDuplicatesMock = """
 public class SimpleDuplicateMock: SimpleDuplicate {
+    
     public init() {
         
     }
@@ -30,12 +31,12 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var pushStateFlagCallCount = 0
-    var pushStateFlagHandler: ((Double, Float, Int, Float?) -> ())?
+    var pushStateCallCount = 0
+    var pushStateHandler: ((Double, Float, Int, Float?) -> ())?
     public func push(state: Double, flag: Float, attachTransition: Int, detachTransition: Float?)  {
-        pushStateFlagCallCount += 1
-        if let pushStateFlagHandler = pushStateFlagHandler {
-            return pushStateFlagHandler(state, flag, attachTransition, detachTransition)
+        pushStateCallCount += 1
+        if let pushStateHandler = pushStateHandler {
+            return pushStateHandler(state, flag, attachTransition, detachTransition)
         }
         
     }
@@ -107,6 +108,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let displayYHandler = displayYHandler {
             return displayYHandler(y)
         }
+        
     }
     var updateCallCount = 0
     var updateHandler: (() -> ())?
@@ -117,30 +119,21 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         
     }
-    var updateInt3CallCount = 0
-    var updateInt3Handler: (() -> (Int))?
+    var updateIntCallCount = 0
+    var updateIntHandler: (() -> (Int))?
     func update() -> Int {
-        updateInt3CallCount += 1
-        if let updateInt3Handler = updateInt3Handler {
-            return updateInt3Handler()
+        updateIntCallCount += 1
+        if let updateIntHandler = updateIntHandler {
+            return updateIntHandler()
         }
         return 0
     }
     var updateArgCallCount = 0
-    var updateArgHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    var updateArgHandler: ((Float) -> ())?
+    func update(arg: Float)  {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
             return updateArgHandler(arg)
-        }
-        
-    }
-    var updateArg4CallCount = 0
-    var updateArg4Handler: ((Float) -> ())?
-    func update(arg: Float)  {
-        updateArg4CallCount += 1
-        if let updateArg4Handler = updateArg4Handler {
-            return updateArg4Handler(arg)
         }
         
     }
@@ -153,41 +146,41 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         
     }
-    var updateArgSomeInt5CallCount = 0
-    var updateArgSomeInt5Handler: ((Int, Float) -> (Int))?
+    var updateArgSomeIntCallCount = 0
+    var updateArgSomeIntHandler: ((Int, Float) -> (Int))?
     func update(arg: Int, some: Float) -> Int {
-        updateArgSomeInt5CallCount += 1
-        if let updateArgSomeInt5Handler = updateArgSomeInt5Handler {
-            return updateArgSomeInt5Handler(arg, some)
+        updateArgSomeIntCallCount += 1
+        if let updateArgSomeIntHandler = updateArgSomeIntHandler {
+            return updateArgSomeIntHandler(arg, some)
         }
         return 0
     }
-    var updateArgSomeObservableInt5CallCount = 0
-    var updateArgSomeObservableInt5Handler: ((Int, Float) -> (Observable<Int>))?
+    var updateArgSomeObservableIntCallCount = 0
+    var updateArgSomeObservableIntHandler: ((Int, Float) -> (Observable<Int>))?
     func update(arg: Int, some: Float) -> Observable<Int> {
-        updateArgSomeObservableInt5CallCount += 1
-        if let updateArgSomeObservableInt5Handler = updateArgSomeObservableInt5Handler {
-            return updateArgSomeObservableInt5Handler(arg, some)
+        updateArgSomeObservableIntCallCount += 1
+        if let updateArgSomeObservableIntHandler = updateArgSomeObservableIntHandler {
+            return updateArgSomeObservableIntHandler(arg, some)
         }
         return Observable.empty()
     }
-    var updateArgSomeStringObservableDouble5CallCount = 0
-    var updateArgSomeStringObservableDouble5Handler: ((Int, Float) -> ((String) -> Observable<Double>))?
+    var updateArgSomeStringObservableDoubleCallCount = 0
+    var updateArgSomeStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
     func update(arg: Int, some: Float) -> (String) -> Observable<Double> {
-        updateArgSomeStringObservableDouble5CallCount += 1
-        if let updateArgSomeStringObservableDouble5Handler = updateArgSomeStringObservableDouble5Handler {
-            return updateArgSomeStringObservableDouble5Handler(arg, some)
+        updateArgSomeStringObservableDoubleCallCount += 1
+        if let updateArgSomeStringObservableDoubleHandler = updateArgSomeStringObservableDoubleHandler {
+            return updateArgSomeStringObservableDoubleHandler(arg, some)
         }
-        fatalError("updateArgSomeStringObservableDouble5Handler returns can't have a default value thus its handler must be set")
+        fatalError("updateArgSomeStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
     }
-    var updateArgSomeArrayStringFloat5CallCount = 0
-    var updateArgSomeArrayStringFloat5Handler: ((Int, Float) -> (Array<String, Float>))?
+    var updateArgSomeArrayStringFloatCallCount = 0
+    var updateArgSomeArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
     func update(arg: Int, some: Float) -> Array<String, Float> {
-        updateArgSomeArrayStringFloat5CallCount += 1
-        if let updateArgSomeArrayStringFloat5Handler = updateArgSomeArrayStringFloat5Handler {
-            return updateArgSomeArrayStringFloat5Handler(arg, some)
+        updateArgSomeArrayStringFloatCallCount += 1
+        if let updateArgSomeArrayStringFloatHandler = updateArgSomeArrayStringFloatHandler {
+            return updateArgSomeArrayStringFloatHandler(arg, some)
         }
-        fatalError("updateArgSomeArrayStringFloat5Handler returns can't have a default value thus its handler must be set")
+        fatalError("updateArgSomeArrayStringFloatHandler returns can't have a default value thus its handler must be set")
     }
     var collectionViewCallCount = 0
     var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
@@ -216,12 +209,12 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         fatalError("collectionViewSizeForItemAtHandler returns can't have a default value thus its handler must be set")
     }
-    var collectionViewDidEndDisplayingForItemAtCallCount = 0
-    var collectionViewDidEndDisplayingForItemAtHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    var collectionViewDidEndDisplayingCallCount = 0
+    var collectionViewDidEndDisplayingHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)  {
-        collectionViewDidEndDisplayingForItemAtCallCount += 1
-        if let collectionViewDidEndDisplayingForItemAtHandler = collectionViewDidEndDisplayingForItemAtHandler {
-            return collectionViewDidEndDisplayingForItemAtHandler(collectionView, cell, index)
+        collectionViewDidEndDisplayingCallCount += 1
+        if let collectionViewDidEndDisplayingHandler = collectionViewDidEndDisplayingHandler {
+            return collectionViewDidEndDisplayingHandler(collectionView, cell, index)
         }
         
     }
@@ -252,12 +245,12 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         return Observable.empty()
     }
-    var loadImageAtURLInitialRetryDelayMaxAttemptsCallCount = 0
-    var loadImageAtURLInitialRetryDelayMaxAttemptsHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
+    var loadImageAtURLInitialRetryDelayCallCount = 0
+    var loadImageAtURLInitialRetryDelayHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: Int) -> Observable<UIImage> {
-        loadImageAtURLInitialRetryDelayMaxAttemptsCallCount += 1
-        if let loadImageAtURLInitialRetryDelayMaxAttemptsHandler = loadImageAtURLInitialRetryDelayMaxAttemptsHandler {
-            return loadImageAtURLInitialRetryDelayMaxAttemptsHandler(url, initialRetryDelay, maxAttempts)
+        loadImageAtURLInitialRetryDelayCallCount += 1
+        if let loadImageAtURLInitialRetryDelayHandler = loadImageAtURLInitialRetryDelayHandler {
+            return loadImageAtURLInitialRetryDelayHandler(url, initialRetryDelay, maxAttempts)
         }
         return Observable.empty()
     }

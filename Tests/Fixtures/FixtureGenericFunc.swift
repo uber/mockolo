@@ -21,45 +21,46 @@ let genericFuncMock = """
 import Foundation
 
 class GenericFuncMock: GenericFunc {
+    
     init() {
         
     }
     
-    var containsGenericArg1CallCount = 0
-    var containsGenericArg1Handler: ((Any, Any) -> (Any))?
+    var containsGenericCallCount = 0
+    var containsGenericHandler: ((Any, Any) -> (Any))?
     func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U)) {
-        containsGenericArg1CallCount += 1
-        if let containsGenericArg1Handler = containsGenericArg1Handler {
-            return containsGenericArg1Handler(arg1, arg2) as! ((T) -> (U))
+        containsGenericCallCount += 1
+        if let containsGenericHandler = containsGenericHandler {
+            return containsGenericHandler(arg1, arg2) as! ((T) -> (U))
         }
-        fatalError("containsGenericArg1Handler returns can't have a default value thus its handler must be set")
+        fatalError("containsGenericHandler returns can't have a default value thus its handler must be set")
     }
-    var confineToViewEventsValueCallCount = 0
-    var confineToViewEventsValueHandler: (([ViewControllerLifecycleEvent], Any, Bool, Any) -> ())?
+    var confineToViewEventsCallCount = 0
+    var confineToViewEventsHandler: (([ViewControllerLifecycleEvent], Any, Bool, Any) -> ())?
     func confineToViewEvents<T>(viewEvents: [ViewControllerLifecycleEvent], value: T, once: Bool, closure: @escaping (T) -> ())  {
-        confineToViewEventsValueCallCount += 1
-        if let confineToViewEventsValueHandler = confineToViewEventsValueHandler {
-            return confineToViewEventsValueHandler(viewEvents, value, once, closure)
+        confineToViewEventsCallCount += 1
+        if let confineToViewEventsHandler = confineToViewEventsHandler {
+            return confineToViewEventsHandler(viewEvents, value, once, closure)
         }
         
     }
-    var enqueueRequestCallCount = 0
-    var enqueueRequestHandler: ((HTTPRequest, StatusErrorCodeConvertible.Type?) -> (Any))?
+    var enqueueCallCount = 0
+    var enqueueHandler: ((HTTPRequest, StatusErrorCodeConvertible.Type?) -> (Any))?
     func enqueue<T: ResponseBody>(_ request: HTTPRequest, statusErrorCodeType: StatusErrorCodeConvertible.Type?) -> Observable<T> {
-        enqueueRequestCallCount += 1
-        if let enqueueRequestHandler = enqueueRequestHandler {
-            return enqueueRequestHandler(request, statusErrorCodeType) as! Observable<T>
+        enqueueCallCount += 1
+        if let enqueueHandler = enqueueHandler {
+            return enqueueHandler(request, statusErrorCodeType) as! Observable<T>
         }
-        fatalError("enqueueRequestHandler returns can't have a default value thus its handler must be set")
+        fatalError("enqueueHandler returns can't have a default value thus its handler must be set")
     }
-    var dequeueRequestCallCount = 0
-    var dequeueRequestHandler: ((HTTPRequest, StatusErrorCodeConvertible.Type?) -> (Any))?
+    var dequeueCallCount = 0
+    var dequeueHandler: ((HTTPRequest, StatusErrorCodeConvertible.Type?) -> (Any))?
     func dequeue<T: ResponseBody>(_ request: HTTPRequest, statusErrorCodeType: StatusErrorCodeConvertible.Type?) -> Observable<T> {
-        dequeueRequestCallCount += 1
-        if let dequeueRequestHandler = dequeueRequestHandler {
-            return dequeueRequestHandler(request, statusErrorCodeType) as! Observable<T>
+        dequeueCallCount += 1
+        if let dequeueHandler = dequeueHandler {
+            return dequeueHandler(request, statusErrorCodeType) as! Observable<T>
         }
-        fatalError("dequeueRequestHandler returns can't have a default value thus its handler must be set")
+        fatalError("dequeueHandler returns can't have a default value thus its handler must be set")
     }
     var registerMessageCallCount = 0
     var registerMessageHandler: ((ResponseMessageType, Any) -> (Disposable))?
@@ -70,14 +71,14 @@ class GenericFuncMock: GenericFunc {
         }
         fatalError("registerMessageHandler returns can't have a default value thus its handler must be set")
     }
-    var registerMessageMessageTypeWithHandlerCallCount = 0
-    var registerMessageMessageTypeWithHandlerHandler: ((ResponseMessageType, Any) -> (Disposable))?
+    var registerMessageMessageTypeCallCount = 0
+    var registerMessageMessageTypeHandler: ((ResponseMessageType, Any) -> (Disposable))?
     func registerMessage<ModelType: RealtimeDecodable>(_ messageType: ResponseMessageType, withHandler handler: @escaping (ModelType) -> ()) -> Disposable {
-        registerMessageMessageTypeWithHandlerCallCount += 1
-        if let registerMessageMessageTypeWithHandlerHandler = registerMessageMessageTypeWithHandlerHandler {
-            return registerMessageMessageTypeWithHandlerHandler(messageType, handler)
+        registerMessageMessageTypeCallCount += 1
+        if let registerMessageMessageTypeHandler = registerMessageMessageTypeHandler {
+            return registerMessageMessageTypeHandler(messageType, handler)
         }
-        fatalError("registerMessageMessageTypeWithHandlerHandler returns can't have a default value thus its handler must be set")
+        fatalError("registerMessageMessageTypeHandler returns can't have a default value thus its handler must be set")
     }
 }
 """
