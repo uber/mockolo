@@ -84,10 +84,6 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
 // Uniquefy multiple entires with the same name, e.g. func signature, given the verbosity level
 private func filterDuplicates(group: [String: [Model]], level: Int, result: inout [String: Model]) {
     group.forEach { (key: String, models: [Model]) in
-        if key.isEmpty {
-            return
-        }
-        
         if result[key] == nil {
             if models.count > 1 {
                 result[key] = models.first
