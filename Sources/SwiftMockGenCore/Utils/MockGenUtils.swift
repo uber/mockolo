@@ -32,10 +32,32 @@ extension File {
     }
 }
 
+
+extension Sequence {
+    func map<T>(path: KeyPath<Element, T>) -> [T] {
+        return map { (element) -> T in
+            element[keyPath: path]
+        }
+    }
+    
+    func filter(path: KeyPath<Element, Bool>) -> [Element] {
+        return filter { (element) -> Bool in
+            element[keyPath: path]
+        }
+    }
+    
+    func sorted<T>(path: KeyPath<Element, T>) -> [Element] where T: Comparable {
+        return sorted { (lhs, rhs) -> Bool in
+            lhs[keyPath: path] < rhs[keyPath: path]
+        }
+    }
+}
+
+
 extension String {
     static let `static` = "static"
     static let `import` = "import "
-    static let `class` = "class"
+    static public let `class` = "class"
     static let override = "override"
     static let mockType = "protocol"
     static let any = "Any"

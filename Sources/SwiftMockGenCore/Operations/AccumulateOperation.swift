@@ -129,13 +129,13 @@ private func uniquifyDuplicates(group: [String: [Model]], level: Int, lookup: [S
 }
 
 private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {
-    let paramsForInit = models.compactMap {$0 as? VariableModel}.filter { $0.canBeInitParam }
-    let parentVars = paramsForInit.filter {$0.processed}.sorted { $0.offset < $1.offset }
-    let parentVarNames = parentVars.map {$0.name}
+    let paramsForInit = models.compactMap {$0 as? VariableModel}.filter(path: \.canBeInitParam)
+    let parentVars = paramsForInit.filter(path: \.processed).sorted(path: \.offset)
+    let parentVarNames = parentVars.map (path: \.name)
     // Named params in init should be unique. Add a duplicate param check to ensure it.
-    let curVars = paramsForInit.filter { !$0.processed && !parentVarNames.contains($0.name) }
-        .sorted {$0.offset < $1.offset}
+    let curVars = paramsForInit.filter { (item: VariableModel) in
+            return !item.processed && !parentVarNames.contains(item.name)
+        }.sorted(path: \.offset)
     let result = [parentVars, curVars].flatMap{$0}
     return result
 }
-

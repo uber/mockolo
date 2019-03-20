@@ -32,12 +32,16 @@ struct ClosureModel: Model {
         self.name = name + .handlerSuffix
         self.staticKind = staticKind
 
-        let genericTypeNameList = genericTypeParams.map {$0.name}
+        let genericTypeNameList = genericTypeParams.map(path: \.name)
         self.paramNames = paramNames
         self.paramTypes = paramTypes
-        let displayableParamTypes = paramTypes.map { (t: String) -> String in
-            return genericTypeNameList.filter({t.displayableComponents.contains($0)}).isEmpty ? t : .any
+        let displayableParamTypes = paramTypes.map { (subtype: String) -> String in
+            let hasGenericType = genericTypeNameList.filter{ (item: String) -> Bool in
+                subtype.displayableComponents.contains(item)
+            }
+            return hasGenericType.isEmpty ? subtype : .any
         }
+        
         self.genericTypeNames = genericTypeNameList
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
         let funcReturnType = returnType == UnknownVal ? "" : returnType
@@ -52,7 +56,7 @@ struct ClosureModel: Model {
 
         let isSimpleTuple = displayableReturnType.hasPrefix("(") &&
             displayableReturnType.hasSuffix(")") &&
-            displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter ({!$0.isEmpty}).count <= 1
+            displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
         
         if !isSimpleTuple {
             displayableReturnType = "(\(displayableReturnType))"
