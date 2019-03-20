@@ -100,14 +100,13 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         
     }
-    var display3CallCount = 0
-    var display3Handler: ((Int) -> ())?
+    var displayYCallCount = 0
+    var displayYHandler: ((Int) -> ())?
     func display(y: Int)  {
-        display3CallCount += 1
-        if let display3Handler = display3Handler {
-            return display3Handler(y)
+        displayYCallCount += 1
+        if let displayYHandler = displayYHandler {
+            return displayYHandler(y)
         }
-        
     }
     var updateCallCount = 0
     var updateHandler: (() -> ())?

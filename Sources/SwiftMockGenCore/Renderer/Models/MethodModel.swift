@@ -54,7 +54,7 @@ struct MethodModel: Model {
         
         var args = zip(paramLabels, paramNames)
             .map { $0.isEmpty ? $1 : $0 }
-            .filter {!nameString.lowercased().hasSuffix($0.lowercased())}
+            .filter {$0.count < 2 || !nameString.lowercased().hasSuffix($0.lowercased())}
             .map {$0.capitlizeFirstLetter}
         args.append(genericNameTypes)
         if self.type.displayableForType.count <= 32 {
