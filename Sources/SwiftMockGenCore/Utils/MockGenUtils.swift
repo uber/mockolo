@@ -123,10 +123,46 @@ extension Structure {
     }
 }
 
+private let defaultValuesDict =
+["Int": "0",
+"Int64": "0",
+"Int32": "0",
+"Int16": "0",
+"Int8": "0",
+"UInt": "0",
+"UInt64": "0",
+"UInt32": "0",
+"UInt16": "0",
+"UInt8": "0",
+"Float": "0.0",
+"CGFloat": "0.0",
+"Double": "0.0",
+"Bool": "false",
+"String": "\"\"",
+"Character": "\"\"",
+"TimeInterval": "0.0",
+"NSTimeInterval": "0.0",
+"Date": "Date()",
+"NSDate": "NSDate()",
+"CGRect": ".zero",
+"CGSize": ".zero",
+"CGPoint": ".zero",
+"UIEdgeInsets": ".zero",
+"UIColor": ".white",
+"UIFont": ".systemFont(ofSize: 12)",
+"UIView": "UIView(frame: .zero)",
+"UIViewController": "UIViewController()",
+"UICollectionView": "UICollectionView()",
+"UICollectionViewLayout": "UICollectionViewLayout()",
+"UIScrollView": "UIScrollView()",
+"UIScrollViewKeyboardDismissMode": ".interactive",
+"UIAccessibilityTraits": ".none",
+"Void": "Void",
+"UUID": "UUID()"];
+
 
 func defaultVal(typeName: String) -> String? {
     // TODO: add more robust handling
-    
     if typeName.hasSuffix("?") {
         return "nil"
     }
@@ -136,27 +172,15 @@ func defaultVal(typeName: String) -> String? {
     }
     
     if (typeName.hasPrefix("[") && typeName.hasSuffix("]")) ||
+        typeName.hasPrefix("Set") ||
         typeName.hasPrefix("Array") ||
         typeName.hasPrefix("Dictionary") {
         return "\(typeName)()"
     }
-    if typeName == "Bool" {
-        return "false"
-    }
-    if typeName == "String" ||
-        typeName == "Character" {
-        return "\"\""
+    
+    if let val = defaultValuesDict[typeName] {
+        return val
     }
     
-    if typeName == "Int" ||
-        typeName == "Int8" ||
-        typeName == "Int16" ||
-        typeName == "Int32" ||
-        typeName == "Int64" ||
-        typeName == "Double" ||
-        typeName == "CGFloat" ||
-        typeName == "Float" {
-        return "0"
-    }
     return nil
 }
