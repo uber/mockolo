@@ -76,29 +76,56 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
 }
 
 private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
-    return filterDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, buffer: nil)
+    return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, lookup: nil)
 }
 
-// Unique-fy multiple entities with the same name, e.g. func signature, using the verbosity level
-private func filterDuplicates(group: [String: [Model]], level: Int, buffer: [String: Model]?) -> [String: Model] {
-    var result = [String: Model]()
+
+// Uniquify multiple entities with the same name, e.g. func signature, using the verbosity level
+// @param group The dictionary containing entity name and corresponding models
+// @param level The verbosiy level used for uniquing entity names
+// @param lookup Used to look up whether an entity name has already been used
+// @returns a dictionary with unique entity names and corresponding models
+private func uniquifyDuplicates(group: [String: [Model]], level: Int, lookup: [String: Model]?) -> [String: Model] {
+    
+    var buffer = [String: Model]()
     group.forEach { (key: String, models: [Model]) in
-        if let buffer = buffer, buffer[key] != nil {
+        if let lookup = lookup, lookup[key] != nil {
             // An entity with the given key already exists, so look up a more verbose name for these entities
-            result.merge(filterDuplicates(group: Dictionary(grouping: models) { $0.name(by: level+1) }, level: level+1, buffer: result)){$1}
+            let subgroup = Dictionary(grouping: models, by: { (modelElement: Model) -> String in
+                modelElement.name(by: level + 1)
+            })
+            let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: buffer)
+            buffer.merge(subresult, uniquingKeysWith: { (bufferElement: Model, subresultElement: Model) -> Model in
+                return subresultElement
+            })
         } else {
             if models.count > 1, let first = models.first {
                 // There are multiple entities with the same name key; map one of them with the given key
                 // and look up a more verbose name for the rest
-                result.merge([key: first]){$1}
-                result.merge(filterDuplicates(group: Dictionary(grouping: models[1...]) { $0.name(by: level+1) }, level: level+1, buffer: result)){$1}
+                let firstElement = [key: first]
+                buffer.merge(firstElement, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
+                    return addedElement
+                })
+
+                let subgroup = Dictionary(grouping: models[1...], by: { (modelElement: Model) -> String in
+                    modelElement.name(by: level + 1)
+                })
+                let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: buffer)
+                buffer.merge(subresult, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
+                    return addedElement
+                })
             } else {
                 // There are no duplicate entities at this point so map them by their (verbose) name
-                models.forEach { result.merge([$0.name(by: level) : $0]){$1} }
+                models.forEach{ (submodel: Model) in
+                    let element = [submodel.name(by: level) : submodel]
+                    buffer.merge(element, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
+                        return addedElement
+                    })
+                }
             }
         }
     }
-    return result
+    return buffer
 }
 
 private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {
