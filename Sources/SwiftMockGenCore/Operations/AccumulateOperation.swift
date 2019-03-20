@@ -77,12 +77,12 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
 
 private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     var result = [String: Model]()
-    uniquefy(group: Dictionary(grouping: models) { $0.nameByLevel(0) }, level: 0, result: &result)
+    filterDuplicates(group: Dictionary(grouping: models) { $0.nameByLevel(0) }, level: 0, result: &result)
     return result
 }
 
 // Uniquefy multiple entires with the same name, e.g. func signature, given the verbosity level
-private func uniquefy(group: [String: [Model]], level: Int, result: inout [String: Model]) {
+private func filterDuplicates(group: [String: [Model]], level: Int, result: inout [String: Model]) {
     group.forEach { (key: String, models: [Model]) in
         if key.isEmpty {
             return
@@ -91,12 +91,12 @@ private func uniquefy(group: [String: [Model]], level: Int, result: inout [Strin
         if result[key] == nil {
             if models.count > 1 {
                 result[key] = models.first
-                uniquefy(group: Dictionary(grouping: models[1...]) { $0.nameByLevel(level+1) }, level: level+1, result: &result)
+                filterDuplicates(group: Dictionary(grouping: models[1...]) { $0.nameByLevel(level+1) }, level: level+1, result: &result)
             } else {
                 models.forEach { result[$0.nameByLevel(level+1)] = $0 }
             }
         } else {
-            uniquefy(group: Dictionary(grouping: models) { $0.nameByLevel(level+1) }, level: level+1, result: &result)
+            filterDuplicates(group: Dictionary(grouping: models) { $0.nameByLevel(level+1) }, level: level+1, result: &result)
         }
     }
 }

@@ -20,16 +20,17 @@ self.num = arg
 """
 
 let simpleInitResultMock = """
-
 import Foundation
 
 public class CurrentMock: Current {
+    public init() {}
     public init(num: Int = 0, title: String = "") {
         self.num = num
         self.title = title
     }
-    
     let num: Int
+    
+    
     var titleSetCallCount = 0
     var underlyingTitle: String = ""
     public var title: String {

@@ -12,8 +12,9 @@ protocol SimpleVar {
 
 let simpleVarMock = """
 import Foundation
-    
+
 class SimpleVarMock: SimpleVar {
+    init() {}
     init(name: Int = 0) {
         self.name = name
     }
