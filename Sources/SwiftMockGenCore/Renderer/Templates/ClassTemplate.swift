@@ -31,11 +31,14 @@ func applyClassTemplate(name: String,
             return "\(element.name): \(element.type)"
         }
         .joined(separator: ", ")
-    
+    // Besides the default init, we want to provide an empty init block (unless the default init is empty)
+    // since vars do not need to be set via init (since they all have get/set; see VariableTemplate for more detail)
+    let extraInitBlock = !initParams.isEmpty ? "\(accessControlLevelDescription)init() {}" : ""
     let paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
     let result = """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
+        \(extraInitBlock)
         \(accessControlLevelDescription)init(\(params)) {
             \(paramsAssign)
         }

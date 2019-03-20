@@ -16,28 +16,28 @@ detachTransition: Float?)
 """
 
 let simpleDuplicatesMock = """
-
 public class SimpleDuplicateMock: SimpleDuplicate {
     public init() {
         
     }
     
-    var pushStateAttachTransitionDetachTransitionCallCount = 0
-    var pushStateAttachTransitionDetachTransitionHandler: ((Double, Int, Float?) -> ())?
+    var pushCallCount = 0
+    var pushHandler: ((Double, Int, Float?) -> ())?
     public func push(state: Double, attachTransition: Int, detachTransition: Float?)  {
-        pushStateAttachTransitionDetachTransitionCallCount += 1
-        if let pushStateAttachTransitionDetachTransitionHandler = pushStateAttachTransitionDetachTransitionHandler {
-            return pushStateAttachTransitionDetachTransitionHandler(state, attachTransition, detachTransition)
+        pushCallCount += 1
+        if let pushHandler = pushHandler {
+            return pushHandler(state, attachTransition, detachTransition)
         }
         
     }
-    var pushStateFlagAttachTransitionDetachTransitionCallCount = 0
-    var pushStateFlagAttachTransitionDetachTransitionHandler: ((Double, Float, Int, Float?) -> ())?
+    var pushStateFlagCallCount = 0
+    var pushStateFlagHandler: ((Double, Float, Int, Float?) -> ())?
     public func push(state: Double, flag: Float, attachTransition: Int, detachTransition: Float?)  {
-        pushStateFlagAttachTransitionDetachTransitionCallCount += 1
-        if let pushStateFlagAttachTransitionDetachTransitionHandler = pushStateFlagAttachTransitionDetachTransitionHandler {
-            return pushStateFlagAttachTransitionDetachTransitionHandler(state, flag, attachTransition, detachTransition)
+        pushStateFlagCallCount += 1
+        if let pushStateFlagHandler = pushStateFlagHandler {
+            return pushStateFlagHandler(state, flag, attachTransition, detachTransition)
         }
+        
     }
 }
 """
@@ -81,6 +81,15 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         
     }
     
+    var displayCallCount = 0
+    var displayHandler: (() -> ())?
+    func display()  {
+        displayCallCount += 1
+        if let displayHandler = displayHandler {
+            return displayHandler()
+        }
+        
+    }
     var displayXCallCount = 0
     var displayXHandler: ((Int) -> ())?
     func display(x: Int)  {
@@ -90,12 +99,12 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         
     }
-    var displayCallCount = 0
-    var displayHandler: ((Int) -> ())?
+    var display34CallCount = 0
+    var display34Handler: ((Int) -> ())?
     func display(y: Int)  {
-        displayCallCount += 1
-        if let displayHandler = displayHandler {
-            return displayHandler(y)
+        display34CallCount += 1
+        if let display34Handler = display34Handler {
+            return display34Handler(y)
         }
         
     }
@@ -108,114 +117,149 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         
     }
-    var updateIntCallCount = 0
-    var updateIntHandler: (() -> (Int))?
+    var updateInt3CallCount = 0
+    var updateInt3Handler: (() -> (Int))?
     func update() -> Int {
-        updateIntCallCount += 1
-        if let updateIntHandler = updateIntHandler {
-            return updateIntHandler()
+        updateInt3CallCount += 1
+        if let updateInt3Handler = updateInt3Handler {
+            return updateInt3Handler()
         }
         return 0
     }
-    var updateArgIntCallCount = 0
-    var updateArgIntHandler: ((Int) -> ())?
+    var updateArgCallCount = 0
+    var updateArgHandler: ((Int) -> ())?
     func update(arg: Int)  {
-        updateArgIntCallCount += 1
-        if let updateArgIntHandler = updateArgIntHandler {
-            return updateArgIntHandler(arg)
+        updateArgCallCount += 1
+        if let updateArgHandler = updateArgHandler {
+            return updateArgHandler(arg)
         }
         
     }
-    var updateArgFloatCallCount = 0
-    var updateArgFloatHandler: ((Float) -> ())?
+    var updateArg45CallCount = 0
+    var updateArg45Handler: ((Float) -> ())?
     func update(arg: Float)  {
-        updateArgFloatCallCount += 1
-        if let updateArgFloatHandler = updateArgFloatHandler {
-            return updateArgFloatHandler(arg)
+        updateArg45CallCount += 1
+        if let updateArg45Handler = updateArg45Handler {
+            return updateArg45Handler(arg)
         }
         
     }
-    var updateObservableIntCallCount = 0
-    var updateObservableIntHandler: ((Int, Float) -> (Observable<Int>))?
+    var updateArgSomeCallCount = 0
+    var updateArgSomeHandler: ((Int, Float) -> ())?
+    func update(arg: Int, some: Float)  {
+        updateArgSomeCallCount += 1
+        if let updateArgSomeHandler = updateArgSomeHandler {
+            return updateArgSomeHandler(arg, some)
+        }
+        
+    }
+    var updateArgSomeInt5CallCount = 0
+    var updateArgSomeInt5Handler: ((Int, Float) -> (Int))?
+    func update(arg: Int, some: Float) -> Int {
+        updateArgSomeInt5CallCount += 1
+        if let updateArgSomeInt5Handler = updateArgSomeInt5Handler {
+            return updateArgSomeInt5Handler(arg, some)
+        }
+        return 0
+    }
+    var updateArgSomeObservableInt5CallCount = 0
+    var updateArgSomeObservableInt5Handler: ((Int, Float) -> (Observable<Int>))?
     func update(arg: Int, some: Float) -> Observable<Int> {
-        updateObservableIntCallCount += 1
-        if let updateObservableIntHandler = updateObservableIntHandler {
-            return updateObservableIntHandler(arg, some)
+        updateArgSomeObservableInt5CallCount += 1
+        if let updateArgSomeObservableInt5Handler = updateArgSomeObservableInt5Handler {
+            return updateArgSomeObservableInt5Handler(arg, some)
         }
         return Observable.empty()
     }
-    var updateStringObservableDoubleCallCount = 0
-    var updateStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
+    var updateArgSomeStringObservableDouble5CallCount = 0
+    var updateArgSomeStringObservableDouble5Handler: ((Int, Float) -> ((String) -> Observable<Double>))?
     func update(arg: Int, some: Float) -> (String) -> Observable<Double> {
-        updateStringObservableDoubleCallCount += 1
-        if let updateStringObservableDoubleHandler = updateStringObservableDoubleHandler {
-            return updateStringObservableDoubleHandler(arg, some)
+        updateArgSomeStringObservableDouble5CallCount += 1
+        if let updateArgSomeStringObservableDouble5Handler = updateArgSomeStringObservableDouble5Handler {
+            return updateArgSomeStringObservableDouble5Handler(arg, some)
         }
-        fatalError("updateStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
+        fatalError("updateArgSomeStringObservableDouble5Handler returns can't have a default value thus its handler must be set")
     }
-    var updateArrayStringFloatCallCount = 0
-    var updateArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
+    var updateArgSomeArrayStringFloat5CallCount = 0
+    var updateArgSomeArrayStringFloat5Handler: ((Int, Float) -> (Array<String, Float>))?
     func update(arg: Int, some: Float) -> Array<String, Float> {
-        updateArrayStringFloatCallCount += 1
-        if let updateArrayStringFloatHandler = updateArrayStringFloatHandler {
-            return updateArrayStringFloatHandler(arg, some)
+        updateArgSomeArrayStringFloat5CallCount += 1
+        if let updateArgSomeArrayStringFloat5Handler = updateArgSomeArrayStringFloat5Handler {
+            return updateArgSomeArrayStringFloat5Handler(arg, some)
         }
-        fatalError("updateArrayStringFloatHandler returns can't have a default value thus its handler must be set")
+        fatalError("updateArgSomeArrayStringFloat5Handler returns can't have a default value thus its handler must be set")
     }
-    var collectionViewStringCallCount = 0
-    var collectionViewStringHandler: ((UICollectionView, Int) -> (String?))?
+    var collectionViewCallCount = 0
+    var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
     func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
-        collectionViewStringCallCount += 1
-        if let collectionViewStringHandler = collectionViewStringHandler {
-            return collectionViewStringHandler(collectionView, index)
+        collectionViewCallCount += 1
+        if let collectionViewHandler = collectionViewHandler {
+            return collectionViewHandler(collectionView, index)
         }
         return nil
     }
-    var collectionViewCGSizeCallCount = 0
-    var collectionViewCGSizeHandler: ((UICollectionView, Int) -> (CGSize))?
-    func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize {
-        collectionViewCGSizeCallCount += 1
-        if let collectionViewCGSizeHandler = collectionViewCGSizeHandler {
-            return collectionViewCGSizeHandler(collectionView, index)
-        }
-        fatalError("collectionViewCGSizeHandler returns can't have a default value thus its handler must be set")
-    }
-    var collectionViewCellUICollectionViewCellIndexIntCallCount = 0
-    var collectionViewCellUICollectionViewCellIndexIntHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    var collectionViewConfigureCellCallCount = 0
+    var collectionViewConfigureCellHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
     func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)  {
-        collectionViewCellUICollectionViewCellIndexIntCallCount += 1
-        if let collectionViewCellUICollectionViewCellIndexIntHandler = collectionViewCellUICollectionViewCellIndexIntHandler {
-            return collectionViewCellUICollectionViewCellIndexIntHandler(collectionView, cell, index)
+        collectionViewConfigureCellCallCount += 1
+        if let collectionViewConfigureCellHandler = collectionViewConfigureCellHandler {
+            return collectionViewConfigureCellHandler(collectionView, cell, index)
         }
         
     }
-    var loadImageUrlCallCount = 0
-    var loadImageUrlHandler: ((URL) -> (Observable<UIImage>))?
+    var collectionViewSizeForItemAtCallCount = 0
+    var collectionViewSizeForItemAtHandler: ((UICollectionView, Int) -> (CGSize))?
+    func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize {
+        collectionViewSizeForItemAtCallCount += 1
+        if let collectionViewSizeForItemAtHandler = collectionViewSizeForItemAtHandler {
+            return collectionViewSizeForItemAtHandler(collectionView, index)
+        }
+        fatalError("collectionViewSizeForItemAtHandler returns can't have a default value thus its handler must be set")
+    }
+    var collectionViewDidEndDisplayingForItemAtCallCount = 0
+    var collectionViewDidEndDisplayingForItemAtHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)  {
+        collectionViewDidEndDisplayingForItemAtCallCount += 1
+        if let collectionViewDidEndDisplayingForItemAtHandler = collectionViewDidEndDisplayingForItemAtHandler {
+            return collectionViewDidEndDisplayingForItemAtHandler(collectionView, cell, index)
+        }
+        
+    }
+    var collectionViewConfigureCellForItemAtCallCount = 0
+    var collectionViewConfigureCellForItemAtHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)  {
+        collectionViewConfigureCellForItemAtCallCount += 1
+        if let collectionViewConfigureCellForItemAtHandler = collectionViewConfigureCellForItemAtHandler {
+            return collectionViewConfigureCellForItemAtHandler(collectionView, cell, index)
+        }
+        
+    }
+    var loadImageCallCount = 0
+    var loadImageHandler: ((URL) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL) -> Observable<UIImage> {
-        loadImageUrlCallCount += 1
-        if let loadImageUrlHandler = loadImageUrlHandler {
-            return loadImageUrlHandler(url)
+        loadImageCallCount += 1
+        if let loadImageHandler = loadImageHandler {
+            return loadImageHandler(url)
         }
         return Observable.empty()
     }
-    var loadImageUrlPlaceholderCallCount = 0
-    var loadImageUrlPlaceholderHandler: ((URL, UIImage) -> (Observable<UIImage>))?
+    var loadImageAtURLCallCount = 0
+    var loadImageAtURLHandler: ((URL, UIImage) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL, placeholder: UIImage) -> Observable<UIImage> {
-        loadImageUrlPlaceholderCallCount += 1
-        if let loadImageUrlPlaceholderHandler = loadImageUrlPlaceholderHandler {
-            return loadImageUrlPlaceholderHandler(url, placeholder)
+        loadImageAtURLCallCount += 1
+        if let loadImageAtURLHandler = loadImageAtURLHandler {
+            return loadImageAtURLHandler(url, placeholder)
         }
         return Observable.empty()
     }
-    var loadImageUrlInitialRetryDelayMaxAttemptsCallCount = 0
-    var loadImageUrlInitialRetryDelayMaxAttemptsHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
+    var loadImageAtURLInitialRetryDelayMaxAttemptsCallCount = 0
+    var loadImageAtURLInitialRetryDelayMaxAttemptsHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: Int) -> Observable<UIImage> {
-        loadImageUrlInitialRetryDelayMaxAttemptsCallCount += 1
-        if let loadImageUrlInitialRetryDelayMaxAttemptsHandler = loadImageUrlInitialRetryDelayMaxAttemptsHandler {
-            return loadImageUrlInitialRetryDelayMaxAttemptsHandler(url, initialRetryDelay, maxAttempts)
+        loadImageAtURLInitialRetryDelayMaxAttemptsCallCount += 1
+        if let loadImageAtURLInitialRetryDelayMaxAttemptsHandler = loadImageAtURLInitialRetryDelayMaxAttemptsHandler {
+            return loadImageAtURLInitialRetryDelayMaxAttemptsHandler(url, initialRetryDelay, maxAttempts)
         }
         return Observable.empty()
     }
 }
-
 """

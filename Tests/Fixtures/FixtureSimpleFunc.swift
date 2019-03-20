@@ -10,7 +10,6 @@ protocol SimpleFunc {
 """
 
 let simpleFuncMock = """
-
 import Foundation
 
 class SimpleFuncMock: SimpleFunc {
@@ -18,12 +17,12 @@ class SimpleFuncMock: SimpleFunc {
         
     }
     
-    var updateCallCount = 0
-    var updateHandler: ((Int) -> (String))?
+    var updateArgCallCount = 0
+    var updateArgHandler: ((Int) -> (String))?
     func update(arg: Int) -> String {
-        updateCallCount += 1
-        if let updateHandler = updateHandler {
-            return updateHandler(arg)
+        updateArgCallCount += 1
+        if let updateArgHandler = updateArgHandler {
+            return updateArgHandler(arg)
         }
         return ""
     }

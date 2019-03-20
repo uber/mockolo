@@ -41,6 +41,7 @@ extension String {
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
+    static let handlerSuffix = "Handler"
     static let observableVarPrefix = "Observable<"
     static let rxObservableVarPrefix = "RxSwift.Observable<"
     static let publishSubjectPrefix = "PublishSubject"

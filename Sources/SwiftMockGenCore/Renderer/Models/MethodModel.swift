@@ -20,10 +20,6 @@ import SourceKittenFramework
 struct MethodModel: Model {
     var name: String
     var type: String
-    var mediumName: String
-    var mediumLongName: String
-    var longName: String
-    var fullName: String
     var offset: Int64
     let accessControlLevelDescription: String
     let attributes: [String]
@@ -33,6 +29,7 @@ struct MethodModel: Model {
     let params: [ParamModel]
     let handler: ClosureModel
     let processed: Bool
+    let signatureComponents: [String]
     
     init(_ ast: Structure, content: String, processed: Bool) {
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
@@ -47,7 +44,7 @@ struct MethodModel: Model {
         
         self.params = zip(paramDecls, comps).map { ParamModel($0, label: $1) }
         
-
+        let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
         let paramNames = paramDecls.map {$0.name}
         let paramTypes = paramDecls.map {$0.typeName}
         self.genericTypeParams = ast.substructures
@@ -55,21 +52,19 @@ struct MethodModel: Model {
             .map { ParamModel($0, label: $0.name, isGeneric: true) }
         let genericNameTypes = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayableForType }.joined()
         
-        self.mediumName = self.name + genericNameTypes + paramNames.map{ nameString.lowercased().contains($0.lowercased()) ? "" :  $0.capitlizeFirstLetter}.joined()
+        var args = zip(paramLabels, paramNames)
+            .map { $0.isEmpty ? $1 : $0 }
+            .filter {!nameString.lowercased().hasSuffix($0.lowercased())}
+            .map {$0.capitlizeFirstLetter}
+        args.append(genericNameTypes)
+        if self.type.displayableForType.count <= 32 {
+            args.append(self.type.displayableForType)
+        }
+        // Used to make the underlying function handler var name unique by providing args
+        // that can be appended to the name
+        self.signatureComponents = args
 
-        self.mediumLongName = self.name + genericNameTypes + self.type.displayableForType
-
-        self.longName = self.mediumName + self.type.displayableForType
-
-        self.fullName = self.name + genericNameTypes +
-            zip(paramNames, paramTypes).map{ nameString.lowercased().contains($0.lowercased()) ? "" :  $0.capitlizeFirstLetter + $1.displayableForType}.joined() +
-            self.type.displayableForType
-        
         self.handler = ClosureModel(name: self.name,
-                                    mediumName: self.mediumName,
-                                    mediumLongName: self.mediumLongName,
-                                    longName: self.longName,
-                                    fullName: self.fullName,
                                     genericTypeParams: genericTypeParams,
                                     paramNames: paramNames,
                                     paramTypes: paramTypes,
@@ -79,18 +74,22 @@ struct MethodModel: Model {
         self.defaultValue = defaultVal(typeName: ast.typeName)
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
+
+    func nameByLevel(_ level: Int) -> String {
+        if level == 0 {
+            return name
+        } else if level-1 >= self.signatureComponents.count {
+            return nameByLevel(level-1) + "\(level)"
+        }
+        return nameByLevel(level-1) + self.signatureComponents[level-1]
+    }
     
     func render(with identifier: String) -> String? {
         guard !processed else { return nil }
         let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}
         let paramDecls = params.compactMap{$0.render(with: "")}
         let returnType = type != UnknownVal ? type : ""
-        let handlerName = (identifier == name ? handler.name :
-            (identifier == mediumName ? handler.mediumName :
-                (identifier == mediumLongName ? handler.mediumLongName :
-                    (identifier == longName ? handler.longName :
-                        handler.fullName))))
-        let handlerReturn = handler.render(with: handlerName) ?? ""
+        let handlerReturn = handler.render(with: identifier) ?? ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
                                          genericTypeDecls: genericTypeDecls,
@@ -98,7 +97,6 @@ struct MethodModel: Model {
                                          returnType: returnType,
                                          staticKind: staticKind,
                                          accessControlLevelDescription: accessControlLevelDescription,
-                                         handlerVarName: handlerName,
                                          handlerVarType: handler.type,
                                          handlerReturn: handlerReturn)
         return result

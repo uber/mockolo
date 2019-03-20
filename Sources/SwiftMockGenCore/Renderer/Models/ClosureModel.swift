@@ -20,11 +20,6 @@ import SourceKittenFramework
 struct ClosureModel: Model {
     var name: String
     var type: String
-    let nameSuffix = "Handler"
-    var mediumName: String
-    var mediumLongName: String
-    var longName: String
-    var fullName: String
     var offset: Int64 = .max
     let returnAs: String
     let defaultReturnType: String
@@ -33,12 +28,8 @@ struct ClosureModel: Model {
     let paramNames: [String]
     let paramTypes: [String]
     
-    init(name: String, mediumName: String, mediumLongName: String, longName: String, fullName: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
-        self.name = name + nameSuffix
-        self.mediumName = mediumName + nameSuffix
-        self.mediumLongName = mediumLongName + nameSuffix
-        self.longName = longName + nameSuffix
-        self.fullName = fullName + nameSuffix
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
+        self.name = name + String.handlerSuffix
         self.staticKind = staticKind
 
         let genericTypeNameList = genericTypeParams.map {$0.name}
@@ -72,7 +63,7 @@ struct ClosureModel: Model {
     }
     
     func render(with identifier: String) -> String? {
-        return applyClosureTemplate(name: identifier,
+        return applyClosureTemplate(name: identifier+String.handlerSuffix,
                                     type: type,
                                     genericTypeNames: genericTypeNames,
                                     paramVals: paramNames,

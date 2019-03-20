@@ -76,43 +76,29 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
 }
 
 private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
-    let entities = Dictionary(grouping: models) { $0.name }
     var result = [String: Model]()
-    
-    entities.forEach { (key: String, modelsByName: [Model]) in
+    uniquefy(group: Dictionary(grouping: models) { $0.nameByLevel(0) }, level: 0, result: &result)
+    return result
+}
+
+// Uniquefy multiple entires with the same name, e.g. func signature, given the verbosity level
+private func uniquefy(group: [String: [Model]], level: Int, result: inout [String: Model]) {
+    group.forEach { (key: String, models: [Model]) in
+        if key.isEmpty {
+            return
+        }
         
-        if modelsByName.count > 1 {
-            Dictionary(grouping: modelsByName) { $0.mediumName }
-                .forEach { (k: String, modelsByMedName: [Model]) in
-                    
-                    if modelsByMedName.count > 1 {
-                        Dictionary(grouping: modelsByMedName) { $0.mediumLongName }
-                            .forEach { (k: String, modelsByMedLongName: [Model]) in
-                                
-                                if modelsByMedLongName.count > 1 {
-                                    Dictionary(grouping: modelsByMedLongName) { $0.longName }
-                                        .forEach { (k: String, modelsByLongName: [Model]) in
-                                            
-                                            if modelsByLongName.count > 1 {
-                                                modelsByLongName.forEach{ result[$0.fullName] = $0 }
-                                            } else {
-                                                modelsByLongName.forEach{ result[$0.longName] = $0 }
-                                            }
-                                    }
-                                } else {
-                                    modelsByMedLongName.forEach { result[$0.mediumLongName] = $0 }
-                                }
-                        }
-                    } else {
-                        modelsByMedName.forEach { result[$0.mediumName] = $0 }
-                    }
+        if result[key] == nil {
+            if models.count > 1 {
+                result[key] = models.first
+                uniquefy(group: Dictionary(grouping: models[1...]) { $0.nameByLevel(level+1) }, level: level+1, result: &result)
+            } else {
+                models.forEach { result[$0.nameByLevel(level+1)] = $0 }
             }
         } else {
-            modelsByName.forEach { result[$0.name] = $0 }
+            uniquefy(group: Dictionary(grouping: models) { $0.nameByLevel(level+1) }, level: level+1, result: &result)
         }
     }
-    
-    return result
 }
 
 private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {

@@ -24,10 +24,10 @@ func applyMethodTemplate(name: String,
                          returnType: String,
                          staticKind: String,
                          accessControlLevelDescription: String,
-                         handlerVarName: String,
                          handlerVarType: String,
                          handlerReturn: String) -> String {
     let callCount = "\(identifier)\(String.callCountSuffix)"
+    let handlerVarName = "\(identifier)\(String.handlerSuffix)"
     let paramDeclsStr = paramDecls.joined(separator: ", ")
     let genericTypeDeclsStr = genericTypeDecls.joined(separator: ", ")
     let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"

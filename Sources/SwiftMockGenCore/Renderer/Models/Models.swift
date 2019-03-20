@@ -22,18 +22,6 @@ protocol Model {
     // Identifier
     var name: String { get set }
 
-    // Used to differentiate multiple entities with the same name
-    var mediumName: String { get set }
-
-    // Used to differentiate multiple entities with the same medium name
-    var mediumLongName: String { get set }
-
-    // Used to differentiate multiple entities with the same mediumLong name
-    var longName: String { get set }
-
-    // Used to differentiate multiple entities with the same long name
-    var fullName: String { get set }
-
     // Return type for var/func and decl type for class/struct/protocol/enum etc.
     var type: String { get set }
 
@@ -42,4 +30,14 @@ protocol Model {
 
     // Applies a corresponding template to this model
     func render(with identifier: String) -> String?
+    
+    func nameByLevel(_ level: Int) -> String
+}
+
+extension Model {
+    // Used to differentiate multiple entities with the same name given the
+    // param level which denotes verbosity. By default, return name.
+    func nameByLevel(_ level: Int) -> String {
+        return name
+    }
 }
