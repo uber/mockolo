@@ -79,12 +79,12 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
     return filterDuplicates(group: Dictionary(grouping: models) { $0.nameByLevel(0) }, level: 0, buffer: nil)
 }
 
-// Unique-fy multiple entires with the same name, e.g. func signature, using the verbosity level
+// Unique-fy multiple entities with the same name, e.g. func signature, using the verbosity level
 private func filterDuplicates(group: [String: [Model]], level: Int, buffer: [String: Model]?) -> [String: Model] {
     var result = [String: Model]()
     group.forEach { (key: String, models: [Model]) in
         if let buffer = buffer, buffer[key] != nil {
-            // An entity with the same name key already exists, so look up a more verbose name for these entities
+            // An entity with the given key already exists, so look up a more verbose name for these entities
             result.merge(filterDuplicates(group: Dictionary(grouping: models) { $0.nameByLevel(level+1) }, level: level+1, buffer: result)){$1}
         } else {
             if models.count > 1, let first = models.first {

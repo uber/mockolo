@@ -19,24 +19,25 @@ import Foundation
 /// Represents entities such as var, func, class, etc. to be
 /// rendered (with templates) for mock output.
 protocol Model {
-    // Identifier
+    /// Identifier
     var name: String { get set }
 
-    // Return type for var/func and decl type for class/struct/protocol/enum etc.
+    /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: String { get set }
 
-    // Offset where this type is declared
+    /// Offset where this type is declared
     var offset: Int64 { get set }
 
-    // Applies a corresponding template to this model
+    /// Applies a corresponding template to this model to output mocks
     func render(with identifier: String) -> String?
-    
+
+    /// Used to differentiate multiple entities with the same name
+    /// @param level The verbosity level
+    /// @returns a unique name given the verbosity (default is name)
     func nameByLevel(_ level: Int) -> String
 }
 
 extension Model {
-    // Used to differentiate multiple entities with the same name given the
-    // param level which denotes verbosity. By default, return name.
     func nameByLevel(_ level: Int) -> String {
         return name
     }
