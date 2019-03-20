@@ -34,11 +34,11 @@ protocol Model {
     /// Used to differentiate multiple entities with the same name
     /// @param level The verbosity level
     /// @returns a unique name given the verbosity (default is name)
-    func nameByLevel(_ level: Int) -> String
+    func name(by level: Int) -> String
 }
 
 extension Model {
-    func nameByLevel(_ level: Int) -> String {
+    func name(by level: Int) -> String {
         return name
     }
 }

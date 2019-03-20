@@ -75,13 +75,13 @@ struct MethodModel: Model {
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
 
-    func nameByLevel(_ level: Int) -> String {
-        if level == 0 {
+    func name(by level: Int) -> String {
+        if level <= 0 {
             return name
         } else if level-1 >= self.signatureComponents.count {
-            return nameByLevel(level-1) + "\(level)"
+            return name(by: level-1) + "\(level)"
         }
-        return nameByLevel(level-1) + self.signatureComponents[level-1]
+        return name(by: level-1) + self.signatureComponents[level-1]
     }
     
     func render(with identifier: String) -> String? {

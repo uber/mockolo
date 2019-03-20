@@ -29,7 +29,7 @@ struct ClosureModel: Model {
     let paramTypes: [String]
     
     init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
-        self.name = name + String.handlerSuffix
+        self.name = name + .handlerSuffix
         self.staticKind = staticKind
 
         let genericTypeNameList = genericTypeParams.map {$0.name}
@@ -63,7 +63,7 @@ struct ClosureModel: Model {
     }
     
     func render(with identifier: String) -> String? {
-        return applyClosureTemplate(name: identifier+String.handlerSuffix,
+        return applyClosureTemplate(name: identifier + .handlerSuffix,
                                     type: type,
                                     genericTypeNames: genericTypeNames,
                                     paramVals: paramNames,
