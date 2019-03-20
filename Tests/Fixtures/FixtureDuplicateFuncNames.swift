@@ -207,7 +207,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let collectionViewSizeForItemAtHandler = collectionViewSizeForItemAtHandler {
             return collectionViewSizeForItemAtHandler(collectionView, index)
         }
-        fatalError("collectionViewSizeForItemAtHandler returns can't have a default value thus its handler must be set")
+        return .zero
     }
     var collectionViewDidEndDisplayingCallCount = 0
     var collectionViewDidEndDisplayingHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
