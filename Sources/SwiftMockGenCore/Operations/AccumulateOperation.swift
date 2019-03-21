@@ -21,7 +21,7 @@ func renderMocks(inheritanceMap: [String: (Structure, File, [Model])],
                  annotatedProtocolMap: [String: ProtocolMapEntryType],
                  semaphore: DispatchSemaphore?,
                  queue: DispatchQueue?,
-                 process: @escaping (Structure, File, String) -> ()) -> Bool {
+                 process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
     
     if let queue = queue {
         let lock = NSLock()
@@ -46,7 +46,7 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
                                  key: String,
                                  annotatedProtocolMap: [String: ProtocolMapEntryType],
                                  lock: NSLock? = nil,
-                                 process: @escaping (Structure, File, String) -> ()) -> Bool {
+                                 process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
     if let val = annotatedProtocolMap[key] {
         let protocolStructure = val.structure
         let file = val.file
@@ -68,7 +68,7 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
                                    entities: [processedResults.joined(), renderedEntities.joined(separator: "\n")])
         if let mockString = mockModel.render(with: key), !mockString.isEmpty {
             lock?.lock()
-            process(protocolStructure, file, mockString)
+            process(protocolStructure, file, mockString, protocolStructure.offset)
             lock?.unlock()
         }
     }

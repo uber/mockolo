@@ -24,6 +24,9 @@ class SwiftMockGenTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         try? FileManager.default.removeItem(atPath: dstFilePath)
         try? FileManager.default.removeItem(atPath: srcFilePath)
+        if FileManager.default.fileExists(atPath: mockFilePath) {
+            try? FileManager.default.removeItem(atPath: mockFilePath)
+        }
     }
     
     func testPerformanceExample() {
@@ -68,15 +71,23 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: genericFuncMock)
     }
     
-    func _testInheritedFuncs() {
-        verify(srcContent: funcsInheritance,
-               dstContent: funcsInheritanceMock)
+    func testInheritedFuncs() {
+        verify(srcContent: simpleInheritance,
+               dstContent: simpleInheritanceMock)
     }
-    func _testDuplicateInheritedFuncs() {
-        verify(srcContent: duplicateFuncsInheritance,
-               dstContent: duplicateFuncsInheritanceMock)
+    func testDuplicateInheritedFuncs() {
+        verify(srcContent: duplicateSigInheritance,
+               dstContent: duplicateSigInheritanceMock)
     }
     
+    func testDocComment1() {
+        verify(srcContent: docComment1,
+               dstContent: docCommentMock)
+    }
+    func testDocComment2() {
+        verify(srcContent: docComment2,
+               dstContent: docCommentMock)
+    }
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)

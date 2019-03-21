@@ -33,7 +33,7 @@ extension File {
 }
 
 
-extension Sequence {
+public extension Sequence {
     func map<T>(path: KeyPath<Element, T>) -> [T] {
         return map { (element) -> T in
             element[keyPath: path]
