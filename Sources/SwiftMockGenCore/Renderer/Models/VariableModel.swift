@@ -5,10 +5,6 @@ struct VariableModel: Model {
     
     var name: String
     var type: String
-    var mediumName: String
-    var mediumLongName: String
-    var longName: String
-    var fullName: String
     var offset: Int64
     let accessControlLevelDescription: String
     let attributes: [String]?
@@ -20,10 +16,6 @@ struct VariableModel: Model {
     init(_ ast: Structure, content: String, processed: Bool) {
         name = ast.name
         type = ast.typeName
-        mediumName = name
-        mediumLongName = name
-        longName = name
-        fullName = name
         offset = ast.offset
         canBeInitParam = ast.canBeInitParam
         staticKind = ast.isStaticVariable ? .static : ""

@@ -32,15 +32,38 @@ extension File {
     }
 }
 
+
+public extension Sequence {
+    func map<T>(path: KeyPath<Element, T>) -> [T] {
+        return map { (element) -> T in
+            element[keyPath: path]
+        }
+    }
+    
+    func filter(path: KeyPath<Element, Bool>) -> [Element] {
+        return filter { (element) -> Bool in
+            element[keyPath: path]
+        }
+    }
+    
+    func sorted<T>(path: KeyPath<Element, T>) -> [Element] where T: Comparable {
+        return sorted { (lhs, rhs) -> Bool in
+            lhs[keyPath: path] < rhs[keyPath: path]
+        }
+    }
+}
+
+
 extension String {
     static let `static` = "static"
     static let `import` = "import "
-    static let `class` = "class"
+    static public let `class` = "class"
     static let override = "override"
     static let mockType = "protocol"
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
+    static let handlerSuffix = "Handler"
     static let observableVarPrefix = "Observable<"
     static let rxObservableVarPrefix = "RxSwift.Observable<"
     static let publishSubjectPrefix = "PublishSubject"
@@ -122,10 +145,46 @@ extension Structure {
     }
 }
 
+private let defaultValuesDict =
+["Int": "0",
+"Int64": "0",
+"Int32": "0",
+"Int16": "0",
+"Int8": "0",
+"UInt": "0",
+"UInt64": "0",
+"UInt32": "0",
+"UInt16": "0",
+"UInt8": "0",
+"Float": "0.0",
+"CGFloat": "0.0",
+"Double": "0.0",
+"Bool": "false",
+"String": "\"\"",
+"Character": "\"\"",
+"TimeInterval": "0.0",
+"NSTimeInterval": "0.0",
+"Date": "Date()",
+"NSDate": "NSDate()",
+"CGRect": ".zero",
+"CGSize": ".zero",
+"CGPoint": ".zero",
+"UIEdgeInsets": ".zero",
+"UIColor": ".white",
+"UIFont": ".systemFont(ofSize: 12)",
+"UIView": "UIView(frame: .zero)",
+"UIViewController": "UIViewController()",
+"UICollectionView": "UICollectionView()",
+"UICollectionViewLayout": "UICollectionViewLayout()",
+"UIScrollView": "UIScrollView()",
+"UIScrollViewKeyboardDismissMode": ".interactive",
+"UIAccessibilityTraits": ".none",
+"Void": "Void",
+"UUID": "UUID()"];
+
 
 func defaultVal(typeName: String) -> String? {
     // TODO: add more robust handling
-    
     if typeName.hasSuffix("?") {
         return "nil"
     }
@@ -135,27 +194,15 @@ func defaultVal(typeName: String) -> String? {
     }
     
     if (typeName.hasPrefix("[") && typeName.hasSuffix("]")) ||
+        typeName.hasPrefix("Set") ||
         typeName.hasPrefix("Array") ||
         typeName.hasPrefix("Dictionary") {
         return "\(typeName)()"
     }
-    if typeName == "Bool" {
-        return "false"
-    }
-    if typeName == "String" ||
-        typeName == "Character" {
-        return "\"\""
+    
+    if let val = defaultValuesDict[typeName] {
+        return val
     }
     
-    if typeName == "Int" ||
-        typeName == "Int8" ||
-        typeName == "Int16" ||
-        typeName == "Int32" ||
-        typeName == "Int64" ||
-        typeName == "Double" ||
-        typeName == "CGFloat" ||
-        typeName == "Float" {
-        return "0"
-    }
     return nil
 }

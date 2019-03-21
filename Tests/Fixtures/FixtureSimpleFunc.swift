@@ -10,10 +10,10 @@ protocol SimpleFunc {
 """
 
 let simpleFuncMock = """
-
 import Foundation
 
 class SimpleFuncMock: SimpleFunc {
+    
     init() {
         
     }

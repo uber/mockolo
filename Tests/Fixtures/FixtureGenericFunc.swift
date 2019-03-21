@@ -18,10 +18,10 @@ func registerMessage<ModelType: RealtimeDecodable>(_ messageType: ResponseMessag
 """
 
 let genericFuncMock = """
-
 import Foundation
 
 class GenericFuncMock: GenericFunc {
+    
     init() {
         
     }
@@ -62,25 +62,23 @@ class GenericFuncMock: GenericFunc {
         }
         fatalError("dequeueHandler returns can't have a default value thus its handler must be set")
     }
-    var registerMessageModelTypeResponseBodyMessageTypeHandlerCallCount = 0
-    var registerMessageModelTypeResponseBodyMessageTypeHandlerHandler: ((ResponseMessageType, Any) -> (Disposable))?
+    var registerMessageCallCount = 0
+    var registerMessageHandler: ((ResponseMessageType, Any) -> (Disposable))?
     func registerMessage<ModelType: ResponseBody>(_ messageType: ResponseMessageType, withHandler handler: @escaping (ModelType) -> ()) -> Disposable {
-        registerMessageModelTypeResponseBodyMessageTypeHandlerCallCount += 1
-        if let registerMessageModelTypeResponseBodyMessageTypeHandlerHandler = registerMessageModelTypeResponseBodyMessageTypeHandlerHandler {
-            return registerMessageModelTypeResponseBodyMessageTypeHandlerHandler(messageType, handler)
+        registerMessageCallCount += 1
+        if let registerMessageHandler = registerMessageHandler {
+            return registerMessageHandler(messageType, handler)
         }
-        fatalError("registerMessageModelTypeResponseBodyMessageTypeHandlerHandler returns can't have a default value thus its handler must be set")
+        fatalError("registerMessageHandler returns can't have a default value thus its handler must be set")
     }
-    var registerMessageModelTypeRealtimeDecodableMessageTypeHandlerCallCount = 0
-    var registerMessageModelTypeRealtimeDecodableMessageTypeHandlerHandler: ((ResponseMessageType, Any) -> (Disposable))?
+    var registerMessageMessageTypeCallCount = 0
+    var registerMessageMessageTypeHandler: ((ResponseMessageType, Any) -> (Disposable))?
     func registerMessage<ModelType: RealtimeDecodable>(_ messageType: ResponseMessageType, withHandler handler: @escaping (ModelType) -> ()) -> Disposable {
-        registerMessageModelTypeRealtimeDecodableMessageTypeHandlerCallCount += 1
-        if let registerMessageModelTypeRealtimeDecodableMessageTypeHandlerHandler = registerMessageModelTypeRealtimeDecodableMessageTypeHandlerHandler {
-            return registerMessageModelTypeRealtimeDecodableMessageTypeHandlerHandler(messageType, handler)
+        registerMessageMessageTypeCallCount += 1
+        if let registerMessageMessageTypeHandler = registerMessageMessageTypeHandler {
+            return registerMessageMessageTypeHandler(messageType, handler)
         }
-        fatalError("registerMessageModelTypeRealtimeDecodableMessageTypeHandlerHandler returns can't have a default value thus its handler must be set")
+        fatalError("registerMessageMessageTypeHandler returns can't have a default value thus its handler must be set")
     }
 }
-
 """
-

@@ -32,7 +32,7 @@ public func generate(sourceDirs: [String]?,
     
     assert(sourceDirs != nil || sourceFiles != nil)
     
-    var candidates = [String: String]()
+    var candidates = [String: (String, Int64)]()
     var parentMocks = [String: (Structure, File, [Model])]()
     var annotatedProtocolMap = [String: ProtocolMapEntryType]()
     var importLines = [String: [String]]()
@@ -90,8 +90,8 @@ public func generate(sourceDirs: [String]?,
                     annotatedProtocolMap: annotatedProtocolMap,
                     semaphore: sema,
                     queue: mockgenQueue,
-                    process: {(s: Structure, file: File, mockString: String) in
-                        candidates[s.name] = mockString
+                    process: {(s: Structure, file: File, mockString: String, offset: Int64) in
+                        candidates[s.name] = (mockString, offset)
     })
     
     let t3 = CFAbsoluteTimeGetCurrent()
@@ -101,8 +101,8 @@ public func generate(sourceDirs: [String]?,
     // 4. Accumulate import lines
     let imports = importLines.values.flatMap { $0 }
     let importsSet = Set(imports)
-    let entities = candidates.values
-
+    let entities = candidates.values.sorted{$0.1 < $1.1}.map{$0.0}
+    
     let ret = [.headerDoc, .poundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), .poundEndIf].joined(separator: "\n")
     
     let t4 = CFAbsoluteTimeGetCurrent()

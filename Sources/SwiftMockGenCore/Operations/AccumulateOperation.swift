@@ -21,7 +21,7 @@ func renderMocks(inheritanceMap: [String: (Structure, File, [Model])],
                  annotatedProtocolMap: [String: ProtocolMapEntryType],
                  semaphore: DispatchSemaphore?,
                  queue: DispatchQueue?,
-                 process: @escaping (Structure, File, String) -> ()) -> Bool {
+                 process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
     
     if let queue = queue {
         let lock = NSLock()
@@ -46,7 +46,7 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
                                  key: String,
                                  annotatedProtocolMap: [String: ProtocolMapEntryType],
                                  lock: NSLock? = nil,
-                                 process: @escaping (Structure, File, String) -> ()) -> Bool {
+                                 process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
     if let val = annotatedProtocolMap[key] {
         let protocolStructure = val.structure
         let file = val.file
@@ -68,7 +68,7 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
                                    entities: [processedResults.joined(), renderedEntities.joined(separator: "\n")])
         if let mockString = mockModel.render(with: key), !mockString.isEmpty {
             lock?.lock()
-            process(protocolStructure, file, mockString)
+            process(protocolStructure, file, mockString, protocolStructure.offset)
             lock?.unlock()
         }
     }
@@ -76,53 +76,62 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
 }
 
 private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
-    let entities = Dictionary(grouping: models) { $0.name }
-    var result = [String: Model]()
+    return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, lookup: nil)
+}
+
+
+// Uniquify multiple entities with the same name, e.g. func signature, using the verbosity level
+// @param group The dictionary containing entity name and corresponding models
+// @param level The verbosiy level used for uniquing entity names
+// @param lookup Used to look up whether an entity name has already been used
+// @returns a dictionary with unique entity names and corresponding models
+private func uniquifyDuplicates(group: [String: [Model]], level: Int, lookup: [String: Model]?) -> [String: Model] {
     
-    entities.forEach { (key: String, modelsByName: [Model]) in
-        
-        if modelsByName.count > 1 {
-            Dictionary(grouping: modelsByName) { $0.mediumName }
-                .forEach { (k: String, modelsByMedName: [Model]) in
-                    
-                    if modelsByMedName.count > 1 {
-                        Dictionary(grouping: modelsByMedName) { $0.mediumLongName }
-                            .forEach { (k: String, modelsByMedLongName: [Model]) in
-                                
-                                if modelsByMedLongName.count > 1 {
-                                    Dictionary(grouping: modelsByMedLongName) { $0.longName }
-                                        .forEach { (k: String, modelsByLongName: [Model]) in
-                                            
-                                            if modelsByLongName.count > 1 {
-                                                modelsByLongName.forEach{ result[$0.fullName] = $0 }
-                                            } else {
-                                                modelsByLongName.forEach{ result[$0.longName] = $0 }
-                                            }
-                                    }
-                                } else {
-                                    modelsByMedLongName.forEach { result[$0.mediumLongName] = $0 }
-                                }
-                        }
-                    } else {
-                        modelsByMedName.forEach { result[$0.mediumName] = $0 }
-                    }
-            }
+    var buffer = [String: Model]()
+    group.forEach { (key: String, models: [Model]) in
+        if let lookup = lookup, lookup[key] != nil {
+            // An entity with the given key already exists, so look up a more verbose name for these entities
+            let subgroup = Dictionary(grouping: models, by: { (modelElement: Model) -> String in
+                modelElement.name(by: level + 1)
+            })
+            let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: buffer)
+            buffer.merge(subresult, uniquingKeysWith: { (bufferElement: Model, subresultElement: Model) -> Model in
+                return subresultElement
+            })
         } else {
-            modelsByName.forEach { result[$0.name] = $0 }
+            if models.count > 1, let first = models.first {
+                // There are multiple entities with the same name key; map one of them with the given key
+                // and look up a more verbose name for the rest
+                buffer[key] = first
+                let subgroup = Dictionary(grouping: models[1...], by: { (modelElement: Model) -> String in
+                    modelElement.name(by: level + 1)
+                })
+                let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: buffer)
+                buffer.merge(subresult, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
+                    return addedElement
+                })
+            } else {
+                // There are no duplicate entities at this point so map them by their (verbose) name
+                models.forEach{ (submodel: Model) in
+                    let element = [submodel.name(by: level) : submodel]
+                    buffer.merge(element, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
+                        return addedElement
+                    })
+                }
+            }
         }
     }
-    
-    return result
+    return buffer
 }
 
 private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {
-    let paramsForInit = models.compactMap {$0 as? VariableModel}.filter { $0.canBeInitParam }
-    let parentVars = paramsForInit.filter {$0.processed}.sorted { $0.offset < $1.offset }
-    let parentVarNames = parentVars.map {$0.name}
+    let paramsForInit = models.compactMap {$0 as? VariableModel}.filter(path: \.canBeInitParam)
+    let parentVars = paramsForInit.filter(path: \.processed).sorted(path: \.offset)
+    let parentVarNames = parentVars.map (path: \.name)
     // Named params in init should be unique. Add a duplicate param check to ensure it.
-    let curVars = paramsForInit.filter { !$0.processed && !parentVarNames.contains($0.name) }
-        .sorted {$0.offset < $1.offset}
+    let curVars = paramsForInit.filter { (item: VariableModel) in
+            return !item.processed && !parentVarNames.contains(item.name)
+        }.sorted(path: \.offset)
     let result = [parentVars, curVars].flatMap{$0}
     return result
 }
-

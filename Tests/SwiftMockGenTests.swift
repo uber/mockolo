@@ -24,6 +24,9 @@ class SwiftMockGenTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         try? FileManager.default.removeItem(atPath: dstFilePath)
         try? FileManager.default.removeItem(atPath: srcFilePath)
+        if FileManager.default.fileExists(atPath: mockFilePath) {
+            try? FileManager.default.removeItem(atPath: mockFilePath)
+        }
     }
     
     func testPerformanceExample() {
@@ -32,12 +35,6 @@ class SwiftMockGenTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
-    
-    func testDuplicateFuncNames() {
-        verify(srcContent: duplicateFuncNames,
-               dstContent: duplicateFuncNamesMock)
-    }
-    
     func testSimpleVar() {
         verify(srcContent: simpleVar,
                dstContent: simpleVarMock)
@@ -59,24 +56,38 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: simpleInitResultMock)
     }
     
+    func testSimpleDuplicates() {
+        verify(srcContent: simpleDuplicates,
+               dstContent: simpleDuplicatesMock)
+    }
+
+    func testDuplicateFuncNames() {
+        verify(srcContent: duplicateFuncNames,
+               dstContent: duplicateFuncNamesMock)
+    }
+
     func testGenericFuncs() {
         verify(srcContent: genericFunc,
                dstContent: genericFuncMock)
     }
     
-    func testSimpleDupes() {
-        verify(srcContent: simpleDuplicates,
-               dstContent: simpleDuplicatesMock)
-    }
     func testInheritedFuncs() {
-        verify(srcContent: funcsInheritance,
-               dstContent: funcsInheritanceMock)
+        verify(srcContent: simpleInheritance,
+               dstContent: simpleInheritanceMock)
     }
     func testDuplicateInheritedFuncs() {
-        verify(srcContent: duplicateFuncsInheritance,
-               dstContent: duplicateFuncsInheritanceMock)
+        verify(srcContent: duplicateSigInheritance,
+               dstContent: duplicateSigInheritanceMock)
     }
     
+    func testDocComment1() {
+        verify(srcContent: docComment1,
+               dstContent: docCommentMock)
+    }
+    func testDocComment2() {
+        verify(srcContent: docComment2,
+               dstContent: docCommentMock)
+    }
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)
@@ -108,6 +119,4 @@ class SwiftMockGenTests: XCTestCase {
         let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         XCTAssert(fixtureContents == outputContents)
     }
-    
-    
 }
