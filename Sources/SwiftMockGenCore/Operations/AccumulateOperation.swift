@@ -102,11 +102,7 @@ private func uniquifyDuplicates(group: [String: [Model]], level: Int, lookup: [S
             if models.count > 1, let first = models.first {
                 // There are multiple entities with the same name key; map one of them with the given key
                 // and look up a more verbose name for the rest
-                let firstElement = [key: first]
-                buffer.merge(firstElement, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
-                    return addedElement
-                })
-
+                buffer[key] = first
                 let subgroup = Dictionary(grouping: models[1...], by: { (modelElement: Model) -> String in
                     modelElement.name(by: level + 1)
                 })
