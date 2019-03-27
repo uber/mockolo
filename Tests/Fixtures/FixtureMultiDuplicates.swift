@@ -85,11 +85,20 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         return 0
     }
     var updateArgCallCount = 0
-    var updateArgHandler: ((Float) -> ())?
-    func update(arg: Float)  {
+    var updateArgHandler: ((Int) -> ())?
+    func update(arg: Int)  {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
             return updateArgHandler(arg)
+        }
+        
+    }
+    var updateArg2CallCount = 0
+    var updateArg2Handler: ((Float) -> ())?
+    func update(arg: Float)  {
+        updateArg2CallCount += 1
+        if let updateArg2Handler = updateArg2Handler {
+            return updateArg2Handler(arg)
         }
         
     }
@@ -118,7 +127,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let updateArgSomeObservableIntHandler = updateArgSomeObservableIntHandler {
             return updateArgSomeObservableIntHandler(arg, some)
         }
-        return Observable<Int>.empty()
+        return Observable.empty()
     }
     var updateArgSomeStringObservableDoubleCallCount = 0
     var updateArgSomeStringObservableDoubleHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
@@ -127,7 +136,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let updateArgSomeStringObservableDoubleHandler = updateArgSomeStringObservableDoubleHandler {
             return updateArgSomeStringObservableDoubleHandler(arg, some)
         }
-        return (String) -> Observable<Double>.empty()
+        fatalError("updateArgSomeStringObservableDoubleHandler returns can't have a default value thus its handler must be set")
     }
     var updateArgSomeArrayStringFloatCallCount = 0
     var updateArgSomeArrayStringFloatHandler: ((Int, Float) -> (Array<String, Float>))?
@@ -190,7 +199,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let loadImageHandler = loadImageHandler {
             return loadImageHandler(url)
         }
-        fatalError("loadImageHandler returns can't have a default value thus its handler must be set")
+        return Observable.empty()
     }
     var loadImageAtURLCallCount = 0
     var loadImageAtURLHandler: ((URL, UIImage) -> (Observable<UIImage>))?
@@ -199,7 +208,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let loadImageAtURLHandler = loadImageAtURLHandler {
             return loadImageAtURLHandler(url, placeholder)
         }
-        fatalError("loadImageAtURLHandler returns can't have a default value thus its handler must be set")
+        return Observable.empty()
     }
     var loadImageAtURLInitialRetryDelayCallCount = 0
     var loadImageAtURLInitialRetryDelayHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
@@ -208,7 +217,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let loadImageAtURLInitialRetryDelayHandler = loadImageAtURLInitialRetryDelayHandler {
             return loadImageAtURLInitialRetryDelayHandler(url, initialRetryDelay, maxAttempts)
         }
-        fatalError("loadImageAtURLInitialRetryDelayHandler returns can't have a default value thus its handler must be set")
+        return Observable.empty()
     }
 }
 """

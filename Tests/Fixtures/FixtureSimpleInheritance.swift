@@ -39,7 +39,7 @@ public class simpleChildMock: simpleChild {
         }
     }
     var fooCallCount = 0
-    var fooHandler: (() -> ())?
+    public var fooHandler: (() -> ())?
     public func foo()  {
         fooCallCount += 1
         if let fooHandler = fooHandler {
@@ -59,7 +59,7 @@ public class simpleChildMock: simpleChild {
         }
     }
     var barCallCount = 0
-    var barHandler: ((Double) -> (Float?))?
+    public var barHandler: ((Double) -> (Float?))?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1
         if let barHandler = barHandler {
@@ -87,7 +87,7 @@ public class simpleParentMock: simpleParent {
         }
     }
     var barCallCount = 0
-    var barHandler: ((Double) -> (Float?))?
+    public var barHandler: ((Double) -> (Float?))?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1
         if let barHandler = barHandler {

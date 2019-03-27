@@ -22,6 +22,7 @@ import SourceKittenFramework
 typealias ProtocolMapEntryType = (structure: Structure, file: File, models: [Model], attributes: [String])
 
 extension File {
+    
     func lines(starting keyword: String) -> [String] {
         let imports = lines.filter { (line: Line) -> Bool in
             return line.content.trimmingCharacters(in: CharacterSet.whitespaces).starts(with: keyword)
@@ -68,6 +69,7 @@ extension String {
     static let rxObservableVarPrefix = "RxSwift.Observable<"
     static let publishSubjectPrefix = "PublishSubject"
     static let observableEmpty = "Observable.empty()"
+    static let rxObservableEmpty = "RxSwift.Observable.empty()"
     static let subjectSuffix = "Subject"
     static let underlyingVarPrefix = "underlying"
     static let callCountSuffix = "CallCount"
@@ -164,6 +166,7 @@ private let defaultValuesDict =
 "Character": "\"\"",
 "TimeInterval": "0.0",
 "NSTimeInterval": "0.0",
+"RxTimeInterval": "0.0",
 "Date": "Date()",
 "NSDate": "NSDate()",
 "CGRect": ".zero",
@@ -172,6 +175,7 @@ private let defaultValuesDict =
 "UIEdgeInsets": ".zero",
 "UIColor": ".white",
 "UIFont": ".systemFont(ofSize: 12)",
+"UIImage": "UIImage()",
 "UIView": "UIView(frame: .zero)",
 "UIViewController": "UIViewController()",
 "UICollectionView": "UICollectionView()",
@@ -180,8 +184,9 @@ private let defaultValuesDict =
 "UIScrollViewKeyboardDismissMode": ".interactive",
 "UIAccessibilityTraits": ".none",
 "Void": "Void",
+"URL": "URL(string: \"\")",
+"NSURL": "NSURL(string: \"\")",
 "UUID": "UUID()"];
-
 
 func defaultVal(typeName: String) -> String? {
     // TODO: add more robust handling
@@ -189,25 +194,21 @@ func defaultVal(typeName: String) -> String? {
         return "nil"
     }
     
-    if let leftidx = typeName.range(of: String.observableVarPrefix)?.upperBound,
-        let rightidx = typeName.lastIndex(of: ">") {
-        let range = Range(uncheckedBounds: (lower: leftidx, upper: rightidx))
-        let innerType = typeName.substring(with: range)
-        if defaultValuesDict.keys.contains(innerType) {
-            return "\(typeName).empty()"
-        }
+    if typeName.hasPrefix(String.observableVarPrefix) {
+        return String.observableEmpty
     }
-    
+    if typeName.hasPrefix(String.rxObservableVarPrefix) {
+        return String.rxObservableEmpty
+    }
+
     if (typeName.hasPrefix("[") && typeName.hasSuffix("]")) ||
         typeName.hasPrefix("Set") ||
         typeName.hasPrefix("Array") ||
         typeName.hasPrefix("Dictionary") {
         return "\(typeName)()"
     }
-    
     if let val = defaultValuesDict[typeName] {
         return val
     }
-    
     return nil
 }

@@ -66,7 +66,7 @@ struct MethodModel: Model {
         }
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
-        self.signatureComponents = args
+        self.signatureComponents = args.filter{ arg in !arg.isEmpty }
         
         
         self.handler = ClosureModel(name: self.name,
