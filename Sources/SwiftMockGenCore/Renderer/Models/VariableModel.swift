@@ -8,7 +8,6 @@ struct VariableModel: Model {
     var offset: Int64
     let accessControlLevelDescription: String
     let attributes: [String]?
-    let defaultValue: String?
     let staticKind: String
     let canBeInitParam: Bool
     let processed: Bool
@@ -20,7 +19,6 @@ struct VariableModel: Model {
         canBeInitParam = ast.canBeInitParam
         staticKind = ast.isStaticVariable ? .static : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
-        defaultValue = defaultVal(typeName: ast.typeName)
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
         self.processed = processed
     }

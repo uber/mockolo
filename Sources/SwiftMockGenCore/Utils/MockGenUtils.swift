@@ -189,8 +189,13 @@ func defaultVal(typeName: String) -> String? {
         return "nil"
     }
     
-    if typeName.hasPrefix(.observableVarPrefix) || typeName.hasPrefix(.rxObservableVarPrefix) {
-        return .observableEmpty
+    if let leftidx = typeName.range(of: String.observableVarPrefix)?.upperBound,
+        let rightidx = typeName.lastIndex(of: ">") {
+        let range = Range(uncheckedBounds: (lower: leftidx, upper: rightidx))
+        let innerType = typeName.substring(with: range)
+        if defaultValuesDict.keys.contains(innerType) {
+            return "\(typeName).empty()"
+        }
     }
     
     if (typeName.hasPrefix("[") && typeName.hasSuffix("]")) ||

@@ -99,7 +99,10 @@ public func generate(sourceDirs: [String]?,
     
     print("Put together mock results and import lines...")
     // 4. Accumulate import lines
-    let imports = importLines.values.flatMap { $0 }
+    let imports = importLines.values.flatMap { $0 }.map { line in
+        return line.trimmingCharacters(in: CharacterSet.whitespaces)
+    }
+    
     let importsSet = Set(imports)
     let entities = candidates.values.sorted{$0.1 < $1.1}.map{$0.0}
     
