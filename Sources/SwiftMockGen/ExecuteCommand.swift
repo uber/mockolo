@@ -78,6 +78,34 @@ class ExecuteCommand {
         //        if let loggingLevelArg = arguments.get(loggingLevel), let loggingLevel = LoggingLevel.level(from: loggingLevelArg) {
         //            set(minLoggingOutputLevel: loggingLevel)
         //        }
+        
+        #if TEST
+        let filepath = "<filepath to an input file containing a cmd with -srcs -output -mocks options>"
+        guard let content = try? String(contentsOfFile: filepath) else { fatalError("Missing input file containing a commandline") }
+        var outputFilePath = ""
+        var srcs: [String]?
+        let srcDirs: [String]? = nil
+        var mockFilePaths: [String]?
+        let excludeSuffixes = ["Test", "Tests", "Mock", "Mocks", "Images", "Strings", "Model", "Models"]
+        var parts = content.components(separatedBy: " -")
+
+        for p in parts {
+            var comps = p.components(separatedBy: " ").filter{!$0.isEmpty}
+            if let option = comps.first {
+                if option == "output" || option == "-output" {
+                    outputFilePath = comps.last ?? ""
+                } else if option == "srcs" || option == "-srcs" {
+                    comps.removeFirst()
+                    srcs = comps
+                } else if option == "mocks" || option == "-mocks" {
+                    comps.removeFirst()
+                    mockFilePaths = comps
+                }
+            }
+        }
+
+        #else
+        
         guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         
         let srcDirs = arguments.get(sourceDirs)
@@ -88,11 +116,14 @@ class ExecuteCommand {
         
         let excludeSuffixes = arguments.get(self.excludeSuffixes) ?? []
         let mockFilePaths = arguments.get(self.mockFilePaths) ?? []
+
+        #endif
+
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
         let parsingTimeout = arguments.get(self.parsingTimeout) ?? defaultTimeout
         let retryParsingOnTimeoutLimit = arguments.get(self.retryParsingOnTimeoutLimit) ?? 0
         let shouldCollectParsingInfo = arguments.get(self.shouldCollectParsingInfo) ?? false
-        
+
         do {
 
             // TODO: add sourcekitutilities to kill sourcekitd
