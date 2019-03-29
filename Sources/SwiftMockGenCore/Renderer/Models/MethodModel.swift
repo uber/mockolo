@@ -23,7 +23,6 @@ struct MethodModel: Model {
     var offset: Int64
     let accessControlLevelDescription: String
     let attributes: [String]
-    let defaultValue: String?
     let staticKind: String
     let genericTypeParams: [ParamModel]
     let params: [ParamModel]
@@ -67,7 +66,7 @@ struct MethodModel: Model {
         }
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
-        self.signatureComponents = args
+        self.signatureComponents = args.filter{ arg in !arg.isEmpty }
         
         
         self.handler = ClosureModel(name: self.name,
@@ -77,7 +76,6 @@ struct MethodModel: Model {
                                     returnType: ast.typeName,
                                     staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
-        self.defaultValue = defaultVal(typeName: ast.typeName)
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
     

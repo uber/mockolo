@@ -37,7 +37,7 @@ func applyMethodTemplate(name: String,
     let template =
     """
         \(staticStr)var \(callCount) = 0
-        \(staticStr)var \(handlerVarName): \(handlerVarType)
+        \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
         \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(returnStr) {
             \(callCount) += 1
             \(handlerReturn)

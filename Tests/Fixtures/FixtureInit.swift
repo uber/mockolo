@@ -12,7 +12,20 @@ var title: String { get set }
 
 let simpleInitParentMock = """
 public class ParentMock: Parent {
-let num: Int
+
+var numSetCallCount = 0
+var underlyingTitle: String = ""
+public var num: Int {
+get {
+return underlyingNum
+}
+set {
+underlyingNum = newValue
+numSetCallCount += 1
+}
+}
+
+public init() {}
 public init(arg: Int) {
 self.num = arg
 }
@@ -28,8 +41,18 @@ public class CurrentMock: Current {
         self.num = num
         self.title = title
     }
-    let num: Int
     
+    var numSetCallCount = 0
+    var underlyingTitle: String = ""
+    public var num: Int {
+        get {
+            return underlyingNum
+        }
+        set {
+            underlyingNum = newValue
+            numSetCallCount += 1
+        }
+    }
     
     var titleSetCallCount = 0
     var underlyingTitle: String = ""

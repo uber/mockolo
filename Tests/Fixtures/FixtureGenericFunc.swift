@@ -51,7 +51,7 @@ class GenericFuncMock: GenericFunc {
         if let enqueueHandler = enqueueHandler {
             return enqueueHandler(request, statusErrorCodeType) as! Observable<T>
         }
-        fatalError("enqueueHandler returns can't have a default value thus its handler must be set")
+        return Observable.empty()
     }
     var dequeueCallCount = 0
     var dequeueHandler: ((HTTPRequest, StatusErrorCodeConvertible.Type?) -> (Any))?
@@ -60,7 +60,7 @@ class GenericFuncMock: GenericFunc {
         if let dequeueHandler = dequeueHandler {
             return dequeueHandler(request, statusErrorCodeType) as! Observable<T>
         }
-        fatalError("dequeueHandler returns can't have a default value thus its handler must be set")
+        return Observable.empty()
     }
     var registerMessageCallCount = 0
     var registerMessageHandler: ((ResponseMessageType, Any) -> (Disposable))?

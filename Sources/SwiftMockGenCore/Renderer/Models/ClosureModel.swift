@@ -22,7 +22,7 @@ struct ClosureModel: Model {
     var type: String
     var offset: Int64 = .max
     let returnAs: String
-    let defaultReturnType: String
+    let funcReturnType: String
     let staticKind: String
     let genericTypeNames: [String]
     let paramNames: [String]
@@ -44,14 +44,16 @@ struct ClosureModel: Model {
         
         self.genericTypeNames = genericTypeNameList
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
-        let funcReturnType = returnType == UnknownVal ? "" : returnType
-        var displayableReturnType = funcReturnType
-        let returnComps = funcReturnType.displayableComponents
+        let formattedReturnType = returnType == UnknownVal ? "" : returnType
+        self.funcReturnType = formattedReturnType
+
+        var displayableReturnType = formattedReturnType
+        let returnComps = formattedReturnType.displayableComponents
         
         var returnAsStr = ""
         if !genericTypeNameList.filter({returnComps.contains($0)}).isEmpty {
             displayableReturnType = .any
-            returnAsStr = funcReturnType
+            returnAsStr = formattedReturnType
         }
 
         let isSimpleTuple = displayableReturnType.hasPrefix("(") &&
@@ -62,7 +64,6 @@ struct ClosureModel: Model {
             displayableReturnType = "(\(displayableReturnType))"
         }
         self.type = "((\(displayableParamStr)) -> \(displayableReturnType))?"
-        self.defaultReturnType = displayableReturnType
         self.returnAs = returnAsStr
     }
     
@@ -73,6 +74,7 @@ struct ClosureModel: Model {
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,
                                     returnAs: returnAs,
-                                    returnDefaultType: defaultReturnType)
+                                    returnDefaultType: funcReturnType)
     }
 }
+

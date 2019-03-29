@@ -50,19 +50,29 @@ func lookupEntities(name: String,
         
         let content = parentFile.contents
         models.append(contentsOf: parentModels)
-        var body = parentStructure.extractBody(content)
-
-        // Remove an initializer from the parent mock class as the leaf mock class will have its own
-        if let initStructure = parentStructure.substructures.filter(path: \.isInitializer).first {
-            let result = initStructure.range
-            if let range = Range(NSRange(location: Int(result.offset - parentStructure.bodyOffset - 1), length: Int(result.length)), in: body) {
-                body.removeSubrange(range)
-            }
-        }
-        processedResults.append(body)
-        
         let parentAttributes = parentStructure.extractAttributes(parentFile.contents, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
         attributes.append(contentsOf: parentAttributes)
+
+        // Remove initializers from the parent mock class as the leaf mock class will have its own
+        var body = parentStructure.extractBody(content)
+        var lowerBound = Int64.max
+        var upperBound = Int64.min
+        parentStructure.substructures.filter(path: \.isInitializer).forEach { (initStructure: Structure) in
+            let start = initStructure.range.offset - 1
+            let end = start + initStructure.range.length
+            if lowerBound > start {
+                lowerBound = start
+            }
+            if upperBound < end {
+                upperBound = end
+            }
+        }
+        
+        if let range = Range(NSRange(location: Int(lowerBound - parentStructure.bodyOffset), length: Int(upperBound - lowerBound)), in: body) {
+            body.removeSubrange(range)
+        }
+
+        processedResults.append(body)
     }
     
     return (models, attributes, processedResults)

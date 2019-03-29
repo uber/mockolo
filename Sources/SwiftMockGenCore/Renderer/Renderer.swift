@@ -20,7 +20,7 @@ import SourceKittenFramework
 func model(for element: Structure, content: String, processed: Bool = false) -> Model? {
     if element.isVariable {
         return VariableModel(element, content: content, processed: processed)
-    } else if element.isMethod {
+    } else if element.isMethod, !element.isInitializer {
         return MethodModel(element, content: content, processed: processed)
     }
     

@@ -27,7 +27,7 @@ public class ParentMock: Parent {
     }
     
     var updateStateCallCount = 0
-    var updateStateHandler: ((Int) -> (result: Double?, status: Bool?))?
+    public var updateStateHandler: ((Int) -> (result: Double?, status: Bool?))?
     public func updateState(_ state: Int) -> (result: Double?, status: Bool?) {
         updateStateCallCount += 1
         if let updateStateHandler = updateStateHandler {
@@ -44,7 +44,7 @@ public class ChildMock: Child {
     }
     
     var updateStateResultDoubleStatusBoolCallCount = 0
-    var updateStateResultDoubleStatusBoolHandler: ((Int) -> (result: Double?, status: Bool?))?
+    public var updateStateResultDoubleStatusBoolHandler: ((Int) -> (result: Double?, status: Bool?))?
     public func updateState(_ state: Int) -> (result: Double?, status: Bool?) {
         updateStateResultDoubleStatusBoolCallCount += 1
         if let updateStateResultDoubleStatusBoolHandler = updateStateResultDoubleStatusBoolHandler {
@@ -53,7 +53,7 @@ public class ChildMock: Child {
         return (nil, nil)
     }
     var updateStateCallCount = 0
-    var updateStateHandler: ((Int, SomeStyle) -> (result: Double?, status: Bool?))?
+    public var updateStateHandler: ((Int, SomeStyle) -> (result: Double?, status: Bool?))?
     public func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bool?) {
         updateStateCallCount += 1
         if let updateStateHandler = updateStateHandler {
