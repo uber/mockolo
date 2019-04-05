@@ -122,6 +122,7 @@ extension Structure {
     var canBeInitParam: Bool {
         return isVariable &&
             isTypeNonOptional &&
+            !isClosure &&
             !typeName.hasPrefix(.observableVarPrefix) &&
             !typeName.hasPrefix(.rxObservableVarPrefix) &&
             !name.hasPrefix(.underlyingVarPrefix) &&

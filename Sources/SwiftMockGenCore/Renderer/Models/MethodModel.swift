@@ -52,7 +52,7 @@ struct MethodModel: Model {
             .map { (arg: Structure) -> ParamModel in
                 ParamModel(arg, label: arg.name, isGeneric: true)
         }
-        let genericNameTypes = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayableForType }.joined()
+        let genericNameTypes = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayableForType }
         var args = zip(paramLabels, paramNames).compactMap { (argLabel: String, argName: String) -> String? in
             let val = argLabel.isEmpty ? argName : argLabel
             if val.count < 2 || !nameString.lowercased().hasSuffix(val.lowercased()) {
@@ -60,15 +60,14 @@ struct MethodModel: Model {
             }
             return nil
         }
-        args.append(genericNameTypes)
-        if self.type.displayableForType.count <= 32 {
-            args.append(self.type.displayableForType)
-        }
+        args.append(contentsOf: genericNameTypes)
+        args.append(contentsOf: paramTypes.map(path: \.displayableForType))
+        let capped = String.Index(encodedOffset: min(self.type.displayableForType.count, 32))
+        args.append(self.type.displayableForType.substring(to: capped))
+        
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
         self.signatureComponents = args.filter{ arg in !arg.isEmpty }
-        
-        
         self.handler = ClosureModel(name: self.name,
                                     genericTypeParams: genericTypeParams,
                                     paramNames: paramNames,
@@ -79,13 +78,17 @@ struct MethodModel: Model {
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
     
+    var fullName: String {
+        let x = self.signatureComponents.joined()
+        return self.name + x
+    }
+    
     func name(by level: Int) -> String {
-        if level <= 0 {
+        let cap = min(level, self.signatureComponents.count)
+        if cap <= 0 {
             return name
-        } else if level-1 >= self.signatureComponents.count {
-            return name(by: level-1) + "\(level)"
         }
-        return name(by: level-1) + self.signatureComponents[level-1]
+        return name(by: cap-1) + self.signatureComponents[cap-1]
     }
     
     func render(with identifier: String) -> String? {

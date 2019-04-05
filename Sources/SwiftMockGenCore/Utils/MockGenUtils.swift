@@ -35,6 +35,12 @@ extension File {
 
 
 public extension Sequence {
+    
+    func compactMap<T>(path: KeyPath<Element, T?>) -> [T] {
+        return compactMap { (element) -> T? in
+            element[keyPath: path]
+        }
+    }
     func map<T>(path: KeyPath<Element, T>) -> [T] {
         return map { (element) -> T in
             element[keyPath: path]

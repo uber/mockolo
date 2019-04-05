@@ -61,9 +61,17 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: simpleDuplicatesMock)
     }
 
-    func testDuplicateFuncNames() {
-        verify(srcContent: duplicateFuncNames,
-               dstContent: duplicateFuncNamesMock)
+    func testDuplicates1() {
+        verify(srcContent: duplicates1,
+               dstContent: duplicateMock1)
+    }
+    func testDuplicates2() {
+        verify(srcContent: duplicates2,
+               dstContent: duplicatesMock2)
+    }
+    func testDuplicates3() {
+        verify(srcContent: duplicates3,
+               dstContent: duplicatesMock3)
     }
 
     func testGenericFuncs() {

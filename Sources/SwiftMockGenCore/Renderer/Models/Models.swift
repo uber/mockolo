@@ -22,6 +22,9 @@ protocol Model {
     /// Identifier
     var name: String { get set }
 
+    /// Fully qualified identifier
+    var fullName: String { get }
+
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: String { get set }
 
@@ -39,6 +42,10 @@ protocol Model {
 
 extension Model {
     func name(by level: Int) -> String {
+        return name
+    }
+    
+    var fullName: String {
         return name
     }
 }

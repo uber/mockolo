@@ -43,12 +43,12 @@ public class ChildMock: Child {
         
     }
     
-    var updateStateResultDoubleStatusBoolCallCount = 0
-    public var updateStateResultDoubleStatusBoolHandler: ((Int) -> (result: Double?, status: Bool?))?
+    var updateStateIntCallCount = 0
+    public var updateStateIntHandler: ((Int) -> (result: Double?, status: Bool?))?
     public func updateState(_ state: Int) -> (result: Double?, status: Bool?) {
-        updateStateResultDoubleStatusBoolCallCount += 1
-        if let updateStateResultDoubleStatusBoolHandler = updateStateResultDoubleStatusBoolHandler {
-            return updateStateResultDoubleStatusBoolHandler(state)
+        updateStateIntCallCount += 1
+        if let updateStateIntHandler = updateStateIntHandler {
+            return updateStateIntHandler(state)
         }
         return (nil, nil)
     }
