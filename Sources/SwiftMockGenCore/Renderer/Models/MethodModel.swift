@@ -79,8 +79,7 @@ struct MethodModel: Model {
     }
     
     var fullName: String {
-        let x = self.signatureComponents.joined()
-        return self.name + x
+        return self.name + self.signatureComponents.joined()
     }
     
     func name(by level: Int) -> String {
