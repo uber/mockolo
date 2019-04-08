@@ -45,7 +45,11 @@ func applyClosureTemplate(name: String,
 }
 
 private func renderReturnDefaultStatement(name: String, type: String) -> String {
-    if type != UnknownVal {
+    if type != UnknownVal, !type.isEmpty {
+        if type.contains("->") {
+            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
+        }
+        
         var typeName = type
         if type.hasPrefix("("), type.hasSuffix(")") {
             typeName.removeFirst()

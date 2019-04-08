@@ -27,11 +27,15 @@ func applyVariableTemplate(name: String,
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {
+        if underlyingType.contains("->") {
+            underlyingType = "(\(underlyingType))!"
+        } else {
         if underlyingType.hasSuffix("?") {
             underlyingType.removeLast()
         }
         if !underlyingType.hasSuffix("!") {
             underlyingType.append("!")
+        }
         }
     }
     

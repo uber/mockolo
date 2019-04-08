@@ -61,9 +61,41 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: simpleDuplicatesMock)
     }
 
-    func testDuplicateFuncNames() {
-        verify(srcContent: duplicateFuncNames,
-               dstContent: duplicateFuncNamesMock)
+    func testDuplicates01() {
+        verify(srcContent: duplicates1,
+               dstContent: duplicateMock1)
+    }
+    func testDuplicates1() {
+        verify(srcContent: duplicates1,
+               dstContent: duplicateMock1)
+    }
+    func testDuplicates2() {
+        verify(srcContent: duplicates2,
+               dstContent: duplicatesMock2)
+    }
+    func testDuplicates3() {
+        verify(srcContent: duplicates3,
+               dstContent: duplicatesMock3)
+    }
+    func testDuplicateSigsInheritance1() {
+        verify(srcContent: duplicateSigInheritance1,
+               dstContent: duplicateSigInheritanceMock1)
+    }
+    func testDuplicateSigsInheritance2() {
+        verify(srcContent: duplicateSigInheritance2,
+               dstContent: duplicateSigInheritanceMock2)
+    }
+    func testDuplicateSigsInheritance3() {
+        verify(srcContent: duplicateSigInheritance3,
+               dstContent: duplicateSigInheritanceMock3)
+    }
+    func testDuplicateSigsInheritance4() {
+        verify(srcContent: duplicateSigInheritance4,
+               dstContent: duplicateSigInheritanceMock4)
+    }
+    func testDuplicateSigsInheritance5() {
+        verify(srcContent: duplicateSigInheritance5,
+               dstContent: duplicateSigInheritanceMock5)
     }
 
     func testGenericFuncs() {
@@ -75,10 +107,6 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: simpleInheritance,
                dstContent: simpleInheritanceMock)
     }
-    func testDuplicateInheritedFuncs() {
-        verify(srcContent: duplicateSigInheritance,
-               dstContent: duplicateSigInheritanceMock)
-    }
     
     func testDocComment1() {
         verify(srcContent: docComment1,
@@ -88,6 +116,7 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: docComment2,
                dstContent: docCommentMock)
     }
+    
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)

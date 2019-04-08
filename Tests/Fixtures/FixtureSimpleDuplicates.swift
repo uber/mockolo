@@ -7,7 +7,7 @@ public protocol SimpleDuplicate {
 func remove(_ arg: Int)
 func remove(_ arg: String)
 func remove(_ arg: Float)
-
+func remove(_ arg: Double)
 func push(state: Double, attachTransition: Int, detachTransition: Float?)
 func push(state: Double, flag: Float, attachTransition: Int, detachTransition: Float?)
 }
@@ -38,12 +38,21 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var removeArg2CallCount = 0
-    public var removeArg2Handler: ((Float) -> ())?
+    var removeArgFloatCallCount = 0
+    public var removeArgFloatHandler: ((Float) -> ())?
     public func remove(_ arg: Float)  {
-        removeArg2CallCount += 1
-        if let removeArg2Handler = removeArg2Handler {
-            return removeArg2Handler(arg)
+        removeArgFloatCallCount += 1
+        if let removeArgFloatHandler = removeArgFloatHandler {
+            return removeArgFloatHandler(arg)
+        }
+        
+    }
+    var removeArgDoubleCallCount = 0
+    public var removeArgDoubleHandler: ((Double) -> ())?
+    public func remove(_ arg: Double)  {
+        removeArgDoubleCallCount += 1
+        if let removeArgDoubleHandler = removeArgDoubleHandler {
+            return removeArgDoubleHandler(arg)
         }
         
     }

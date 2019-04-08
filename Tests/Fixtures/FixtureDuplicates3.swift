@@ -1,0 +1,98 @@
+import SwiftMockGenCore
+
+let duplicates3 = """
+/// \(String.mockAnnotation)
+protocol DuplicateFuncNames {
+
+func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String?
+func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)
+func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize
+func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)
+func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int)
+func loadImage(atURL url: URL) -> Observable<UIImage>
+func loadImage(atURL url: URL, placeholder: UIImage) -> Observable<UIImage>
+func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: Int) -> Observable<UIImage>
+}
+"""
+
+let duplicatesMock3 = """
+class DuplicateFuncNamesMock: DuplicateFuncNames {
+    
+    init() {
+        
+    }
+    
+    var collectionViewCallCount = 0
+    var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
+    func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
+        collectionViewCallCount += 1
+        if let collectionViewHandler = collectionViewHandler {
+            return collectionViewHandler(collectionView, index)
+        }
+        return nil
+    }
+    var collectionViewConfigureCellCallCount = 0
+    var collectionViewConfigureCellHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)  {
+        collectionViewConfigureCellCallCount += 1
+        if let collectionViewConfigureCellHandler = collectionViewConfigureCellHandler {
+            return collectionViewConfigureCellHandler(collectionView, cell, index)
+        }
+        
+    }
+    var collectionViewSizeForItemAtCallCount = 0
+    var collectionViewSizeForItemAtHandler: ((UICollectionView, Int) -> (CGSize))?
+    func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize {
+        collectionViewSizeForItemAtCallCount += 1
+        if let collectionViewSizeForItemAtHandler = collectionViewSizeForItemAtHandler {
+            return collectionViewSizeForItemAtHandler(collectionView, index)
+        }
+        return .zero
+    }
+    var collectionViewDidEndDisplayingCallCount = 0
+    var collectionViewDidEndDisplayingHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)  {
+        collectionViewDidEndDisplayingCallCount += 1
+        if let collectionViewDidEndDisplayingHandler = collectionViewDidEndDisplayingHandler {
+            return collectionViewDidEndDisplayingHandler(collectionView, cell, index)
+        }
+        
+    }
+    var collectionViewConfigureCallCount = 0
+    var collectionViewConfigureHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
+    func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int)  {
+        collectionViewConfigureCallCount += 1
+        if let collectionViewConfigureHandler = collectionViewConfigureHandler {
+            return collectionViewConfigureHandler(collectionView, cell, index)
+        }
+        
+    }
+    var loadImageCallCount = 0
+    var loadImageHandler: ((URL) -> (Observable<UIImage>))?
+    func loadImage(atURL url: URL) -> Observable<UIImage> {
+        loadImageCallCount += 1
+        if let loadImageHandler = loadImageHandler {
+            return loadImageHandler(url)
+        }
+        return Observable.empty()
+    }
+    var loadImageAtURLCallCount = 0
+    var loadImageAtURLHandler: ((URL, UIImage) -> (Observable<UIImage>))?
+    func loadImage(atURL url: URL, placeholder: UIImage) -> Observable<UIImage> {
+        loadImageAtURLCallCount += 1
+        if let loadImageAtURLHandler = loadImageAtURLHandler {
+            return loadImageAtURLHandler(url, placeholder)
+        }
+        return Observable.empty()
+    }
+    var loadImageAtURLInitialRetryDelayCallCount = 0
+    var loadImageAtURLInitialRetryDelayHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
+    func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: Int) -> Observable<UIImage> {
+        loadImageAtURLInitialRetryDelayCallCount += 1
+        if let loadImageAtURLInitialRetryDelayHandler = loadImageAtURLInitialRetryDelayHandler {
+            return loadImageAtURLInitialRetryDelayHandler(url, initialRetryDelay, maxAttempts)
+        }
+        return Observable.empty()
+    }
+}
+"""
