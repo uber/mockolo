@@ -1,6 +1,6 @@
 import SwiftMockGenCore
 
-let duplicateSigInheritance =  """
+let duplicateSigInheritance1 =  """
 import Foundation
 
 /// \(String.mockAnnotation)
@@ -17,7 +17,7 @@ func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bo
 }
 """
 
-let duplicateSigInheritanceMock = """
+let duplicateSigInheritanceMock1 = """
 import Foundation
 
 public class ParentMock: Parent {

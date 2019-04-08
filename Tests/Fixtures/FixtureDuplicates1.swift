@@ -1,5 +1,6 @@
 import SwiftMockGenCore
 
+
 let duplicates1 = """
 import UIKit
 
