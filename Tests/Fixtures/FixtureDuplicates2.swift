@@ -11,8 +11,7 @@ func update(arg: Int, some: Float) -> Array<String, Float>
 }
 """
 
-let duplicatesMock2 =
-"""
+let duplicatesMock2 = """
 class DuplicateFuncNamesMock: DuplicateFuncNames {
     
     init() {
@@ -62,7 +61,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         if let updateArgSomeIntFloatHandler = updateArgSomeIntFloatHandler {
             return updateArgSomeIntFloatHandler(arg, some)
         }
-        fatalError("updateArgSomeIntFloatHandler returns can't have a default value thus its handler must be set")
+        return Array<String, Float>()
     }
 }
 """

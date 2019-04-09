@@ -117,6 +117,11 @@ class SwiftMockGenTests: XCTestCase {
                dstContent: docCommentMock)
     }
     
+    func testTuplesBrackets() {
+        verify(srcContent: tuplesBrackets,
+               dstContent: tuplesBracketsMock)
+    }
+
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)

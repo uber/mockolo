@@ -7,13 +7,13 @@ import Foundation
 public protocol Parent: AnyObject {
 
 @discardableResult
-func updateState(_ state: Int) -> (result: Double?, status: Bool?)
+func updateState(_ state: Int) -> (result: Double?, status: Bool)
 }
 
 /// \(String.mockAnnotation)
 public protocol Child: Parent {
 @discardableResult
-func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bool?)
+func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bool)
 }
 """
 
@@ -27,13 +27,13 @@ public class ParentMock: Parent {
     }
     
     var updateStateCallCount = 0
-    public var updateStateHandler: ((Int) -> (result: Double?, status: Bool?))?
-    public func updateState(_ state: Int) -> (result: Double?, status: Bool?) {
+    public var updateStateHandler: ((Int) -> (result: Double?, status: Bool))?
+    public func updateState(_ state: Int) -> (result: Double?, status: Bool) {
         updateStateCallCount += 1
         if let updateStateHandler = updateStateHandler {
             return updateStateHandler(state)
         }
-        return (nil, nil)
+        return ( nil, false)
     }
 }
 
@@ -44,22 +44,22 @@ public class ChildMock: Child {
     }
     
     var updateStateIntCallCount = 0
-    public var updateStateIntHandler: ((Int) -> (result: Double?, status: Bool?))?
-    public func updateState(_ state: Int) -> (result: Double?, status: Bool?) {
+    public var updateStateIntHandler: ((Int) -> (result: Double?, status: Bool))?
+    public func updateState(_ state: Int) -> (result: Double?, status: Bool) {
         updateStateIntCallCount += 1
         if let updateStateIntHandler = updateStateIntHandler {
             return updateStateIntHandler(state)
         }
-        return (nil, nil)
+        return ( nil, false)
     }
     var updateStateCallCount = 0
-    public var updateStateHandler: ((Int, SomeStyle) -> (result: Double?, status: Bool?))?
-    public func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bool?) {
+    public var updateStateHandler: ((Int, SomeStyle) -> (result: Double?, status: Bool))?
+    public func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bool) {
         updateStateCallCount += 1
         if let updateStateHandler = updateStateHandler {
             return updateStateHandler(state, style)
         }
-        return (nil, nil)
+        return ( nil, false)
     }
 }
 """

@@ -44,36 +44,22 @@ func applyClosureTemplate(name: String,
     return result
 }
 
+
 private func renderReturnDefaultStatement(name: String, type: String) -> String {
     if type != UnknownVal, !type.isEmpty {
         if type.contains("->") {
             return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
         }
         
-        var typeName = type
-        if type.hasPrefix("("), type.hasSuffix(")") {
-            typeName.removeFirst()
-            typeName.removeLast()
-        }
-        let subtypes = typeName.components(separatedBy: ",")
-        // TODO: 2. need to handle ',' in return type like Hashtable<Int, String>, (Observable<(Int, String)>, Bool)
-        let returnStmts = subtypes.compactMap { (subType: String) -> String? in
-            if subType.isEmpty {
-                return nil
-            }
-            if let val = defaultVal(typeName: subType) {
-                return val
-            }
-            return .fatalError
-        }
+        let result = processDefaultVal(typeName: type) ?? String.fatalError
         
-        if returnStmts.contains(.fatalError) {
-            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-        } else if returnStmts.count > 1 {
-            return "return (\(returnStmts.joined(separator: ", ")))"
-        } else if let returnStmts = returnStmts.first {
-            return  "return \(returnStmts)"
+        if result.isEmpty {
+            return ""
         }
+        if result.contains(String.fatalError) {
+            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
+        }
+        return  "return \(result)"
     }
     return ""
 }
