@@ -253,8 +253,8 @@ private func parseBrackets(_ arg: String, left: String, right: String) -> String
     return mutableArg
 }
 
-// Parse the string containing tuples or brackets and returns a default value for each type compoennt
-// @paren arg The type string to be parsed
+// Parse the string containing tuples or brackets and returns a default value for each type component
+// @param arg The type string to be parsed
 // @returns The parsed string containing a default value for each type component
 private func parseParens(_ arg: String) -> String? {
     var stack = [[String]]()
