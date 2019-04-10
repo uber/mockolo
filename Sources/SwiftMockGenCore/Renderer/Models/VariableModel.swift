@@ -10,6 +10,7 @@ struct VariableModel: Model {
     let attributes: [String]?
     let staticKind: String
     let canBeInitParam: Bool
+    let isClosureVariable: Bool
     let processed: Bool
     
     init(_ ast: Structure, content: String, processed: Bool) {
@@ -17,6 +18,7 @@ struct VariableModel: Model {
         type = ast.typeName
         offset = ast.offset
         canBeInitParam = ast.canBeInitParam
+        isClosureVariable = ast.isClosureVariable
         staticKind = ast.isStaticVariable ? .static : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil

@@ -108,7 +108,7 @@ extension Structure {
         return isInstanceMethod || isStaticMethod
     }
     
-    var isClosure: Bool {
+    var isClosureVariable: Bool {
         return isVariable && typeName.contains("->")
     }
     
@@ -122,9 +122,6 @@ extension Structure {
     var canBeInitParam: Bool {
         return isVariable &&
             isTypeNonOptional &&
-            !isClosure &&
-            !typeName.hasPrefix(.observableVarPrefix) &&
-            !typeName.hasPrefix(.rxObservableVarPrefix) &&
             !name.hasPrefix(.underlyingVarPrefix) &&
             !name.hasSuffix(.closureVarSuffix) &&
             !name.hasSuffix(.callCountSuffix) &&

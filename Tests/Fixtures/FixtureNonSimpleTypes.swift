@@ -4,6 +4,12 @@ let tuplesBrackets = """
 
 /// \(String.mockAnnotation)
 protocol NonSimpleTypes {
+func variadicFunc(_ arg: Int, for key: String)
+func variadicFunc(_ arg: Int, for key: String...)
+func update() -> (state: State?, other: SomeEnum)
+func update() -> Observable<(ItemType, ())>
+func update() -> Observable<(ItemType, ())>?
+func update() -> Observable<[SomeKey: SomeType]>
 func update() -> [String: Int]
 func update() -> Dictionary<String, Int>
 func update() -> Observable<Double, Float>
@@ -33,12 +39,57 @@ class NonSimpleTypesMock: NonSimpleTypes {
         
     }
     
+    var variadicFuncCallCount = 0
+    var variadicFuncHandler: ((Int, String) -> ())?
+    func variadicFunc(_ arg: Int, for key: String)  {
+        variadicFuncCallCount += 1
+        if let variadicFuncHandler = variadicFuncHandler {
+            return variadicFuncHandler(arg, key)
+        }
+        
+    }
     var updateCallCount = 0
-    var updateHandler: (() -> ([String: Int]))?
-    func update() -> [String: Int] {
+    var updateHandler: (() -> (state: State?, other: SomeEnum))?
+    func update() -> (state: State?, other: SomeEnum) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             return updateHandler()
+        }
+        fatalError("updateHandler returns can't have a default value thus its handler must be set")
+    }
+    var updateObservableItemTypeCallCount = 0
+    var updateObservableItemTypeHandler: (() -> (Observable<(ItemType, ())>))?
+    func update() -> Observable<(ItemType, ())> {
+        updateObservableItemTypeCallCount += 1
+        if let updateObservableItemTypeHandler = updateObservableItemTypeHandler {
+            return updateObservableItemTypeHandler()
+        }
+        return Observable.empty()
+    }
+    var updateObservableItemTypeOptionalCallCount = 0
+    var updateObservableItemTypeOptionalHandler: (() -> (Observable<(ItemType, ())>?))?
+    func update() -> Observable<(ItemType, ())>? {
+        updateObservableItemTypeOptionalCallCount += 1
+        if let updateObservableItemTypeOptionalHandler = updateObservableItemTypeOptionalHandler {
+            return updateObservableItemTypeOptionalHandler()
+        }
+        return nil
+    }
+    var updateObservableSomeKeySomeTypeCallCount = 0
+    var updateObservableSomeKeySomeTypeHandler: (() -> (Observable<[SomeKey: SomeType]>))?
+    func update() -> Observable<[SomeKey: SomeType]> {
+        updateObservableSomeKeySomeTypeCallCount += 1
+        if let updateObservableSomeKeySomeTypeHandler = updateObservableSomeKeySomeTypeHandler {
+            return updateObservableSomeKeySomeTypeHandler()
+        }
+        return Observable.empty()
+    }
+    var updateStringIntCallCount = 0
+    var updateStringIntHandler: (() -> ([String: Int]))?
+    func update() -> [String: Int] {
+        updateStringIntCallCount += 1
+        if let updateStringIntHandler = updateStringIntHandler {
+            return updateStringIntHandler()
         }
         return [String: Int]()
     }
@@ -132,12 +183,12 @@ class NonSimpleTypesMock: NonSimpleTypes {
         }
         return Array<String>()
     }
-    var updateResultDoubleStatusBoolCallCount = 0
-    var updateResultDoubleStatusBoolHandler: (() -> (result: Double?, status: Bool))?
+    var updateResultDoubleOptionalStatusBoolCallCount = 0
+    var updateResultDoubleOptionalStatusBoolHandler: (() -> (result: Double?, status: Bool))?
     func update() -> (result: Double?, status: Bool) {
-        updateResultDoubleStatusBoolCallCount += 1
-        if let updateResultDoubleStatusBoolHandler = updateResultDoubleStatusBoolHandler {
-            return updateResultDoubleStatusBoolHandler()
+        updateResultDoubleOptionalStatusBoolCallCount += 1
+        if let updateResultDoubleOptionalStatusBoolHandler = updateResultDoubleOptionalStatusBoolHandler {
+            return updateResultDoubleOptionalStatusBoolHandler()
         }
         return ( nil, false)
     }

@@ -81,6 +81,7 @@ extension String {
     static let callCountSuffix = "CallCount"
     static let closureVarSuffix = "Handler"
     static let initializerPrefix = "init("
+    static let `escaping` = "@escaping"
     static public let mockAnnotation = "@CreateMock"
     static public let poundIfMock = "#if MOCK"
     static public let poundEndIf = "#endif"
@@ -109,7 +110,8 @@ extension String {
     }
     
     var displayableComponents: [String] {
-        return self.components(separatedBy: CharacterSet.alphanumerics.inverted)
+        let ret = self.replacingOccurrences(of: "?", with: "Optional")
+        return ret.components(separatedBy: CharacterSet.alphanumerics.inverted)
     }
     
     var displayableForType: String {
@@ -176,6 +178,7 @@ private let defaultValuesDict =
 "TimeInterval": "0.0",
 "NSTimeInterval": "0.0",
 "RxTimeInterval": "0.0",
+"PublishSubject": "PublishSubject()",
 "Date": "Date()",
 "NSDate": "NSDate()",
 "CGRect": ".zero",
@@ -195,9 +198,12 @@ private let defaultValuesDict =
 "Void": "Void",
 "URL": "URL(string: \"\")",
 "NSURL": "NSURL(string: \"\")",
-"UUID": "UUID()"];
+"UUID": "UUID()",
+// Following is a hack in the js script -- TODO: copied here for now but remove
+"CachedExperimenting": "CachedExperimentingMock()"
+];
 
-func defaultVal(typeName: String) -> String? {
+private func defaultVal(typeName: String) -> String? {
     // TODO: add more robust handling
     if typeName.hasSuffix("?") {
         return "nil"
@@ -215,7 +221,11 @@ func defaultVal(typeName: String) -> String? {
         return String.rxObservableEmpty
     }
 
-    if typeName.contains("<"), typeName.hasSuffix(">") {
+    if typeName.hasSuffix(">") &&
+        (typeName.hasPrefix("Array<") ||
+        typeName.hasPrefix("Set<") ||
+        typeName.hasPrefix("Dictionary<") ||
+        typeName.hasPrefix("PublishSubject<")) {
         return "\(typeName)()"
     }
     
@@ -277,9 +287,9 @@ private func parseParens(_ arg: String) -> String? {
             return defaultVal(typeName: labelSub)
         }
     } else {
-        comps
-            .filter(path: \.isNotEmpty)
-            .forEach { comp in
+        let subcomps = comps.filter(path: \.isNotEmpty)
+        
+        for comp in subcomps {
                 var sub = comp.trimmingCharacters(in: CharacterSet.whitespaces)
                 
                 // Process tuples by stripping parens and recursively calling on the remaining substring portion
@@ -289,6 +299,8 @@ private func parseParens(_ arg: String) -> String? {
                     stack.append(["("])
                     if let val = parseParens(sub) {
                         stack[stack.count - 1].append(val)
+                    } else {
+                        return nil
                     }
                     stack[stack.count - 1].append(")")
                 } else if sub.hasPrefix("(") {
@@ -296,12 +308,16 @@ private func parseParens(_ arg: String) -> String? {
                     stack.append(["("])
                     if let val = parseParens(sub) {
                         stack[stack.count - 1].append(val)
+                    } else {
+                        return nil
                     }
                 } else if sub.hasSuffix(")") {
                     sub.removeLast()
                     if !stack.isEmpty {  // Adding this as a safe guard but this check should not be needed
                         if let val = parseParens(sub) {
                             stack[stack.count - 1].append(val)
+                        } else {
+                            return nil
                         }
                         stack[stack.count - 1].append(")")
                     }
@@ -313,6 +329,8 @@ private func parseParens(_ arg: String) -> String? {
                         } else {
                             stack[stack.count - 1].append(val)
                         }
+                    } else {
+                        return nil
                     }
                 }
         }
@@ -338,6 +356,9 @@ private func lintCommas(_ arg: String) -> String {
 }
 
 func processDefaultVal(typeName: String) -> String? {
+    if let val = defaultVal(typeName: typeName) {
+        return val
+    }
     if let result = parseParens(typeName) {
         return lintCommas(result)
     }
