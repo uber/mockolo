@@ -81,6 +81,7 @@ extension String {
     static let callCountSuffix = "CallCount"
     static let closureVarSuffix = "Handler"
     static let initializerPrefix = "init("
+    static let `escaping` = "@escaping"
     static public let mockAnnotation = "@CreateMock"
     static public let poundIfMock = "#if MOCK"
     static public let poundEndIf = "#endif"
@@ -91,7 +92,10 @@ extension String {
 //  swiftlint:disable custom_rules
 
 """
-
+    var isNotEmpty: Bool {
+        return !isEmpty
+    }
+    
     var capitlizeFirstLetter: String {
         return prefix(1).capitalized + dropFirst()
     }
@@ -106,7 +110,8 @@ extension String {
     }
     
     var displayableComponents: [String] {
-        return self.components(separatedBy: CharacterSet.alphanumerics.inverted)
+        let ret = self.replacingOccurrences(of: "?", with: "Optional")
+        return ret.components(separatedBy: CharacterSet.alphanumerics.inverted)
     }
     
     var displayableForType: String {
@@ -173,6 +178,7 @@ private let defaultValuesDict =
 "TimeInterval": "0.0",
 "NSTimeInterval": "0.0",
 "RxTimeInterval": "0.0",
+"PublishSubject": "PublishSubject()",
 "Date": "Date()",
 "NSDate": "NSDate()",
 "CGRect": ".zero",
@@ -192,29 +198,170 @@ private let defaultValuesDict =
 "Void": "Void",
 "URL": "URL(string: \"\")",
 "NSURL": "NSURL(string: \"\")",
-"UUID": "UUID()"];
+"UUID": "UUID()",
+// Following is a hack in the js script -- TODO: copied here for now but remove
+"CachedExperimenting": "CachedExperimentingMock()"
+];
 
-func defaultVal(typeName: String) -> String? {
+private func defaultVal(typeName: String) -> String? {
     // TODO: add more robust handling
     if typeName.hasSuffix("?") {
         return "nil"
     }
     
-    if typeName.hasPrefix(String.observableVarPrefix) {
+    if typeName.hasPrefix("["), typeName.hasSuffix("]") {
+        return "\(typeName)()"
+    }
+
+    if typeName.hasPrefix(String.observableVarPrefix), typeName.hasSuffix(">") {
         return String.observableEmpty
     }
-    if typeName.hasPrefix(String.rxObservableVarPrefix) {
+
+    if typeName.hasPrefix(String.rxObservableVarPrefix), typeName.hasSuffix(">") {
         return String.rxObservableEmpty
     }
 
-    if (typeName.hasPrefix("[") && typeName.hasSuffix("]")) ||
-        typeName.hasPrefix("Set") ||
-        typeName.hasPrefix("Array") ||
-        typeName.hasPrefix("Dictionary") {
+    if typeName.hasSuffix(">") &&
+        (typeName.hasPrefix("Array<") ||
+        typeName.hasPrefix("Set<") ||
+        typeName.hasPrefix("Dictionary<") ||
+        typeName.hasPrefix("PublishSubject<")) {
         return "\(typeName)()"
     }
+    
     if let val = defaultValuesDict[typeName] {
         return val
     }
     return nil
 }
+
+
+
+// Process substrings containing angled or square brackets by replacing a comma delimiter
+// with another delimiter (e.g. ;) to make it easier to parse tuples
+// @param arg The type string to be parsed
+// @param left The opening bracket character
+// @param right The closing bracket character
+// @returns The processed string with a new delimiter
+private func parseBrackets(_ arg: String, left: String, right: String) -> String {
+    var mutableArg = arg
+    var nextRange: Range<String.Index>? = nil
+    while let leftRange = mutableArg.range(of: left, options: String.CompareOptions.caseInsensitive, range: nextRange, locale: nil),
+        let rightRange = mutableArg.range(of: right, options: String.CompareOptions.caseInsensitive, range: nextRange, locale: nil) {
+            let bound = leftRange.lowerBound..<rightRange.lowerBound
+            let sub = mutableArg.substring(with: bound)
+            let newsub = sub.replacingOccurrences(of: ",", with: ";")
+            mutableArg = mutableArg.replacingOccurrences(of: sub, with: newsub)
+            
+            if let nextIdx = mutableArg.index(rightRange.upperBound, offsetBy: 1, limitedBy: mutableArg.endIndex) {
+                nextRange = nextIdx..<mutableArg.endIndex
+            } else {
+                break
+            }
+    }
+    
+    return mutableArg
+}
+
+// Parse the string containing tuples or brackets and returns a default value for each type component
+// @param arg The type string to be parsed
+// @returns The parsed string containing a default value for each type component
+private func parseParens(_ arg: String) -> String? {
+    var stack = [[String]]()
+    
+    // First process substrings with brackets: replace a comma with another delimiter
+    var parsedArg = parseBrackets(arg, left: "<", right: ">")
+    parsedArg = parseBrackets(parsedArg, left: "[", right: "]")
+    
+    // Separate the input by a comma delimiter and process each sub component
+    let comps = parsedArg.components(separatedBy: CharacterSet(charactersIn: ",")).filter(path: \.isNotEmpty)
+    if comps.count == 1 {
+        let sub = parsedArg.trimmingCharacters(in: CharacterSet.whitespaces)
+        // There's only one component, so just look up the default value for the component
+        if let val = defaultVal(typeName: sub) {
+            return val
+        }
+        
+        // In case it contains a label, look up the type portion
+        if let labelSub = sub.components(separatedBy: ":").last?.trimmingCharacters(in: CharacterSet.whitespaces) {
+            return defaultVal(typeName: labelSub)
+        }
+    } else {
+        let subcomps = comps.filter(path: \.isNotEmpty)
+        
+        for comp in subcomps {
+                var sub = comp.trimmingCharacters(in: CharacterSet.whitespaces)
+                
+                // Process tuples by stripping parens and recursively calling on the remaining substring portion
+                if sub.hasPrefix("("), sub.hasSuffix(")") {
+                    sub.removeFirst()
+                    sub.removeLast()
+                    stack.append(["("])
+                    if let val = parseParens(sub) {
+                        stack[stack.count - 1].append(val)
+                    } else {
+                        return nil
+                    }
+                    stack[stack.count - 1].append(")")
+                } else if sub.hasPrefix("(") {
+                    sub.removeFirst()
+                    stack.append(["("])
+                    if let val = parseParens(sub) {
+                        stack[stack.count - 1].append(val)
+                    } else {
+                        return nil
+                    }
+                } else if sub.hasSuffix(")") {
+                    sub.removeLast()
+                    if !stack.isEmpty {  // Adding this as a safe guard but this check should not be needed
+                        if let val = parseParens(sub) {
+                            stack[stack.count - 1].append(val)
+                        } else {
+                            return nil
+                        }
+                        stack[stack.count - 1].append(")")
+                    }
+                    stack.append([""])
+                } else {
+                    if let val = parseParens(sub), !val.isEmpty {
+                        if stack.isEmpty {
+                            stack.append([val])
+                        } else {
+                            stack[stack.count - 1].append(val)
+                        }
+                    } else {
+                        return nil
+                    }
+                }
+        }
+    }
+    
+    // Now combine them with a comma delimiter
+    let result = stack.flatMap{$0}.filter(path: \.isNotEmpty).joined(separator: ", ")
+    return result
+}
+
+// Cleanup the input string if it contains extra unneeded commas
+private func lintCommas(_ arg: String) -> String {
+    // Replace the other delimiter back to a comma delimiter
+    var replaced = arg.replacingOccurrences(of: ";", with: ",")
+    // Remove any excessive commas added from joining
+    for left in ["(,", "( ,"] {
+        replaced = replaced.replacingOccurrences(of: left, with: "(")
+    }
+    for right in [",)", ", )"] {
+        replaced = replaced.replacingOccurrences(of: right, with: ")")
+    }
+    return replaced
+}
+
+func processDefaultVal(typeName: String) -> String? {
+    if let val = defaultVal(typeName: typeName) {
+        return val
+    }
+    if let result = parseParens(typeName) {
+        return lintCommas(result)
+    }
+    return nil
+}
+

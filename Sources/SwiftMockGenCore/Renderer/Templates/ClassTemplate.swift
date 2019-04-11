@@ -25,10 +25,15 @@ func applyClassTemplate(name: String,
     
     let params = initParams
         .map { (element: VariableModel) -> String in
-            if let val = defaultVal(typeName: element.type), !val.isEmpty {
+            if let val = processDefaultVal(typeName: element.type), !val.isEmpty {
                 return "\(element.name): \(element.type) = \(val)"
             }
-            return "\(element.name): \(element.type)"
+            
+            var prefix = ""
+            if element.isClosureVariable {
+                prefix = String.escaping + " "
+            }
+            return "\(element.name): \(prefix)\(element.type)"
         }
         .joined(separator: ", ")
     // Besides the default init, we want to provide an empty init block (unless the default init is empty)

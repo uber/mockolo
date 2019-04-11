@@ -23,7 +23,7 @@ func applyVariableTemplate(name: String,
                            accessControlLevelDescription: String) -> String {
     let underlyingName = "\(String.underlyingVarPrefix)\(name.capitlizeFirstLetter)"
     let underlyingSetCallCount = "\(name)Set\(String.callCountSuffix)"
-    let underlyingVarDefaultVal = defaultVal(typeName: typeName) ?? ""
+    let underlyingVarDefaultVal = processDefaultVal(typeName: typeName) ?? ""
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {
@@ -75,13 +75,19 @@ func applyRxVariableTemplate(name: String,
         let template =
         """
             \(staticStr)var \(underlyingSetCallCount) = 0
-            \(staticStr)var \(underlying) = \(underlyingType)() {
-                 didSet {
-                     \(underlyingSetCallCount) += 1
-                 }
+            \(staticStr)var \(underlying): \(underlyingType) = \(underlyingType)() {
+                didSet {
+                    \(underlyingSetCallCount) += 1
+                }
             }
+        
             \(acl)\(staticStr)var \(name): \(typeName) {
-                return \(underlying)
+                get {
+                    return \(underlying)
+                }
+                set {
+                    \(underlyingSetCallCount) += 1
+                }
             }
         """
         return template

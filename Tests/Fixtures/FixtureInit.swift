@@ -13,8 +13,14 @@ var title: String { get set }
 let simpleInitParentMock = """
 public class ParentMock: Parent {
 
+public init() {}
+public init(num: Int, rate: Double) {
+self.num = arg
+self.rate = rate
+}
+
 var numSetCallCount = 0
-var underlyingTitle: String = ""
+var underlyingNum: Int = ""
 public var num: Int {
 get {
 return underlyingNum
@@ -25,11 +31,19 @@ numSetCallCount += 1
 }
 }
 
-public init() {}
-public init(arg: Int) {
-self.num = arg
+var rateSetCallCount = 0
+var underlyingRate: Double = 0.0
+public var rate: Double {
+get {
+return underlyingRate
+}
+set {
+underlyingRate = newValue
+rateSetCallCount += 1
 }
 }
+}
+
 """
 
 let simpleInitResultMock = """
@@ -37,13 +51,14 @@ import Foundation
 
 public class CurrentMock: Current {
     public init() {}
-    public init(num: Int = 0, title: String = "") {
-        self.num = num
+    public init(title: String = "", num: Int = 0, rate: Double = 0.0) {
         self.title = title
+        self.num = num
+        self.rate = rate
     }
     
     var numSetCallCount = 0
-    var underlyingTitle: String = ""
+    var underlyingNum: Int = ""
     public var num: Int {
         get {
             return underlyingNum
@@ -51,6 +66,18 @@ public class CurrentMock: Current {
         set {
             underlyingNum = newValue
             numSetCallCount += 1
+        }
+    }
+    
+    var rateSetCallCount = 0
+    var underlyingRate: Double = 0.0
+    public var rate: Double {
+        get {
+            return underlyingRate
+        }
+        set {
+            underlyingRate = newValue
+            rateSetCallCount += 1
         }
     }
     
