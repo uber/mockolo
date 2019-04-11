@@ -239,9 +239,9 @@ private func defaultVal(typeName: String) -> String? {
 
 // Process substrings containing angled or square brackets by replacing a comma delimiter
 // with another delimiter (e.g. ;) to make it easier to parse tuples
-// @paren arg The type string to be parsed
-// @paren left The opening bracket character
-// @paren right The closing bracket character
+// @param arg The type string to be parsed
+// @param left The opening bracket character
+// @param right The closing bracket character
 // @returns The processed string with a new delimiter
 private func parseBrackets(_ arg: String, left: String, right: String) -> String {
     var mutableArg = arg
