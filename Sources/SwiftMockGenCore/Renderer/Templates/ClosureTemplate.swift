@@ -19,13 +19,14 @@ import SourceKittenFramework
 
 func applyClosureTemplate(name: String,
                           type: String,
+                          typeKeys: [String]?,
                           genericTypeNames: [String],
                           paramVals: [String]?,
                           paramTypes: [String]?,
                           returnAs: String,
                           returnDefaultType: String) -> String {
     let handlerParamValsStr = paramVals?.joined(separator: ", ") ?? ""
-    let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
+    let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType, typeKeys: typeKeys)
 
     var returnTypeCast = ""
     if !returnAs.isEmpty {
@@ -45,13 +46,13 @@ func applyClosureTemplate(name: String,
 }
 
 
-private func renderReturnDefaultStatement(name: String, type: String) -> String {
+private func renderReturnDefaultStatement(name: String, type: String, typeKeys: [String]?) -> String {
     if type != UnknownVal, !type.isEmpty {
         if type.contains("->") {
             return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
         }
         
-        let result = processDefaultVal(typeName: type) ?? String.fatalError
+        let result = processDefaultVal(typeName: type, typeKeys: typeKeys) ?? String.fatalError
         
         if result.isEmpty {
             return ""

@@ -30,7 +30,7 @@ struct ParamModel: Model {
         self.label = ast.name != label ? label: ""
     }
     
-    func render(with identifier: String) -> String? {
+    func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
         var result = name
         if !label.isEmpty {
             result = "\(label) \(name)"

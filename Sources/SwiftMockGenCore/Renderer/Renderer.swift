@@ -26,10 +26,3 @@ func model(for element: Structure, content: String, processed: Bool = false) -> 
     
     return nil
 }
-
-func renderEntity(_ entity: [String: Model]) -> [String] {
-    let result = entity.compactMap { (arg: (name: String, model: Model)) -> String? in
-        return arg.model.render(with: arg.name)
-    }
-    return result
-}

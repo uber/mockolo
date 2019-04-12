@@ -67,9 +67,10 @@ struct ClosureModel: Model {
         self.returnAs = returnAsStr
     }
     
-    func render(with identifier: String) -> String? {
+    func render(with identifier: String, typeKeys: [String]?) -> String? {
         return applyClosureTemplate(name: identifier + .handlerSuffix,
                                     type: type,
+                                    typeKeys: typeKeys,
                                     genericTypeNames: genericTypeNames,
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,

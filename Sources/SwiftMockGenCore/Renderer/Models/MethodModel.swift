@@ -90,12 +90,12 @@ struct MethodModel: Model {
         return name(by: cap-1) + self.signatureComponents[cap-1]
     }
     
-    func render(with identifier: String) -> String? {
+    func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
         guard !processed else { return nil }
         let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}
         let paramDecls = params.compactMap{$0.render(with: "")}
         let returnType = type != UnknownVal ? type : ""
-        let handlerReturn = handler.render(with: identifier) ?? ""
+        let handlerReturn = handler.render(with: identifier, typeKeys: typeKeys) ?? ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
                                          genericTypeDecls: genericTypeDecls,

@@ -48,7 +48,7 @@ struct ClassModel: Model {
         self.accessControlLevelDescription = ast.accessControlLevelDescription.isEmpty ? "" : ast.accessControlLevelDescription + " "
     }
     
-    func render(with identifier: String) -> String? {
+    func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
         return applyClassTemplate(name: name, identifier: self.identifier, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, initParams: initParams, entities: entities)
     }
 }
