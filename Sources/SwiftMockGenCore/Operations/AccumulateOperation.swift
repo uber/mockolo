@@ -19,6 +19,7 @@ import SourceKittenFramework
 
 func renderMocks(inheritanceMap: [String: (Structure, File, [Model])],
                  annotatedProtocolMap: [String: ProtocolMapEntryType],
+                 typeKeys: [String],
                  semaphore: DispatchSemaphore?,
                  queue: DispatchQueue?,
                  process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
@@ -29,14 +30,14 @@ func renderMocks(inheritanceMap: [String: (Structure, File, [Model])],
         for key in annotatedProtocolMap.keys {
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                _ = renderMocksForClass(inheritanceMap: inheritanceMap, key: key, annotatedProtocolMap: annotatedProtocolMap, lock: lock, process: process)
+                _ = renderMocksForClass(inheritanceMap: inheritanceMap, key: key, annotatedProtocolMap: annotatedProtocolMap, typeKeys: typeKeys, lock: lock, process: process)
                 semaphore?.signal()
             }
         }
         queue.sync(flags: .barrier) { }
     } else {
         for key in annotatedProtocolMap.keys {
-            _ = renderMocksForClass(inheritanceMap: inheritanceMap, key: key, annotatedProtocolMap: annotatedProtocolMap, lock: nil, process: process)
+            _ = renderMocksForClass(inheritanceMap: inheritanceMap, key: key, annotatedProtocolMap: annotatedProtocolMap, typeKeys: typeKeys, lock: nil, process: process)
         }
     }
     return false
@@ -45,6 +46,7 @@ func renderMocks(inheritanceMap: [String: (Structure, File, [Model])],
 private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Model])],
                                  key: String,
                                  annotatedProtocolMap: [String: ProtocolMapEntryType],
+                                 typeKeys: [String],
                                  lock: NSLock? = nil,
                                  process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
     if let val = annotatedProtocolMap[key] {
@@ -54,8 +56,9 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
         let (models, attributes, processedResults) = lookupEntities(name: key, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
         
         let uniqueVals = uniqueEntities(in: models).sorted { $0.value.offset < $1.value.offset }
+        
         let renderedEntities = uniqueVals.compactMap { (name: String, model: Model) -> String? in
-            return model.render(with: name)
+            return model.render(with: name, typeKeys: typeKeys)
         }
         
         let nonOptionalOrRxVarList = nonOptionalOrRxVars(in: models)

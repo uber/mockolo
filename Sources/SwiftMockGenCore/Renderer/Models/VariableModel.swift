@@ -26,17 +26,19 @@ struct VariableModel: Model {
     }
     
     
-    func render(with identifier: String) -> String? {
+    func render(with identifier: String, typeKeys: [String]?) -> String? {
         guard !processed else { return nil }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,
                                                typeName: type,
+                                               typeKeys: typeKeys,
                                                staticKind: staticKind,
                                                accessControlLevelDescription: accessControlLevelDescription) {
             return rxVar
         }
         return applyVariableTemplate(name: identifier,
                                      typeName: type,
+                                     typeKeys: typeKeys, 
                                      staticKind: staticKind,
                                      accessControlLevelDescription: accessControlLevelDescription)
     }

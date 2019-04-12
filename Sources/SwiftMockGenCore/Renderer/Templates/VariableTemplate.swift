@@ -19,11 +19,12 @@ import SourceKittenFramework
 
 func applyVariableTemplate(name: String,
                            typeName: String,
+                           typeKeys: [String]?,
                            staticKind: String,
                            accessControlLevelDescription: String) -> String {
     let underlyingName = "\(String.underlyingVarPrefix)\(name.capitlizeFirstLetter)"
     let underlyingSetCallCount = "\(name)Set\(String.callCountSuffix)"
-    let underlyingVarDefaultVal = processDefaultVal(typeName: typeName) ?? ""
+    let underlyingVarDefaultVal = processDefaultVal(typeName: typeName, typeKeys: typeKeys) ?? ""
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {
@@ -61,6 +62,7 @@ func applyVariableTemplate(name: String,
 
 func applyRxVariableTemplate(name: String,
                              typeName: String,
+                             typeKeys: [String]?,
                              staticKind: String,
                              accessControlLevelDescription: String) -> String? {
     if let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {

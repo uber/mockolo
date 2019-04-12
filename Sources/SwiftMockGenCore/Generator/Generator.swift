@@ -86,8 +86,10 @@ public func generate(sourceDirs: [String]?,
     
     print("Accumulate the mock results for annotated protocols and their parents...")
     // 3. Accumulate mocks for annotated protocols and all of their parent protocols.
+    let typeKeys = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
     _ = renderMocks(inheritanceMap: parentMocks,
                     annotatedProtocolMap: annotatedProtocolMap,
+                    typeKeys: typeKeys,
                     semaphore: sema,
                     queue: mockgenQueue,
                     process: {(s: Structure, file: File, mockString: String, offset: Int64) in

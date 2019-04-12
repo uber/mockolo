@@ -199,8 +199,6 @@ private let defaultValuesDict =
 "URL": "URL(string: \"\")",
 "NSURL": "NSURL(string: \"\")",
 "UUID": "UUID()",
-// Following is a hack in the js script -- TODO: copied here for now but remove
-"CachedExperimenting": "CachedExperimentingMock()"
 ];
 
 private func defaultVal(typeName: String) -> String? {
@@ -355,9 +353,12 @@ private func lintCommas(_ arg: String) -> String {
     return replaced
 }
 
-func processDefaultVal(typeName: String) -> String? {
+func processDefaultVal(typeName: String, typeKeys: [String]? = nil) -> String? {
     if let val = defaultVal(typeName: typeName) {
         return val
+    }
+    if let typeKeys = typeKeys, typeKeys.contains(typeName) {
+        return "\(typeName)Mock()"
     }
     if let result = parseParens(typeName) {
         return lintCommas(result)
