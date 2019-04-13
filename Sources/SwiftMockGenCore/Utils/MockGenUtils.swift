@@ -190,7 +190,7 @@ private let defaultValuesDict =
 "UIImage": "UIImage()",
 "UIView": "UIView(frame: .zero)",
 "UIViewController": "UIViewController()",
-"UICollectionView": "UICollectionView()",
+"UICollectionView": "UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())",
 "UICollectionViewLayout": "UICollectionViewLayout()",
 "UIScrollView": "UIScrollView()",
 "UIScrollViewKeyboardDismissMode": ".interactive",
