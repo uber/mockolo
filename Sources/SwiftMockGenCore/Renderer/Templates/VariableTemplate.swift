@@ -31,12 +31,12 @@ func applyVariableTemplate(name: String,
         if underlyingType.contains("->") {
             underlyingType = "(\(underlyingType))!"
         } else {
-        if underlyingType.hasSuffix("?") {
-            underlyingType.removeLast()
-        }
-        if !underlyingType.hasSuffix("!") {
-            underlyingType.append("!")
-        }
+            if underlyingType.hasSuffix("?") {
+                underlyingType.removeLast()
+            }
+            if !underlyingType.hasSuffix("!") {
+                underlyingType.append("!")
+            }
         }
     }
     
@@ -45,17 +45,17 @@ func applyVariableTemplate(name: String,
     
     let template =
     """
-        \(staticStr)var \(underlyingSetCallCount) = 0
-        \(staticStr)var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
-        \(acl)\(staticStr)var \(name): \(typeName) {
-             get {
-                  return \(underlyingName)
-             }
-             set {
-                  \(underlyingName) = newValue
-                  \(underlyingSetCallCount) += 1
-             }
+    \(staticStr)var \(underlyingSetCallCount) = 0
+    \(staticStr)var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
+    \(acl)\(staticStr)var \(name): \(typeName) {
+        get {
+            return \(underlyingName)
         }
+        set {
+            \(underlyingName) = newValue
+            \(underlyingSetCallCount) += 1
+        }
+    }
     """
     return template
 }
@@ -73,24 +73,25 @@ func applyRxVariableTemplate(name: String,
         let underlyingType = "\(String.publishSubjectPrefix)<\(typeParamStr)>"
         let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-
+        
         let template =
         """
-            \(staticStr)var \(underlyingSetCallCount) = 0
-            \(staticStr)var \(underlying): \(underlyingType) = \(underlyingType)() {
-                didSet {
-                    \(underlyingSetCallCount) += 1
+        \(staticStr)var \(underlyingSetCallCount) = 0
+        \(staticStr)var \(underlying): \(underlyingType) = \(underlyingType)() {
+            didSet {
+                \(underlyingSetCallCount) += 1
+            }
+        }
+        \(acl)\(staticStr)var \(name): \(typeName) {
+            get {
+                return \(underlying)
+            }
+            set {
+                if let val = newValue as? \(underlyingType) {
+                    \(underlying) = val
                 }
             }
-        
-            \(acl)\(staticStr)var \(name): \(typeName) {
-                get {
-                    return \(underlying)
-                }
-                set {
-                    \(underlyingSetCallCount) += 1
-                }
-            }
+        }
         """
         return template
     }
