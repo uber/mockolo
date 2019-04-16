@@ -19,11 +19,15 @@ import SourceKittenFramework
 
 func lookupEntities(name: String,
                     inheritanceMap: [String: (structure: Structure, file: File, models: [Model])],
-                    annotatedProtocolMap: [String: ProtocolMapEntryType]) -> ([Model], [String], [String]) {
+                    annotatedProtocolMap: [String: ProtocolMapEntryType]) -> ([Model], [Model], [String]) {
     
+    // Used to keep track of types to be mocked
     var models = [Model]()
-    var attributes = [""]
-    var processedResults = [""]
+    // Used to keep track of types that were already mocked
+    var processedModels = [Model]()
+    // Gather attributes declared in current or parent protocols
+    var attributes = [String]()
+
     // Look up the mock entities of a protocol specified by the name.
     if let current = annotatedProtocolMap[name] {
         let curStructure = current.structure
@@ -36,10 +40,10 @@ func lookupEntities(name: String,
         // If the protocol inherits other protocols, look up their entities as well.
         for parent in curStructure.inheritedTypes {
             if parent != .class, parent != .any, parent != .anyObject {
-                let (parentModels, parentAttributes, parentResults) = lookupEntities(name: parent, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
+                let (parentModels, parentProcessedModels, parentAttributes) = lookupEntities(name: parent, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
                 models.append(contentsOf: parentModels)
                 attributes.append(contentsOf: parentAttributes)
-                processedResults.append(contentsOf: parentResults)
+                processedModels.append(contentsOf: parentProcessedModels)
             }
         }
     } else if let parentMock = inheritanceMap["\(name)Mock"] {
@@ -48,32 +52,11 @@ func lookupEntities(name: String,
         let parentFile = parentMock.file
         let parentModels = parentMock.models
         
-        let content = parentFile.contents
-        models.append(contentsOf: parentModels)
+        processedModels.append(contentsOf: parentModels)
+        
         let parentAttributes = parentStructure.extractAttributes(parentFile.contents, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
         attributes.append(contentsOf: parentAttributes)
-
-        // Remove initializers from the parent mock class as the leaf mock class will have its own
-        var body = parentStructure.extractBody(content)
-        var lowerBound = Int64.max
-        var upperBound = Int64.min
-        parentStructure.substructures.filter(path: \.isInitializer).forEach { (initStructure: Structure) in
-            let start = initStructure.range.offset - 1
-            let end = start + initStructure.range.length
-            if lowerBound > start {
-                lowerBound = start
-            }
-            if upperBound < end {
-                upperBound = end
-            }
-        }
-        
-        if let range = Range(NSRange(location: Int(lowerBound - parentStructure.bodyOffset), length: Int(upperBound - lowerBound)), in: body) {
-            body.removeSubrange(range)
-        }
-
-        processedResults.append(body)
     }
     
-    return (models, attributes, processedResults)
+    return (models, processedModels, attributes)
 }

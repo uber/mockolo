@@ -120,8 +120,9 @@ private func generateModelsToRender(_ path: String,
     guard fileName.shouldParse(with: exclude) else { return false }
     
     guard let file = File(path: path) else { return false }
+    guard file.contents.contains(String.mockAnnotation) else { return false }
+
     if let topstructure = try? Structure(file: file) {
-        
         for substructure in topstructure.substructures {
             if substructure.isProtocol,
                 substructure.isAnnotated(with: .mockAnnotation, in: file.contents) {

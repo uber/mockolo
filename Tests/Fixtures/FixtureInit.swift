@@ -56,7 +56,17 @@ public class CurrentMock: Current {
         self.num = num
         self.rate = rate
     }
-    
+    var titleSetCallCount = 0
+    var underlyingTitle: String = ""
+    public var title: String {
+        get {
+            return underlyingTitle
+        }
+        set {
+            underlyingTitle = newValue
+            titleSetCallCount += 1
+        }
+    }
     var numSetCallCount = 0
     var underlyingNum: Int = ""
     public var num: Int {
@@ -68,7 +78,6 @@ public class CurrentMock: Current {
             numSetCallCount += 1
         }
     }
-    
     var rateSetCallCount = 0
     var underlyingRate: Double = 0.0
     public var rate: Double {
@@ -78,18 +87,6 @@ public class CurrentMock: Current {
         set {
             underlyingRate = newValue
             rateSetCallCount += 1
-        }
-    }
-    
-    var titleSetCallCount = 0
-    var underlyingTitle: String = ""
-    public var title: String {
-        get {
-            return underlyingTitle
-        }
-        set {
-            underlyingTitle = newValue
-            titleSetCallCount += 1
         }
     }
 }

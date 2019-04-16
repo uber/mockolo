@@ -24,7 +24,10 @@ protocol Model {
 
     /// Fully qualified identifier
     var fullName: String { get }
-
+    
+    /// Indicates whether mock generation for this model has been processed
+    var processed: Bool { get }
+    
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: String { get set }
 
@@ -47,5 +50,9 @@ extension Model {
     
     var fullName: String {
         return name
+    }
+    
+    var processed: Bool {
+        return false
     }
 }
