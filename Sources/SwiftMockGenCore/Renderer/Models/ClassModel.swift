@@ -49,6 +49,6 @@ struct ClassModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, initParams: initParams, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, initParams: initParams, entities: entities)
     }
 }

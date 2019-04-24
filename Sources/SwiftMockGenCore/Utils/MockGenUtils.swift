@@ -78,6 +78,7 @@ extension String {
     static let rxObservableEmpty = "RxSwift.Observable.empty()"
     static let subjectSuffix = "Subject"
     static let underlyingVarPrefix = "underlying"
+    static let setCallCountSuffix = "SetCallCount"
     static let callCountSuffix = "CallCount"
     static let closureVarSuffix = "Handler"
     static let initializerPrefix = "init("
@@ -128,7 +129,7 @@ extension Structure {
         let len = dictionary["key.doclength"] as? Int64 ?? 0
         let offset = dictionary["key.docoffset"] as? Int64 ?? -1
         
-        return extract(offset: offset, length: len, content: content)
+        return SwiftMockGenCore.extract(offset: offset, length: len, content: content)
     }
     
     func extractAttributes(_ content: String, filterOn: String? = nil) -> [String] {
@@ -152,7 +153,7 @@ extension Structure {
         if let offset = source[SwiftDocKey.offset.rawValue] as? Int64,
             let len = source[SwiftDocKey.length.rawValue] as? Int64 {
             
-            return extract(offset: offset, length: len, content: content)
+            return SwiftMockGenCore.extract(offset: offset, length: len, content: content)
         }
         return ""
     }
@@ -354,6 +355,7 @@ private func lintCommas(_ arg: String) -> String {
 }
 
 func processDefaultVal(typeName: String, typeKeys: [String]? = nil) -> String? {
+    
     if let val = defaultVal(typeName: typeName) {
         return val
     }
@@ -365,4 +367,3 @@ func processDefaultVal(typeName: String, typeKeys: [String]? = nil) -> String? {
     }
     return nil
 }
-

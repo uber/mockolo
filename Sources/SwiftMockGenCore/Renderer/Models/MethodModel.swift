@@ -21,9 +21,11 @@ struct MethodModel: Model {
     var name: String
     var type: String
     var offset: Int64
+    let range: (offset: Int64, length: Int64)
     let accessControlLevelDescription: String
     let attributes: [String]
     let staticKind: String
+    let content: String
     let genericTypeParams: [ParamModel]
     let params: [ParamModel]
     let handler: ClosureModel
@@ -33,11 +35,13 @@ struct MethodModel: Model {
     init(_ ast: Structure, content: String, processed: Bool) {
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
         let nameString = comps.removeFirst()
+        self.content = content
         self.name = nameString
         self.type = ast.typeName == UnknownVal ? "" : ast.typeName
         self.staticKind = ast.isStaticMethod ? .static : ""
         self.processed = processed
         self.offset = ast.offset
+        self.range = ast.range
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
         assert(paramDecls.count == comps.count)
         
@@ -91,7 +95,10 @@ struct MethodModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
-        guard !processed else { return nil }
+        if processed {
+            return extract(offset: self.range.offset-1, length: self.range.length+1, content: self.content)
+        }
+        
         let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}
         let paramDecls = params.compactMap{$0.render(with: "")}
         let returnType = type != UnknownVal ? type : ""

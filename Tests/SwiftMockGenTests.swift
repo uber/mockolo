@@ -121,7 +121,19 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: tuplesBrackets,
                dstContent: tuplesBracketsMock)
     }
+    
+    func testFuncOverload() {
+        verify(srcContent: overload,
+               mockContent: overloadParent,
+               dstContent: overloadMock)
+    }
 
+    func testFuncOverload1() {
+        verify(srcContent: overload1,
+               mockContent: overloadParent1,
+               dstContent: overloadMock1)
+    }
+    
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)

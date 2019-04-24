@@ -18,17 +18,17 @@ import Foundation
 
 func applyClassTemplate(name: String,
                         identifier: String,
+                        typeKeys: [String]?,
                         accessControlLevelDescription: String,
                         attribute: String,
                         initParams: [VariableModel],
                         entities: [String]) -> String {
-    
     let params = initParams
         .map { (element: VariableModel) -> String in
-            if let val = processDefaultVal(typeName: element.type), !val.isEmpty {
+            
+            if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys), !val.isEmpty {
                 return "\(element.name): \(element.type) = \(val)"
             }
-            
             var prefix = ""
             if element.isClosureVariable {
                 prefix = String.escaping + " "
@@ -36,6 +36,7 @@ func applyClassTemplate(name: String,
             return "\(element.name): \(prefix)\(element.type)"
         }
         .joined(separator: ", ")
+    
     // Besides the default init, we want to provide an empty init block (unless the default init is empty)
     // since vars do not need to be set via init (since they all have get/set; see VariableTemplate for more detail)
     let extraInitBlock = !initParams.isEmpty ? "\(accessControlLevelDescription)init() {}" : ""

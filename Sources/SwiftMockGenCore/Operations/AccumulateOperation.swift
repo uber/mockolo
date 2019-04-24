@@ -49,27 +49,50 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
                                  typeKeys: [String],
                                  lock: NSLock? = nil,
                                  process: @escaping (Structure, File, String, Int64) -> ()) -> Bool {
+
     if let val = annotatedProtocolMap[key] {
         let protocolStructure = val.structure
         let file = val.file
+        let (models, processedModels, attributes) = lookupEntities(name: key, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
+
+        let processedFullNames = processedModels.compactMap {$0.fullName}
+
+        let processedElements = processedModels.compactMap { (element: Model) -> (String, Model)? in
+            if let rng = element.name.range(of: String.setCallCountSuffix) {
+                return (element.name.substring(to: rng.lowerBound), element)
+            }
+            if let rng = element.name.range(of: String.callCountSuffix) {
+                return (element.name.substring(to: rng.lowerBound), element)
+            }
+            return nil
+        }
         
-        let (models, attributes, processedResults) = lookupEntities(name: key, inheritanceMap: inheritanceMap, annotatedProtocolMap: annotatedProtocolMap)
-        
-        let uniqueVals = uniqueEntities(in: models).sorted { $0.value.offset < $1.value.offset }
-        
-        let renderedEntities = uniqueVals.compactMap { (name: String, model: Model) -> String? in
+        var processedLookup = Dictionary<String, Model>()
+        processedElements.forEach { (key, val) in
+            processedLookup[key] = val
+        }
+
+        let unmockedUniqueEntities = uniqueEntities(in: models, exclude: processedLookup, fullnames: processedFullNames).filter {!$0.value.processed}
+
+        let processedElementsMap = Dictionary(grouping: processedModels) { element in element.fullName }
+            .compactMap { (key, value) in value.first }
+            .map { element in (element.fullName, element) }
+        let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
+
+        let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
+        let renderedEntities = uniqueModels.sorted {$0.1.offset < $1.1.offset}
+            .compactMap { (name: String, model: Model) -> String? in
             return model.render(with: name, typeKeys: typeKeys)
         }
         
-        let nonOptionalOrRxVarList = nonOptionalOrRxVars(in: models)
-        
+        let nonOptionalVarList = nonOptionalVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
         let mockModel = ClassModel(protocolStructure,
                                    content: file.contents,
                                    identifier: key,
                                    additionalAttributes: attributes,
-                                   initParams: nonOptionalOrRxVarList,
-                                   entities: [processedResults.joined(), renderedEntities.joined(separator: "\n")])
-        if let mockString = mockModel.render(with: key), !mockString.isEmpty {
+                                   initParams: nonOptionalVarList,
+                                   entities: [renderedEntities.joined(separator: "\n")])
+        if let mockString = mockModel.render(with: key, typeKeys: typeKeys), !mockString.isEmpty {
             lock?.lock()
             process(protocolStructure, file, mockString, protocolStructure.offset)
             lock?.unlock()
@@ -78,8 +101,8 @@ private func renderMocksForClass(inheritanceMap: [String: (Structure, File, [Mod
     return false
 }
 
-private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
-    return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, lookup: nil, fullNameVisited: nil)
+private func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [String]) -> [String: Model] {
+    return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, lookup: exclude, fullNameVisited: fullnames)
 }
 
 // Uniquify multiple entities with the same name, e.g. func signature, using the verbosity level
@@ -93,27 +116,25 @@ private func uniqueEntities(`in` models: [Model]) -> [String: Model] {
 private func uniquifyDuplicates(group: [String: [Model]],
                                 level: Int,
                                 lookup: [String: Model]?,
-                                fullNameVisited: [String: Bool]?) -> [String: Model] {
+                                fullNameVisited: [String]) -> [String: Model] {
     
     var bufferKeyModelMap = [String: Model]()
-    var bufferFullNameVisited = [String: Bool]()
+    var bufferFullNameVisited = [String]()
     group.forEach { (key: String, models: [Model]) in
         if let lookup = lookup, lookup[key] != nil {
             // An entity with the given key already exists, so look up a more verbose name for these entities
             let subgroup = Dictionary(grouping: models, by: { (modelElement: Model) -> String in
                 return modelElement.name(by: level + 1)
             })
-            if let fullNameVisited = fullNameVisited {
-                bufferFullNameVisited.merge(fullNameVisited, uniquingKeysWith: { (cur, prev) -> Bool in
-                    return cur
-                })
+            if !fullNameVisited.isEmpty {
+                bufferFullNameVisited.append(contentsOf: fullNameVisited)
             }
             let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: bufferKeyModelMap, fullNameVisited: bufferFullNameVisited)
             bufferKeyModelMap.merge(subresult, uniquingKeysWith: { (bufferElement: Model, subresultElement: Model) -> Model in
                 return subresultElement
             })
         } else if let first = models.first {
-            if let visited = fullNameVisited?[first.fullName], visited == true {
+            if fullNameVisited.contains(first.fullName) {
                 // Full name looked up before so don't do anything
             } else if models.count > 1 {
                 // There are multiple entities with the same name key; map one of them with the
@@ -121,14 +142,12 @@ private func uniquifyDuplicates(group: [String: [Model]],
                 bufferKeyModelMap[key] = first
                 // Mark the full name of the given key as visited to detect other entities with
                 // the same full name (true duplicates)
-                bufferFullNameVisited[first.fullName] = true
+                bufferFullNameVisited.append(first.fullName)
                 
-                if let fullNameVisited = fullNameVisited {
-                    bufferFullNameVisited.merge(fullNameVisited, uniquingKeysWith: { (cur, prev) -> Bool in
-                        return cur
-                    })
+                if !fullNameVisited.isEmpty {
+                    bufferFullNameVisited.append(contentsOf: fullNameVisited)
                 }
-                
+
                 let nextModels = models[1...]
                 let subgroup = Dictionary(grouping: nextModels, by: { (modelElement: Model) -> String in
                     let distinctName = modelElement.name(by: level + 1)
@@ -156,22 +175,11 @@ private func uniquifyDuplicates(group: [String: [Model]],
     return bufferKeyModelMap
 }
 
-private func nonOptionalOrRxVars(`in` models: [Model]) -> [VariableModel] {
-    let paramsForInit = models.compactMap {$0 as? VariableModel}.filter(path: \.canBeInitParam)
-    let paramsDict = Dictionary(grouping: paramsForInit) { $0.name }
-    
+private func nonOptionalVars(`in` models: [String: Model], processed: [String: Model]) -> [VariableModel] {
     // Named params in init should be unique. Add a duplicate param check to ensure it.
-    let curVars = paramsDict.compactMap {$0.value.first}
-        .filter { (item: VariableModel) in
-            return !item.processed
-        }.sorted(path: \.offset)
-    
+    let curVars = models.values.compactMap{$0 as? VariableModel}.filter(path: \.canBeInitParam).sorted(path: \.offset)
     let curVarNames = curVars.map(path: \.name)
-
-    let parentVars = paramsForInit.filter { (item: VariableModel) -> Bool in
-        return item.processed && !curVarNames.contains(item.name)
-    }
-
+    let parentVars = processed.values.compactMap{$0 as? VariableModel}.filter {!curVarNames.contains($0.name) && $0.canBeInitParam}.sorted(path: \.offset)
     let result = [curVars, parentVars].flatMap{$0}
     return result
 }

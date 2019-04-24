@@ -189,30 +189,30 @@ extension Structure {
         return dictionary[SwiftDocKey.bodyOffset.rawValue] as? Int64 ?? -1
     }
 
-    func extract(offset: Int64, length: Int64, content: String) -> String {
-        let end = offset + length - 1
-        let start = offset
-        
-        if start >= 0 && length > 0 {
-            if end > content.count {
-                print("No content found", start, length, end, content.count)
-                return ""
-            }
-            
-            let startIdx = content.index(content.startIndex, offsetBy: Int(start))
-            let endIdx = content.index(content.startIndex, offsetBy: Int(end))
-            let body = content[startIdx ..< endIdx]
-            return String(body)
-        }
-        return ""
-    }
-    
     // This extracts the body of this structure, i.e. it doens't include the decl or signature
     func extractBody(_ file: String) -> String {
         let start = dictionary["key.bodyoffset"] as? Int64 ?? -1
         let len = dictionary["key.bodylength"] as? Int64 ?? 0
-        return extract(offset: start, length: len, content: file)
+        return SwiftMockGenCore.extract(offset: start, length: len, content: file)
     }
+}
+
+func extract(offset: Int64, length: Int64, content: String) -> String {
+    let end = offset + length - 1
+    let start = offset
+    
+    if start >= 0 && length > 0 {
+        if end > content.count {
+            print("No content found", start, length, end, content.count)
+            return ""
+        }
+        
+        let startIdx = content.index(content.startIndex, offsetBy: Int(start))
+        let endIdx = content.index(content.startIndex, offsetBy: Int(end))
+        let body = content[startIdx ..< endIdx]
+        return String(body)
+    }
+    return ""
 }
 
 func scanDirectory(_ path: String, with callBack: (String) -> Void) {
