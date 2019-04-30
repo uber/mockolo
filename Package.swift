@@ -9,7 +9,7 @@ let package = Package(
     ],
     dependencies: [
                 .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.1.0"),
-                .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.20.0"),
+                .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.23.0"),
     ],
     targets: [
         .target(

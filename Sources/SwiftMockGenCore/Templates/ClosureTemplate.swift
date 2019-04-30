@@ -47,12 +47,12 @@ func applyClosureTemplate(name: String,
 
 
 private func renderReturnDefaultStatement(name: String, type: String, typeKeys: [String]?) -> String {
-    if type != UnknownVal, !type.isEmpty {
+    if type != .unknownVal, !type.isEmpty {
         if type.contains("->") {
             return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
         }
         
-        let result = processDefaultVal(typeName: type, typeKeys: typeKeys) ?? String.fatalError
+        let result = TypeParser.processDefaultVal(typeName: type, typeKeys: typeKeys) ?? String.fatalError
         
         if result.isEmpty {
             return ""

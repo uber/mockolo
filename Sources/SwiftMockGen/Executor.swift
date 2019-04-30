@@ -23,17 +23,18 @@ protocol Command {
     func execute(with arguments: ArgumentParser.Result)
 }
 
-class ExecuteCommand {
+class Executor {
     let name: String
     let defaultTimeout = 30
     
     // MARK: - Private
-    private var loggingLevel: OptionArgument<String>!
+    private var loggingLevel: OptionArgument<Int>!
     private var outputFilePath: OptionArgument<String>!
     private var mockFilePaths: OptionArgument<[String]>!
     private var sourceDirs: OptionArgument<[String]>!
     private var sourceFiles: OptionArgument<[String]>!
-    private var excludeSuffixes: OptionArgument<[String]>!
+    private var exclusionSuffixes: OptionArgument<[String]>!
+    private var annotatedOnly: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var parsingTimeout: OptionArgument<Int>!
     private var retryParsingOnTimeoutLimit: OptionArgument<Int>!
@@ -56,12 +57,13 @@ class ExecuteCommand {
     ///
     /// - parameter parser: The argument parser to use.
     private func setupArguments(with parser: ArgumentParser) {
-        loggingLevel = parser.add(option: "--logging-level", shortName: "-v", kind: String.self, usage: "The logging level to use.")
+        loggingLevel = parser.add(option: "--logging-level", shortName: "-v", kind: Int.self, usage: "The logging level to use. Default is set to 0 (non-verbose). Set 1 for verbose, and 2 for error logging.")
         sourceFiles = parser.add(option: "--sourcefiles", shortName: "-srcs", kind: [String].self, usage: "List of source files (separated by a comma or a space) to generate mocks for. If no value is given, the --srcdir value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.", completion: .filename)
         sourceDirs = parser.add(option: "--sourcedirs", shortName: "-srcdirs", kind: [String].self, usage: "Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.", completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles", shortName: "-mocks", kind: [String].self, usage: "List of mock files (separated by a comma or a space) from modules this target depends on. ", completion: .filename)
         outputFilePath = parser.add(option: "--outputfile", shortName: "-output", kind: String.self, usage: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.", completion: .filename)
-        excludeSuffixes = parser.add(option: "--exclude-suffixes", kind: [String].self, usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).", completion: .filename)
+        exclusionSuffixes = parser.add(option: "--exclude-suffixes", kind: [String].self, usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).", completion: .filename)
+        annotatedOnly = parser.add(option: "--annotated-only", kind: Bool.self, usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
         concurrencyLimit = parser.add(option: "--concurrency-limit", kind: Int.self, usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
         parsingTimeout = parser.add(option: "--parsing-timeout", kind: Int.self, usage: "Timeout for parsing, in seconds (default = 10).")
         parsingTimeout = parser.add(option: "--rendering-timeout", kind: Int.self, usage: "Timeout for output rendering, in seconds (default = 15).")
@@ -74,38 +76,7 @@ class ExecuteCommand {
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
     func execute(with arguments: ArgumentParser.Result) {
-        // TODO: add LoggingLevel
-        //        if let loggingLevelArg = arguments.get(loggingLevel), let loggingLevel = LoggingLevel.level(from: loggingLevelArg) {
-        //            set(minLoggingOutputLevel: loggingLevel)
-        //        }
-        
-        #if TEST
-        let filepath = "<filepath to an input file containing a cmd with -srcs -output -mocks options>"
-        guard let content = try? String(contentsOfFile: filepath) else { fatalError("Missing input file containing a commandline") }
-        var outputFilePath = ""
-        var srcs: [String]?
-        let srcDirs: [String]? = nil
-        var mockFilePaths: [String]?
-        let excludeSuffixes = ["Test", "Tests", "Mock", "Mocks", "Images", "Strings", "Model", "Models"]
-        var parts = content.components(separatedBy: " -")
 
-        for p in parts {
-            var comps = p.components(separatedBy: " ").filter{!$0.isEmpty}
-            if let option = comps.first {
-                if option == "output" || option == "-output" {
-                    outputFilePath = comps.last ?? ""
-                } else if option == "srcs" || option == "-srcs" {
-                    comps.removeFirst()
-                    srcs = comps
-                } else if option == "mocks" || option == "-mocks" {
-                    comps.removeFirst()
-                    mockFilePaths = comps
-                }
-            }
-        }
-
-        #else
-        
         guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         
         let srcDirs = arguments.get(sourceDirs)
@@ -114,24 +85,23 @@ class ExecuteCommand {
             fatalError("Missing source files or their directory")
         }
         
-        let excludeSuffixes = arguments.get(self.excludeSuffixes) ?? []
+        let exclusionSuffixes = arguments.get(self.exclusionSuffixes) ?? []
         let mockFilePaths = arguments.get(self.mockFilePaths) ?? []
-
-        #endif
-
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
         let parsingTimeout = arguments.get(self.parsingTimeout) ?? defaultTimeout
         let retryParsingOnTimeoutLimit = arguments.get(self.retryParsingOnTimeoutLimit) ?? 0
         let shouldCollectParsingInfo = arguments.get(self.shouldCollectParsingInfo) ?? false
+        let annotatedOnly = arguments.get(self.annotatedOnly) ?? true
+        let loggingLevel = arguments.get(self.loggingLevel) ?? 0
 
         do {
-
-            // TODO: add sourcekitutilities to kill sourcekitd
-            try generate(sourceDirs: srcDirs,
+            try Generator.execute(sourceDirs: srcDirs,
                          sourceFiles: srcs,
-                         excludeSuffixes: excludeSuffixes,
+                         exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
+                         annotatedOnly: annotatedOnly,
                          to: outputFilePath,
+                         loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
                          parsingTimeout: parsingTimeout,
                          retryParsingOnTimeoutLimit: retryParsingOnTimeoutLimit,

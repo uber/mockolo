@@ -25,26 +25,24 @@ struct ClassModel: Model {
     let accessControlLevelDescription: String
     let identifier: String
     let entities: [String]
-    let initParams: [VariableModel]
-    
+    let initParams: [VariableModel]?
+
     init(_ ast: Structure,
          content: String,
          identifier: String,
          additionalAttributes: [String],
-         initParams: [VariableModel],
+         initParams: [VariableModel]?,
          entities: [String]) {
         self.identifier = identifier
         self.name = identifier + "Mock"
         self.type = .class
         self.entities = entities
         self.initParams = initParams
-        
         var mutableAttributes = additionalAttributes
         let curAttributes = ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
         mutableAttributes.append(contentsOf: curAttributes)
         let attributeSet = Set(mutableAttributes)
         self.attribute = attributeSet.joined(separator: " ")
-        
         self.accessControlLevelDescription = ast.accessControlLevelDescription.isEmpty ? "" : ast.accessControlLevelDescription + " "
     }
     

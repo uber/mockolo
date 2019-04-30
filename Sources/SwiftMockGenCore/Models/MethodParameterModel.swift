@@ -26,7 +26,7 @@ struct ParamModel: Model {
     init(_ ast: Structure, label: String = "", isGeneric: Bool = false) {
         self.name = ast.name
         self.isGeneric = isGeneric
-        self.type = isGeneric ? (ast.inheritedTypes.first ?? UnknownVal) : ast.typeName
+        self.type = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : ast.typeName
         self.label = ast.name != label ? label: ""
     }
     
@@ -35,7 +35,7 @@ struct ParamModel: Model {
         if !label.isEmpty {
             result = "\(label) \(name)"
         }
-        if !type.isEmpty, type != UnknownVal {
+        if !type.isEmpty, type != .unknownVal {
             result = "\(result): \(type)"
         }
         return result

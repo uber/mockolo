@@ -2,15 +2,14 @@ import Foundation
 import SourceKittenFramework
 
 struct VariableModel: Model {
-    
     var name: String
     var type: String
     var offset: Int64
-    let range: (offset: Int64, length: Int64)
+    var length: Int64
     let accessControlLevelDescription: String
     let attributes: [String]?
     let staticKind: String
-    let canBeInitParam: Bool
+    var canBeInitParam: Bool
     let isClosureVariable: Bool
     let processed: Bool
     let content: String
@@ -18,8 +17,8 @@ struct VariableModel: Model {
     init(_ ast: Structure, content: String, processed: Bool) {
         name = ast.name
         type = ast.typeName
-        offset = ast.offset
-        range = ast.range
+        offset = ast.range.offset
+        length = ast.range.length
         canBeInitParam = ast.canBeInitParam
         isClosureVariable = ast.isClosureVariable
         staticKind = ast.isStaticVariable ? .static : ""
@@ -29,10 +28,9 @@ struct VariableModel: Model {
         self.content = content
     }
     
-    
     func render(with identifier: String, typeKeys: [String]?) -> String? {
         if processed {
-            return extract(offset: self.range.offset-1, length: self.range.length+1, content: self.content)
+            return Extractor.extract(offset: self.offset-1, length: self.length+1, content: self.content)
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,
