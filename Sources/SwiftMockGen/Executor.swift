@@ -95,7 +95,7 @@ class Executor {
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
 
         do {
-            try Generator.execute(sourceDirs: srcDirs,
+            try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,

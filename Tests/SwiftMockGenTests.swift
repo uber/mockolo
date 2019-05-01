@@ -155,17 +155,17 @@ class SwiftMockGenTests: XCTestCase {
         \(String.poundEndIf)
         """
         
-        try? Generator.execute(sourceDirs: nil,
-                               sourceFiles: [srcFilePath],
-                               exclusionSuffixes: ["Mocks", "Tests"],
-                               mockFilePaths: [mockFilePath],
-                               annotatedOnly: false,
-                               to: dstFilePath,
-                               loggingLevel: 1,
-                               concurrencyLimit: nil,
-                               parsingTimeout: 10,
-                               retryParsingOnTimeoutLimit: 3,
-                               shouldCollectParsingInfo: true)
+        try? generate(sourceDirs: nil,
+                      sourceFiles: [srcFilePath],
+                      exclusionSuffixes: ["Mocks", "Tests"],
+                      mockFilePaths: [mockFilePath],
+                      annotatedOnly: false,
+                      to: dstFilePath,
+                      loggingLevel: 1,
+                      concurrencyLimit: nil,
+                      parsingTimeout: 10,
+                      retryParsingOnTimeoutLimit: 3,
+                      shouldCollectParsingInfo: true)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}

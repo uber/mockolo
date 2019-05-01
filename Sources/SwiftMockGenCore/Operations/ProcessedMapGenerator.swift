@@ -18,60 +18,57 @@ import Foundation
 import SourceKittenFramework
 
 /// Performs processed mock type map generation
-struct ProcessedTypeMapGenerator {
-    static func execute(_ paths: [String],
-                        semaphore: DispatchSemaphore?,
-                        timeout: Int,
-                        queue: DispatchQueue?,
-                        process: @escaping ([Entity], [String]) -> ()) -> Int {
-        var count = 0
-        if let queue = queue {
-            let lock = NSLock()
-            
-            for filePath in paths {
-                _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
-                queue.async {
-                    if let content = try? String(contentsOfFile: filePath) {
-                        let result = generateProcessedModels(filePath, content: content, lock: lock, process: process)
-                        count += result ? 1 : 0
-                    }
-                    semaphore?.signal()
-                }
-            }
-            // Wait for queue to drain
-            queue.sync(flags: .barrier) {}
-        } else {
-            for filePath in paths {
+func generateProcessedTypeMap(_ paths: [String],
+                              semaphore: DispatchSemaphore?,
+                              timeout: Int,
+                              queue: DispatchQueue?,
+                              process: @escaping ([Entity], [String]) -> ()) -> Int {
+    var count = 0
+    if let queue = queue {
+        let lock = NSLock()
+        
+        for filePath in paths {
+            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            queue.async {
                 if let content = try? String(contentsOfFile: filePath) {
-                    let result = generateProcessedModels(filePath, content: content, lock: nil, process: process)
+                    let result = generateProcessedModels(filePath, content: content, lock: lock, process: process)
                     count += result ? 1 : 0
                 }
+                semaphore?.signal()
             }
         }
-        
-        return count
+        // Wait for queue to drain
+        queue.sync(flags: .barrier) {}
+    } else {
+        for filePath in paths {
+            if let content = try? String(contentsOfFile: filePath) {
+                let result = generateProcessedModels(filePath, content: content, lock: nil, process: process)
+                count += result ? 1 : 0
+            }
+        }
     }
     
-    static private func generateProcessedModels(_ path: String,
-                                                content: String,
-                                                lock: NSLock?,
-                                                process: @escaping ([Entity], [String]) -> ()) -> Bool {
-        guard let content = try? String(contentsOfFile: path) else { return false }
-        let imports = Resolver.findImportLines(content: content)
-        
-        if let topstructure = try? Structure(path: path) {
-            let results = topstructure.substructures.map { current -> Entity in
-                
-                let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, isProcessed: true, models: nil, attributes: nil)
-                return node
-            }
+    return count
+}
+
+private func generateProcessedModels(_ path: String,
+                                            content: String,
+                                            lock: NSLock?,
+                                            process: @escaping ([Entity], [String]) -> ()) -> Bool {
+    guard let content = try? String(contentsOfFile: path) else { return false }
+    let imports = findImportLines(content: content)
+    
+    if let topstructure = try? Structure(path: path) {
+        let results = topstructure.substructures.map { current -> Entity in
             
-            lock?.lock()
-            process(results, imports)
-            lock?.unlock()
-            return true
+            let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, isProcessed: true, models: nil, attributes: nil)
+            return node
         }
-        return false
+        
+        lock?.lock()
+        process(results, imports)
+        lock?.unlock()
+        return true
     }
-    
+    return false
 }

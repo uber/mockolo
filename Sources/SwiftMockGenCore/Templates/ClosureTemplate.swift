@@ -30,7 +30,6 @@ func applyClosureTemplate(name: String,
 
     var returnTypeCast = ""
     if !returnAs.isEmpty {
-        // TODO: add a better check for optional
         let asSuffix = returnAs.hasSuffix("?") ? "?" : "!"
         returnTypeCast = " as\(asSuffix) " + returnAs
     }
@@ -52,7 +51,7 @@ private func renderReturnDefaultStatement(name: String, type: String, typeKeys: 
             return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
         }
         
-        let result = TypeParser.processDefaultVal(typeName: type, typeKeys: typeKeys) ?? String.fatalError
+        let result = processDefaultVal(typeName: type, typeKeys: typeKeys) ?? String.fatalError
         
         if result.isEmpty {
             return ""

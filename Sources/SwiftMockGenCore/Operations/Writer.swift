@@ -17,29 +17,27 @@
 import Foundation
 
 /// Combines a list of entities and import lines and header and writes the final output
-struct Writer {
-    static func execute(candidates: [(String, Int64)],
-                        processedImportLines: [String: [String]],
-                        pathToContentMap: [(String, String)],
-                        to outputFilePath: String) -> String {
-        
-        var importLines = processedImportLines
-        for (filepath, filecontent) in pathToContentMap {
-            if importLines[filepath] == nil {
-                importLines[filepath] = Resolver.findImportLines(content: filecontent)
-            }
+func write(candidates: [(String, Int64)],
+                  processedImportLines: [String: [String]],
+                  pathToContentMap: [(String, String)],
+                  to outputFilePath: String) -> String {
+    
+    var importLines = processedImportLines
+    for (filepath, filecontent) in pathToContentMap {
+        if importLines[filepath] == nil {
+            importLines[filepath] = findImportLines(content: filecontent)
         }
-        
-        let imports = importLines.values.joined().map { line in
-            return line.trimmingCharacters(in: CharacterSet.whitespaces)
-        }
-        
-        let importsSet = Set(imports)
-        let entities = candidates.sorted{$0.1 < $1.1}.map{$0.0}
-        
-        let ret = [.headerDoc, .poundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), .poundEndIf].joined(separator: "\n")
-        
-        _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
-        return ret
     }
+    
+    let imports = importLines.values.joined().map { line in
+        return line.trimmingCharacters(in: CharacterSet.whitespaces)
+    }
+    
+    let importsSet = Set(imports)
+    let entities = candidates.sorted{$0.1 < $1.1}.map{$0.0}
+    
+    let ret = [.headerDoc, .poundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), .poundEndIf].joined(separator: "\n")
+    
+    _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
+    return ret
 }

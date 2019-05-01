@@ -18,137 +18,135 @@ import Foundation
 import SourceKittenFramework
 
 /// Performs protocol and annotated protocol map generation
-struct ProtocolMapGenerator {
-    
-    static func execute(sourceDirs: [String]?,
-                 sourceFiles: [String]?,
-                 exclusionSuffixes: [String]? = nil,
-                 annotatedOnly: Bool,
-                 semaphore: DispatchSemaphore?,
-                 timeout: Int,
-                 queue: DispatchQueue?,
-                 process: @escaping ([Entity]) -> ()) -> Int {
-        if let sourceDirs = sourceDirs {
-            return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
-        } else if let sourceFiles = sourceFiles {
-            return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
-        }
-        return -1
+
+func generateProtocolMap(sourceDirs: [String]?,
+                         sourceFiles: [String]?,
+                         exclusionSuffixes: [String]? = nil,
+                         annotatedOnly: Bool,
+                         semaphore: DispatchSemaphore?,
+                         timeout: Int,
+                         queue: DispatchQueue?,
+                         process: @escaping ([Entity]) -> ()) -> Int {
+    if let sourceDirs = sourceDirs {
+        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
+    } else if let sourceFiles = sourceFiles {
+        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     }
+    return -1
+}
+
+private func generateProtcolMap(dirs: [String],
+                                exclusionSuffixes: [String]? = nil,
+                                annotatedOnly: Bool,
+                                semaphore: DispatchSemaphore?,
+                                timeout: Int,
+                                queue: DispatchQueue?,
+                                process: @escaping ([Entity]) -> ()) -> Int {
+    var count = 0
     
-    static private func generateProtcolMap(dirs: [String],
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotatedOnly: Bool,
-                                    semaphore: DispatchSemaphore?,
-                                    timeout: Int,
-                                    queue: DispatchQueue?,
-                                    process: @escaping ([Entity]) -> ()) -> Int {
-        var count = 0
+    if let queue = queue {
+        let lock = NSLock()
         
-        if let queue = queue {
-            let lock = NSLock()
-            
-            Scanner.scanPaths(dirs) { filePath in
-                _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
-                queue.async {
-                    let result = generateProtcolMap(filePath,
-                                                    exclusionSuffixes: exclusionSuffixes,
-                                                    annotatedOnly: annotatedOnly,
-                                                    lock: lock,
-                                                    process: process)
-                    count += result ? 1 : 0
-                    semaphore?.signal()
-                }
-            }
-            
-            // Wait for queue to drain
-            queue.sync(flags: .barrier) {}
-        } else {
-            Scanner.scanPaths(dirs) { filePath in
+        scanPaths(dirs) { filePath in
+            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            queue.async {
                 let result = generateProtcolMap(filePath,
                                                 exclusionSuffixes: exclusionSuffixes,
                                                 annotatedOnly: annotatedOnly,
-                                                lock: nil,
+                                                lock: lock,
                                                 process: process)
                 count += result ? 1 : 0
+                semaphore?.signal()
             }
         }
         
-        return count
+        // Wait for queue to drain
+        queue.sync(flags: .barrier) {}
+    } else {
+        scanPaths(dirs) { filePath in
+            let result = generateProtcolMap(filePath,
+                                            exclusionSuffixes: exclusionSuffixes,
+                                            annotatedOnly: annotatedOnly,
+                                            lock: nil,
+                                            process: process)
+            count += result ? 1 : 0
+        }
     }
     
-    
-    static private func generateProtcolMap(files: [String],
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotatedOnly: Bool,
-                                    semaphore: DispatchSemaphore?,
-                                    timeout: Int,
-                                    queue: DispatchQueue?,
-                                    process: @escaping ([Entity]) -> ()) -> Int  {
-        var count = 0
-        if let queue = queue {
-            let lock = NSLock()
-            for filePath in files {
-                _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
-                queue.async {
-                    let result = generateProtcolMap(filePath,
-                                                    exclusionSuffixes: exclusionSuffixes,
-                                                    annotatedOnly: annotatedOnly,
-                                                    lock: lock,
-                                                    process: process)
-                    count += result ? 1 : 0
-                    semaphore?.signal()
-                }
-            }
-            // Wait for queue to drain
-            queue.sync(flags: .barrier) {}
-            
-        } else {
-            for filePath in files {
+    return count
+}
+
+
+private func generateProtcolMap(files: [String],
+                                       exclusionSuffixes: [String]? = nil,
+                                       annotatedOnly: Bool,
+                                       semaphore: DispatchSemaphore?,
+                                       timeout: Int,
+                                       queue: DispatchQueue?,
+                                       process: @escaping ([Entity]) -> ()) -> Int  {
+    var count = 0
+    if let queue = queue {
+        let lock = NSLock()
+        for filePath in files {
+            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            queue.async {
                 let result = generateProtcolMap(filePath,
                                                 exclusionSuffixes: exclusionSuffixes,
                                                 annotatedOnly: annotatedOnly,
-                                                lock: nil,
+                                                lock: lock,
                                                 process: process)
                 count += result ? 1 : 0
+                semaphore?.signal()
             }
         }
+        // Wait for queue to drain
+        queue.sync(flags: .barrier) {}
         
-        return count
+    } else {
+        for filePath in files {
+            let result = generateProtcolMap(filePath,
+                                            exclusionSuffixes: exclusionSuffixes,
+                                            annotatedOnly: annotatedOnly,
+                                            lock: nil,
+                                            process: process)
+            count += result ? 1 : 0
+        }
     }
     
-    static private func generateProtcolMap(_ path: String,
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotatedOnly: Bool,
-                                    lock: NSLock?,
-                                    process: @escaping ([Entity]) -> ()) -> Bool {
-        
-        guard path.shouldParse(with: exclusionSuffixes) else { return false }
-        
-        guard let content = try? String(contentsOfFile: path) else { return false }
-        
-        if annotatedOnly, !content.contains(String.mockAnnotation) {
-            return false
-        }
-        
-        if let topstructure = try? Structure(path: path) {
-            var results = [Entity]()
-            
-            for current in topstructure.substructures {
-                if current.isProtocol {
-                    let isAnnotated = current.isAnnotated(with: .mockAnnotation, in: content)
-                    if !annotatedOnly || isAnnotated {
-                        let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: isAnnotated, isProcessed: false, models: nil, attributes: nil)
-                        results.append(node)
-                    }
-                }
-            }
-            
-            lock?.lock()
-            process(results)
-            lock?.unlock()
-            return true
-        }
+    return count
+}
+
+private func generateProtcolMap(_ path: String,
+                                       exclusionSuffixes: [String]? = nil,
+                                       annotatedOnly: Bool,
+                                       lock: NSLock?,
+                                       process: @escaping ([Entity]) -> ()) -> Bool {
+    
+    guard path.shouldParse(with: exclusionSuffixes) else { return false }
+    
+    guard let content = try? String(contentsOfFile: path) else { return false }
+    
+    if annotatedOnly, !content.contains(String.mockAnnotation) {
         return false
     }
+    
+    if let topstructure = try? Structure(path: path) {
+        var results = [Entity]()
+        
+        for current in topstructure.substructures {
+            if current.isProtocol {
+                let isAnnotated = current.isAnnotated(with: .mockAnnotation, in: content)
+                if !annotatedOnly || isAnnotated {
+                    let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: isAnnotated, isProcessed: false, models: nil, attributes: nil)
+                    results.append(node)
+                }
+            }
+        }
+        
+        lock?.lock()
+        process(results)
+        lock?.unlock()
+        return true
+    }
+    return false
 }

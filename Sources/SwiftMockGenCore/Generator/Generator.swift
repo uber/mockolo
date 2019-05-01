@@ -19,122 +19,120 @@ import SourceKittenFramework
 
 
 /// Performs end to end mock generation flow
-public struct Generator {
+
+public let DefaultParsingTimeout = 10
+public let DefaultRetryParsingLimit = 3
+
+public func generate(sourceDirs: [String]?,
+                     sourceFiles: [String]?,
+                     exclusionSuffixes: [String],
+                     mockFilePaths: [String]?,
+                     annotatedOnly: Bool,
+                     to outputFilePath: String,
+                     loggingLevel: Int,
+                     concurrencyLimit: Int?,
+                     parsingTimeout: Int,
+                     retryParsingOnTimeoutLimit: Int,
+                     shouldCollectParsingInfo: Bool) throws {
     
-    public let DefaultParsingTimeout = 10
-    public let DefaultRetryParsingLimit = 3
+    assert(sourceDirs != nil || sourceFiles != nil)
     
-    static public func execute(sourceDirs: [String]?,
-                               sourceFiles: [String]?,
-                               exclusionSuffixes: [String],
-                               mockFilePaths: [String]?,
-                               annotatedOnly: Bool,
-                               to outputFilePath: String,
-                               loggingLevel: Int,
-                               concurrencyLimit: Int?,
-                               parsingTimeout: Int,
-                               retryParsingOnTimeoutLimit: Int,
-                               shouldCollectParsingInfo: Bool) throws {
-        
-        assert(sourceDirs != nil || sourceFiles != nil)
-        
-        var candidates = [(String, Int64)]()
-        var parentMocks = [String: Entity]()
-        var annotatedProtocolMap = [String: Entity]()
-        var protocolMap = [String: Entity]()
-        var processedImportLines = [String: [String]]()
-        var pathToContentMap = [(String, String)]()
-        var resolvedEntities = [ResolvedEntity]()
-        
-        var sema: DispatchSemaphore? = nil
-        if let limit = concurrencyLimit {
-            sema = DispatchSemaphore(value: limit)
-        }
-        
-        let mockgenQueue = (concurrencyLimit ?? 0 == 1) ? nil :
-            DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
-        
-        let level = Logger.Level(rawValue: loggingLevel) ?? .none
-        let t0 = CFAbsoluteTimeGetCurrent()
-        Logger.log("Process input mock files...", level: level)
-        var processedMocksCount = 0
-        if let mockFilePaths = mockFilePaths {
-            processedMocksCount = ProcessedTypeMapGenerator.execute(mockFilePaths,
-                                                                    semaphore: sema,
-                                                                    timeout: parsingTimeout,
-                                                                    queue: mockgenQueue) { (elements, imports) in
-                                                                        elements.forEach { element in
-                                                                            parentMocks[element.name] = element
-                                                                            if processedImportLines[element.filepath] == nil {
-                                                                                processedImportLines[element.filepath] = imports
-                                                                            }
-                                                                        }
-            }
-        }
-        
-        let t1 = CFAbsoluteTimeGetCurrent()
-        Logger.log("Took", t1-t0, "Input mocks:", processedMocksCount, level: level)
-        
-        Logger.log("Process source files / Generate a protocol map & annotated protocol map...", level: level)
-        let entityCount = ProtocolMapGenerator.execute(sourceDirs: sourceDirs,
-                                                       sourceFiles: sourceFiles,
-                                                       exclusionSuffixes: exclusionSuffixes,
-                                                       annotatedOnly: annotatedOnly,
+    var candidates = [(String, Int64)]()
+    var parentMocks = [String: Entity]()
+    var annotatedProtocolMap = [String: Entity]()
+    var protocolMap = [String: Entity]()
+    var processedImportLines = [String: [String]]()
+    var pathToContentMap = [(String, String)]()
+    var resolvedEntities = [ResolvedEntity]()
+    
+    var sema: DispatchSemaphore? = nil
+    if let limit = concurrencyLimit {
+        sema = DispatchSemaphore(value: limit)
+    }
+    
+    let mockgenQueue = (concurrencyLimit ?? 0 == 1) ? nil :
+        DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
+    
+    let level = LogLevel(rawValue: loggingLevel) ?? .none
+    let t0 = CFAbsoluteTimeGetCurrent()
+    log("Process input mock files...", level: level)
+    var processedMocksCount = 0
+    if let mockFilePaths = mockFilePaths {
+        processedMocksCount = generateProcessedTypeMap(mockFilePaths,
                                                        semaphore: sema,
                                                        timeout: parsingTimeout,
-                                                       queue: mockgenQueue) { (elements) in
+                                                       queue: mockgenQueue) { (elements, imports) in
                                                         elements.forEach { element in
-                                                            protocolMap[element.name] = element
-                                                            if element.isAnnotated {
-                                                                annotatedProtocolMap[element.name] = element
+                                                            parentMocks[element.name] = element
+                                                            if processedImportLines[element.filepath] == nil {
+                                                                processedImportLines[element.filepath] = imports
                                                             }
                                                         }
         }
-        
-        let t2 = CFAbsoluteTimeGetCurrent()
-        Logger.log("Took", t2-t1, "#Generated entities:", entityCount, level: level)
-        
-        let typeKeys = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
-        
-        Logger.log("Resolve inheritance and generate unique entity models...", level: level)
-        UniqueModelGenerator.execute(protocolMap: protocolMap,
-                                     annotatedProtocolMap: annotatedProtocolMap,
-                                     inheritanceMap: parentMocks,
-                                     typeKeys: typeKeys,
-                                     semaphore: sema,
-                                     timeout: parsingTimeout,
-                                     queue: mockgenQueue,
-                                     process: { (entity, pathsToContents) in
-                                        pathToContentMap.append(contentsOf: pathsToContents)
-                                        resolvedEntities.append(entity)
-        })
-        
-        let t3 = CFAbsoluteTimeGetCurrent()
-        Logger.log("Took", t3-t2, level: level)
-        
-        Logger.log("Render models with templates...", level: level)
-        let renderedCount = TemplateRenderer.execute(entities: resolvedEntities,
-                                                     typeKeys: typeKeys,
-                                                     semaphore: sema,
-                                                     timeout: parsingTimeout,
-                                                     queue: mockgenQueue,
-                                                     process: { (mockString: String, offset: Int64) in
-                                                        candidates.append((mockString, offset))
-        })
-        
-        let t4 = CFAbsoluteTimeGetCurrent()
-        Logger.log("Took", t4-t3, "Rendered:", renderedCount, level: level)
-        
-        Logger.log("Write the mock results and import lines to", outputFilePath, level: level)
-        let result = Writer.execute(candidates: candidates,
-                                    processedImportLines: processedImportLines,
-                                    pathToContentMap: pathToContentMap,
-                                    to: outputFilePath)
-        
-        let t5 = CFAbsoluteTimeGetCurrent()
-        Logger.log("Took", t5-t4, level: level)
-        
-        let count = result.components(separatedBy: "\n").count
-        Logger.log("TOTAL:", t5-t0, "#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: level)
     }
+    
+    let t1 = CFAbsoluteTimeGetCurrent()
+    log("Took", t1-t0, "Input mocks:", processedMocksCount, level: level)
+    
+    log("Process source files / Generate a protocol map & annotated protocol map...", level: level)
+    let entityCount = generateProtocolMap(sourceDirs: sourceDirs,
+                                          sourceFiles: sourceFiles,
+                                          exclusionSuffixes: exclusionSuffixes,
+                                          annotatedOnly: annotatedOnly,
+                                          semaphore: sema,
+                                          timeout: parsingTimeout,
+                                          queue: mockgenQueue) { (elements) in
+                                            elements.forEach { element in
+                                                protocolMap[element.name] = element
+                                                if element.isAnnotated {
+                                                    annotatedProtocolMap[element.name] = element
+                                                }
+                                            }
+    }
+    
+    let t2 = CFAbsoluteTimeGetCurrent()
+    log("Took", t2-t1, "#Generated entities:", entityCount, level: level)
+    
+    let typeKeys = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
+    
+    log("Resolve inheritance and generate unique entity models...", level: level)
+    generateUniqueModels(protocolMap: protocolMap,
+                         annotatedProtocolMap: annotatedProtocolMap,
+                         inheritanceMap: parentMocks,
+                         typeKeys: typeKeys,
+                         semaphore: sema,
+                         timeout: parsingTimeout,
+                         queue: mockgenQueue,
+                         process: { (entity, pathsToContents) in
+                            pathToContentMap.append(contentsOf: pathsToContents)
+                            resolvedEntities.append(entity)
+    })
+    
+    let t3 = CFAbsoluteTimeGetCurrent()
+    log("Took", t3-t2, level: level)
+    
+    log("Render models with templates...", level: level)
+    let renderedCount = renderTemplates(entities: resolvedEntities,
+                                        typeKeys: typeKeys,
+                                        semaphore: sema,
+                                        timeout: parsingTimeout,
+                                        queue: mockgenQueue,
+                                        process: { (mockString: String, offset: Int64) in
+                                            candidates.append((mockString, offset))
+    })
+    
+    let t4 = CFAbsoluteTimeGetCurrent()
+    log("Took", t4-t3, "Rendered:", renderedCount, level: level)
+    
+    log("Write the mock results and import lines to", outputFilePath, level: level)
+    let result = write(candidates: candidates,
+                       processedImportLines: processedImportLines,
+                       pathToContentMap: pathToContentMap,
+                       to: outputFilePath)
+    
+    let t5 = CFAbsoluteTimeGetCurrent()
+    log("Took", t5-t4, level: level)
+    
+    let count = result.components(separatedBy: "\n").count
+    log("TOTAL:", t5-t0, "#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: level)
 }

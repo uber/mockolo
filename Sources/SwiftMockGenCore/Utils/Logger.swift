@@ -17,22 +17,19 @@
 import Foundation
 
 /// Logs status and other messages depending on the level provided
-public struct Logger {
-    
-    public enum Level: Int {
-        case none
-        case verbose
-        case error
-    }
-    
-    public static func log(_ arg: Any..., level: Level = .none) {
-        switch level {
-        case .verbose:
-            print(arg)
-        case .error:
-            print("ERROR: \(arg)")
-        default:
-            break
-        }
+public enum LogLevel: Int {
+    case none
+    case verbose
+    case error
+}
+
+public func log(_ arg: Any..., level: LogLevel = .none) {
+    switch level {
+    case .verbose:
+        print(arg)
+    case .error:
+        print("ERROR: \(arg)")
+    default:
+        break
     }
 }

@@ -24,7 +24,7 @@ func applyVariableTemplate(name: String,
                            accessControlLevelDescription: String) -> String {
     let underlyingName = "\(String.underlyingVarPrefix)\(name.capitlizeFirstLetter)"
     let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
-    let underlyingVarDefaultVal = TypeParser.processDefaultVal(typeName: typeName, typeKeys: typeKeys) ?? ""
+    let underlyingVarDefaultVal = processDefaultVal(typeName: typeName, typeKeys: typeKeys) ?? ""
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {
