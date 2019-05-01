@@ -20,14 +20,12 @@ import Foundation
 public struct Logger {
     
     public enum Level: Int {
-        case message
+        case none
         case verbose
         case error
     }
     
-    public static var level: Level = .message
-
-    public static func log(_ arg: Any...) {
+    public static func log(_ arg: Any..., level: Level = .none) {
         switch level {
         case .verbose:
             print(arg)
