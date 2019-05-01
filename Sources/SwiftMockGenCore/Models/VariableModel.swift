@@ -30,7 +30,7 @@ struct VariableModel: Model {
     
     func render(with identifier: String, typeKeys: [String]?) -> String? {
         if processed {
-            return Extractor.extract(offset: self.offset-1, length: self.length+1, content: self.content)
+            return self.content.extract(offset: self.offset-1, length: self.length+1)
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,

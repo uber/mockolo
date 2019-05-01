@@ -85,6 +85,25 @@ extension String {
     var displayableForType: String {
         return displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
+    
+    
+    func extract(offset: Int64, length: Int64) -> String {
+        let end = offset + length - 1
+        let start = offset
+        
+        if start >= 0 && length > 0 {
+            if end > self.count {
+                print("No content found", start, length, end, self.count)
+                return ""
+            }
+            
+            let startIdx = self.index(self.startIndex, offsetBy: Int(start))
+            let endIdx = self.index(self.startIndex, offsetBy: Int(end))
+            let body = self[startIdx ..< endIdx]
+            return String(body)
+        }
+        return ""
+    }
 }
 
 extension Structure {
@@ -104,7 +123,7 @@ extension Structure {
     func extractDocComment(_ content: String) -> String? {
             if let len = dictionary["key.doclength"] as? Int64,
                 let offset = dictionary["key.docoffset"] as? Int64 {
-                return Extractor.extract(offset: offset, length: len, content: content)
+                return content.extract(offset: offset, length: len)
             }
             return nil
     }
@@ -131,7 +150,7 @@ extension Structure {
         if let offset = source[SwiftDocKey.offset.rawValue] as? Int64,
             let len = source[SwiftDocKey.length.rawValue] as? Int64 {
             
-            return Extractor.extract(offset: offset, length: len, content: content)
+            return content.extract(offset: offset, length: len)
         }
         return ""
     }
@@ -306,28 +325,8 @@ extension Structure {
     func extractBody(_ file: String) -> String {
         let start = dictionary["key.bodyoffset"] as? Int64 ?? -1
         let len = dictionary["key.bodylength"] as? Int64 ?? 0
-        return Extractor.extract(offset: start, length: len, content: file)
+        return file.extract(offset: start, length: len)
     }
-}
-
-struct Extractor {
-static func extract(offset: Int64, length: Int64, content: String) -> String {
-    let end = offset + length - 1
-    let start = offset
-    
-    if start >= 0 && length > 0 {
-        if end > content.count {
-            print("No content found", start, length, end, content.count)
-            return ""
-        }
-        
-        let startIdx = content.index(content.startIndex, offsetBy: Int(start))
-        let endIdx = content.index(content.startIndex, offsetBy: Int(end))
-        let body = content[startIdx ..< endIdx]
-        return String(body)
-    }
-    return ""
-}
 }
 
 public extension Sequence {
