@@ -2,7 +2,7 @@
 
 # Mockolo
 
-`Mockolo` is a lightweight commandline tool that uses the `MockoloCore` framework for creating mocks in Swift.  It uses a concurrent swift file scanner and `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  
+`Mockolo` is a lightweight commandline tool that uses the `MockoloFramework` framework for creating mocks in Swift.  It uses a concurrent swift file scanner and `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  
 
 
 ## Build
@@ -27,19 +27,16 @@ $ swift package generate-xcodeproj
 
 ## Run
 
-`Mockolo` produces a commandline executable. To run it, pass in a list of the source file paths of a build target, the ouptut filepath for the mock output, any file name suffixes that need to be excluded if any, and a list of any mock files that are needed to generate mocks for the current build target. 
+`Mockolo` produces a commandline executable. To run it, pass in a list of the source dirs or file paths of a build target and the ouptut filepath for the resulting mock output. Optional input parameters include a custom annotation string, file name suffixes that need to be excluded, a list of files containing dependent mocks if needed by the current build target, etc.
 
 For example,
 
 ```swift
 
-.build/release/mockolo generate --outputfile apps/result/Mocks.swift 
---sourcefiles apps/src/File1.swift, apps/src/File2.swift 
---mockfiles apps/libFoo/FooMocks.swift, apps/libBar/BarMocks.swift
---exclude-suffixes "Mocks", "Tests", "Models", "Services"
+.build/release/mockolo generate -output /User/foo/output/Result.swift -srcdirs /User/foo/srcs -exclude "Resources"
 ```
 
-The above will run the program on the source files passed in, excluding any files with suffixes "Tests", "Mocks", etc, use input mock files `FooMocks.swift` and `BarMocks.swift` to resolve inheritance if needed, and generate the mock output to the `Mocks.swift` file.
+The above will run the program on the source directories passed in, excluding any swift files with suffixes "Resources", and generate the mock output to the `Result.swift` file.
 
 
 
