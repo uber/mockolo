@@ -37,7 +37,5 @@ public func log(_ arg: Any..., level: LogLevel = .info) {
         print("WARNING: \(arg)")
     case .error:
         print("ERROR: \(arg)")
-    default:
-        break
     }
 }
