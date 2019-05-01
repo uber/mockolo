@@ -16,17 +16,25 @@
 
 import Foundation
 
+public var minLogLevel = 0
+
 /// Logs status and other messages depending on the level provided
 public enum LogLevel: Int {
-    case none
+    case info
     case verbose
+    case warning
     case error
 }
 
-public func log(_ arg: Any..., level: LogLevel = .none) {
+public func log(_ arg: Any..., level: LogLevel = .info) {
+    
+    guard level.rawValue <= minLogLevel else { return }
+
     switch level {
-    case .verbose:
+    case .info, .verbose:
         print(arg)
+    case .warning:
+        print("WARNING: \(arg)")
     case .error:
         print("ERROR: \(arg)")
     default:

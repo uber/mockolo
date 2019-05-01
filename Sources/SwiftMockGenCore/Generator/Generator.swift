@@ -36,7 +36,7 @@ public func generate(sourceDirs: [String]?,
                      shouldCollectParsingInfo: Bool) throws {
     
     assert(sourceDirs != nil || sourceFiles != nil)
-    
+    minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
     var parentMocks = [String: Entity]()
     var annotatedProtocolMap = [String: Entity]()
@@ -53,9 +53,8 @@ public func generate(sourceDirs: [String]?,
     let mockgenQueue = (concurrencyLimit ?? 0 == 1) ? nil :
         DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
     
-    let level = LogLevel(rawValue: loggingLevel) ?? .none
     let t0 = CFAbsoluteTimeGetCurrent()
-    log("Process input mock files...", level: level)
+    log("Process input mock files...", level: .info)
     var processedMocksCount = 0
     if let mockFilePaths = mockFilePaths {
         processedMocksCount = generateProcessedTypeMap(mockFilePaths,
@@ -72,9 +71,9 @@ public func generate(sourceDirs: [String]?,
     }
     
     let t1 = CFAbsoluteTimeGetCurrent()
-    log("Took", t1-t0, "Input mocks:", processedMocksCount, level: level)
+    log("Took", t1-t0, "Input mocks:", processedMocksCount, level: .verbose)
     
-    log("Process source files / Generate a protocol map & annotated protocol map...", level: level)
+    log("Process source files / Generate a protocol map & annotated protocol map...", level: .info)
     let entityCount = generateProtocolMap(sourceDirs: sourceDirs,
                                           sourceFiles: sourceFiles,
                                           exclusionSuffixes: exclusionSuffixes,
@@ -91,11 +90,11 @@ public func generate(sourceDirs: [String]?,
     }
     
     let t2 = CFAbsoluteTimeGetCurrent()
-    log("Took", t2-t1, "#Generated entities:", entityCount, level: level)
+    log("Took", t2-t1, "#Generated entities:", entityCount, level: .verbose)
     
     let typeKeys = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
     
-    log("Resolve inheritance and generate unique entity models...", level: level)
+    log("Resolve inheritance and generate unique entity models...", level: .info)
     generateUniqueModels(protocolMap: protocolMap,
                          annotatedProtocolMap: annotatedProtocolMap,
                          inheritanceMap: parentMocks,
@@ -109,9 +108,9 @@ public func generate(sourceDirs: [String]?,
     })
     
     let t3 = CFAbsoluteTimeGetCurrent()
-    log("Took", t3-t2, level: level)
+    log("Took", t3-t2, level: .verbose)
     
-    log("Render models with templates...", level: level)
+    log("Render models with templates...", level: .info)
     let renderedCount = renderTemplates(entities: resolvedEntities,
                                         typeKeys: typeKeys,
                                         semaphore: sema,
@@ -122,17 +121,17 @@ public func generate(sourceDirs: [String]?,
     })
     
     let t4 = CFAbsoluteTimeGetCurrent()
-    log("Took", t4-t3, "Rendered:", renderedCount, level: level)
+    log("Took", t4-t3, "Rendered:", renderedCount, level: .verbose)
     
-    log("Write the mock results and import lines to", outputFilePath, level: level)
+    log("Write the mock results and import lines to", outputFilePath, level: .info)
     let result = write(candidates: candidates,
                        processedImportLines: processedImportLines,
                        pathToContentMap: pathToContentMap,
                        to: outputFilePath)
     
     let t5 = CFAbsoluteTimeGetCurrent()
-    log("Took", t5-t4, level: level)
+    log("Took", t5-t4, level: .verbose)
     
     let count = result.components(separatedBy: "\n").count
-    log("TOTAL:", t5-t0, "#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: level)
+    log("TOTAL:", t5-t0, "#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: .verbose)
 }

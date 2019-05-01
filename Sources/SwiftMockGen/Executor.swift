@@ -57,7 +57,7 @@ class Executor {
     ///
     /// - parameter parser: The argument parser to use.
     private func setupArguments(with parser: ArgumentParser) {
-        loggingLevel = parser.add(option: "--logging-level", shortName: "-v", kind: Int.self, usage: "The logging level to use. Default is set to 0 (non-verbose). Set 1 for verbose, and 2 for error logging.")
+        loggingLevel = parser.add(option: "--logging-level", shortName: "-v", kind: Int.self, usage: "The logging level to use. Default is set to 0 (info). Set 1 for verbose, 2 for warning, and 3 for error.")
         sourceFiles = parser.add(option: "--sourcefiles", shortName: "-srcs", kind: [String].self, usage: "List of source files (separated by a comma or a space) to generate mocks for. If no value is given, the --srcdir value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.", completion: .filename)
         sourceDirs = parser.add(option: "--sourcedirs", shortName: "-srcdirs", kind: [String].self, usage: "Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.", completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles", shortName: "-mocks", kind: [String].self, usage: "List of mock files (separated by a comma or a space) from modules this target depends on. ", completion: .filename)
