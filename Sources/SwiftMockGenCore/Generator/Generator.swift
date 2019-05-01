@@ -17,108 +17,121 @@
 import Foundation
 import SourceKittenFramework
 
+
+/// Performs end to end mock generation flow
+
 public let DefaultParsingTimeout = 10
 public let DefaultRetryParsingLimit = 3
 
 public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,
-                     excludeSuffixes: [String],
-                     mockFilePaths: [String]? = nil,
+                     exclusionSuffixes: [String],
+                     mockFilePaths: [String]?,
+                     annotatedOnly: Bool,
                      to outputFilePath: String,
-                     concurrencyLimit: Int? = nil,
-                     parsingTimeout: Int = DefaultParsingTimeout,
-                     retryParsingOnTimeoutLimit: Int = DefaultRetryParsingLimit,
-                     shouldCollectParsingInfo: Bool = false) throws {
+                     loggingLevel: Int,
+                     concurrencyLimit: Int?,
+                     parsingTimeout: Int,
+                     retryParsingOnTimeoutLimit: Int,
+                     shouldCollectParsingInfo: Bool) throws {
     
     assert(sourceDirs != nil || sourceFiles != nil)
-    
-    var candidates = [String: (String, Int64)]()
-    var parentMocks = [String: (Structure, File, [Model])]()
-    var annotatedProtocolMap = [String: ProtocolMapEntryType]()
-    var importLines = [String: [String]]()
+    minLogLevel = loggingLevel
+    var candidates = [(String, Int64)]()
+    var parentMocks = [String: Entity]()
+    var annotatedProtocolMap = [String: Entity]()
+    var protocolMap = [String: Entity]()
+    var processedImportLines = [String: [String]]()
+    var pathToContentMap = [(String, String)]()
+    var resolvedEntities = [ResolvedEntity]()
     
     var sema: DispatchSemaphore? = nil
     if let limit = concurrencyLimit {
         sema = DispatchSemaphore(value: limit)
     }
     
-    let mockgenQueue = DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
+    let mockgenQueue = (concurrencyLimit ?? 0 == 1) ? nil :
+        DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
     
     let t0 = CFAbsoluteTimeGetCurrent()
-    
-    print("Build a map of input parent mocks and their ASTs, and a map of filepath and import lines...")
+    log("Process input mock files...", level: .info)
+    var processedMocksCount = 0
     if let mockFilePaths = mockFilePaths {
-        // 1. Generate mapping for parent mocks and their ASTs specified in the input files,
-        // while saving the import lines of the files being processed.
-        _ = generateParentMocksMap(mockFilePaths,
-                                   exclude: excludeSuffixes,
-                                   semaphore: sema,
-                                   timeout: parsingTimeout,
-                                   queue: mockgenQueue) { (s: Structure, file: File, models: [Model]) in
-                                    // Map between mock class names and their ASTs
-                                    parentMocks[s.name] = (s, file, models)
-                                    if let fpath = file.path, importLines[fpath] == nil {
-                                        // Map between filepaths and import lines of the files.
-                                        importLines[fpath] = file.lines(starting: .import)
-                                    }
+        processedMocksCount = generateProcessedTypeMap(mockFilePaths,
+                                                       semaphore: sema,
+                                                       timeout: parsingTimeout,
+                                                       queue: mockgenQueue) { (elements, imports) in
+                                                        elements.forEach { element in
+                                                            parentMocks[element.name] = element
+                                                            if processedImportLines[element.filepath] == nil {
+                                                                processedImportLines[element.filepath] = imports
+                                                            }
+                                                        }
         }
     }
     
     let t1 = CFAbsoluteTimeGetCurrent()
-    print("Took", t1-t0)
+    log("Took", t1-t0, "Input mocks:", processedMocksCount, level: .verbose)
     
-    print("Generate mocks for annotated protocols and store the results in a protocol map...")
-    // 2. Generate mocks for annotated protocols in source dir and store the results in a map.
-    _ = generateModelsForAnnotatedTypes(sourceDirs: sourceDirs,
-                                        sourceFiles: sourceFiles,
-                                        exclude: excludeSuffixes,
-                                        semaphore: sema,
-                                        timeout: parsingTimeout,
-                                        queue: mockgenQueue) { (s: Structure, file: File, entites: [Model], attributes: [String]) in
-                                            annotatedProtocolMap[s.name] = (s, file, entites, attributes)
-                                            if let fpath = file.path, importLines[fpath] == nil {
-                                                importLines[fpath] = file.lines(starting: .import)
+    log("Process source files / Generate a protocol map & annotated protocol map...", level: .info)
+    let entityCount = generateProtocolMap(sourceDirs: sourceDirs,
+                                          sourceFiles: sourceFiles,
+                                          exclusionSuffixes: exclusionSuffixes,
+                                          annotatedOnly: annotatedOnly,
+                                          semaphore: sema,
+                                          timeout: parsingTimeout,
+                                          queue: mockgenQueue) { (elements) in
+                                            elements.forEach { element in
+                                                protocolMap[element.name] = element
+                                                if element.isAnnotated {
+                                                    annotatedProtocolMap[element.name] = element
+                                                }
                                             }
     }
     
     let t2 = CFAbsoluteTimeGetCurrent()
-    print("Took", t2-t1)
+    log("Took", t2-t1, "#Generated entities:", entityCount, level: .verbose)
     
-    print("Accumulate the mock results for annotated protocols and their parents...")
-    // 3. Accumulate mocks for annotated protocols and all of their parent protocols.
     let typeKeys = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
-    _ = renderMocks(inheritanceMap: parentMocks,
-                    annotatedProtocolMap: annotatedProtocolMap,
-                    typeKeys: typeKeys,
-                    semaphore: sema,
-                    queue: mockgenQueue,
-                    process: {(s: Structure, file: File, mockString: String, offset: Int64) in
-                        candidates[s.name] = (mockString, offset)
+    
+    log("Resolve inheritance and generate unique entity models...", level: .info)
+    generateUniqueModels(protocolMap: protocolMap,
+                         annotatedProtocolMap: annotatedProtocolMap,
+                         inheritanceMap: parentMocks,
+                         typeKeys: typeKeys,
+                         semaphore: sema,
+                         timeout: parsingTimeout,
+                         queue: mockgenQueue,
+                         process: { (entity, pathsToContents) in
+                            pathToContentMap.append(contentsOf: pathsToContents)
+                            resolvedEntities.append(entity)
     })
     
     let t3 = CFAbsoluteTimeGetCurrent()
-    print("Took", t3-t2)
+    log("Took", t3-t2, level: .verbose)
     
-    print("Put together mock results and import lines...")
-    // 4. Accumulate import lines
-    let imports = importLines.values.joined().map { line in
-        return line.trimmingCharacters(in: CharacterSet.whitespaces)
-    }
-    
-    let importsSet = Set(imports)
-    let entities = candidates.values.sorted{$0.1 < $1.1}.map{$0.0}
-    
-    let ret = [.headerDoc, .poundIfMock, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), .poundEndIf].joined(separator: "\n")
+    log("Render models with templates...", level: .info)
+    let renderedCount = renderTemplates(entities: resolvedEntities,
+                                        typeKeys: typeKeys,
+                                        semaphore: sema,
+                                        timeout: parsingTimeout,
+                                        queue: mockgenQueue,
+                                        process: { (mockString: String, offset: Int64) in
+                                            candidates.append((mockString, offset))
+    })
     
     let t4 = CFAbsoluteTimeGetCurrent()
-    print("Took", t4-t3)
+    log("Took", t4-t3, "Rendered:", renderedCount, level: .verbose)
     
-    print("Write the output to a file", outputFilePath)
-    // 5. Write the final accumulated results to a file.
-    _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
+    log("Write the mock results and import lines to", outputFilePath, level: .info)
+    let result = write(candidates: candidates,
+                       processedImportLines: processedImportLines,
+                       pathToContentMap: pathToContentMap,
+                       to: outputFilePath)
     
     let t5 = CFAbsoluteTimeGetCurrent()
-    print("Took", t5-t4)
+    log("Took", t5-t4, level: .verbose)
     
-    print("TOTAL", t5-t0)
+    let count = result.components(separatedBy: "\n").count
+    log("TOTAL:", t5-t0, "#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: .verbose)
 }

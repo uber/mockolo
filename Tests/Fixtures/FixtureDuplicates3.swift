@@ -11,7 +11,7 @@ func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: U
 func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int)
 func loadImage(atURL url: URL) -> Observable<UIImage>
 func loadImage(atURL url: URL, placeholder: UIImage) -> Observable<UIImage>
-func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: Int) -> Observable<UIImage>
+func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -> Observable<UIImage>
 }
 """
 
@@ -21,7 +21,6 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     init() {
         
     }
-    
     var collectionViewCallCount = 0
     var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
     func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
@@ -85,12 +84,12 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         }
         return Observable.empty()
     }
-    var loadImageAtURLInitialRetryDelayCallCount = 0
-    var loadImageAtURLInitialRetryDelayHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
-    func loadImage(atURL url: URL, initialRetryDelay: RxTimeInterval, maxAttempts: Int) -> Observable<UIImage> {
-        loadImageAtURLInitialRetryDelayCallCount += 1
-        if let loadImageAtURLInitialRetryDelayHandler = loadImageAtURLInitialRetryDelayHandler {
-            return loadImageAtURLInitialRetryDelayHandler(url, initialRetryDelay, maxAttempts)
+    var loadImageAtURLRetryIntervalCallCount = 0
+    var loadImageAtURLRetryIntervalHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
+    func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -> Observable<UIImage> {
+        loadImageAtURLRetryIntervalCallCount += 1
+        if let loadImageAtURLRetryIntervalHandler = loadImageAtURLRetryIntervalHandler {
+            return loadImageAtURLRetryIntervalHandler(url, retryInterval, maxRetries)
         }
         return Observable.empty()
     }

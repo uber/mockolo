@@ -15,14 +15,27 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
-func model(for element: Structure, content: String, processed: Bool = false) -> Model? {
-    if element.isVariable {
-        return VariableModel(element, content: content, processed: processed)
-    } else if element.isMethod, !element.isInitializer {
-        return MethodModel(element, content: content, processed: processed)
-    }
+public var minLogLevel = 0
+
+/// Logs status and other messages depending on the level provided
+public enum LogLevel: Int {
+    case info
+    case verbose
+    case warning
+    case error
+}
+
+public func log(_ arg: Any..., level: LogLevel = .info) {
     
-    return nil
+    guard level.rawValue <= minLogLevel else { return }
+
+    switch level {
+    case .info, .verbose:
+        print(arg)
+    case .warning:
+        print("WARNING: \(arg)")
+    case .error:
+        print("ERROR: \(arg)")
+    }
 }

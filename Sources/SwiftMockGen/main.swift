@@ -20,17 +20,17 @@ import Basic
 func main() {
     
     let parser = ArgumentParser(usage: "<subcommand> <options>", overview: "Swift mock generator.")
-    let command = ExecuteCommand(name: "generate", overview: "Generates mock classes for a specified target.", parser: parser)
+    let command = Executor(name: "generate", overview: "Generates mock classes for a specified target.", parser: parser)
     let inputs = Array(CommandLine.arguments.dropFirst())
 
     print("Start...")
     do {
         /* Example:
          .build/release/swiftmockgen generate
-         --sourcefiles apps/src/File1.swift, apps/src/File2.swift
-         --outputfile apps/result/Mocks.swift
-         --mockfiles "apps/libFoo/FooMocks.swift", "apps/libBar/BarMocks.swift"
-         --exclude-suffixes "Mocks", "Tests", "Models", "Services"
+         -srcs apps/src/File1.swift, apps/src/File2.swift
+         -output apps/result/Mocks.swift
+         -mocks "apps/libFoo/FooMocks.swift", "apps/libBar/BarMocks.swift"
+         --exclude-suffixes "Mocks", "Tests", "Resources"
          */
         let args = try parser.parse(inputs)
         command.execute(with: args)

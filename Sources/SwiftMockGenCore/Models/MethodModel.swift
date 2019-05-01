@@ -21,7 +21,7 @@ struct MethodModel: Model {
     var name: String
     var type: String
     var offset: Int64
-    let range: (offset: Int64, length: Int64)
+    let length: Int64
     let accessControlLevelDescription: String
     let attributes: [String]
     let staticKind: String
@@ -37,11 +37,11 @@ struct MethodModel: Model {
         let nameString = comps.removeFirst()
         self.content = content
         self.name = nameString
-        self.type = ast.typeName == UnknownVal ? "" : ast.typeName
+        self.type = ast.typeName == .unknownVal ? "" : ast.typeName
         self.staticKind = ast.isStaticMethod ? .static : ""
         self.processed = processed
-        self.offset = ast.offset
-        self.range = ast.range
+        self.offset = ast.range.offset
+        self.length = ast.range.length
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
         assert(paramDecls.count == comps.count)
         
@@ -96,12 +96,12 @@ struct MethodModel: Model {
     
     func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
         if processed {
-            return extract(offset: self.range.offset-1, length: self.range.length+1, content: self.content)
+            return self.content.extract(offset: self.offset-1, length: self.length+1)
         }
         
         let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}
         let paramDecls = params.compactMap{$0.render(with: "")}
-        let returnType = type != UnknownVal ? type : ""
+        let returnType = type != .unknownVal ? type : ""
         let handlerReturn = handler.render(with: identifier, typeKeys: typeKeys) ?? ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,

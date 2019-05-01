@@ -60,7 +60,7 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: simpleDuplicates,
                dstContent: simpleDuplicatesMock)
     }
-
+    
     func testDuplicates01() {
         verify(srcContent: duplicates1,
                dstContent: duplicateMock1)
@@ -97,7 +97,7 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: duplicateSigInheritance5,
                dstContent: duplicateSigInheritanceMock5)
     }
-
+    
     func testGenericFuncs() {
         verify(srcContent: genericFunc,
                dstContent: genericFuncMock)
@@ -127,7 +127,7 @@ class SwiftMockGenTests: XCTestCase {
                mockContent: overloadParent,
                dstContent: overloadMock)
     }
-
+    
     func testFuncOverload1() {
         verify(srcContent: overload1,
                mockContent: overloadParent1,
@@ -153,13 +153,19 @@ class SwiftMockGenTests: XCTestCase {
         \(String.poundIfMock)
         \(dstContent)
         \(String.poundEndIf)
-       """
+        """
         
         try? generate(sourceDirs: nil,
                       sourceFiles: [srcFilePath],
-                      excludeSuffixes: ["Mocks", "Tests"],
+                      exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: [mockFilePath],
-                      to: dstFilePath)
+                      annotatedOnly: false,
+                      to: dstFilePath,
+                      loggingLevel: 1,
+                      concurrencyLimit: nil,
+                      parsingTimeout: 10,
+                      retryParsingOnTimeoutLimit: 3,
+                      shouldCollectParsingInfo: true)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}

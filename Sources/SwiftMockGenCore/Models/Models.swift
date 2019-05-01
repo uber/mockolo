@@ -16,9 +16,8 @@
 
 import Foundation
 
-/// Represents entities such as var, func, class, etc. to be
-/// rendered (with templates) for mock output.
-protocol Model {
+/// Represents a model for an entity such as var, func, class, etc.
+public protocol Model {
     /// Identifier
     var name: String { get set }
 
@@ -27,6 +26,9 @@ protocol Model {
     
     /// Indicates whether mock generation for this model has been processed
     var processed: Bool { get }
+    
+    /// Indicates whether this model can be used as a parameter to an initializer
+    var canBeInitParam: Bool { get }
     
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: String { get set }
@@ -53,6 +55,10 @@ extension Model {
     }
     
     var processed: Bool {
+        return false
+    }
+    
+    var canBeInitParam: Bool {
         return false
     }
 }

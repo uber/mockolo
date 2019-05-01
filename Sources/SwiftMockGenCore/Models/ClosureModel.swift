@@ -44,7 +44,7 @@ struct ClosureModel: Model {
         
         self.genericTypeNames = genericTypeNameList
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
-        let formattedReturnType = returnType == UnknownVal ? "" : returnType
+        let formattedReturnType = returnType == .unknownVal ? "" : returnType
         self.funcReturnType = formattedReturnType
 
         var displayableReturnType = formattedReturnType

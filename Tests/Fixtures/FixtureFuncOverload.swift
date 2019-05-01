@@ -4,7 +4,7 @@ import SwiftMockGenCore
 let overload = """
 /// @CreateMock
 public protocol Foo: Bar {
-func encrypt(status: Int, msg: String) -> Double
+func tell(status: Int, msg: String) -> Double
 }
 """
 
@@ -15,22 +15,22 @@ public init() {
 
 }
 
-var encryptCallCount = 0
-public var encryptHandler: (([String: String], ClientProtocol) -> (Observable<EncryptedData>))?
-public func encrypt(data: [String: String], for client: ClientProtocol) -> Observable<EncryptedData> {
-encryptCallCount += 1
-if let encryptHandler = encryptHandler {
-return encryptHandler(data, client)
+var tellCallCount = 0
+public var tellHandler: (([String: String], ClientProtocol) -> (Observable<EncryptedData>))?
+public func tell(data: [String: String], for client: ClientProtocol) -> Observable<EncryptedData> {
+tellCallCount += 1
+if let tellHandler = tellHandler {
+return tellHandler(data, client)
 }
 return Observable.empty()
 }
 
-var encryptKeyCallCount = 0
-public var encryptKeyHandler: ((Double) -> (Int))?
-public func encrypt(key: Double) -> Int {
-encryptKeyCallCount += 1
-if let encryptKeyHandler = encryptKeyHandler {
-return encryptKeyHandler(key)
+var tellKeyCallCount = 0
+public var tellKeyHandler: ((Double) -> (Int))?
+public func tell(key: Double) -> Int {
+tellKeyCallCount += 1
+if let tellKeyHandler = tellKeyHandler {
+return tellKeyHandler(key)
 }
 return 0
 }
@@ -44,30 +44,30 @@ public class FooMock: Foo {
     public init() {
         
     }
-    var encryptStatusCallCount = 0
-    public var encryptStatusHandler: ((Int, String) -> (Double))?
-    public func encrypt(status: Int, msg: String) -> Double {
-        encryptStatusCallCount += 1
-        if let encryptStatusHandler = encryptStatusHandler {
-            return encryptStatusHandler(status, msg)
+    var tellStatusCallCount = 0
+    public var tellStatusHandler: ((Int, String) -> (Double))?
+    public func tell(status: Int, msg: String) -> Double {
+        tellStatusCallCount += 1
+        if let tellStatusHandler = tellStatusHandler {
+            return tellStatusHandler(status, msg)
         }
         return 0.0
     }
-    var encryptCallCount = 0
-    public var encryptHandler: (([String: String], ClientProtocol) -> (Observable<EncryptedData>))?
-    public func encrypt(data: [String: String], for client: ClientProtocol) -> Observable<EncryptedData> {
-        encryptCallCount += 1
-        if let encryptHandler = encryptHandler {
-            return encryptHandler(data, client)
+    var tellCallCount = 0
+    public var tellHandler: (([String: String], ClientProtocol) -> (Observable<EncryptedData>))?
+    public func tell(data: [String: String], for client: ClientProtocol) -> Observable<EncryptedData> {
+        tellCallCount += 1
+        if let tellHandler = tellHandler {
+            return tellHandler(data, client)
         }
         return Observable.empty()
     }
-    var encryptKeyCallCount = 0
-    public var encryptKeyHandler: ((Double) -> (Int))?
-    public func encrypt(key: Double) -> Int {
-        encryptKeyCallCount += 1
-        if let encryptKeyHandler = encryptKeyHandler {
-            return encryptKeyHandler(key)
+    var tellKeyCallCount = 0
+    public var tellKeyHandler: ((Double) -> (Int))?
+    public func tell(key: Double) -> Int {
+        tellKeyCallCount += 1
+        if let tellKeyHandler = tellKeyHandler {
+            return tellKeyHandler(key)
         }
         return 0
     }

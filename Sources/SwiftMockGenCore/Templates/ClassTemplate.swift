@@ -21,26 +21,33 @@ func applyClassTemplate(name: String,
                         typeKeys: [String]?,
                         accessControlLevelDescription: String,
                         attribute: String,
-                        initParams: [VariableModel],
+                        initParams: [VariableModel]?,
                         entities: [String]) -> String {
-    let params = initParams
-        .map { (element: VariableModel) -> String in
-            
-            if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys), !val.isEmpty {
-                return "\(element.name): \(element.type) = \(val)"
-            }
-            var prefix = ""
-            if element.isClosureVariable {
-                prefix = String.escaping + " "
-            }
-            return "\(element.name): \(prefix)\(element.type)"
-        }
-        .joined(separator: ", ")
     
-    // Besides the default init, we want to provide an empty init block (unless the default init is empty)
-    // since vars do not need to be set via init (since they all have get/set; see VariableTemplate for more detail)
-    let extraInitBlock = !initParams.isEmpty ? "\(accessControlLevelDescription)init() {}" : ""
-    let paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
+    var extraInitBlock = ""
+    var paramsAssign = ""
+    var params = ""
+    if let initParams = initParams, !initParams.isEmpty {
+        params = initParams
+            .map { (element: VariableModel) -> String in
+                
+                if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys), !val.isEmpty {
+                    return "\(element.name): \(element.type) = \(val)"
+                }
+                var prefix = ""
+                if element.isClosureVariable {
+                    prefix = String.escaping + " "
+                }
+                return "\(element.name): \(prefix)\(element.type)"
+            }
+            .joined(separator: ", ")
+        
+        // Besides the default init, we want to provide an empty init block (unless the default init is empty)
+        // since vars do not need to be set via init (since they all have get/set; see VariableTemplate for more detail)
+        extraInitBlock = "\(attribute)\n\(accessControlLevelDescription)init() {}"
+        paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
+    }
+
     let result = """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
