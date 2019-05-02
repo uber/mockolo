@@ -1,5 +1,5 @@
 import XCTest
-import SwiftMockGenCore
+import MockoloFramework
 
 class SwiftMockGenTests: XCTestCase {
     
@@ -160,6 +160,7 @@ class SwiftMockGenTests: XCTestCase {
                       exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: [mockFilePath],
                       annotatedOnly: false,
+                      annotation: String.mockAnnotation,
                       to: dstFilePath,
                       loggingLevel: 1,
                       concurrencyLimit: nil,

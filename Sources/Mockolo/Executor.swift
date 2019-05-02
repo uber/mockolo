@@ -16,7 +16,7 @@
 
 import Foundation
 import Utility
-import SwiftMockGenCore
+import MockoloFramework
 
 protocol Command {
     var name: String { get }
@@ -34,6 +34,7 @@ class Executor {
     private var sourceDirs: OptionArgument<[String]>!
     private var sourceFiles: OptionArgument<[String]>!
     private var exclusionSuffixes: OptionArgument<[String]>!
+    private var annotation: OptionArgument<String>!
     private var annotatedOnly: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var parsingTimeout: OptionArgument<Int>!
@@ -62,9 +63,10 @@ class Executor {
         sourceDirs = parser.add(option: "--sourcedirs", shortName: "-srcdirs", kind: [String].self, usage: "Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.", completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles", shortName: "-mocks", kind: [String].self, usage: "List of mock files (separated by a comma or a space) from modules this target depends on. ", completion: .filename)
         outputFilePath = parser.add(option: "--outputfile", shortName: "-output", kind: String.self, usage: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.", completion: .filename)
-        exclusionSuffixes = parser.add(option: "--exclude-suffixes", kind: [String].self, usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).", completion: .filename)
-        annotatedOnly = parser.add(option: "--annotated-only", kind: Bool.self, usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
-        concurrencyLimit = parser.add(option: "--concurrency-limit", kind: Int.self, usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
+        exclusionSuffixes = parser.add(option: "--exclude-suffixes", shortName: "-exclude", kind: [String].self, usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).", completion: .filename)
+        annotation = parser.add(option: "--annotation", shortName: "-ant", kind: String.self, usage: "A custom annotation string used to indicate if a type should be mocked (default = @CreateMock).")
+        annotatedOnly = parser.add(option: "--annotated-only", shortName: "-antonly", kind: Bool.self, usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
+        concurrencyLimit = parser.add(option: "--concurrency-limit", shortName: "-j", kind: Int.self, usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
         parsingTimeout = parser.add(option: "--parsing-timeout", kind: Int.self, usage: "Timeout for parsing, in seconds (default = 10).")
         parsingTimeout = parser.add(option: "--rendering-timeout", kind: Int.self, usage: "Timeout for output rendering, in seconds (default = 15).")
         retryParsingOnTimeoutLimit = parser.add(option: "--retry-parsing-limit", kind: Int.self, usage: "Maximum retry numbers for parsing Swift source files in case of a timeout (default = 3).")
@@ -91,6 +93,7 @@ class Executor {
         let parsingTimeout = arguments.get(self.parsingTimeout) ?? defaultTimeout
         let retryParsingOnTimeoutLimit = arguments.get(self.retryParsingOnTimeoutLimit) ?? 0
         let shouldCollectParsingInfo = arguments.get(self.shouldCollectParsingInfo) ?? false
+        let annotation = arguments.get(self.annotation) ?? String.mockAnnotation
         let annotatedOnly = arguments.get(self.annotatedOnly) ?? true
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
 
@@ -100,6 +103,7 @@ class Executor {
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotatedOnly: annotatedOnly,
+                         annotation: annotation, 
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,

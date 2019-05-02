@@ -23,14 +23,15 @@ func generateProtocolMap(sourceDirs: [String]?,
                          sourceFiles: [String]?,
                          exclusionSuffixes: [String]? = nil,
                          annotatedOnly: Bool,
+                         annotation: String,
                          semaphore: DispatchSemaphore?,
                          timeout: Int,
                          queue: DispatchQueue?,
                          process: @escaping ([Entity]) -> ()) -> Int {
     if let sourceDirs = sourceDirs {
-        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
+        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
-        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
+        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     }
     return -1
 }
@@ -38,6 +39,7 @@ func generateProtocolMap(sourceDirs: [String]?,
 private func generateProtcolMap(dirs: [String],
                                 exclusionSuffixes: [String]? = nil,
                                 annotatedOnly: Bool,
+                                annotation: String,
                                 semaphore: DispatchSemaphore?,
                                 timeout: Int,
                                 queue: DispatchQueue?,
@@ -53,6 +55,7 @@ private func generateProtcolMap(dirs: [String],
                 let result = generateProtcolMap(filePath,
                                                 exclusionSuffixes: exclusionSuffixes,
                                                 annotatedOnly: annotatedOnly,
+                                                annotation: annotation,
                                                 lock: lock,
                                                 process: process)
                 count += result ? 1 : 0
@@ -67,6 +70,7 @@ private func generateProtcolMap(dirs: [String],
             let result = generateProtcolMap(filePath,
                                             exclusionSuffixes: exclusionSuffixes,
                                             annotatedOnly: annotatedOnly,
+                                            annotation: annotation,
                                             lock: nil,
                                             process: process)
             count += result ? 1 : 0
@@ -80,6 +84,7 @@ private func generateProtcolMap(dirs: [String],
 private func generateProtcolMap(files: [String],
                                        exclusionSuffixes: [String]? = nil,
                                        annotatedOnly: Bool,
+                                       annotation: String,
                                        semaphore: DispatchSemaphore?,
                                        timeout: Int,
                                        queue: DispatchQueue?,
@@ -93,6 +98,7 @@ private func generateProtcolMap(files: [String],
                 let result = generateProtcolMap(filePath,
                                                 exclusionSuffixes: exclusionSuffixes,
                                                 annotatedOnly: annotatedOnly,
+                                                annotation: annotation,
                                                 lock: lock,
                                                 process: process)
                 count += result ? 1 : 0
@@ -107,6 +113,7 @@ private func generateProtcolMap(files: [String],
             let result = generateProtcolMap(filePath,
                                             exclusionSuffixes: exclusionSuffixes,
                                             annotatedOnly: annotatedOnly,
+                                            annotation: annotation,
                                             lock: nil,
                                             process: process)
             count += result ? 1 : 0
@@ -119,6 +126,7 @@ private func generateProtcolMap(files: [String],
 private func generateProtcolMap(_ path: String,
                                        exclusionSuffixes: [String]? = nil,
                                        annotatedOnly: Bool,
+                                       annotation: String,
                                        lock: NSLock?,
                                        process: @escaping ([Entity]) -> ()) -> Bool {
     
@@ -126,7 +134,7 @@ private func generateProtcolMap(_ path: String,
     
     guard let content = try? String(contentsOfFile: path) else { return false }
     
-    if annotatedOnly, !content.contains(String.mockAnnotation) {
+    if annotatedOnly, !content.contains(annotation) {
         return false
     }
     
@@ -135,7 +143,7 @@ private func generateProtcolMap(_ path: String,
         
         for current in topstructure.substructures {
             if current.isProtocol {
-                let isAnnotated = current.isAnnotated(with: .mockAnnotation, in: content)
+                let isAnnotated = current.isAnnotated(with: annotation, in: content)
                 if !annotatedOnly || isAnnotated {
                     let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: isAnnotated, isProcessed: false, models: nil, attributes: nil)
                     results.append(node)

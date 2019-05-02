@@ -1,4 +1,4 @@
-import SwiftMockGenCore
+import MockoloFramework
 
 let duplicateSigInheritance3 = """
 /// \(String.mockAnnotation)

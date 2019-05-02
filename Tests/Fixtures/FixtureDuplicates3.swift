@@ -1,4 +1,4 @@
-import SwiftMockGenCore
+import MockoloFramework
 
 let duplicates3 = """
 /// \(String.mockAnnotation)
