@@ -1,5 +1,5 @@
 import XCTest
-import SwiftMockGenCore
+import MockoloFramework
 
 class SwiftMockGenTests: XCTestCase {
     

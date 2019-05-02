@@ -2,10 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "SwiftMockGen",
+    name: "Mockolo",
     products: [
-        .executable(name: "swiftmockgen", targets: ["SwiftMockGen"]),
-        .library(name: "SwiftMockGenCore", targets: ["SwiftMockGenCore"]),
+        .executable(name: "mockolo", targets: ["Mockolo"]),
+        .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
     ],
     dependencies: [
                 .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
@@ -13,21 +13,21 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "SwiftMockGen",
+            name: "Mockolo",
             dependencies: [
-                "Utility",
-                "SwiftMockGenCore",
+                "MockoloFramework",
             ]),
         .target(
-                    name: "SwiftMockGenCore",
+                    name: "MockoloFramework",
                     dependencies: [
+                        "Utility",
                         "SourceKittenFramework"
                     ]
         ),
         .testTarget(
-            name: "SwiftMockGenTests",
+            name: "MockoloTests",
             dependencies: [
-                "SwiftMockGenCore",
+                "MockoloFramework",
                 ],
             path: "Tests"
             )

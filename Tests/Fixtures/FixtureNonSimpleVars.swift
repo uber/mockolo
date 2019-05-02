@@ -1,4 +1,4 @@
-import SwiftMockGenCore
+import MockoloFramework
 
 let nonSimpleVars = """
 import Foundation

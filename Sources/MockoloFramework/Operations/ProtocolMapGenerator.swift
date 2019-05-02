@@ -135,7 +135,7 @@ private func generateProtcolMap(_ path: String,
         
         for current in topstructure.substructures {
             if current.isProtocol {
-                let isAnnotated = current.isAnnotated(with: .mockAnnotation, in: content)
+                let isAnnotated = current.isAnnotated(with: String.mockAnnotation, in: content)
                 if !annotatedOnly || isAnnotated {
                     let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: isAnnotated, isProcessed: false, models: nil, attributes: nil)
                     results.append(node)
