@@ -1,9 +1,9 @@
 import XCTest
 import MockoloFramework
 
-class SwiftMockGenTests: XCTestCase {
+class MockoloTests: XCTestCase {
     
-    let bundle = Bundle(for: SwiftMockGenTests.self)
+    let bundle = Bundle(for: MockoloTests.self)
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
@@ -35,6 +35,7 @@ class SwiftMockGenTests: XCTestCase {
             // Put the code you want to measure the time of here.
         }
     }
+    
     func testSimpleVar() {
         verify(srcContent: simpleVar,
                dstContent: simpleVarMock)
@@ -65,34 +66,42 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: duplicates1,
                dstContent: duplicateMock1)
     }
+    
     func testDuplicates1() {
         verify(srcContent: duplicates1,
                dstContent: duplicateMock1)
     }
+    
     func testDuplicates2() {
         verify(srcContent: duplicates2,
                dstContent: duplicatesMock2)
     }
+    
     func testDuplicates3() {
         verify(srcContent: duplicates3,
                dstContent: duplicatesMock3)
     }
+    
     func testDuplicateSigsInheritance1() {
         verify(srcContent: duplicateSigInheritance1,
                dstContent: duplicateSigInheritanceMock1)
     }
+    
     func testDuplicateSigsInheritance2() {
         verify(srcContent: duplicateSigInheritance2,
                dstContent: duplicateSigInheritanceMock2)
     }
+    
     func testDuplicateSigsInheritance3() {
         verify(srcContent: duplicateSigInheritance3,
                dstContent: duplicateSigInheritanceMock3)
     }
+    
     func testDuplicateSigsInheritance4() {
         verify(srcContent: duplicateSigInheritance4,
                dstContent: duplicateSigInheritanceMock4)
     }
+    
     func testDuplicateSigsInheritance5() {
         verify(srcContent: duplicateSigInheritance5,
                dstContent: duplicateSigInheritanceMock5)
@@ -112,6 +121,7 @@ class SwiftMockGenTests: XCTestCase {
         verify(srcContent: docComment1,
                dstContent: docCommentMock)
     }
+    
     func testDocComment2() {
         verify(srcContent: docComment2,
                dstContent: docCommentMock)
