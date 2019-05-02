@@ -29,12 +29,12 @@ public func generate(sourceDirs: [String]?,
                      mockFilePaths: [String]?,
                      annotatedOnly: Bool,
                      annotation: String,
+                     header: String?,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
                      parsingTimeout: Int,
-                     retryParsingOnTimeoutLimit: Int,
-                     shouldCollectParsingInfo: Bool) throws {
+                     renderingTimeout: Int) throws {
     
     assert(sourceDirs != nil || sourceFiles != nil)
     minLogLevel = loggingLevel
@@ -46,13 +46,9 @@ public func generate(sourceDirs: [String]?,
     var pathToContentMap = [(String, String)]()
     var resolvedEntities = [ResolvedEntity]()
     
-    var sema: DispatchSemaphore? = nil
-    if let limit = concurrencyLimit {
-        sema = DispatchSemaphore(value: limit)
-    }
-    
-    let mockgenQueue = (concurrencyLimit ?? 0 == 1) ? nil :
-        DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
+    let maxConcurrentThreads = concurrencyLimit ?? 0
+    let sema = maxConcurrentThreads > 1 ? DispatchSemaphore(value: maxConcurrentThreads) : nil
+    let mockgenQueue = maxConcurrentThreads > 1 ? DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent) : nil
     
     let t0 = CFAbsoluteTimeGetCurrent()
     log("Process input mock files...", level: .info)
@@ -102,7 +98,7 @@ public func generate(sourceDirs: [String]?,
                          inheritanceMap: parentMocks,
                          typeKeys: typeKeys,
                          semaphore: sema,
-                         timeout: parsingTimeout,
+                         timeout: renderingTimeout,
                          queue: mockgenQueue,
                          process: { (entity, pathsToContents) in
                             pathToContentMap.append(contentsOf: pathsToContents)
@@ -116,7 +112,7 @@ public func generate(sourceDirs: [String]?,
     let renderedCount = renderTemplates(entities: resolvedEntities,
                                         typeKeys: typeKeys,
                                         semaphore: sema,
-                                        timeout: parsingTimeout,
+                                        timeout: renderingTimeout,
                                         queue: mockgenQueue,
                                         process: { (mockString: String, offset: Int64) in
                                             candidates.append((mockString, offset))
@@ -129,6 +125,7 @@ public func generate(sourceDirs: [String]?,
     let result = write(candidates: candidates,
                        processedImportLines: processedImportLines,
                        pathToContentMap: pathToContentMap,
+                       header: header,
                        to: outputFilePath)
     
     let t5 = CFAbsoluteTimeGetCurrent()

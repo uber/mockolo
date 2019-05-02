@@ -52,9 +52,9 @@ func generateProcessedTypeMap(_ paths: [String],
 }
 
 private func generateProcessedModels(_ path: String,
-                                            content: String,
-                                            lock: NSLock?,
-                                            process: @escaping ([Entity], [String]) -> ()) -> Bool {
+                                     content: String,
+                                     lock: NSLock?,
+                                     process: @escaping ([Entity], [String]) -> ()) -> Bool {
     guard let content = try? String(contentsOfFile: path) else { return false }
     let imports = findImportLines(content: content)
     

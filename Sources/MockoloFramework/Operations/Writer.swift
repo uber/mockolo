@@ -18,9 +18,10 @@ import Foundation
 
 /// Combines a list of entities and import lines and header and writes the final output
 func write(candidates: [(String, Int64)],
-                  processedImportLines: [String: [String]],
-                  pathToContentMap: [(String, String)],
-                  to outputFilePath: String) -> String {
+           processedImportLines: [String: [String]],
+           pathToContentMap: [(String, String)],
+           header: String?,
+           to outputFilePath: String) -> String {
     
     var importLines = processedImportLines
     for (filepath, filecontent) in pathToContentMap {

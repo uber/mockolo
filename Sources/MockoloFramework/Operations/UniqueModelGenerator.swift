@@ -30,7 +30,7 @@ func generateUniqueModels(protocolMap: [String: Entity],
     if let queue = queue {
         let lock = NSLock()
         for (key, val) in annotatedProtocolMap {
-            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
+            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
                 generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: lock, process: process)
                 semaphore?.signal()
