@@ -171,12 +171,12 @@ class MockoloTests: XCTestCase {
                       mockFilePaths: [mockFilePath],
                       annotatedOnly: false,
                       annotation: String.mockAnnotation,
+                      header: nil,
                       to: dstFilePath,
                       loggingLevel: 1,
                       concurrencyLimit: nil,
                       parsingTimeout: 10,
-                      retryParsingOnTimeoutLimit: 3,
-                      shouldCollectParsingInfo: true)
+                      renderingTimeout: 12)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}

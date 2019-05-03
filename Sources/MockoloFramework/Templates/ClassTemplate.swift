@@ -47,15 +47,15 @@ func applyClassTemplate(name: String,
         extraInitBlock = "\(attribute)\n\(accessControlLevelDescription)init() {}"
         paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
     }
-
+    
     let result = """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
         \(extraInitBlock)
         \(accessControlLevelDescription)init(\(params)) {
-            \(paramsAssign)
-        }
-        \(entities.joined(separator: "\n"))
+        \(paramsAssign)
+    }
+    \(entities.joined(separator: "\n"))
     }
     """
     return result

@@ -82,13 +82,13 @@ private func generateProtcolMap(dirs: [String],
 
 
 private func generateProtcolMap(files: [String],
-                                       exclusionSuffixes: [String]? = nil,
-                                       annotatedOnly: Bool,
-                                       annotation: String,
-                                       semaphore: DispatchSemaphore?,
-                                       timeout: Int,
-                                       queue: DispatchQueue?,
-                                       process: @escaping ([Entity]) -> ()) -> Int  {
+                                exclusionSuffixes: [String]? = nil,
+                                annotatedOnly: Bool,
+                                annotation: String,
+                                semaphore: DispatchSemaphore?,
+                                timeout: Int,
+                                queue: DispatchQueue?,
+                                process: @escaping ([Entity]) -> ()) -> Int  {
     var count = 0
     if let queue = queue {
         let lock = NSLock()
@@ -124,11 +124,11 @@ private func generateProtcolMap(files: [String],
 }
 
 private func generateProtcolMap(_ path: String,
-                                       exclusionSuffixes: [String]? = nil,
-                                       annotatedOnly: Bool,
-                                       annotation: String,
-                                       lock: NSLock?,
-                                       process: @escaping ([Entity]) -> ()) -> Bool {
+                                exclusionSuffixes: [String]? = nil,
+                                annotatedOnly: Bool,
+                                annotation: String,
+                                lock: NSLock?,
+                                process: @escaping ([Entity]) -> ()) -> Bool {
     
     guard path.shouldParse(with: exclusionSuffixes) else { return false }
     

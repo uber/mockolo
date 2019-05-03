@@ -29,11 +29,11 @@ func renderTemplates(entities: [ResolvedEntity],
     if let queue = queue {
         let lock = NSLock()
         for element in entities {
-            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
+            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
                 let result = renderTemplates(entityMetadata: element, typeKeys: typeKeys, lock: lock, process: process)
-                semaphore?.signal()
                 count += result ? 1 : 0
+                semaphore?.signal()
             }
         }
         queue.sync(flags: .barrier) { }
