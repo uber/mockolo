@@ -47,9 +47,9 @@ public func generate(sourceDirs: [String]?,
     var resolvedEntities = [ResolvedEntity]()
     
     let maxConcurrentThreads = concurrencyLimit ?? 0
-    let sema = maxConcurrentThreads > 1 ? DispatchSemaphore(value: maxConcurrentThreads) : nil
-    let mockgenQueue = maxConcurrentThreads > 1 ? DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent) : nil
-    
+    let sema = maxConcurrentThreads <= 1 ? nil: DispatchSemaphore(value: maxConcurrentThreads)
+    let mockgenQueue = maxConcurrentThreads == 1 ? nil: DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
+
     let t0 = CFAbsoluteTimeGetCurrent()
     log("Process input mock files...", level: .info)
     var processedMocksCount = 0
