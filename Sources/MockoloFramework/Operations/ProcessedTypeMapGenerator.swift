@@ -57,12 +57,10 @@ private func generateProcessedModels(_ path: String,
                                      process: @escaping ([Entity], [String]) -> ()) -> Bool {
     guard let content = try? String(contentsOfFile: path) else { return false }
     let imports = findImportLines(content: content)
-    
+
     if let topstructure = try? Structure(path: path) {
         let results = topstructure.substructures.map { current -> Entity in
-            
-            let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, isProcessed: true, models: nil, attributes: nil)
-            return node
+            return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, isProcessed: true)
         }
         
         lock?.lock()

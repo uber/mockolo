@@ -28,7 +28,7 @@ struct VariableModel: Model {
         self.content = content
     }
     
-    func render(with identifier: String, typeKeys: [String]?) -> String? {
+    func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
             return self.content.extract(offset: self.offset, length: self.length)
         }

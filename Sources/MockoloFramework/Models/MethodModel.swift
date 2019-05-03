@@ -94,7 +94,7 @@ struct MethodModel: Model {
         return name(by: cap-1) + self.signatureComponents[cap-1]
     }
     
-    func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
+    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
             return self.content.extract(offset: self.offset, length: self.length)
         }

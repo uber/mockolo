@@ -18,11 +18,16 @@ import Foundation
 
 func applyClassTemplate(name: String,
                         identifier: String,
-                        typeKeys: [String]?,
+                        typeKeys: [String: String]?,
                         accessControlLevelDescription: String,
                         attribute: String,
                         initParams: [VariableModel]?,
-                        entities: [String]) -> String {
+                        entities: [(String, Model)]) -> String {
+    
+    let renderedEntities = entities
+        .compactMap { (name: String, model: Model) -> String? in
+            return model.render(with: name, typeKeys: typeKeys)
+    }
     
     var extraInitBlock = ""
     var paramsAssign = ""
@@ -55,7 +60,7 @@ func applyClassTemplate(name: String,
         \(accessControlLevelDescription)init(\(params)) {
         \(paramsAssign)
     }
-    \(entities.joined(separator: "\n"))
+    \(renderedEntities.joined(separator: "\n"))
     }
     """
     return result

@@ -19,7 +19,7 @@ import SourceKittenFramework
 
 func applyClosureTemplate(name: String,
                           type: String,
-                          typeKeys: [String]?,
+                          typeKeys: [String: String]?,
                           genericTypeNames: [String],
                           paramVals: [String]?,
                           paramTypes: [String]?,
@@ -45,7 +45,7 @@ func applyClosureTemplate(name: String,
 }
 
 
-private func renderReturnDefaultStatement(name: String, type: String, typeKeys: [String]?) -> String {
+private func renderReturnDefaultStatement(name: String, type: String, typeKeys: [String: String]?) -> String {
     if type != .unknownVal, !type.isEmpty {
         if type.contains("->") {
             return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"

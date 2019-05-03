@@ -148,7 +148,6 @@ extension Structure {
     func extract(_ source: [String: SourceKitRepresentable], from content: String) -> String {
         if let offset = source[SwiftDocKey.offset.rawValue] as? Int64,
             let len = source[SwiftDocKey.length.rawValue] as? Int64 {
-            
             return content.extract(offset: offset, length: len)
         }
         return ""
