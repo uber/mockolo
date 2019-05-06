@@ -138,13 +138,6 @@ class MockoloTests: XCTestCase {
                dstContent: overloadMock1)
     }
     
-    func testInit() {
-        verify(srcContent: simpleInit,
-               mockContent: simpleInitParentMock,
-               dstContent: simpleInitResultMock)
-    }
-    
-
     func testHeader1() {
         verify(srcContent: simpleInit,
                mockContent: simpleInitParentMock,
@@ -166,6 +159,24 @@ class MockoloTests: XCTestCase {
                header: "/// Copyright c")
     }
 
+    func testEmojis() {
+        verify(srcContent: emojiVars,
+               mockContent: nonSimpleVarsMock,
+               dstContent: emojiVarsMock)
+    }
+    
+    func testInitParams() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock)
+    }
+
+    func testInitMethod() {
+        verify(srcContent: protocolWithInit,
+               mockContent: simpleInitParentMock,
+               dstContent: protocolWithInitResultMock)
+    }
+    
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)

@@ -30,6 +30,9 @@ public protocol Model {
     /// Indicates whether this model can be used as a parameter to an initializer
     var canBeInitParam: Bool { get }
     
+    /// Indicates whether this model maps to an init method
+    var isInitializer: Bool { get }
+
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: String { get set }
 
@@ -59,6 +62,10 @@ extension Model {
     }
     
     var canBeInitParam: Bool {
+        return false
+    }
+
+    var isInitializer: Bool {
         return false
     }
 }

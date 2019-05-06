@@ -34,14 +34,15 @@ func applyClosureTemplate(name: String,
         returnTypeCast = " as\(asSuffix) " + returnAs
     }
     
-    let result = """
+    let template =
+    """
         if let \(name) = \(name) {
             return \(name)(\(handlerParamValsStr))\(returnTypeCast)
         }
         \(handlerReturnDefault)
     """
     
-    return result
+    return template
 }
 
 
