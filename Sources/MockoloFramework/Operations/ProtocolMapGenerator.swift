@@ -27,13 +27,12 @@ func generateProtocolMap(sourceDirs: [String]?,
                          semaphore: DispatchSemaphore?,
                          timeout: Int,
                          queue: DispatchQueue?,
-                         process: @escaping ([Entity]) -> ()) -> Int {
+                         process: @escaping ([Entity]) -> ()) {
     if let sourceDirs = sourceDirs {
         return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
         return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
     }
-    return -1
 }
 
 private func generateProtcolMap(dirs: [String],
@@ -43,22 +42,19 @@ private func generateProtcolMap(dirs: [String],
                                 semaphore: DispatchSemaphore?,
                                 timeout: Int,
                                 queue: DispatchQueue?,
-                                process: @escaping ([Entity]) -> ()) -> Int {
-    var count = 0
-    
+                                process: @escaping ([Entity]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         
         scanPaths(dirs) { filePath in
             _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
-                let result = generateProtcolMap(filePath,
-                                                exclusionSuffixes: exclusionSuffixes,
-                                                annotatedOnly: annotatedOnly,
-                                                annotation: annotation,
-                                                lock: lock,
-                                                process: process)
-                count += result ? 1 : 0
+                _ = generateProtcolMap(filePath,
+                                       exclusionSuffixes: exclusionSuffixes,
+                                       annotatedOnly: annotatedOnly,
+                                       annotation: annotation,
+                                       lock: lock,
+                                       process: process)
                 semaphore?.signal()
             }
         }
@@ -67,17 +63,14 @@ private func generateProtcolMap(dirs: [String],
         queue.sync(flags: .barrier) {}
     } else {
         scanPaths(dirs) { filePath in
-            let result = generateProtcolMap(filePath,
-                                            exclusionSuffixes: exclusionSuffixes,
-                                            annotatedOnly: annotatedOnly,
-                                            annotation: annotation,
-                                            lock: nil,
-                                            process: process)
-            count += result ? 1 : 0
+            _ = generateProtcolMap(filePath,
+                                   exclusionSuffixes: exclusionSuffixes,
+                                   annotatedOnly: annotatedOnly,
+                                   annotation: annotation,
+                                   lock: nil,
+                                   process: process)
         }
     }
-    
-    return count
 }
 
 
@@ -88,20 +81,18 @@ private func generateProtcolMap(files: [String],
                                 semaphore: DispatchSemaphore?,
                                 timeout: Int,
                                 queue: DispatchQueue?,
-                                process: @escaping ([Entity]) -> ()) -> Int  {
-    var count = 0
+                                process: @escaping ([Entity]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for filePath in files {
             _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
-                let result = generateProtcolMap(filePath,
-                                                exclusionSuffixes: exclusionSuffixes,
-                                                annotatedOnly: annotatedOnly,
-                                                annotation: annotation,
-                                                lock: lock,
-                                                process: process)
-                count += result ? 1 : 0
+                _ = generateProtcolMap(filePath,
+                                       exclusionSuffixes: exclusionSuffixes,
+                                       annotatedOnly: annotatedOnly,
+                                       annotation: annotation,
+                                       lock: lock,
+                                       process: process)
                 semaphore?.signal()
             }
         }
@@ -110,17 +101,14 @@ private func generateProtcolMap(files: [String],
         
     } else {
         for filePath in files {
-            let result = generateProtcolMap(filePath,
-                                            exclusionSuffixes: exclusionSuffixes,
-                                            annotatedOnly: annotatedOnly,
-                                            annotation: annotation,
-                                            lock: nil,
-                                            process: process)
-            count += result ? 1 : 0
+            _ = generateProtcolMap(filePath,
+                                   exclusionSuffixes: exclusionSuffixes,
+                                   annotatedOnly: annotatedOnly,
+                                   annotation: annotation,
+                                   lock: nil,
+                                   process: process)
         }
     }
-    
-    return count
 }
 
 private func generateProtcolMap(_ path: String,
@@ -131,9 +119,7 @@ private func generateProtcolMap(_ path: String,
                                 process: @escaping ([Entity]) -> ()) -> Bool {
     
     guard path.shouldParse(with: exclusionSuffixes) else { return false }
-    
     guard let content = try? String(contentsOfFile: path) else { return false }
-    
     if annotatedOnly, !content.contains(annotation) {
         return false
     }

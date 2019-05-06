@@ -24,27 +24,22 @@ func renderTemplates(entities: [ResolvedEntity],
                      semaphore: DispatchSemaphore?,
                      timeout: Int,
                      queue: DispatchQueue?,
-                     process: @escaping (String, Int64) -> ()) -> Int {
-    var count = 0
+                     process: @escaping (String, Int64) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for element in entities {
             _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
-                let result = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: lock, process: process)
-                count += result ? 1 : 0
+                _ = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: lock, process: process)
                 semaphore?.signal()
             }
         }
         queue.sync(flags: .barrier) { }
     } else {
         for element in entities {
-            let result = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: nil, process: process)
-            count += result ? 1 : 0
+            _ = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: nil, process: process)
         }
     }
-    
-    return count
 }
 
 private func renderTemplates(resolvedEntity: ResolvedEntity,

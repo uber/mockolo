@@ -22,8 +22,7 @@ func generateProcessedTypeMap(_ paths: [String],
                               semaphore: DispatchSemaphore?,
                               timeout: Int,
                               queue: DispatchQueue?,
-                              process: @escaping ([Entity], [String]) -> ()) -> Int {
-    var count = 0
+                              process: @escaping ([Entity], [String]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         
@@ -31,8 +30,7 @@ func generateProcessedTypeMap(_ paths: [String],
             _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
                 if let content = try? String(contentsOfFile: filePath) {
-                    let result = generateProcessedModels(filePath, content: content, lock: lock, process: process)
-                    count += result ? 1 : 0
+                    _ = generateProcessedModels(filePath, content: content, lock: lock, process: process)
                 }
                 semaphore?.signal()
             }
@@ -42,13 +40,10 @@ func generateProcessedTypeMap(_ paths: [String],
     } else {
         for filePath in paths {
             if let content = try? String(contentsOfFile: filePath) {
-                let result = generateProcessedModels(filePath, content: content, lock: nil, process: process)
-                count += result ? 1 : 0
+                _ = generateProcessedModels(filePath, content: content, lock: nil, process: process)
             }
         }
     }
-    
-    return count
 }
 
 private func generateProcessedModels(_ path: String,
@@ -57,7 +52,7 @@ private func generateProcessedModels(_ path: String,
                                      process: @escaping ([Entity], [String]) -> ()) -> Bool {
     guard let content = try? String(contentsOfFile: path) else { return false }
     let imports = findImportLines(content: content)
-
+    
     if let topstructure = try? Structure(path: path) {
         let results = topstructure.substructures.map { current -> Entity in
             return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, isProcessed: true)
