@@ -218,7 +218,7 @@ func processDefaultVal(typeName: String, typeKeys: [String: String]? = nil) -> S
         return val
     }
     if let val = typeKeys?[typeName] {
-        return "\(val)Mock()"
+        return val
     }
     if let result = parseParens(typeName) {
         return lintCommas(result)
