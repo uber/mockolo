@@ -89,7 +89,7 @@ class Executor {
                                    kind: Bool.self,
                                    usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
         macro = parser.add(option: "--macro",
-                                shortName: "-mcr",
+                                shortName: "-m",
                                 kind: String.self,
                                 usage: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
         header = parser.add(option: "--header",
