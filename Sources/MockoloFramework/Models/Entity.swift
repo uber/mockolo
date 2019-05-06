@@ -23,7 +23,18 @@ struct ResolvedEntity {
     let entity: Entity
     let uniqueModels: [(String, Model)]
     let attributes: [String]
+    let hasInit: Bool
     let initVars: [VariableModel]?
+    
+    func model() -> Model {
+        return ClassModel(entity.ast,
+                          content: entity.content,
+                          identifier: key,
+                          additionalAttributes: attributes,
+                          needInit: !hasInit,
+                          initParams: initVars,
+                          entities: uniqueModels)
+    }
 }
 
 
@@ -36,29 +47,30 @@ struct Entity {
     let isAnnotated: Bool
     let isProcessed: Bool
     
-    lazy var models: [Model]? = {
-        let childEntities = ast.substructures.compactMap { (child: Structure) -> Model? in
+    var hasInit: Bool {
+        return ast.substructures.filter(path: \.isInitializer).count > 0
+    }
+    
+    func subModels() -> [Model] {
+        return ast.substructures.compactMap { (child: Structure) -> Model? in
             return model(for: child, content: content, processed: isProcessed)
         }
-        return childEntities
-    }()
+    }
     
-    lazy var attributes: [String]? = {
+    func subAttributes() -> [String]? {
         if isProcessed {
             return nil
         }
         
-        let childAttributes = ast.substructures.compactMap { (child: Structure) -> [String]? in
+        return ast.substructures.compactMap { (child: Structure) -> [String]? in
             return child.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
             }.flatMap {$0}
-        return childAttributes
-    }()
-    
+    }
     
     func model(for element: Structure, content: String, processed: Bool = false) -> Model? {
         if element.isVariable {
             return VariableModel(element, content: content, processed: processed)
-        } else if element.isMethod, !element.isInitializer {
+        } else if element.isMethod {
             return MethodModel(element, content: content, processed: processed)
         }
         

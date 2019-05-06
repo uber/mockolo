@@ -212,13 +212,13 @@ private func lintCommas(_ arg: String) -> String {
 }
 
 /// Parses a type string containing (nested) tuples or brackets and returns a default value for each type component
-func processDefaultVal(typeName: String, typeKeys: [String]? = nil) -> String? {
+func processDefaultVal(typeName: String, typeKeys: [String: String]? = nil) -> String? {
     
     if let val = defaultVal(typeName: typeName) {
         return val
     }
-    if let typeKeys = typeKeys, typeKeys.contains(typeName) {
-        return "\(typeName)Mock()"
+    if let val = typeKeys?[typeName] {
+        return val
     }
     if let result = parseParens(typeName) {
         return lintCommas(result)

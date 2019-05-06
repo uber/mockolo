@@ -28,9 +28,10 @@ struct MethodModel: Model {
     let content: String
     let genericTypeParams: [ParamModel]
     let params: [ParamModel]
-    let handler: ClosureModel
+    let handler: ClosureModel?
     let processed: Bool
     let signatureComponents: [String]
+    let isInitializer: Bool
     
     init(_ ast: Structure, content: String, processed: Bool) {
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
@@ -40,14 +41,17 @@ struct MethodModel: Model {
         self.type = ast.typeName == .unknownVal ? "" : ast.typeName
         self.staticKind = ast.isStaticMethod ? .static : ""
         self.processed = processed
+        self.isInitializer = ast.isInitializer
         self.offset = ast.range.offset
         self.length = ast.range.length
+
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
         assert(paramDecls.count == comps.count)
-        
+
         self.params = zip(paramDecls, comps).map { (argModel: Structure, argLabel: String) -> ParamModel in
             ParamModel(argModel, label: argLabel)
         }
+
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
         let paramNames = paramDecls.map(path: \.name)
         let paramTypes = paramDecls.map(path: \.typeName)
@@ -72,7 +76,8 @@ struct MethodModel: Model {
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
         self.signatureComponents = args.filter{ arg in !arg.isEmpty }
-        self.handler = ClosureModel(name: self.name,
+        self.handler = self.isInitializer ? nil :
+                        ClosureModel(name: self.name,
                                     genericTypeParams: genericTypeParams,
                                     paramNames: paramNames,
                                     paramTypes: paramTypes,
@@ -94,24 +99,22 @@ struct MethodModel: Model {
         return name(by: cap-1) + self.signatureComponents[cap-1]
     }
     
-    func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
+    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
-            return self.content.extract(offset: self.offset, length: self.length)
+            return isInitializer ? nil : self.content.extract(offset: self.offset, length: self.length)
         }
-        
-        let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}
-        let paramDecls = params.compactMap{$0.render(with: "")}
+    
         let returnType = type != .unknownVal ? type : ""
-        let handlerReturn = handler.render(with: identifier, typeKeys: typeKeys) ?? ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
-                                         genericTypeDecls: genericTypeDecls,
-                                         paramDecls: paramDecls,
+                                         isInitializer: isInitializer,
+                                         genericTypeParams: genericTypeParams,
+                                         params: params,
                                          returnType: returnType,
                                          staticKind: staticKind,
                                          accessControlLevelDescription: accessControlLevelDescription,
-                                         handlerVarType: handler.type,
-                                         handlerReturn: handlerReturn)
+                                         handler: handler,
+                                         typeKeys: typeKeys)
         return result
     }
 }

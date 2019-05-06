@@ -22,7 +22,7 @@ import SourceKittenFramework
 func generateUniqueModels(protocolMap: [String: Entity],
                           annotatedProtocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
-                          typeKeys: [String],
+                          typeKeys: [String: String]?,
                           semaphore: DispatchSemaphore?,
                           timeout: Int,
                           queue: DispatchQueue?,
@@ -46,15 +46,17 @@ func generateUniqueModels(protocolMap: [String: Entity],
 
 private func generateUniqueModels(key: String,
                                   entity: Entity,
-                                  typeKeys: [String],
+                                  typeKeys: [String: String]?,
                                   protocolMap: [String: Entity],
                                   inheritanceMap: [String: Entity],
                                   lock: NSLock? = nil,
                                   process: @escaping (ResolvedEntity, [(String, String)]) -> ()) {
     
     let (models, processedModels, attributes, pathToContentList) = lookupEntities(key: key, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+    let containsInit = models.filter(path: \.isInitializer).count > 0
+
     let processedFullNames = processedModels.compactMap {$0.fullName}
-    
+
     let processedElements = processedModels.compactMap { (element: Model) -> (String, Model)? in
         if let rng = element.name.range(of: String.setCallCountSuffix) {
             return (element.name.substring(to: rng.lowerBound), element)
@@ -76,9 +78,9 @@ private func generateUniqueModels(key: String,
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
     
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}.sorted {$0.1.offset < $1.1.offset}
-    let initVars = potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
+    let initVars = containsInit ? nil: potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
     
-    let container = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, initVars: initVars)
+    let container = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars)
     lock?.lock()
     process(container, pathToContentList)
     lock?.unlock()

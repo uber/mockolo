@@ -145,7 +145,7 @@ private func generateProtcolMap(_ path: String,
             if current.isProtocol {
                 let isAnnotated = current.isAnnotated(with: annotation, in: content)
                 if !annotatedOnly || isAnnotated {
-                    let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: isAnnotated, isProcessed: false, models: nil, attributes: nil)
+                    let node = Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: isAnnotated, isProcessed: false)
                     results.append(node)
                 }
             }

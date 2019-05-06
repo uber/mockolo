@@ -39,12 +39,10 @@ func lookupEntities(key: String,
     var pathToContents = [(String, String)]()
     
     // Look up the mock entities of a protocol specified by the name.
-    if var current = protocolMap[key] {
+    if let current = protocolMap[key] {
         
-        if  let curModels = current.models {
-            models.append(contentsOf: curModels)
-        }
-        if let curAttributes = current.attributes {
+        models.append(contentsOf: current.subModels())
+        if let curAttributes = current.subAttributes() {
             attributes.append(contentsOf: curAttributes)
         }
         pathToContents.append((current.filepath, current.content))
@@ -62,10 +60,8 @@ func lookupEntities(key: String,
         
     } else if var parentMock = inheritanceMap["\(key)Mock"] {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        if let parentModels = parentMock.models {
-            processedModels.append(contentsOf: parentModels)
-        }
-        if let parentAttributes = parentMock.attributes {
+        processedModels.append(contentsOf: parentMock.subModels())
+        if let parentAttributes = parentMock.subAttributes() {
             attributes.append(contentsOf: parentAttributes)
         }
         pathToContents.append((parentMock.filepath, parentMock.content))

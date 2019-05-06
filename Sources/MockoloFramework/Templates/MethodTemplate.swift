@@ -19,30 +19,47 @@ import SourceKittenFramework
 
 func applyMethodTemplate(name: String,
                          identifier: String,
-                         genericTypeDecls: [String],
-                         paramDecls: [String],
+                         isInitializer: Bool,
+                         genericTypeParams: [ParamModel],
+                         params: [ParamModel],
                          returnType: String,
                          staticKind: String,
                          accessControlLevelDescription: String,
-                         handlerVarType: String,
-                         handlerReturn: String) -> String {
-    let callCount = "\(identifier)\(String.callCountSuffix)"
-    let handlerVarName = "\(identifier)\(String.handlerSuffix)"
-    let paramDeclsStr = paramDecls.joined(separator: ", ")
-    let genericTypeDeclsStr = genericTypeDecls.joined(separator: ", ")
-    let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
+                         handler: ClosureModel?,
+                         typeKeys: [String: String]?) -> String {
+    var template = ""
+    
     let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
-    let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"
-    let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-    let template =
-    """
+    let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "")}.joined(separator: ", ")
+    let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
+    let paramDeclsStr = params.compactMap{$0.render(with: "")}.joined(separator: ", ")
+
+    if isInitializer {
+        let paramsAssign = params.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
+        template =
+        """
+        \(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
+            \(paramsAssign)
+        }
+        """
+    } else {
+        let callCount = "\(identifier)\(String.callCountSuffix)"
+        let handlerVarName = "\(identifier)\(String.handlerSuffix)"
+        let handlerVarType = handler?.type ?? "Any"
+        let handlerReturn = handler?.render(with: identifier, typeKeys: typeKeys) ?? ""
+        
+        let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"
+        let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
+        template =
+        """
         \(staticStr)var \(callCount) = 0
         \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
         \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(returnStr) {
             \(callCount) += 1
             \(handlerReturn)
         }
-    """
+        """
+    }
     return template
 }
 

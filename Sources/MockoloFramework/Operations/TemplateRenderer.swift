@@ -20,7 +20,7 @@ import SourceKittenFramework
 /// Renders models with temeplates for output
 
 func renderTemplates(entities: [ResolvedEntity],
-                     typeKeys: [String],
+                     typeKeys: [String: String]?,
                      semaphore: DispatchSemaphore?,
                      timeout: Int,
                      queue: DispatchQueue?,
@@ -31,7 +31,7 @@ func renderTemplates(entities: [ResolvedEntity],
         for element in entities {
             _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
             queue.async {
-                let result = renderTemplates(entityMetadata: element, typeKeys: typeKeys, lock: lock, process: process)
+                let result = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: lock, process: process)
                 count += result ? 1 : 0
                 semaphore?.signal()
             }
@@ -39,7 +39,7 @@ func renderTemplates(entities: [ResolvedEntity],
         queue.sync(flags: .barrier) { }
     } else {
         for element in entities {
-            let result = renderTemplates(entityMetadata: element, typeKeys: typeKeys, lock: nil, process: process)
+            let result = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: nil, process: process)
             count += result ? 1 : 0
         }
     }
@@ -47,26 +47,15 @@ func renderTemplates(entities: [ResolvedEntity],
     return count
 }
 
-private func renderTemplates(entityMetadata: ResolvedEntity,
-                             typeKeys: [String]?,
+private func renderTemplates(resolvedEntity: ResolvedEntity,
+                             typeKeys: [String: String]?,
                              lock: NSLock? = nil,
                              process: @escaping (String, Int64) -> ()) -> Bool {
     
-    let renderedEntities = entityMetadata.uniqueModels
-        .compactMap { (name: String, model: Model) -> String? in
-            return model.render(with: name, typeKeys: typeKeys)
-    }
-    
-    let mockModel = ClassModel(entityMetadata.entity.ast,
-                               content: entityMetadata.entity.content,
-                               identifier: entityMetadata.key,
-                               additionalAttributes: entityMetadata.attributes,
-                               initParams: entityMetadata.initVars,
-                               entities: [renderedEntities.joined(separator: "\n")])
-    
-    if let mockString = mockModel.render(with: entityMetadata.key, typeKeys: typeKeys), !mockString.isEmpty {
+    let mockModel = resolvedEntity.model()
+    if let mockString = mockModel.render(with: resolvedEntity.key, typeKeys: typeKeys), !mockString.isEmpty {
         lock?.lock()
-        process(mockString, entityMetadata.entity.ast.offset)
+        process(mockString, mockModel.offset)
         lock?.unlock()
         return true
     }
