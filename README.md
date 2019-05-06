@@ -33,7 +33,7 @@ For example,
 
 ```swift
 
-.build/release/mockolo -out /User/foo/output/Result.swift -srcdirs /User/foo/srcs -exclude "Resources"
+.build/release/mockolo -srcdirs /User/foo/srcs -out /User/foo/output/Result.swift -exclude "Resources"
 ```
 
 The above will run the program on the source directories passed in, excluding any swift files with suffixes "Resources", and generate the mock output to the `Result.swift` file.
