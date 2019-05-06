@@ -30,6 +30,7 @@ public func generate(sourceDirs: [String]?,
                      annotatedOnly: Bool,
                      annotation: String,
                      header: String?,
+                     macro: String?,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
@@ -126,6 +127,7 @@ public func generate(sourceDirs: [String]?,
                        processedImportLines: processedImportLines,
                        pathToContentMap: pathToContentMap,
                        header: header,
+                       macro: macro,
                        to: outputFilePath)
     
     let t5 = CFAbsoluteTimeGetCurrent()

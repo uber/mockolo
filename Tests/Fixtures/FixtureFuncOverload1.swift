@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let overload1 = """
-/// @CreateMock
+/// \(String.mockAnnotation)
 protocol P1: P0 {
 }
 """

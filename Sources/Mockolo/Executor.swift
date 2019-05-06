@@ -29,6 +29,7 @@ class Executor {
     private var sourceFiles: OptionArgument<[String]>!
     private var exclusionSuffixes: OptionArgument<[String]>!
     private var header: OptionArgument<String>!
+    private var macro: OptionArgument<String>!
     private var annotation: OptionArgument<String>!
     private var annotatedOnly: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
@@ -82,11 +83,15 @@ class Executor {
         annotation = parser.add(option: "--annotation",
                                 shortName: "-ant",
                                 kind: String.self,
-                                usage: "A custom annotation string used to indicate if a type should be mocked (default = @CreateMock).")
+                                usage: "A custom annotation string used to indicate if a type should be mocked (default = mockolo:GenerateMock).")
         annotatedOnly = parser.add(option: "--annotated-only",
                                    shortName: "-antonly",
                                    kind: Bool.self,
                                    usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
+        macro = parser.add(option: "--macro",
+                                shortName: "-m",
+                                kind: String.self,
+                                usage: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
         header = parser.add(option: "--header",
                                 shortName: "-h",
                                 kind: String.self,
@@ -111,7 +116,7 @@ class Executor {
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
     func execute(with arguments: ArgumentParser.Result) {
-        
+
         guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         
         let srcDirs = arguments.get(sourceDirs)
@@ -129,6 +134,7 @@ class Executor {
         let header = arguments.get(self.header)
         let annotatedOnly = arguments.get(self.annotatedOnly) ?? true
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
+        let macro = arguments.get(self.macro)
         
         do {
             try generate(sourceDirs: srcDirs,
@@ -138,6 +144,7 @@ class Executor {
                          annotatedOnly: annotatedOnly,
                          annotation: annotation,
                          header: header,
+                         macro: macro, 
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,

@@ -5,43 +5,43 @@ import Foundation
 
 /// \(String.mockAnnotation)
 public protocol Current: Parent {
-var title: String { get set }
+    var title: String { get set }
 }
 
 """
 
 let simpleInitParentMock = """
 public class ParentMock: Parent {
-
-public init() {}
-public init(num: Int, rate: Double) {
-self.num = arg
-self.rate = rate
-}
-
-var numSetCallCount = 0
-var underlyingNum: Int = ""
-public var num: Int {
-get {
-return underlyingNum
-}
-set {
-underlyingNum = newValue
-numSetCallCount += 1
-}
-}
-
-var rateSetCallCount = 0
-var underlyingRate: Double = 0.0
-public var rate: Double {
-get {
-return underlyingRate
-}
-set {
-underlyingRate = newValue
-rateSetCallCount += 1
-}
-}
+    
+    public init() {}
+    public init(num: Int, rate: Double) {
+        self.num = arg
+        self.rate = rate
+    }
+    
+    var numSetCallCount = 0
+    var underlyingNum: Int = ""
+    public var num: Int {
+        get {
+            return underlyingNum
+        }
+        set {
+            underlyingNum = newValue
+            numSetCallCount += 1
+        }
+    }
+    
+    var rateSetCallCount = 0
+    var underlyingRate: Double = 0.0
+    public var rate: Double {
+        get {
+            return underlyingRate
+        }
+        set {
+            underlyingRate = newValue
+            rateSetCallCount += 1
+        }
+    }
 }
 
 """

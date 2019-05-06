@@ -1,7 +1,7 @@
 import MockoloFramework
 
-
 let simpleVar = """
+\(String.headerDoc)
 import Foundation
 
 /// \(String.mockAnnotation)

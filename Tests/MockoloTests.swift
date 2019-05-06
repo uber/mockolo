@@ -51,12 +51,6 @@ class MockoloTests: XCTestCase {
                dstContent: simpleFuncMock)
     }
     
-    func testInit() {
-        verify(srcContent: simpleInit,
-               mockContent: simpleInitParentMock,
-               dstContent: simpleInitResultMock)
-    }
-    
     func testSimpleDuplicates() {
         verify(srcContent: simpleDuplicates,
                dstContent: simpleDuplicatesMock)
@@ -144,25 +138,58 @@ class MockoloTests: XCTestCase {
                dstContent: overloadMock1)
     }
     
-    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String) {
+    func testInit() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock)
+    }
+    
+
+    func testHeader1() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock,
+               header: "/// Copyright ©")
+    }
+
+    func testHeader2() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock,
+               header: "/// Copyright ©©©")
+    }
+
+    func testHeader3() {
+        verify(srcContent: simpleInit,
+               mockContent: simpleInitParentMock,
+               dstContent: simpleInitResultMock,
+               header: "/// Copyright c")
+    }
+
+    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)
+
+        let macroStart = String.poundIf + "MOCK"
+        let macroEnd = String.poundEndIf
+        
+        let headerStr = header + String.headerDoc
         if let mockContent = mockContent {
             let formattedMockContent = """
-            \(String.headerDoc)
-            \(String.poundIfMock)
+            \(headerStr)
+            \(macroStart)
             \(mockContent)
-            \(String.poundEndIf)
+            \(macroEnd)
             """
             let mockCreated = FileManager.default.createFile(atPath: mockFilePath, contents: formattedMockContent.data(using: .utf8), attributes: nil)
             XCTAssert(mockCreated)
         }
         
         let formattedDstContent = """
-        \(String.headerDoc)
-        \(String.poundIfMock)
+        \(headerStr)
+        \(macroStart)
         \(dstContent)
-        \(String.poundEndIf)
+        \(macroEnd)
         """
         
         try? generate(sourceDirs: nil,
@@ -171,7 +198,8 @@ class MockoloTests: XCTestCase {
                       mockFilePaths: [mockFilePath],
                       annotatedOnly: false,
                       annotation: String.mockAnnotation,
-                      header: nil,
+                      header: header,
+                      macro: "MOCK",
                       to: dstFilePath,
                       loggingLevel: 1,
                       concurrencyLimit: nil,

@@ -96,7 +96,7 @@ struct MethodModel: Model {
     
     func render(with identifier: String, typeKeys: [String]? = nil) -> String? {
         if processed {
-            return self.content.extract(offset: self.offset-1, length: self.length+1)
+            return self.content.extract(offset: self.offset, length: self.length)
         }
         
         let genericTypeDecls = genericTypeParams.compactMap {$0.render(with: "")}

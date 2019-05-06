@@ -15,7 +15,7 @@ import Foundation
  * and types that conform to this protocol
  * and also contains the mock annotation
  * in this comment.
- * @CreateMock
+ * \(String.mockAnnotation)
  */
 public protocol DocProtocol {
     func foo(arg: Bool, tag: Int)
@@ -38,7 +38,7 @@ import Foundation
 * and also contains the mock annotation
 * in this comment.
 */
-/// @CreateMock
+/// \(String.mockAnnotation)
 public protocol DocProtocol {
 func foo(arg: Bool, tag: Int)
 func bar(name: String, more: Float)
