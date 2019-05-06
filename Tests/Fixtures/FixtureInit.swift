@@ -6,51 +6,51 @@ import MockoloFramework
 let protocolWithInit = """
 /// \(String.mockAnnotation)
 public protocol HasInit: Parent {
-var arg: String { get set }
-init(arg: String)
+    var arg: String { get set }
+    init(arg: String)
 }
 """
 
 let protocolWithInitResultMock = """
 
 public class HasInitMock: HasInit {
-
-var argSetCallCount = 0
-var underlyingArg: String = ""
-public var arg: String {
-get {
-return underlyingArg
-}
-set {
-underlyingArg = newValue
-argSetCallCount += 1
-}
-}
-public init(arg: String) {
-self.arg = arg
-}
-var numSetCallCount = 0
-var underlyingNum: Int = ""
-public var num: Int {
-get {
-return underlyingNum
-}
-set {
-underlyingNum = newValue
-numSetCallCount += 1
-}
-}
-var rateSetCallCount = 0
-var underlyingRate: Double = 0.0
-public var rate: Double {
-get {
-return underlyingRate
-}
-set {
-underlyingRate = newValue
-rateSetCallCount += 1
-}
-}
+    
+    var argSetCallCount = 0
+    var underlyingArg: String = ""
+    public var arg: String {
+        get {
+            return underlyingArg
+        }
+        set {
+            underlyingArg = newValue
+            argSetCallCount += 1
+        }
+    }
+    public init(arg: String) {
+        self.arg = arg
+    }
+    var numSetCallCount = 0
+    var underlyingNum: Int = ""
+    public var num: Int {
+        get {
+            return underlyingNum
+        }
+        set {
+            underlyingNum = newValue
+            numSetCallCount += 1
+        }
+    }
+    var rateSetCallCount = 0
+    var underlyingRate: Double = 0.0
+    public var rate: Double {
+        get {
+            return underlyingRate
+        }
+        set {
+            underlyingRate = newValue
+            rateSetCallCount += 1
+        }
+    }
 }
 """
 
