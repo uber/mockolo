@@ -4,10 +4,10 @@ import MockoloFramework
 let emojiVars = """
 /// \(String.mockAnnotation)
 protocol EmojiVars: NonSimpleVars {
-var 😂: Emoji { get set }
-var 👍: Emoji { get set }
-@available(iOS 10.0, *)
-var 👌😳: Emoji { get set }
+    var 😂: Emoji { get set }
+    var 👍: Emoji { get set }
+    @available(iOS 10.0, *)
+    var 👌😳: Emoji { get set }
 }
 """
 
@@ -76,8 +76,8 @@ import Foundation
 /// \(String.mockAnnotation)
 @objc
 public protocol NonSimpleVars {
-@available(iOS 10.0, *)
-var dict: Dictionary<String, Int> { get set }
+    @available(iOS 10.0, *)
+    var dict: Dictionary<String, Int> { get set }
 }
 """
 
