@@ -81,7 +81,7 @@ class Executor {
         annotation = parser.add(option: "--annotation",
                                 shortName: "-ant",
                                 kind: String.self,
-                                usage: "A custom annotation string used to indicate if a type should be mocked (default = mockable).")
+                                usage: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
         annotatedOnly = parser.add(option: "--annotated-only",
                                    shortName: "-antonly",
                                    kind: Bool.self,
