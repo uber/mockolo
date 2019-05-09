@@ -20,14 +20,13 @@ import SourceKittenFramework
 /// Performs processed mock type map generation
 func generateProcessedTypeMap(_ paths: [String],
                               semaphore: DispatchSemaphore?,
-                              timeout: Int,
                               queue: DispatchQueue?,
                               process: @escaping ([Entity], [String]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         
         for filePath in paths {
-            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
                 if let content = try? String(contentsOfFile: filePath) {
                     _ = generateProcessedModels(filePath, content: content, lock: lock, process: process)

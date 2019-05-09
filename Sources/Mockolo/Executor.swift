@@ -33,8 +33,6 @@ class Executor {
     private var annotation: OptionArgument<String>!
     private var annotatedOnly: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
-    private var parsingTimeout: OptionArgument<Int>!
-    private var renderingTimeout: OptionArgument<Int>!
     private var version: OptionArgument<String>!
     
     /// Initializer.
@@ -83,7 +81,7 @@ class Executor {
         annotation = parser.add(option: "--annotation",
                                 shortName: "-ant",
                                 kind: String.self,
-                                usage: "A custom annotation string used to indicate if a type should be mocked (default = mockolo:GenerateMock).")
+                                usage: "A custom annotation string used to indicate if a type should be mocked (default = mockable).")
         annotatedOnly = parser.add(option: "--annotated-only",
                                    shortName: "-antonly",
                                    kind: Bool.self,
@@ -100,13 +98,6 @@ class Executor {
                                       shortName: "-j",
                                       kind: Int.self,
                                       usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
-        parsingTimeout = parser.add(option: "--parsing-timeout",
-                                    shortName: "-pt",
-                                    kind: Int.self,
-                                    usage: "Timeout for parsing, in seconds (default = 10).")
-        renderingTimeout = parser.add(option: "--rendering-timeout",
-                                      shortName: "-rt",
-                                      kind: Int.self, usage: "Timeout for output rendering, in seconds (default = 10).")
         version = parser.add(option: "--version",
                              kind: String.self,
                              usage: "Xcode version.")
@@ -128,8 +119,6 @@ class Executor {
         let exclusionSuffixes = arguments.get(self.exclusionSuffixes) ?? []
         let mockFilePaths = arguments.get(self.mockFilePaths) ?? []
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
-        let parsingTimeout = arguments.get(self.parsingTimeout) ?? defaultTimeout
-        let renderingTimeout = arguments.get(self.renderingTimeout) ?? defaultTimeout
         let annotation = arguments.get(self.annotation) ?? String.mockAnnotation
         let header = arguments.get(self.header)
         let annotatedOnly = arguments.get(self.annotatedOnly) ?? true
@@ -147,9 +136,7 @@ class Executor {
                          macro: macro, 
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
-                         concurrencyLimit: concurrencyLimit,
-                         parsingTimeout: parsingTimeout,
-                         renderingTimeout: renderingTimeout)
+                         concurrencyLimit: concurrencyLimit)
         } catch {
             fatalError("Generation error: \(error)")
         }

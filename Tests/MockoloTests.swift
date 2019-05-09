@@ -213,9 +213,7 @@ class MockoloTests: XCTestCase {
                       macro: "MOCK",
                       to: dstFilePath,
                       loggingLevel: 1,
-                      concurrencyLimit: nil,
-                      parsingTimeout: 10,
-                      renderingTimeout: 12)
+                      concurrencyLimit: nil)
         let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}

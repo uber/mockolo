@@ -25,13 +25,12 @@ func generateProtocolMap(sourceDirs: [String]?,
                          annotatedOnly: Bool,
                          annotation: String,
                          semaphore: DispatchSemaphore?,
-                         timeout: Int,
                          queue: DispatchQueue?,
                          process: @escaping ([Entity]) -> ()) {
     if let sourceDirs = sourceDirs {
-        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
+        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
-        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, timeout: timeout, queue: queue, process: process)
+        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
     }
 }
 
@@ -40,14 +39,13 @@ private func generateProtcolMap(dirs: [String],
                                 annotatedOnly: Bool,
                                 annotation: String,
                                 semaphore: DispatchSemaphore?,
-                                timeout: Int,
                                 queue: DispatchQueue?,
                                 process: @escaping ([Entity]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         
         scanPaths(dirs) { filePath in
-            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
                 _ = generateProtcolMap(filePath,
                                        exclusionSuffixes: exclusionSuffixes,
@@ -79,13 +77,12 @@ private func generateProtcolMap(files: [String],
                                 annotatedOnly: Bool,
                                 annotation: String,
                                 semaphore: DispatchSemaphore?,
-                                timeout: Int,
                                 queue: DispatchQueue?,
                                 process: @escaping ([Entity]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for filePath in files {
-            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
                 _ = generateProtcolMap(filePath,
                                        exclusionSuffixes: exclusionSuffixes,
