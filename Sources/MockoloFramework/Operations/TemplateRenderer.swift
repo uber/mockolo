@@ -22,13 +22,12 @@ import SourceKittenFramework
 func renderTemplates(entities: [ResolvedEntity],
                      typeKeys: [String: String]?,
                      semaphore: DispatchSemaphore?,
-                     timeout: Int,
                      queue: DispatchQueue?,
                      process: @escaping (String, Int64) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for element in entities {
-            _ = semaphore?.wait(timeout: DispatchTime.now() + DispatchTimeInterval.seconds(timeout))
+            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
                 _ = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: lock, process: process)
                 semaphore?.signal()

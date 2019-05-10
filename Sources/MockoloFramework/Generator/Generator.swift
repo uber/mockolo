@@ -20,9 +20,6 @@ import SourceKittenFramework
 
 /// Performs end to end mock generation flow
 
-public let DefaultParsingTimeout = 10
-public let DefaultRetryParsingLimit = 3
-
 public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,
                      exclusionSuffixes: [String],
@@ -33,9 +30,7 @@ public func generate(sourceDirs: [String]?,
                      macro: String?,
                      to outputFilePath: String,
                      loggingLevel: Int,
-                     concurrencyLimit: Int?,
-                     parsingTimeout: Int,
-                     renderingTimeout: Int) throws {
+                     concurrencyLimit: Int?) throws {
     
     assert(sourceDirs != nil || sourceFiles != nil)
     minLogLevel = loggingLevel
@@ -56,7 +51,6 @@ public func generate(sourceDirs: [String]?,
     if let mockFilePaths = mockFilePaths {
         generateProcessedTypeMap(mockFilePaths,
                                  semaphore: sema,
-                                 timeout: parsingTimeout,
                                  queue: mockgenQueue) { (elements, imports) in
                                     elements.forEach { element in
                                         parentMocks[element.name] = element
@@ -77,7 +71,6 @@ public func generate(sourceDirs: [String]?,
                         annotatedOnly: annotatedOnly,
                         annotation: annotation,
                         semaphore: sema,
-                        timeout: parsingTimeout,
                         queue: mockgenQueue) { (elements) in
                             elements.forEach { element in
                                 protocolMap[element.name] = element
@@ -102,7 +95,6 @@ public func generate(sourceDirs: [String]?,
                          inheritanceMap: parentMocks,
                          typeKeys: typeKeys,
                          semaphore: sema,
-                         timeout: renderingTimeout,
                          queue: mockgenQueue,
                          process: { (entity, pathsToContents) in
                             pathToContentMap.append(contentsOf: pathsToContents)
@@ -116,7 +108,6 @@ public func generate(sourceDirs: [String]?,
     renderTemplates(entities: resolvedEntities,
                     typeKeys: typeKeys,
                     semaphore: sema,
-                    timeout: renderingTimeout,
                     queue: mockgenQueue,
                     process: { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))

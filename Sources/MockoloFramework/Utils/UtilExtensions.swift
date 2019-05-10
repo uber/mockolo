@@ -44,7 +44,7 @@ extension String {
     static let closureVarSuffix = "Handler"
     static let initializerPrefix = "init("
     static let `escaping` = "@escaping"
-    static public let mockAnnotation = "mockolo:GenerateMock"
+    static public let mockAnnotation = "@mockable"
     static public let poundIf = "#if "
     static public let poundEndIf = "#endif"
     static public let headerDoc =
