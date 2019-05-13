@@ -34,7 +34,11 @@ extension String {
     static let handlerSuffix = "Handler"
     static let observableVarPrefix = "Observable<"
     static let rxObservableVarPrefix = "RxSwift.Observable<"
-    static let publishSubjectPrefix = "PublishSubject"
+    static let rxPublishSubject = "RxSwift.PublishSubject"
+    static let publishSubject = "PublishSubject"
+    static let behaviorSubject = "BehaviorSubject"
+    static let replaySubject = "ReplaySubject"
+    static let rx = "Rx"
     static let observableEmpty = "Observable.empty()"
     static let rxObservableEmpty = "RxSwift.Observable.empty()"
     static let subjectSuffix = "Subject"
@@ -79,7 +83,7 @@ extension String {
     
     var displayableComponents: [String] {
         let ret = self.replacingOccurrences(of: "?", with: "Optional")
-        return ret.components(separatedBy: CharacterSet(charactersIn: "<>[] :,()-.&@#!{}@+\"\'"))
+        return ret.components(separatedBy: CharacterSet(charactersIn: "<>[] :,()_-.&@#!{}@+\"\'"))
     }
     
     var displayableForType: String {
