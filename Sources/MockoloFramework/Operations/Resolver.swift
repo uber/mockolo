@@ -58,7 +58,7 @@ func lookupEntities(key: String,
             }
         }
         
-    } else if var parentMock = inheritanceMap["\(key)Mock"] {
+    } else if let parentMock = inheritanceMap["\(key)Mock"] {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
         processedModels.append(contentsOf: parentMock.subModels())
         if let parentAttributes = parentMock.subAttributes() {

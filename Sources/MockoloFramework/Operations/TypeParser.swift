@@ -62,7 +62,7 @@ private let defaultValuesDict =
      "UUID": "UUID()",
 ];
 
-private func defaultVal(typeName: String) -> String? {
+private func defaultVal(typeName: String, initParam: Bool = false) -> String? {
     if typeName.hasSuffix("?") {
         return "nil"
     }
@@ -72,11 +72,11 @@ private func defaultVal(typeName: String) -> String? {
     }
     
     if typeName.hasPrefix(String.observableVarPrefix), typeName.hasSuffix(">") {
-        return String.observableEmpty
+        return initParam ? "\(String.publishSubject)()" : String.observableEmpty
     }
     
     if typeName.hasPrefix(String.rxObservableVarPrefix), typeName.hasSuffix(">") {
-        return String.rxObservableEmpty
+        return initParam ? "\(String.rxPublishSubject)()" : String.rxObservableEmpty
     }
     
     if typeName.hasSuffix(">") &&
@@ -212,9 +212,9 @@ private func lintCommas(_ arg: String) -> String {
 }
 
 /// Parses a type string containing (nested) tuples or brackets and returns a default value for each type component
-func processDefaultVal(typeName: String, typeKeys: [String: String]? = nil) -> String? {
+func processDefaultVal(typeName: String, typeKeys: [String: String]? = nil, initParam: Bool = false) -> String? {
     
-    if let val = defaultVal(typeName: typeName) {
+    if let val = defaultVal(typeName: typeName, initParam: initParam) {
         return val
     }
     if let val = typeKeys?[typeName] {

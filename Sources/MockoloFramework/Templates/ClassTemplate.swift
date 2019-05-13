@@ -34,7 +34,7 @@ func applyClassTemplate(name: String,
             params = initParams
                 .map { (element: VariableModel) -> String in
                     
-                    if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys), !val.isEmpty {
+                    if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys, initParam: true), !val.isEmpty {
                         return "\(element.name): \(element.type) = \(val)"
                     }
                     var prefix = ""
