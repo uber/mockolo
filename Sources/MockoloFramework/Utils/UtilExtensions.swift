@@ -33,6 +33,8 @@ extension String {
     static let `rethrows` = "rethrows"
     static let forceTry = "try!"
     static let closureArrow = "->"
+    static let `typealias` = "typealias"
+    static let annotationArgDelimiter = "|"
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
@@ -102,7 +104,7 @@ extension String {
                 ret.append("!")
             }
         }
-
+        
         return ret
     }
     
@@ -133,6 +135,12 @@ extension String {
     }
 }
 
+// Contains arguments to annotation
+// Ex. @mockable(assoicatedtypes: T = Any | U = String | ...)
+struct AnnotationMetadata {
+    var typealiases: [String: String]?
+}
+
 extension Structure {
     
     init(path: String) throws {
@@ -143,9 +151,33 @@ extension Structure {
             ]).send())
     }
     
-    func isAnnotated(with annotation: String, in content: String) -> Bool {
-        return extractDocComment(content)?.contains(annotation) ?? false
+    func annotationMetadata(with annotation: String, in content: String) -> AnnotationMetadata? {
+        if let part = extractDocComment(content)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) {
+            guard part.contains(annotation) else { return nil }
+            
+            var ret = AnnotationMetadata()
+            // Look up the typealias argument if any
+            let patComps = part.components(separatedBy: String.typealias)
+            if patComps.count > 1, let patVal = patComps.last, !patVal.isEmpty {
+                var patValStr = patVal
+                patValStr.removeFirst()
+                patValStr.removeLast()
+                let aliases = patValStr.components(separatedBy: String.annotationArgDelimiter).filter { !$0.isEmpty }
+                var aliasMap = [String: String]()
+                
+                aliases.forEach { (item: String) in
+                    let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: CharacterSet.whitespaces)}
+                    if let key = keyVal.first, let val = keyVal.last {
+                        aliasMap[key] = val
+                    }
+                }
+                ret.typealiases = aliasMap
+            }
+            return ret
+        }
+        return nil
     }
+    
     
     func extractDocComment(_ content: String) -> String? {
         if let len = dictionary["key.doclength"] as? Int64,
@@ -266,6 +298,10 @@ extension Structure {
         return isInstanceMethod || isStaticMethod
     }
     
+    var isAssociatedType: Bool {
+        return kind == SwiftDeclarationKind.associatedtype.rawValue
+    }
+    
     var isClosureVariable: Bool {
         return isVariable && typeName.contains("->")
     }
@@ -335,6 +371,13 @@ extension Structure {
         return (offsetMin, len)
     }
     
+    var nameOffset: Int64 {
+        return dictionary[SwiftDocKey.nameOffset.rawValue] as? Int64 ?? -1
+    }
+    
+    var nameLength: Int64 {
+        return dictionary[SwiftDocKey.nameLength.rawValue] as? Int64 ?? -1
+    }
     
     var offset: Int64 {
         return dictionary[SwiftDocKey.offset.rawValue] as? Int64 ?? -1

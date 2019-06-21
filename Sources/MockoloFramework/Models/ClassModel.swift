@@ -27,17 +27,19 @@ struct ClassModel: Model {
     let entities: [(String, Model)]
     let needInit: Bool
     let initParams: [Model]?
+    let typealiasWhitelist: [String: [String]]?
     
     var modelType: ModelType {
         return .class
     }
-
+    
     init(_ ast: Structure,
          content: String,
          identifier: String,
          additionalAttributes: [String],
          needInit: Bool,
          initParams: [Model]?,
+         typealiasWhitelist: [String: [String]]?,
          entities: [(String, Model)]) {
         self.identifier = identifier
         self.name = identifier + "Mock"
@@ -52,9 +54,10 @@ struct ClassModel: Model {
         let attributeSet = Set(mutableAttributes)
         self.attribute = attributeSet.joined(separator: " ")
         self.accessControlLevelDescription = ast.accessControlLevelDescription.isEmpty ? "" : ast.accessControlLevelDescription + " "
+        self.typealiasWhitelist = typealiasWhitelist
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, needInit: needInit, initParams: initParams, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, needInit: needInit, initParams: initParams, typealiasWhitelist: typealiasWhitelist, entities: entities)
     }
 }

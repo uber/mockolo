@@ -82,12 +82,11 @@ func generateUniqueModels(key: String,
     let containsInit = existingInitVars.count > 0
     let initVars = containsInit ? existingInitVars : potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
     
-    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars)
+    let whitelist = typealiasWhitelist(in: uniqueModels)
+    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars, typealiasWhitelist: whitelist)
     
     return ResolvedEntityContainer(entity: resolvedEntity, imports: pathToContentList)
 }
-
-
 
 
 
