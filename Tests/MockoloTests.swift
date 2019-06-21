@@ -177,6 +177,7 @@ class MockoloTests: XCTestCase {
                dstContent: protocolWithInitResultMock)
     }
     
+    
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
         let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
         XCTAssert(srcCreated)

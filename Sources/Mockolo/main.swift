@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 import Foundation
-import Utility
+import SPMUtility
 import Basic
 
 func main() {
