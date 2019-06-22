@@ -22,23 +22,25 @@ func applyClassTemplate(name: String,
                         accessControlLevelDescription: String,
                         attribute: String,
                         needInit: Bool,
-                        initParams: [VariableModel]?,
+                        initParams: [Model]?,
                         entities: [(String, Model)]) -> String {
     
     var initTemplate = ""
+    var extraVars = ""
+    
     if needInit {
         var extraInitBlock = ""
         var paramsAssign = ""
         var params = ""
         if let initParams = initParams, !initParams.isEmpty {
             params = initParams
-                .map { (element: VariableModel) -> String in
+                .map { (element: Model) -> String in
                     
                     if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys, initParam: true), !val.isEmpty {
                         return "\(element.name): \(element.type) = \(val)"
                     }
                     var prefix = ""
-                    if element.isClosureVariable {
+                    if element.type.contains(String.closureOp) {
                         prefix = String.escaping + " "
                     }
                     return "\(element.name): \(prefix)\(element.type)"
@@ -58,18 +60,37 @@ func applyClassTemplate(name: String,
             \(paramsAssign)
         }
         """
+    } else {
+        
+        if let initParams = initParams, !initParams.isEmpty {
+            var varDict = [String: Model]()
+            entities.filter {$0.1.canBeInitParam}.forEach { (arg: (String, Model)) in
+                varDict[arg.0] = arg.1
+            }
+            extraVars = initParams
+                .filter { varDict[$0.name] == nil }
+                .compactMap { $0.render(with: $0.name, typeKeys: typeKeys) }
+                .joined(separator: "\n")
+        }
     }
     
     let renderedEntities = entities
-        .compactMap { (name: String, model: Model) -> String? in
-            return model.render(with: name, typeKeys: typeKeys)
-    }.joined(separator: "\n")
+        .compactMap { (uniqueId: String, model: Model) -> (String, Int64)? in
+            if let ret = model.render(with: uniqueId, typeKeys: typeKeys) {
+                return (ret, model.offset)
+            }
+            return nil
+        }
+        .sorted { $0.1 < $1.1 }
+        .map {$0.0}
+        .joined(separator: "\n")
     
     let template =
     """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
         \(initTemplate)
+        \(extraVars)
         \(renderedEntities)
     }
     """

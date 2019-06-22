@@ -39,10 +39,22 @@ func applyVariableTemplate(name: String,
             }
         }
     }
-    
-    let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-    
+
+    var acl = accessControlLevelDescription
+    // If acl is unknown, treat this as a private var set by a protocol initializer
+    if acl == String.unknownVal {
+        let privateVarLine =
+        """
+            private \(staticStr)var \(name): \(typeName)!
+        """
+        return privateVarLine
+    }
+
+    if !acl.isEmpty {
+        acl = acl + " "
+    }
+
     let template =
     """
     \(staticStr)var \(underlyingSetCallCount) = 0

@@ -26,14 +26,14 @@ struct ClassModel: Model {
     let identifier: String
     let entities: [(String, Model)]
     let needInit: Bool
-    let initParams: [VariableModel]?
+    let initParams: [Model]?
 
     init(_ ast: Structure,
          content: String,
          identifier: String,
          additionalAttributes: [String],
          needInit: Bool,
-         initParams: [VariableModel]?,
+         initParams: [Model]?,
          entities: [(String, Model)]) {
         self.identifier = identifier
         self.name = identifier + "Mock"

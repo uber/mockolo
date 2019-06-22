@@ -32,9 +32,10 @@ struct MethodModel: Model {
     let processed: Bool
     let signatureComponents: [String]
     let isInitializer: Bool
+    var initParams: [VariableModel]?
     
     init(_ ast: Structure, content: String, processed: Bool) {
-        var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
+        var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
         let nameString = comps.removeFirst()
         self.content = content
         self.name = nameString
@@ -46,10 +47,17 @@ struct MethodModel: Model {
         self.length = ast.range.length
 
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
-        assert(paramDecls.count == comps.count)
+        if paramDecls.count > 0 {
+            assert(paramDecls.count == comps.count)
+        }
+        
+        let zippedParams = zip(paramDecls, comps)
+        self.params = zip(paramDecls, comps).map { (argAst: Structure, argLabel: String) -> ParamModel in
+            ParamModel(argAst, label: argLabel)
+        }
 
-        self.params = zip(paramDecls, comps).map { (argModel: Structure, argLabel: String) -> ParamModel in
-            ParamModel(argModel, label: argLabel)
+        self.initParams = !ast.isInitializer ? nil: zippedParams.map { (argAst: Structure, argLabel: String) -> VariableModel in
+            VariableModel(argAst, content: content, processed: processed)
         }
 
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
@@ -90,6 +98,7 @@ struct MethodModel: Model {
     var fullName: String {
         return self.name + self.signatureComponents.joined()
     }
+    
     
     func name(by level: Int) -> String {
         let cap = min(level, self.signatureComponents.count)
