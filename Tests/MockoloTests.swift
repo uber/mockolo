@@ -2,13 +2,22 @@ import XCTest
 import MockoloFramework
 
 class MockoloTests: XCTestCase {
-    
+    var srcFilePathsCount = 1
     let bundle = Bundle(for: MockoloTests.self)
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
-    lazy var srcFilePath: String = {
-        return bundle.bundlePath + "/Src.swift"
+    lazy var srcFilePaths: [String] = {
+        var idx = 0
+        var paths = [String]()
+        let prefix = bundle.bundlePath + "/Src"
+        let suffix = ".swift"
+        while idx < srcFilePathsCount {
+            let path = prefix + "\(idx)" + suffix
+            paths.append(path)
+            idx += 1
+        }
+        return paths
     }()
     lazy var mockFilePath: String = {
         return bundle.bundlePath + "/Mocks.swift"
@@ -23,7 +32,9 @@ class MockoloTests: XCTestCase {
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
         try? FileManager.default.removeItem(atPath: dstFilePath)
-        try? FileManager.default.removeItem(atPath: srcFilePath)
+        for srcpath in srcFilePaths {
+            try? FileManager.default.removeItem(atPath: srcpath)
+        }
         if FileManager.default.fileExists(atPath: mockFilePath) {
             try? FileManager.default.removeItem(atPath: mockFilePath)
         }
@@ -76,6 +87,11 @@ class MockoloTests: XCTestCase {
                dstContent: duplicatesMock3)
     }
     
+    func testDuplicates4() {
+        verify(srcContent: duplicates4,
+               dstContent: duplicatesMock4)
+    }
+
     func testDuplicateSigsInheritance1() {
         verify(srcContent: duplicateSigInheritance1,
                dstContent: duplicateSigInheritanceMock1)
@@ -177,10 +193,18 @@ class MockoloTests: XCTestCase {
                dstContent: protocolWithInitResultMock)
     }
     
-    
-    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
-        let srcCreated = FileManager.default.createFile(atPath: srcFilePath, contents: srcContent.data(using: .utf8), attributes: nil)
-        XCTAssert(srcCreated)
+
+    private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "") {
+        var index = 0
+        srcFilePathsCount = srcContents.count
+        
+        for src in srcContents {
+            if index < srcContents.count {
+                let srcCreated = FileManager.default.createFile(atPath: srcFilePaths[index], contents: src.data(using: .utf8), attributes: nil)
+                index += 1
+                XCTAssert(srcCreated)
+            }
+        }
 
         let macroStart = String.poundIf + "MOCK"
         let macroEnd = String.poundEndIf
@@ -205,7 +229,7 @@ class MockoloTests: XCTestCase {
         """
         
         try? generate(sourceDirs: nil,
-                      sourceFiles: [srcFilePath],
+                      sourceFiles: srcFilePaths,
                       exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: [mockFilePath],
                       annotatedOnly: false,
@@ -213,11 +237,17 @@ class MockoloTests: XCTestCase {
                       header: header,
                       macro: "MOCK",
                       to: dstFilePath,
-                      loggingLevel: 1,
-                      concurrencyLimit: nil)
-        let output = (try? String(contentsOf: URL(fileURLWithPath: dstFilePath), encoding: .utf8)) ?? ""
+                      loggingLevel: 3,
+                      concurrencyLimit: nil,
+                      onCompletion: { ret in
+        let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
         XCTAssert(fixtureContents == outputContents)
+        })
+    }
+    
+    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
+        verify(srcContents: [srcContent], mockContent: mockContent, dstContent: dstContent, header: header)
     }
 }

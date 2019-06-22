@@ -37,6 +37,11 @@ struct ResolvedEntity {
     }
 }
 
+struct ResolvedEntityContainer {
+    let entity: ResolvedEntity
+    let imports: [(String, String)]
+}
+
 
 /// Metadata for a type being mocked
 struct Entity {

@@ -136,7 +136,10 @@ class Executor {
                          macro: macro, 
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
-                         concurrencyLimit: concurrencyLimit)
+                         concurrencyLimit: concurrencyLimit,
+                         onCompletion: { _ in 
+                    log("Done. Exiting program", level: .info)
+            })
         } catch {
             fatalError("Generation error: \(error)")
         }
