@@ -8,7 +8,7 @@ let package = Package(
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.4.0"),
+        .package(url: "https://github.com/apple/swift-package-manager.git", from: "0.3.0"),
         .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.23.0"),
     ],
     targets: [

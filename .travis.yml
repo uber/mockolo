@@ -2,7 +2,7 @@ language: objective-c
 osx_image: xcode10.1
 matrix:
     include:
-        - name: "SwiftMockGenTests"
+        - name: "MockoloTests"
           script: swift test -Xswiftc -DDEBUG
-        - name: "SwiftMockGenBinary"
+        - name: "MockoloBinary"
           script: swift build -c release -Xswiftc -static-stdlib
