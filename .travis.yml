@@ -5,4 +5,4 @@ matrix:
         - name: "MockoloTests"
           script: swift test -Xswiftc -DDEBUG
         - name: "MockoloBinary"
-          script: swift build -c release -Xswiftc -static-stdlib
+          script: swift build -c release
