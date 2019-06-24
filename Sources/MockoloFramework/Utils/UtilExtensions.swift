@@ -109,6 +109,11 @@ extension String {
     }
 }
 
+enum Annotated {
+    case annotated(String?)
+    case none
+}
+
 extension Structure {
     
     init(path: String) throws {
@@ -119,8 +124,16 @@ extension Structure {
             ]).send())
     }
     
-    func isAnnotated(with annotation: String, in content: String) -> Bool {
-        return extractDocComment(content)?.contains(annotation) ?? false
+    func isAnnotated(with annotation: String, in content: String) -> Annotated {
+        if let part = extractDocComment(content) {
+            if part.contains(annotation + "(namespace: ") {
+                let moduleinfo = part.components(separatedBy: "():").filter {!$0.isEmpty}.last
+                return .annotated(moduleinfo)
+            } else if part.contains(annotation) {
+                return .annotated(nil)
+            }
+        }
+        return .none
     }
     
     func extractDocComment(_ content: String) -> String? {

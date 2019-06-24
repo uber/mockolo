@@ -18,6 +18,7 @@ import Foundation
 
 func applyClassTemplate(name: String,
                         identifier: String,
+                        module: String?,
                         typeKeys: [String: String]?,
                         accessControlLevelDescription: String,
                         attribute: String,
@@ -65,10 +66,15 @@ func applyClassTemplate(name: String,
             return model.render(with: name, typeKeys: typeKeys)
     }.joined(separator: "\n")
     
+    var moduleStr = ""
+    if let module = module {
+        moduleStr = module + "."
+    }
+
     let template =
     """
     \(attribute)
-    \(accessControlLevelDescription)class \(name): \(identifier) {
+    \(accessControlLevelDescription)class \(moduleStr)\(name): \(moduleStr)\(identifier) {
         \(initTemplate)
         \(renderedEntities)
     }

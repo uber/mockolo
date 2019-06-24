@@ -24,6 +24,7 @@ struct ClassModel: Model {
     let attribute: String
     let accessControlLevelDescription: String
     let identifier: String
+    let module: String?
     let entities: [(String, Model)]
     let needInit: Bool
     let initParams: [VariableModel]?
@@ -31,12 +32,14 @@ struct ClassModel: Model {
     init(_ ast: Structure,
          content: String,
          identifier: String,
+         module: String?,
          additionalAttributes: [String],
          needInit: Bool,
          initParams: [VariableModel]?,
          entities: [(String, Model)]) {
         self.identifier = identifier
         self.name = identifier + "Mock"
+        self.module = module
         self.type = .class
         self.entities = entities
         self.needInit = needInit
@@ -51,6 +54,6 @@ struct ClassModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, needInit: needInit, initParams: initParams, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, module: self.module, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, needInit: needInit, initParams: initParams, entities: entities)
     }
 }

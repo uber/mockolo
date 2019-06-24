@@ -30,6 +30,7 @@ struct ResolvedEntity {
         return ClassModel(entity.ast,
                           content: entity.content,
                           identifier: key,
+                          module: entity.module,
                           additionalAttributes: attributes,
                           needInit: !hasInit,
                           initParams: initVars,
@@ -45,6 +46,7 @@ struct Entity {
     let content: String
     let ast: Structure
     let isAnnotated: Bool
+    let module: String?
     let isProcessed: Bool
     
     var hasInit: Bool {
