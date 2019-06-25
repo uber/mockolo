@@ -2,15 +2,15 @@
 
 # Mockolo
 
-** Welcome to Mockolo! **
+Welcome to Mockolo!
 
 `Mockolo` is a lightweight commandline tool which uses the `MockoloFramework` framework for creating mocks in Swift.  It uses `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  It currently supports protocol mocking.  Class mocking will be added in the future. 
 
 ## System Requirements 
 
-* Swift 4.2 or later.
-* Xcode 10.1 or later.
-* Support is included for the Swift Package Manager.
+* Swift 4.2 or later
+* Xcode 10.1 or later
+* Support is included for the Swift Package Manager
 
 
 ## Build / Install
