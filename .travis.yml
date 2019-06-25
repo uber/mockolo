@@ -6,3 +6,4 @@ matrix:
           script: swift test -Xswiftc -DDEBUG
         - name: "MockoloBinary"
           script: swift build --static-swift-stdlib -c release
+          
