@@ -1,8 +1,9 @@
 language: objective-c
-osx_image: xcode10.2.1
+osx_image: xcode10.1
 matrix:
     include:
         - name: "MockoloTests"
           script: swift test -Xswiftc -DDEBUG
         - name: "MockoloBinary"
-          script: swift build -c release
+          script: swift build --static-swift-stdlib -c release
+          
