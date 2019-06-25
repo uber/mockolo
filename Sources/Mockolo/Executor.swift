@@ -15,7 +15,7 @@
 //
 
 import Foundation
-import SPMUtility
+import Utility
 import MockoloFramework
 
 class Executor {
@@ -59,7 +59,7 @@ class Executor {
                                  usage: "List of source files (separated by a comma or a space) to generate mocks for. If no value is given, the --srcdir value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.",
                                  completion: .filename)
         sourceDirs = parser.add(option: "--sourcedirs",
-                                shortName: "-srcdirs",
+                                shortName: "-s",
                                 kind: [String].self,
                                 usage: "Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.",
                                 completion: .filename)
@@ -68,13 +68,13 @@ class Executor {
                                    kind: [String].self,
                                    usage: "List of mock files (separated by a comma or a space) from modules this target depends on. ",
                                    completion: .filename)
-        outputFilePath = parser.add(option: "--outputfile",
-                                    shortName: "-out",
+        outputFilePath = parser.add(option: "--destination",
+                                    shortName: "-d",
                                     kind: String.self,
                                     usage: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.",
                                     completion: .filename)
         exclusionSuffixes = parser.add(option: "--exclude-suffixes",
-                                       shortName: "-exclude",
+                                       shortName: "-x",
                                        kind: [String].self,
                                        usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).",
                                        completion: .filename)
@@ -83,7 +83,7 @@ class Executor {
                                 kind: String.self,
                                 usage: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
         annotatedOnly = parser.add(option: "--annotated-only",
-                                   shortName: "-antonly",
+                                   shortName: "-ant-only",
                                    kind: Bool.self,
                                    usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
         macro = parser.add(option: "--macro",
