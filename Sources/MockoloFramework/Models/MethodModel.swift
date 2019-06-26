@@ -117,12 +117,14 @@ struct MethodModel: Model {
     }
     
     func name(by level: Int) -> String {
-        let cap = min(level, self.signatureComponents.count)
-        if cap <= 0 {
+        if level <= 0 {
             return name
         }
-        return name(by: cap-1) + self.signatureComponents[cap-1]
+        let diff = level - self.signatureComponents.count
+        let postfix = diff > 0 ? String(diff) : self.signatureComponents[level - 1]
+        return name(by: level - 1) + postfix
     }
+
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
