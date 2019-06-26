@@ -6,13 +6,16 @@ import Foundation
 /// \(String.mockAnnotation)
 protocol FuncThrow {
     func f1(arg: Int) throws -> String
-    func f2(arg: (Int) throws -> ()) throws -> String
-    func f3(arg: (Int) throws -> ()) rethrows -> String
-    func f4<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
+    func f2(arg: Int) throws
+    func g1(arg: (Int) throws -> ()) throws -> String
+    func g2(arg: (Int) throws -> ()) throws
+    func h(arg: (Int) throws -> ()) rethrows -> String
+    func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
 }
 """
 
-let funcThrowMock = """
+let funcThrowMock =
+"""
 import Foundation
 
 class FuncThrowMock: FuncThrow {
@@ -30,32 +33,49 @@ class FuncThrowMock: FuncThrow {
         return ""
     }
     var f2CallCount = 0
-    var f2Handler: (((Int) throws -> ()) throws -> (String))?
-    func f2(arg: (Int) throws -> ()) throws -> String {
+    var f2Handler: ((Int) throws -> ())?
+    func f2(arg: Int) throws  {
         f2CallCount += 1
         if let f2Handler = f2Handler {
             return try! f2Handler(arg)
         }
-        return ""
+        
     }
-    var f3CallCount = 0
-    var f3Handler: (((Int) throws -> ()) throws -> (String))?
-    func f3(arg: (Int) throws -> ()) rethrows -> String {
-        f3CallCount += 1
-        if let f3Handler = f3Handler {
-            return try! f3Handler(arg)
+    var g1CallCount = 0
+    var g1Handler: (((Int) throws -> ()) throws -> (String))?
+    func g1(arg: (Int) throws -> ()) throws -> String {
+        g1CallCount += 1
+        if let g1Handler = g1Handler {
+            return try! g1Handler(arg)
         }
         return ""
     }
-    var f4CallCount = 0
-    var f4Handler: ((Any, Any) throws -> (Any))?
-    func f4<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U)) {
-        f4CallCount += 1
-        if let f4Handler = f4Handler {
-            return try! f4Handler(arg1, arg2) as! ((T) -> (U))
+    var g2CallCount = 0
+    var g2Handler: (((Int) throws -> ()) throws -> ())?
+    func g2(arg: (Int) throws -> ()) throws  {
+        g2CallCount += 1
+        if let g2Handler = g2Handler {
+            return try! g2Handler(arg)
         }
-        fatalError("f4Handler returns can't have a default value thus its handler must be set")
+        
+    }
+    var hCallCount = 0
+    var hHandler: (((Int) throws -> ()) throws -> (String))?
+    func h(arg: (Int) throws -> ()) rethrows -> String {
+        hCallCount += 1
+        if let hHandler = hHandler {
+            return try! hHandler(arg)
+        }
+        return ""
+    }
+    var updateCallCount = 0
+    var updateHandler: ((Any, Any) throws -> (Any))?
+    func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U)) {
+        updateCallCount += 1
+        if let updateHandler = updateHandler {
+            return try! updateHandler(arg1, arg2) as! ((T) -> (U))
+        }
+        fatalError("updateHandler returns can't have a default value thus its handler must be set")
     }
 }
-
 """

@@ -89,12 +89,13 @@ struct MethodModel: Model {
             }
         }
 
-        let suffixOffset = plast + plastLen
-        let suffixPart = content.extract(offset: suffixOffset, length: self.offset + self.length - suffixOffset)
-        if suffixPart.contains(" \(String.throws) -> \(type)") {
-            self.suffix = String.throws
-        } else if suffixPart.contains(" \(String.rethrows) -> \(type)") {
+        let suffixOffset = plast + plastLen + 1
+        let suffixPart = content.extract(offset: suffixOffset, length: self.offset + self.length - suffixOffset).trimmingCharacters(in: CharacterSet.whitespaces)
+        
+        if suffixPart.hasPrefix("\(String.rethrows)") {
             self.suffix = String.rethrows
+        } else if suffixPart.hasPrefix("\(String.throws)") {
+            self.suffix = String.throws
         } else {
             self.suffix = ""
         }
