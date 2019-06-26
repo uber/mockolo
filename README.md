@@ -70,7 +70,7 @@ targets: [
 This parses all the source files in `srcsFoo` and `srcsBar`, excluding any files ending with `Images` or `Strings` in the file name (e.g. MyImages.swift), and generates mocks to a file at `./MockResults.swift`. 
 
 
-## Sample Code 
+## How to use 
 
 For example, Foo.swift contains: 
 
