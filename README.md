@@ -1,6 +1,6 @@
 
 
-# Welcome to Mockolo!
+# Welcome to Mockolo
 
 `Mockolo` is a lightweight commandline tool which uses the `MockoloFramework` framework for creating mocks in Swift.  It uses `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  
 
