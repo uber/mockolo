@@ -22,7 +22,7 @@ class MockoloTests: XCTestCase {
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-//        try? FileManager.default.removeItem(atPath: dstFilePath)
+        try? FileManager.default.removeItem(atPath: dstFilePath)
         try? FileManager.default.removeItem(atPath: srcFilePath)
         if FileManager.default.fileExists(atPath: mockFilePath) {
             try? FileManager.default.removeItem(atPath: mockFilePath)
