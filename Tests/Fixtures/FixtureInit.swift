@@ -14,7 +14,7 @@ let protocolWithInitResultMock =
 public class HasInitMock: HasInit {
     
     private var arg: String!
-    public init(arg: String) {
+    required public init(arg: String) {
         self.arg = arg
     }
     var numSetCallCount = 0

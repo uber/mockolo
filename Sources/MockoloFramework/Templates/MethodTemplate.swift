@@ -38,7 +38,7 @@ func applyMethodTemplate(name: String,
         let paramsAssign = params.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
         template =
         """
-        \(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
+        \(String.required) \(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
             \(paramsAssign)
         }
         """
