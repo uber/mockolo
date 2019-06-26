@@ -72,7 +72,7 @@ This parses all the source files in `srcsFoo` and `srcsBar`, excluding any files
 
 ## Sample Code 
 
-Foo.swift contains: 
+For example, Foo.swift contains: 
 
 ```swift 
 /// @mockable
@@ -115,7 +115,7 @@ public class FooMock: Foo {
 }
 ```
 
-In your test, you can use the mock as follows: 
+Now the mock can be used in a test as follows: 
 
 ```swift 
 func testMock() {
