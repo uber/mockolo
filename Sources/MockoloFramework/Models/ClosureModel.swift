@@ -27,11 +27,12 @@ struct ClosureModel: Model {
     let genericTypeNames: [String]
     let paramNames: [String]
     let paramTypes: [String]
+    let suffix: String
     
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], returnType: String, staticKind: String) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], suffix: String, returnType: String, staticKind: String) {
         self.name = name + .handlerSuffix
         self.staticKind = staticKind
-
+        self.suffix = suffix
         let genericTypeNameList = genericTypeParams.map(path: \.name)
         self.paramNames = paramNames
         self.paramTypes = paramTypes
@@ -63,7 +64,9 @@ struct ClosureModel: Model {
         if !isSimpleTuple {
             displayableReturnType = "(\(displayableReturnType))"
         }
-        self.type = "((\(displayableParamStr)) -> \(displayableReturnType))?"
+        
+        let suffixStr = suffix.isThrowsOrRethrows ? String.throws + " " : ""
+        self.type = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
         self.returnAs = returnAsStr
     }
     
@@ -74,6 +77,7 @@ struct ClosureModel: Model {
                                     genericTypeNames: genericTypeNames,
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,
+                                    suffix: suffix,
                                     returnAs: returnAs,
                                     returnDefaultType: funcReturnType)
     }

@@ -57,8 +57,8 @@ private let defaultValuesDict =
      "UIScrollViewKeyboardDismissMode": ".interactive",
      "UIAccessibilityTraits": ".none",
      "Void": "Void",
-     "URL": "URL(string: \"\")",
-     "NSURL": "NSURL(string: \"\")",
+     "URL": "URL(fileURLWithPath: \"\")",
+     "NSURL": "NSURL(fileURLWithPath: \"\")",
      "UUID": "UUID()",
 ];
 

@@ -30,6 +30,9 @@ extension String {
     static let unknownVal = "Unknown"
     static let `required` = "required"
     static let closureOp = "->"
+    static let `throws` = "throws"
+    static let `rethrows` = "rethrows"
+    static let forceTry = "try!"
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
@@ -60,6 +63,10 @@ extension String {
     ///
     """
     
+    var isThrowsOrRethrows: Bool {
+        return self == .throws || self == .rethrows
+    }
+    
     var isNotEmpty: Bool {
         return !isEmpty
     }
@@ -79,7 +86,6 @@ extension String {
             }
             return true
         }
-        
         return false
     }
     
@@ -91,7 +97,6 @@ extension String {
     var displayableForType: String {
         return displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
-    
     
     func extract(offset: Int64, length: Int64) -> String {
         let end = offset + length

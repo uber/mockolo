@@ -23,6 +23,7 @@ func applyClosureTemplate(name: String,
                           genericTypeNames: [String],
                           paramVals: [String]?,
                           paramTypes: [String]?,
+                          suffix: String,
                           returnAs: String,
                           returnDefaultType: String) -> String {
     let handlerParamValsStr = paramVals?.joined(separator: ", ") ?? ""
@@ -34,10 +35,11 @@ func applyClosureTemplate(name: String,
         returnTypeCast = " as\(asSuffix) " + returnAs
     }
     
+    let prefix = suffix.isThrowsOrRethrows ? String.forceTry + " " : ""
     let template =
     """
         if let \(name) = \(name) {
-            return \(name)(\(handlerParamValsStr))\(returnTypeCast)
+            return \(prefix)\(name)(\(handlerParamValsStr))\(returnTypeCast)
         }
         \(handlerReturnDefault)
     """

@@ -25,6 +25,7 @@ func applyMethodTemplate(name: String,
                          returnType: String,
                          staticKind: String,
                          accessControlLevelDescription: String,
+                         suffix: String,
                          handler: ClosureModel?,
                          typeKeys: [String: String]?) -> String {
     var template = ""
@@ -48,13 +49,14 @@ func applyMethodTemplate(name: String,
         let handlerVarType = handler?.type ?? "Any"
         let handlerReturn = handler?.render(with: identifier, typeKeys: typeKeys) ?? ""
         
+        let suffixStr = suffix.isEmpty ? "" : "\(suffix) "
         let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         template =
         """
         \(staticStr)var \(callCount) = 0
         \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-        \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(returnStr) {
+        \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
             \(callCount) += 1
             \(handlerReturn)
         }

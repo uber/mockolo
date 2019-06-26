@@ -43,13 +43,11 @@ func generateUniqueModels(protocolMap: [String: Entity],
     }
 }
 
-private func generateUniqueModels(key: String,
-                                  entity: Entity,
-                                  typeKeys: [String: String]?,
-                                  protocolMap: [String: Entity],
-                                  inheritanceMap: [String: Entity],
-                                  lock: NSLock? = nil,
-                                  process: @escaping (ResolvedEntity, [(String, String)]) -> ()) {
+func generateUniqueModels(key: String,
+                          entity: Entity,
+                          typeKeys: [String: String]?,
+                          protocolMap: [String: Entity],
+                          inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
     let (models, processedModels, attributes, pathToContentList) = lookupEntities(key: key, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
@@ -81,8 +79,27 @@ private func generateUniqueModels(key: String,
     let containsInit = existingInitVars.count > 0
     let initVars = containsInit ? existingInitVars : potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
     
-    let container = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars)
+    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars)
+    
+    return ResolvedEntityContainer(entity: resolvedEntity, imports: pathToContentList)
+}
+
+
+
+
+
+func generateUniqueModels(key: String,
+                          entity: Entity,
+                          typeKeys: [String: String]?,
+                          protocolMap: [String: Entity],
+                          inheritanceMap: [String: Entity],
+                          lock: NSLock? = nil,
+                          process: @escaping (ResolvedEntity, [(String, String)]) -> ()) {
+    let ret = generateUniqueModels(key: key, entity: entity, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+    
     lock?.lock()
-    process(container, pathToContentList)
+    process(ret.entity, ret.imports)
     lock?.unlock()
 }
+
+

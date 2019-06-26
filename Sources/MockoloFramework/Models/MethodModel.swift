@@ -33,6 +33,7 @@ struct MethodModel: Model {
     let signatureComponents: [String]
     let isInitializer: Bool
     var initParams: [VariableModel]?
+    let suffix: String
     
     init(_ ast: Structure, content: String, processed: Bool) {
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
@@ -81,14 +82,38 @@ struct MethodModel: Model {
         let capped = String.Index(encodedOffset: min(self.type.displayableForType.count, 32))
         args.append(self.type.displayableForType.substring(to: capped))
         
+
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
         self.signatureComponents = args.filter{ arg in !arg.isEmpty }
+
+        // Sourcekit structure api doesn't provide info on throws/rethrows, so manually parse it here
+        var plast: Int64 = 0
+        var plastLen: Int64 = 0
+        paramDecls.forEach { (p: Structure) in
+            if p.offset > plast {
+                plast = p.offset
+                plastLen = p.length
+            }
+        }
+
+        let suffixOffset = plast + plastLen + 1
+        let suffixPart = content.extract(offset: suffixOffset, length: self.offset + self.length - suffixOffset).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        
+        if suffixPart.hasPrefix("\(String.rethrows)") {
+            self.suffix = String.rethrows
+        } else if suffixPart.hasPrefix("\(String.throws)") {
+            self.suffix = String.throws
+        } else {
+            self.suffix = ""
+        }
+
         self.handler = self.isInitializer ? nil :
                         ClosureModel(name: self.name,
                                     genericTypeParams: genericTypeParams,
                                     paramNames: paramNames,
                                     paramTypes: paramTypes,
+                                    suffix: suffix,
                                     returnType: ast.typeName,
                                     staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
@@ -101,12 +126,14 @@ struct MethodModel: Model {
     
     
     func name(by level: Int) -> String {
-        let cap = min(level, self.signatureComponents.count)
-        if cap <= 0 {
+        if level <= 0 {
             return name
         }
-        return name(by: cap-1) + self.signatureComponents[cap-1]
+        let diff = level - self.signatureComponents.count
+        let postfix = diff > 0 ? String(diff) : self.signatureComponents[level - 1]
+        return name(by: level - 1) + postfix
     }
+
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
@@ -122,6 +149,7 @@ struct MethodModel: Model {
                                          returnType: returnType,
                                          staticKind: staticKind,
                                          accessControlLevelDescription: accessControlLevelDescription,
+                                         suffix: suffix,
                                          handler: handler,
                                          typeKeys: typeKeys)
         return result

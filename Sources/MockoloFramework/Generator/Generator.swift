@@ -17,7 +17,6 @@
 import Foundation
 import SourceKittenFramework
 
-
 /// Performs end to end mock generation flow
 
 public func generate(sourceDirs: [String]?,
@@ -30,7 +29,8 @@ public func generate(sourceDirs: [String]?,
                      macro: String?,
                      to outputFilePath: String,
                      loggingLevel: Int,
-                     concurrencyLimit: Int?) throws {
+                     concurrencyLimit: Int?,
+                     onCompletion: @escaping (String) -> ()) throws {
     
     assert(sourceDirs != nil || sourceFiles != nil)
     minLogLevel = loggingLevel
@@ -63,7 +63,7 @@ public func generate(sourceDirs: [String]?,
     
     let t1 = CFAbsoluteTimeGetCurrent()
     log("Took", t1-t0, level: .verbose)
-    
+
     log("Process source files and generate an annotated/protocol map...", level: .info)
     generateProtocolMap(sourceDirs: sourceDirs,
                         sourceFiles: sourceFiles,
@@ -130,4 +130,6 @@ public func generate(sourceDirs: [String]?,
     let count = result.components(separatedBy: "\n").count
     log("TOTAL", t5-t0, level: .verbose)
     log("#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: .verbose)
+    
+    onCompletion(result)
 }
