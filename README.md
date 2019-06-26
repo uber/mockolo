@@ -1,10 +1,8 @@
 
 
-# Mockolo
+# Welcome to Mockolo!
 
-Welcome to Mockolo!
-
-`Mockolo` is a lightweight commandline tool which uses the `MockoloFramework` framework for creating mocks in Swift.  It uses `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  It currently supports protocol mocking.  Class mocking will be added in the future. 
+`Mockolo` is a lightweight commandline tool which uses the `MockoloFramework` framework for creating mocks in Swift.  It uses `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  
 
 ## System Requirements 
 
@@ -65,13 +63,74 @@ targets: [
 
 `Mockolo` is a commandline executable. To run it, pass in a list of the source directories or source file paths of a build target, and the ouptut filepath for the mock output. To see other arguments to the commandline, run `mockolo --help`.
 
-```swift
-
-.build/release/mockolo -s /Users/foo/srcs -d /Users/foo/MockResults.swift -x "ResourceStrings"
+```
+.build/release/mockolo -s srcsFoo srcsBar -d ./MockResults.swift -x Images Strings
 ```
 
-This parses all the source files in `/Users/foo/srcs`, excluding any files ending with `ResourceStrings` in the file name (e.g. MyResourceStrings.swift), and generates mocks to a file at `/Users/foo/MockResults.swift`. 
+This parses all the source files in `srcsFoo` and `srcsBar`, excluding any files ending with `Images` or `Strings` in the file name (e.g. MyImages.swift), and generates mocks to a file at `./MockResults.swift`. 
 
+
+## Sample Code 
+
+Foo.swift contains: 
+
+```swift 
+/// @mockable
+public protocol Foo { 
+    var num: Int { get set }
+    func bar(arg: Float) -> String
+}
+```
+
+Running the commandline ```.build/release/mockolo -srcs Foo.swift -d ./MockResults.swift ``` will produce: 
+
+```swift 
+public class FooMock: Foo { 
+    init() {}
+    init(num: Int = 0) {
+        self.num = num
+    }
+    
+    var numSetCallCount = 0
+    var underlyingNum: Int = 0
+    var num: Int {
+        get {
+            return underlyingNum
+        }
+        set {
+            underlyingNum = newValue
+            numSetCallCount += 1
+        }
+    }
+    
+    var barCallCount = 0
+    var barHandler: ((Float) -> (String))?
+    func bar(arg: Float) -> String {
+        barCallCount += 1
+        if let barHandler = barHandler {
+            return barHandler(arg)
+        }
+        return ""
+    }
+}
+```
+
+In your test, you can use the mock as follows: 
+
+```swift 
+func testMock() {
+    let mock = FooMock(num: 5) 
+    XCTAssertEqual(mock.numSetCallCount, 1) 
+    mock.barHandler = { arg in 
+        return String(arg)
+    }
+    XCTAssertEqual(mock.barCallCount, 1) 
+}
+```
+
+
+## Limitations
+It currently supports protocol mocking.  Class mocking will be added in the future. 
 
 
 ## Report any issues
