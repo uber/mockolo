@@ -115,7 +115,7 @@ public class FooMock: Foo {
 }
 ```
 
-Now the mock can be used in a test as follows: 
+The above mock can now be used in a test as follows: 
 
 ```swift 
 func testMock() {
