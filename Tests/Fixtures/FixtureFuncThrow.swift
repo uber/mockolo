@@ -7,7 +7,8 @@ import Foundation
 protocol FuncThrow {
     func f1(arg: Int) throws -> String
     func f2(arg: Int) throws
-    func g1(arg: (Int) throws -> ()) throws -> String
+    func g1(arg: (Int) throws -> ())
+                throws -> String
     func g2(arg: (Int) throws -> ()) throws
     func h(arg: (Int) throws -> ()) rethrows -> String
     func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))

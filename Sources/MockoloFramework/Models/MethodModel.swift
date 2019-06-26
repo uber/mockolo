@@ -90,7 +90,7 @@ struct MethodModel: Model {
         }
 
         let suffixOffset = plast + plastLen + 1
-        let suffixPart = content.extract(offset: suffixOffset, length: self.offset + self.length - suffixOffset).trimmingCharacters(in: CharacterSet.whitespaces)
+        let suffixPart = content.extract(offset: suffixOffset, length: self.offset + self.length - suffixOffset).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
         
         if suffixPart.hasPrefix("\(String.rethrows)") {
             self.suffix = String.rethrows
