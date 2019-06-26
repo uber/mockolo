@@ -192,6 +192,12 @@ class MockoloTests: XCTestCase {
                mockContent: simpleInitParentMock,
                dstContent: protocolWithInitResultMock)
     }
+  
+      func testFuncThrows() {
+        verify(srcContent: funcThrow,
+               dstContent: funcThrowMock)
+    }
+
     
 
     private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "") {
