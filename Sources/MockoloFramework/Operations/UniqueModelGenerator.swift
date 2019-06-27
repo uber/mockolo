@@ -75,7 +75,7 @@ func generateUniqueModels(key: String,
     
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
     let existingInits = models.filter {$0.isInitializer && !$0.processed}
-    let existingInitVars = existingInits.compactMap { ($0 as? MethodModel)?.initParams }.flatMap {$0}
+    let existingInitVars = existingInits.compactMap { ($0 as? MethodModel)?.params }.flatMap {$0}
     let containsInit = existingInitVars.count > 0
     let initVars = containsInit ? existingInitVars : potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
     

@@ -28,29 +28,11 @@ func applyVariableTemplate(name: String,
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {
-        if underlyingType.contains("->") {
-            underlyingType = "(\(underlyingType))!"
-        } else {
-            if underlyingType.hasSuffix("?") {
-                underlyingType.removeLast()
-            }
-            if !underlyingType.hasSuffix("!") {
-                underlyingType.append("!")
-            }
-        }
+        underlyingType = typeName.forceUnwrappedType
     }
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
 
     var acl = accessControlLevelDescription
-    // If acl is unknown, treat this as a private var set by a protocol initializer
-    if acl == String.unknownVal {
-        let privateVarLine =
-        """
-            private \(staticStr)var \(name): \(typeName)!
-        """
-        return privateVarLine
-    }
-
     if !acl.isEmpty {
         acl = acl + " "
     }

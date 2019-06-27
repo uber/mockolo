@@ -29,10 +29,10 @@ extension String {
     static let mockType = "protocol"
     static let unknownVal = "Unknown"
     static let `required` = "required"
-    static let closureOp = "->"
     static let `throws` = "throws"
     static let `rethrows` = "rethrows"
     static let forceTry = "try!"
+    static let closureArrow = "->"
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
@@ -87,6 +87,23 @@ extension String {
             return true
         }
         return false
+    }
+    
+    var forceUnwrappedType: String {
+        var ret = self
+        
+        if ret.contains("->") {
+            ret = "(\(ret))!"
+        } else {
+            if ret.hasSuffix("?") {
+                ret.removeLast()
+            }
+            if !ret.hasSuffix("!") {
+                ret.append("!")
+            }
+        }
+
+        return ret
     }
     
     var displayableComponents: [String] {

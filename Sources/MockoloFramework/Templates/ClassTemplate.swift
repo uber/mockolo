@@ -26,7 +26,7 @@ func applyClassTemplate(name: String,
                         entities: [(String, Model)]) -> String {
     
     var initTemplate = ""
-    var extraVars = ""
+    var extraVarsNeeded = ""
     
     if needInit {
         var extraInitBlock = ""
@@ -40,7 +40,7 @@ func applyClassTemplate(name: String,
                         return "\(element.name): \(element.type) = \(val)"
                     }
                     var prefix = ""
-                    if element.type.contains(String.closureOp) {
+                    if element.type.contains(String.closureArrow) {
                         prefix = String.escaping + " "
                     }
                     return "\(element.name): \(prefix)\(element.type)"
@@ -63,13 +63,13 @@ func applyClassTemplate(name: String,
     } else {
         
         if let initParams = initParams, !initParams.isEmpty {
-            var varDict = [String: Model]()
+            var varsForInit = [String: Model]()
             entities.filter {$0.1.canBeInitParam}.forEach { (arg: (String, Model)) in
-                varDict[arg.0] = arg.1
+                varsForInit[arg.0] = arg.1
             }
-            extraVars = initParams
-                .filter { varDict[$0.name] == nil }
-                .compactMap { $0.render(with: $0.name, typeKeys: typeKeys) }
+            extraVarsNeeded = initParams
+                .filter { varsForInit[$0.name] == nil }
+                .compactMap { ($0 as? ParamModel)?.asVarDecl }
                 .joined(separator: "\n")
         }
     }
@@ -90,7 +90,7 @@ func applyClassTemplate(name: String,
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
         \(initTemplate)
-        \(extraVars)
+        \(extraVarsNeeded)
         \(renderedEntities)
     }
     """

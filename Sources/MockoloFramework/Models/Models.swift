@@ -33,9 +33,6 @@ public protocol Model {
     /// Indicates whether this model maps to an init method
     var isInitializer: Bool { get }
 
-    /// Parameter name and type dictinoary if this model is an initializer
-    var initParams: [Model]? { get }
-    
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: String { get set }
 
@@ -70,9 +67,5 @@ extension Model {
 
     var isInitializer: Bool {
         return false
-    }
-    
-    var initParams: [Model]? {
-        return nil
     }
 }

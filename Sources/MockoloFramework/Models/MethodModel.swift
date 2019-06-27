@@ -17,6 +17,11 @@
 import Foundation
 import SourceKittenFramework
 
+
+protocol F {
+    func sm<T, U>(arg: T) -> U
+}
+
 struct MethodModel: Model {
     var name: String
     var type: String
@@ -32,12 +37,15 @@ struct MethodModel: Model {
     let processed: Bool
     let signatureComponents: [String]
     let isInitializer: Bool
-    var initParams: [VariableModel]?
     let suffix: String
     
     init(_ ast: Structure, content: String, processed: Bool) {
+        // This will split func signature into name and the rest (params, return type). In case it's a generic func,
+        // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
+        // give the name part that we expect.
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
         let nameString = comps.removeFirst()
+        
         self.content = content
         self.name = nameString
         self.type = ast.typeName == .unknownVal ? "" : ast.typeName
@@ -48,17 +56,11 @@ struct MethodModel: Model {
         self.length = ast.range.length
 
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
-        if paramDecls.count > 0 {
-            assert(paramDecls.count == comps.count)
-        }
+        assert(paramDecls.count == comps.count)
         
         let zippedParams = zip(paramDecls, comps)
-        self.params = zip(paramDecls, comps).map { (argAst: Structure, argLabel: String) -> ParamModel in
-            ParamModel(argAst, label: argLabel)
-        }
-
-        self.initParams = !ast.isInitializer ? nil: zippedParams.map { (argAst: Structure, argLabel: String) -> VariableModel in
-            VariableModel(argAst, content: content, processed: processed)
+        self.params = zippedParams.map { (argAst: Structure, argLabel: String) -> ParamModel in
+            ParamModel(argAst, label: argLabel, isInitializer: ast.isInitializer)
         }
 
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}

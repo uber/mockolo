@@ -23,11 +23,26 @@ struct ParamModel: Model {
     var type: String
     let label: String
     let isGeneric: Bool
-    init(_ ast: Structure, label: String = "", isGeneric: Bool = false) {
+    let isInitializer: Bool
+
+    init(_ ast: Structure, label: String = "", isGeneric: Bool = false, isInitializer: Bool = false) {
         self.name = ast.name
         self.isGeneric = isGeneric
+        self.isInitializer = isInitializer
         self.type = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : ast.typeName
         self.label = ast.name != label ? label: ""
+    }
+
+    var asVarDecl: String? {
+        if self.isInitializer {
+            assert(!type.isEmpty && type != .unknownVal)
+            let vardecl =
+            """
+            private var \(name): \(type.forceUnwrappedType)
+            """
+            return vardecl
+        }
+        return nil
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
