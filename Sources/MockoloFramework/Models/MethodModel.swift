@@ -17,11 +17,6 @@
 import Foundation
 import SourceKittenFramework
 
-
-protocol F {
-    func sm<T, U>(arg: T) -> U
-}
-
 struct MethodModel: Model {
     var name: String
     var type: String
