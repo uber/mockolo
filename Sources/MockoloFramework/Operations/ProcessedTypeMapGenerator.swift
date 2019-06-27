@@ -54,7 +54,7 @@ private func generateProcessedModels(_ path: String,
     
     if let topstructure = try? Structure(path: path) {
         let results = topstructure.substructures.map { current -> Entity in
-            return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, isProcessed: true)
+            return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, namespace: "", isProcessed: true)
         }
         
         lock?.lock()

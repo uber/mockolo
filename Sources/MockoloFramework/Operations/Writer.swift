@@ -17,36 +17,45 @@
 import Foundation
 
 /// Combines a list of entities and import lines and header and writes the final output
-func write(candidates: [(String, Int64)],
+func write(candidateMap: [String: [(String, Int64)]],
            processedImportLines: [String: [String]],
-           pathToContentMap: [(String, String)],
+           pathToContentMap: [String: [(String, String)]],
            header: String?,
            macro: String?,
            to outputFilePath: String) -> String {
     
-    var importLines = processedImportLines
-    for (filepath, filecontent) in pathToContentMap {
-        if importLines[filepath] == nil {
-            importLines[filepath] = findImportLines(content: filecontent)
+    var total = ""
+    let sorted = candidateMap.sorted(by: {$0.key < $1.key})
+    sorted.forEach { (arg: (namespace: String, candidates: [(String, Int64)])) in
+        var importLines = [String: [String]]()
+        if let list = pathToContentMap[arg.namespace] {
+            for (filepath, filecontent) in list {
+                if importLines[filepath] == nil {
+                    importLines[filepath] = findImportLines(content: filecontent)
+                }
+            }
+            
+            let imports = importLines.values.joined().map { line in
+                return line.trimmingCharacters(in: CharacterSet.whitespaces)
+            }
+            
+            let importsSet = Set(imports)
+            let entities = arg.candidates.sorted{$0.1 < $1.1}.map{$0.0}
+            
+            let headerStr = (header ?? "") + .headerDoc
+            var macroStart = ""
+            var macroEnd = ""
+            if let mcr = macro, !mcr.isEmpty {
+                macroStart = .poundIf + mcr
+                macroEnd = .poundEndIf
+            }
+            
+            let markline = arg.namespace.isEmpty ? "" : "/// MARK - \(arg.namespace)"
+            let ret = [headerStr, markline, macroStart, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
+            total += "\n\n" + ret
         }
     }
     
-    let imports = importLines.values.joined().map { line in
-        return line.trimmingCharacters(in: CharacterSet.whitespaces)
-    }
-    
-    let importsSet = Set(imports)
-    let entities = candidates.sorted{$0.1 < $1.1}.map{$0.0}
-    
-    let headerStr = (header ?? "") + .headerDoc
-    var macroStart = ""
-    var macroEnd = ""
-    if let mcr = macro, !mcr.isEmpty {
-        macroStart = .poundIf + mcr
-        macroEnd = .poundEndIf
-    }
-    let ret = [headerStr, macroStart, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
-    
-    _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
-    return ret
+    _ = try? total.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
+    return total
 }

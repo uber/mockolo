@@ -22,6 +22,10 @@ import CommonCrypto
 /// Util extensions
 
 extension String {
+    static let annotationKeyDelimiter = "|"
+    static let annotationValueDelimiter = "/"
+    static let namespaceKey = "namespace:"
+    static let assocaitedtypesKey = "associatedtypes:"
     static let `static` = "static"
     static let `import` = "import "
     static public let `class` = "class"
@@ -114,6 +118,11 @@ extension String {
     }
 }
 
+struct AnnotationMetadata {
+    var namespace: String?
+    var associatedtypes: [String]?
+}
+
 extension Structure {
     
     init(path: String) throws {
@@ -124,8 +133,33 @@ extension Structure {
             ]).send())
     }
     
-    func isAnnotated(with annotation: String, in content: String) -> Bool {
-        return extractDocComment(content)?.contains(annotation) ?? false
+    func isAnnotated(with annotation: String, in content: String) -> AnnotationMetadata? {
+        if let part = extractDocComment(content)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) {
+            guard part.contains(annotation) else { return nil }
+            
+            var ret = AnnotationMetadata()
+            
+            let nameComps = part.components(separatedBy: String.namespaceKey)
+            if nameComps.count > 1, let namespacePart = nameComps.last, !namespacePart.isEmpty,
+                let namespaceVal = namespacePart.components(separatedBy: CharacterSet(charactersIn: "()| ")).filter({!$0.isEmpty}).first {
+                ret.namespace = namespaceVal
+            }
+
+            let patComps = part.components(separatedBy: String.assocaitedtypesKey)
+            if patComps.count > 1, let patVal = patComps.last, !patVal.isEmpty {
+                var patValStr: Substring?
+                if let delimiterRange = patVal.range(of: "|") {
+                    patValStr = patVal[patVal.startIndex ..< delimiterRange.lowerBound]
+                } else  {
+                    patValStr = patVal.dropLast()
+                }
+                ret.associatedtypes = patValStr?.components(separatedBy: String.annotationValueDelimiter).filter { !$0.isEmpty }.map {$0.trimmingCharacters(in: CharacterSet.whitespaces)}
+            }
+            
+            return ret
+        }
+        
+        return nil
     }
     
     func extractDocComment(_ content: String) -> String? {
@@ -361,5 +395,4 @@ public extension Sequence {
         }
     }
 }
-
 

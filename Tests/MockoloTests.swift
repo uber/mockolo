@@ -198,9 +198,13 @@ class MockoloTests: XCTestCase {
                dstContent: funcThrowMock)
     }
 
-    
+    func testAnnotation() {
+        verify(srcContent: annotationWithMetadata,
+               dstContent: annotationWithMetadataMock,
+               shouldFormat: false)
+    }
 
-    private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "") {
+    private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", shouldFormat: Bool = true) {
         var index = 0
         srcFilePathsCount = srcContents.count
         
@@ -227,7 +231,8 @@ class MockoloTests: XCTestCase {
             XCTAssert(mockCreated)
         }
         
-        let formattedDstContent = """
+        let formattedDstContent = !shouldFormat ? dstContent :
+        """
         \(headerStr)
         \(macroStart)
         \(dstContent)
@@ -246,14 +251,15 @@ class MockoloTests: XCTestCase {
                       loggingLevel: 3,
                       concurrencyLimit: nil,
                       onCompletion: { ret in
-        let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
-        let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-        let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-        XCTAssert(fixtureContents == outputContents)
+                        
+                        let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
+                        let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
+                        let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
+                        XCTAssert(fixtureContents == outputContents)
         })
     }
     
-    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
-        verify(srcContents: [srcContent], mockContent: mockContent, dstContent: dstContent, header: header)
+    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", shouldFormat: Bool = true) {
+        verify(srcContents: [srcContent], mockContent: mockContent, dstContent: dstContent, header: header, shouldFormat: shouldFormat)
     }
 }

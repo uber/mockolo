@@ -25,9 +25,11 @@ import SourceKittenFramework
 /// @param inheritanceMap Used to look up inherited types if not contained in protocolMap
 /// @returns a list of models representing sub-entities of the current entity, a list of models processed in dependent mock files if exists,
 ///          cumulated attributes, and a map of filepaths and file contents (used for import lines lookup later).
-func lookupEntities(key: String,
-                    protocolMap: [String: Entity],
-                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [(String, String)]) {
+func lookupEntities(namespace: String,
+                    key: String,
+                    protocolMap: [String: [String: Entity]],
+                    processedMap: [String: Entity],
+                    level: Int) -> ([Model], [Model], [String], [(String, String)]) {
     
     // Used to keep track of types to be mocked
     var models = [Model]()
@@ -38,9 +40,14 @@ func lookupEntities(key: String,
     // Gather filepaths used for import lines look up later
     var pathToContents = [(String, String)]()
     
-    // Look up the mock entities of a protocol specified by the name.
-    if let current = protocolMap[key] {
-        
+    // Look up the mock entities of a protocol specified by the namespace and name.
+    var namespaceKey = namespace
+    // if a parent protocol is not found in this namespace, look it up in a global protocol map
+    if level > 0, protocolMap[namespaceKey]?[key] == nil, !namespaceKey.isEmpty {
+        namespaceKey = ""
+    }
+
+    if let current = protocolMap[namespaceKey]?[key] {
         models.append(contentsOf: current.subModels())
         if let curAttributes = current.subAttributes() {
             attributes.append(contentsOf: curAttributes)
@@ -50,7 +57,7 @@ func lookupEntities(key: String,
         // If the protocol inherits other protocols, look up their entities as well.
         for parent in current.ast.inheritedTypes {
             if parent != .class, parent != .any, parent != .anyObject {
-                let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+                let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(namespace: namespace, key: parent, protocolMap: protocolMap, processedMap: processedMap, level: level + 1)
                 models.append(contentsOf: parentModels)
                 processedModels.append(contentsOf: parentProcessedModels)
                 attributes.append(contentsOf: parentAttributes)
@@ -58,7 +65,7 @@ func lookupEntities(key: String,
             }
         }
         
-    } else if let parentMock = inheritanceMap["\(key)Mock"] {
+    } else if let parentMock = processedMap["\(key)Mock"] {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
         processedModels.append(contentsOf: parentMock.subModels())
         if let parentAttributes = parentMock.subAttributes() {

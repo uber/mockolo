@@ -19,7 +19,8 @@ import SourceKittenFramework
 
 /// Metadata containing unique models and potential init params ready to be rendered for output
 struct ResolvedEntity {
-    let key: String
+    let namespace: String
+    let identifier: String
     let entity: Entity
     let uniqueModels: [(String, Model)]
     let attributes: [String]
@@ -29,7 +30,7 @@ struct ResolvedEntity {
     func model() -> Model {
         return ClassModel(entity.ast,
                           content: entity.content,
-                          identifier: key,
+                          identifier: identifier,
                           additionalAttributes: attributes,
                           needInit: !hasInit,
                           initParams: initVars,
@@ -50,6 +51,7 @@ struct Entity {
     let content: String
     let ast: Structure
     let isAnnotated: Bool
+    let namespace: String
     let isProcessed: Bool
     
     var hasInit: Bool {

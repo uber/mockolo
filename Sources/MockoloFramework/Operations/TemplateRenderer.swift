@@ -23,7 +23,7 @@ func renderTemplates(entities: [ResolvedEntity],
                      typeKeys: [String: String]?,
                      semaphore: DispatchSemaphore?,
                      queue: DispatchQueue?,
-                     process: @escaping (String, Int64) -> ()) {
+                     process: @escaping (String, String, Int64) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for element in entities {
@@ -44,12 +44,12 @@ func renderTemplates(entities: [ResolvedEntity],
 private func renderTemplates(resolvedEntity: ResolvedEntity,
                              typeKeys: [String: String]?,
                              lock: NSLock? = nil,
-                             process: @escaping (String, Int64) -> ()) -> Bool {
+                             process: @escaping (String, String, Int64) -> ()) -> Bool {
     
     let mockModel = resolvedEntity.model()
-    if let mockString = mockModel.render(with: resolvedEntity.key, typeKeys: typeKeys), !mockString.isEmpty {
+    if let mockString = mockModel.render(with: resolvedEntity.identifier, typeKeys: typeKeys), !mockString.isEmpty {
         lock?.lock()
-        process(mockString, mockModel.offset)
+        process(resolvedEntity.namespace, mockString, mockModel.offset)
         lock?.unlock()
         return true
     }
