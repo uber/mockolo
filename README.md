@@ -2,12 +2,14 @@
 
 # Welcome to Mockolo
 
-`Mockolo` is a lightweight commandline tool which uses the `MockoloFramework` framework for creating mocks in Swift.  It uses `SourceKittenFramework` for parsing, and a custom template renderer for generating a mock output.  
+**Mockolo** is a mock generator for Swift. Swift doesn't provide mocking support, and Mockolo provides a fast and easy way to autogenerate mock objects that can be tested in your code. One of the main objectives of Mockolo is performance.  Unlike other frameworks, Mockolo provides highly performant and scalable generation of mocks via a lightweight commandline tool, so it can  run as part of a linter or during a build if one chose to do so. Try Mockolo and enhance your project's test coverage in an efficient, performant way. 
+
 
 ## System Requirements 
 
 * Swift 4.2 or later
 * Xcode 10.1 or later
+* MacOS 10.13.6 or later
 * Support is included for the Swift Package Manager
 
 
@@ -129,16 +131,29 @@ func testMock() {
 ```
 
 
-## Limitations
+## TODO
 It currently supports protocol mocking.  Class mocking will be added in the future. 
+
+
+## Used libraries 
+
+[SourceKitten](https://github.com/jpsim/SourceKitten)
+
+
+## License
+
+Mockolo is available under the Apache license. See [LICENSE][LICENSE] for more information.
 
 
 ## Report any issues
 
 If you run into any problems, please file a git issue. Please include:
 
-* The OS version (e.g. macOS 10.14.0)
+* The OS version (e.g. macOS 10.14.3)
 * The Swift version installed on your machine (from `swift --version`)
 * The Xcode version 
 * The specific release version of this source code (you can use `git tag` to get a list of all the release versions or `git log` to get a specific commit sha)
 * Any local changes on your machine 
+
+
+
