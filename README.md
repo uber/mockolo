@@ -34,6 +34,7 @@ Run the following to make a release build.
 ```
 $ swift build --static-swift-stdlib -c release
 ```
+Note: `--static-swift-stdlib -c` should be omitted if you're on the Swift 5.0 toolchain or later.
 
 This will create a binary called `mockolo` in the `.build/release` directory.
 
