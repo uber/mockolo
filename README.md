@@ -1,3 +1,7 @@
+# ![](Images/logo.png)
+
+[![Build Status](https://travis-ci.com/uber/mockolo.svg?token=xLqK5hKgjQBvRErSp7Wk&branch=master)](https://travis-ci.com/uber/mockolo.svg?token=xLqK5hKgjQBvRErSp7Wk&branch=master)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 
 # Welcome to Mockolo
