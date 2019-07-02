@@ -142,7 +142,7 @@ It currently supports protocol mocking.  Class mocking will be added in the futu
 
 ## License
 
-Mockolo is available under the Apache license. See [LICENSE](LICENSE.txt) for more information.
+Mockolo is licensed under Apache License 2.0. See [LICENSE](LICENSE.txt) for more information.
 
 
 ## Report any issues
