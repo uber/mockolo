@@ -27,6 +27,10 @@ struct ClassModel: Model {
     let entities: [(String, Model)]
     let needInit: Bool
     let initParams: [Model]?
+    
+    var modelType: ModelType {
+        return .class
+    }
 
     init(_ ast: Structure,
          content: String,

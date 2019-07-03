@@ -31,7 +31,7 @@ class MockoloTests: XCTestCase {
     
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-        try? FileManager.default.removeItem(atPath: dstFilePath)
+//        try? FileManager.default.removeItem(atPath: dstFilePath)
         for srcpath in srcFilePaths {
             try? FileManager.default.removeItem(atPath: srcpath)
         }
@@ -92,6 +92,12 @@ class MockoloTests: XCTestCase {
                dstContent: duplicatesMock4)
     }
 
+    func testDuplicates5() {
+        verify(srcContent: duplicates5,
+               dstContent: duplicatesMock5,
+               concurrencyLimit: 1)
+    }
+    
     func testDuplicateSigsInheritance1() {
         verify(srcContent: duplicateSigInheritance1,
                dstContent: duplicateSigInheritanceMock1)
@@ -99,7 +105,8 @@ class MockoloTests: XCTestCase {
     
     func testDuplicateSigsInheritance2() {
         verify(srcContent: duplicateSigInheritance2,
-               dstContent: duplicateSigInheritanceMock2)
+               dstContent: duplicateSigInheritanceMock2,
+               concurrencyLimit: 1)
     }
     
     func testDuplicateSigsInheritance3() {
@@ -199,8 +206,13 @@ class MockoloTests: XCTestCase {
     }
 
     
+    func testSameNameVarFunc() {
+        verify(srcContent: sameVarFuncName,
+               dstContent: sameVarFuncNameMock)
+    }
 
-    private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "") {
+
+    private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
         var index = 0
         srcFilePathsCount = srcContents.count
         
@@ -244,7 +256,7 @@ class MockoloTests: XCTestCase {
                       macro: "MOCK",
                       to: dstFilePath,
                       loggingLevel: 3,
-                      concurrencyLimit: nil,
+                      concurrencyLimit: concurrencyLimit,
                       onCompletion: { ret in
         let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
         let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
@@ -253,7 +265,7 @@ class MockoloTests: XCTestCase {
         })
     }
     
-    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "") {
-        verify(srcContents: [srcContent], mockContent: mockContent, dstContent: dstContent, header: header)
+    private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
+        verify(srcContents: [srcContent], mockContent: mockContent, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit)
     }
 }

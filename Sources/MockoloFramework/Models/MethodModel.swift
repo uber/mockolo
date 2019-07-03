@@ -34,6 +34,10 @@ struct MethodModel: Model {
     let isInitializer: Bool
     let suffix: String
     
+    var modelType: ModelType {
+        return .method
+    }
+    
     init(_ ast: Structure, content: String, processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only

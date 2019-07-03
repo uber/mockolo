@@ -84,7 +84,7 @@ func applyClassTemplate(name: String,
         .sorted { $0.1 < $1.1 }
         .map {$0.0}
         .joined(separator: "\n")
-    
+
     let template =
     """
     \(attribute)

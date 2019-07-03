@@ -16,6 +16,10 @@
 
 import Foundation
 
+public enum ModelType {
+    case variable, method, typeAlias, parameter, `class`
+}
+
 /// Represents a model for an entity such as var, func, class, etc.
 public protocol Model {
     /// Identifier
@@ -23,6 +27,9 @@ public protocol Model {
 
     /// Fully qualified identifier
     var fullName: String { get }
+    
+    /// Type of this model
+    var modelType: ModelType { get }
     
     /// Indicates whether mock generation for this model has been processed
     var processed: Bool { get }

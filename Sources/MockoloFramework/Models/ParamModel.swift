@@ -25,6 +25,11 @@ struct ParamModel: Model {
     let isGeneric: Bool
     let isInitializer: Bool
 
+    var modelType: ModelType {
+        return .parameter
+    }
+    
+
     init(_ ast: Structure, label: String = "", isGeneric: Bool = false, isInitializer: Bool = false) {
         self.name = ast.name
         self.isGeneric = isGeneric

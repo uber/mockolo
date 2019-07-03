@@ -28,6 +28,10 @@ struct ClosureModel: Model {
     let paramNames: [String]
     let paramTypes: [String]
     let suffix: String
+
+    var modelType: ModelType {
+        return .class
+    }
     
     init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], suffix: String, returnType: String, staticKind: String) {
         self.name = name + .handlerSuffix

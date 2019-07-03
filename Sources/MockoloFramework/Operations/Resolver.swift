@@ -74,20 +74,20 @@ func lookupEntities(key: String,
 /// Uniquify multiple entities with the same name, e.g. func signature, using the verbosity level
 /// @param group The dictionary containing entity name and corresponding models
 /// @param level The verbosiy level used for uniquing entity names
-/// @param lookup Used to look up whether an entity name has already been used and thus needs
-///               to be differentiated
+/// @param nameByLevelVisited Used to look up whether an entity name has already been used and thus needs
+///                           to be differentiated
 /// @param fullNameVisited Used to look up an entity full name to detect true duplicates (e.g.
 ///        overloaded functions in multiple parent protocols)
 /// @returns a dictionary with unique entity names and corresponding models
 private func uniquifyDuplicates(group: [String: [Model]],
                                 level: Int,
-                                lookup: [String: Model]?,
+                                nameByLevelVisited: [String: Model]?,
                                 fullNameVisited: [String]) -> [String: Model] {
     
-    var bufferKeyModelMap = [String: Model]()
+    var bufferNameByLevelVisited = [String: Model]()
     var bufferFullNameVisited = [String]()
     group.forEach { (key: String, models: [Model]) in
-        if let lookup = lookup, lookup[key] != nil {
+        if let nameByLevelVisited = nameByLevelVisited, nameByLevelVisited[key] != nil {
             // An entity with the given key already exists, so look up a more verbose name for these entities
             let subgroup = Dictionary(grouping: models, by: { (modelElement: Model) -> String in
                 return modelElement.name(by: level + 1)
@@ -95,50 +95,39 @@ private func uniquifyDuplicates(group: [String: [Model]],
             if !fullNameVisited.isEmpty {
                 bufferFullNameVisited.append(contentsOf: fullNameVisited)
             }
-            let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: bufferKeyModelMap, fullNameVisited: bufferFullNameVisited)
-            bufferKeyModelMap.merge(subresult, uniquingKeysWith: { (bufferElement: Model, subresultElement: Model) -> Model in
+            let subresult = uniquifyDuplicates(group: subgroup, level: level+1, nameByLevelVisited: bufferNameByLevelVisited, fullNameVisited: bufferFullNameVisited)
+            bufferNameByLevelVisited.merge(subresult, uniquingKeysWith: { (bufferElement: Model, subresultElement: Model) -> Model in
                 return subresultElement
             })
-        } else if let first = models.first {
-            if fullNameVisited.contains(first.fullName) {
-                // Full name looked up before so don't do anything
-            } else if models.count > 1 {
-                // There are multiple entities with the same name key; map one of them with the
-                // given key and look up a more verbose name for the rest to differentiate them
-                bufferKeyModelMap[key] = first
-                // Mark the full name of the given key as visited to detect other entities with
-                // the same full name (true duplicates)
+        } else {
+            // Check if full name has been looked up
+            let visited = models.filter {fullNameVisited.contains($0.fullName)}.compactMap{$0}
+            let unvisited = models.filter {!fullNameVisited.contains($0.fullName)}.compactMap{$0}
+
+            if let first = unvisited.first {
+                // If not, add it to the fullname map to keep track of duplicates
+                if !visited.isEmpty {
+                    bufferFullNameVisited.append(contentsOf: visited.map{$0.fullName})
+                }
                 bufferFullNameVisited.append(first.fullName)
                 
-                if !fullNameVisited.isEmpty {
-                    bufferFullNameVisited.append(contentsOf: fullNameVisited)
-                }
-                
-                let nextModels = models[1...]
+                // There could be multiple entities with the same name key; add the first one to
+                // a buffer and use a more verbose name key for the rest to differentiate them
+                bufferNameByLevelVisited[key] = first
+                let nextModels = unvisited[1...]
                 let subgroup = Dictionary(grouping: nextModels, by: { (modelElement: Model) -> String in
                     let distinctName = modelElement.name(by: level + 1)
                     return distinctName
                 })
                 
-                let subresult = uniquifyDuplicates(group: subgroup, level: level+1, lookup: bufferKeyModelMap, fullNameVisited: bufferFullNameVisited)
-                bufferKeyModelMap.merge(subresult, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
+                let subresult = uniquifyDuplicates(group: subgroup, level: level+1, nameByLevelVisited: bufferNameByLevelVisited, fullNameVisited: bufferFullNameVisited)
+                bufferNameByLevelVisited.merge(subresult, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
                     return addedElement
                 })
-            } else {
-                
-                // There are no duplicate entities at this point so map them by their (verbose) name
-                models.forEach{ (submodel: Model) in
-                    let nameKey = submodel.name(by: level)
-                    let element = [nameKey : submodel]
-                    
-                    bufferKeyModelMap.merge(element, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
-                        return addedElement
-                    })
-                }
             }
         }
     }
-    return bufferKeyModelMap
+    return bufferNameByLevelVisited
 }
 
 /// Uniquify multiple entities with the same name
@@ -147,7 +136,7 @@ private func uniquifyDuplicates(group: [String: [Model]],
 /// @param fullnames Used to look up full identifiers
 /// @returns A map of unique models
 func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [String]) -> [String: Model] {
-    return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, lookup: exclude, fullNameVisited: fullnames)
+    return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, nameByLevelVisited: exclude, fullNameVisited: fullnames)
 }
 
 /// Returns models that can be used as parameters to an initializer
@@ -162,6 +151,7 @@ func potentialInitVars(`in` models: [String: Model], processed: [String: Model])
     let result = [curVars, parentVars].flatMap{$0}
     return result
 }
+
 
 /// Returns import lines of a file
 /// @param content The source file content

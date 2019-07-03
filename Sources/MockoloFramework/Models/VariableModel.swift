@@ -13,6 +13,11 @@ struct VariableModel: Model {
     let processed: Bool
     let content: String
 
+    var modelType: ModelType {
+        return .variable
+    }
+    
+
     init(_ ast: Structure, content: String, processed: Bool) {
         name = ast.name
         type = ast.typeName
