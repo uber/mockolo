@@ -35,8 +35,12 @@ struct MethodModel: Model {
     let suffix: String
     
     init(_ ast: Structure, content: String, processed: Bool) {
-        var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter{!$0.isEmpty}
+        // This will split func signature into name and the rest (params, return type). In case it's a generic func,
+        // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
+        // give the name part that we expect.
+        var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
         let nameString = comps.removeFirst()
+        
         self.content = content
         self.name = nameString
         self.type = ast.typeName == .unknownVal ? "" : ast.typeName
@@ -48,9 +52,10 @@ struct MethodModel: Model {
 
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
         assert(paramDecls.count == comps.count)
-
-        self.params = zip(paramDecls, comps).map { (argModel: Structure, argLabel: String) -> ParamModel in
-            ParamModel(argModel, label: argLabel)
+        
+        let zippedParams = zip(paramDecls, comps)
+        self.params = zippedParams.map { (argAst: Structure, argLabel: String) -> ParamModel in
+            ParamModel(argAst, label: argLabel, isInitializer: ast.isInitializer)
         }
 
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
@@ -115,6 +120,7 @@ struct MethodModel: Model {
     var fullName: String {
         return self.name + self.signatureComponents.joined()
     }
+    
     
     func name(by level: Int) -> String {
         if level <= 0 {

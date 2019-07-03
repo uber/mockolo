@@ -50,8 +50,7 @@ func generateUniqueModels(key: String,
                           inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
     let (models, processedModels, attributes, pathToContentList) = lookupEntities(key: key, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
-    let containsInit = models.filter(path: \.isInitializer).count > 0
-
+    
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
     let processedElements = processedModels.compactMap { (element: Model) -> (String, Model)? in
@@ -74,8 +73,11 @@ func generateUniqueModels(key: String,
         .map { element in (element.fullName, element) }
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
     
-    let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}.sorted {$0.1.offset < $1.1.offset}
-    let initVars = containsInit ? nil: potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
+    let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
+    let existingInits = models.filter {$0.isInitializer && !$0.processed}
+    let existingInitVars = existingInits.compactMap { ($0 as? MethodModel)?.params }.flatMap {$0}
+    let containsInit = existingInitVars.count > 0
+    let initVars = containsInit ? existingInitVars : potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
     
     let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars)
     

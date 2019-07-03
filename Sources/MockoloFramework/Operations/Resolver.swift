@@ -154,12 +154,12 @@ func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [
 /// @param models The models of the current entity
 /// @param processed The processed models of the current entity
 /// @returns A list of init parameter models
-func potentialInitVars(`in` models: [String: Model], processed: [String: Model]) -> [VariableModel]? {
+func potentialInitVars(`in` models: [String: Model], processed: [String: Model]) -> [Model]? {
     // Named params in init should be unique. Add a duplicate param check to ensure it.
     let curVars = models.values.filter(path: \.canBeInitParam).sorted(path: \.offset)
     let curVarNames = curVars.map(path: \.name)
     let parentVars = processed.values.filter {!curVarNames.contains($0.name)}.filter(path: \.canBeInitParam).sorted(path: \.offset)
-    let result = [curVars, parentVars].flatMap{$0} as? [VariableModel]
+    let result = [curVars, parentVars].flatMap{$0}
     return result
 }
 

@@ -28,21 +28,15 @@ func applyVariableTemplate(name: String,
     
     var underlyingType = typeName
     if underlyingVarDefaultVal.isEmpty {
-        if underlyingType.contains("->") {
-            underlyingType = "(\(underlyingType))!"
-        } else {
-            if underlyingType.hasSuffix("?") {
-                underlyingType.removeLast()
-            }
-            if !underlyingType.hasSuffix("!") {
-                underlyingType.append("!")
-            }
-        }
+        underlyingType = typeName.forceUnwrappedType
     }
-    
-    let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-    
+
+    var acl = accessControlLevelDescription
+    if !acl.isEmpty {
+        acl = acl + " "
+    }
+
     let template =
     """
     \(staticStr)var \(underlyingSetCallCount) = 0

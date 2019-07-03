@@ -1,36 +1,24 @@
 import MockoloFramework
 
-
 //  MARK - protocol containing init
 
 let protocolWithInit = """
 /// \(String.mockAnnotation)
 public protocol HasInit: Parent {
-    var arg: String { get set }
     init(arg: String)
 }
 """
 
-let protocolWithInitResultMock = """
-
+let protocolWithInitResultMock =
+"""
 public class HasInitMock: HasInit {
     
-    var argSetCallCount = 0
-    var underlyingArg: String = ""
-    public var arg: String {
-        get {
-            return underlyingArg
-        }
-        set {
-            underlyingArg = newValue
-            argSetCallCount += 1
-        }
-    }
-    public init(arg: String) {
+    private var arg: String!
+    required public init(arg: String) {
         self.arg = arg
     }
     var numSetCallCount = 0
-    var underlyingNum: Int = ""
+    var underlyingNum: Int = 0
     public var num: Int {
         get {
             return underlyingNum
@@ -52,9 +40,8 @@ public class HasInitMock: HasInit {
         }
     }
 }
+
 """
-
-
 
 //  MARK - simple init
 
@@ -77,7 +64,7 @@ public class ParentMock: Parent {
     }
     
     var numSetCallCount = 0
-    var underlyingNum: Int = ""
+    var underlyingNum: Int = 0
     public var num: Int {
         get {
             return underlyingNum
@@ -125,7 +112,7 @@ public class CurrentMock: Current {
         }
     }
     var numSetCallCount = 0
-    var underlyingNum: Int = ""
+    var underlyingNum: Int = 0
     public var num: Int {
         get {
             return underlyingNum

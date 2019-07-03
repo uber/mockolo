@@ -10,7 +10,6 @@ struct VariableModel: Model {
     let attributes: [String]?
     let staticKind: String
     var canBeInitParam: Bool
-    let isClosureVariable: Bool
     let processed: Bool
     let content: String
 
@@ -20,7 +19,6 @@ struct VariableModel: Model {
         offset = ast.range.offset
         length = ast.range.length
         canBeInitParam = ast.canBeInitParam
-        isClosureVariable = ast.isClosureVariable
         staticKind = ast.isStaticVariable ? .static : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil

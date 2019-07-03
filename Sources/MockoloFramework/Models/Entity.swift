@@ -24,7 +24,7 @@ struct ResolvedEntity {
     let uniqueModels: [(String, Model)]
     let attributes: [String]
     let hasInit: Bool
-    let initVars: [VariableModel]?
+    let initVars: [Model]?
     
     func model() -> Model {
         return ClassModel(entity.ast,
@@ -41,6 +41,7 @@ struct ResolvedEntityContainer {
     let entity: ResolvedEntity
     let imports: [(String, String)]
 }
+
 
 
 /// Metadata for a type being mocked
