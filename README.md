@@ -144,6 +144,9 @@ It currently supports protocol mocking.  Class mocking will be added in the futu
 [SourceKitten](https://github.com/jpsim/SourceKitten)
 
 
+## How to contribute to Mockolo
+Feel free to push a PR along with detailed descriptions for a review. 
+
 ## Report any issues
 
 If you run into any problems, please file a git issue. Please include:
