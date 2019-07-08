@@ -152,6 +152,25 @@ func potentialInitVars(`in` models: [String: Model], processed: [String: Model])
     return result
 }
 
+/// Returns a map of typealiases with conflicting types to be whitelisted
+/// @param models Potentially contains typealias models
+/// @returns A map of typealiases with multiple possible types
+func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
+    let typealiasModels = models.filter{$0.1.modelType == .typeAlias}
+    var aliasMap = [String: [String]]()
+    typealiasModels.forEach { (arg: (key: String, value: Model)) in
+        if aliasMap[arg.value.name] == nil {
+            aliasMap[arg.value.name] = [arg.value.type]
+        } else {
+            if let val = aliasMap[arg.value.name], !val.contains(arg.value.type) {
+                aliasMap[arg.value.name]?.append(arg.value.type)
+            }
+        }
+    }
+    let aliasDupes = aliasMap.filter {$0.value.count > 1}
+    return aliasDupes.isEmpty ? nil : aliasDupes
+}
+
 
 /// Returns import lines of a file
 /// @param content The source file content

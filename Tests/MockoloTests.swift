@@ -98,6 +98,11 @@ class MockoloTests: XCTestCase {
                concurrencyLimit: 1)
     }
     
+    func testSameNameVarFunc() {
+        verify(srcContent: sameVarFuncName,
+               dstContent: sameVarFuncNameMock)
+    }
+    
     func testDuplicateSigsInheritance1() {
         verify(srcContent: duplicateSigInheritance1,
                dstContent: duplicateSigInheritanceMock1)
@@ -205,12 +210,26 @@ class MockoloTests: XCTestCase {
                dstContent: funcThrowMock)
     }
 
-    
-    func testSameNameVarFunc() {
-        verify(srcContent: sameVarFuncName,
-               dstContent: sameVarFuncNameMock)
+
+    func testPATDefaultType() {
+        verify(srcContent: patDefaultType,
+               dstContent: patDefaultTypeMock)
     }
 
+    func testPATPartialOverrideTypealiases() {
+        verify(srcContent: patPartialOverride,
+               dstContent: patPartialOverrideMock)
+    }
+
+    func testPATOverrideTypealiases() {
+        verify(srcContent: patOverride,
+               dstContent: patOverrideMock)
+    }
+    
+    func testPATNameCollisions() {
+        verify(srcContent: patNameCollision,
+               dstContent: patNameCollisionMock)
+    }
 
     private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
         var index = 0

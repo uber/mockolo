@@ -25,6 +25,7 @@ struct ResolvedEntity {
     let attributes: [String]
     let hasInit: Bool
     let initVars: [Model]?
+    let typealiasWhitelist: [String: [String]]?
     
     func model() -> Model {
         return ClassModel(entity.ast,
@@ -33,6 +34,7 @@ struct ResolvedEntity {
                           additionalAttributes: attributes,
                           needInit: !hasInit,
                           initParams: initVars,
+                          typealiasWhitelist: typealiasWhitelist,
                           entities: uniqueModels)
     }
 }
@@ -51,6 +53,7 @@ struct Entity {
     let content: String
     let ast: Structure
     let isAnnotated: Bool
+    let metadata: [String: String]?
     let isProcessed: Bool
     
     var hasInit: Bool {
@@ -78,6 +81,8 @@ struct Entity {
             return VariableModel(element, content: content, processed: processed)
         } else if element.isMethod {
             return MethodModel(element, content: content, processed: processed)
+        } else if element.isAssociatedType {
+            return TypeAliasModel(element, content: content, overrideTypes: metadata, processed: processed)
         }
         
         return nil

@@ -23,6 +23,7 @@ func applyClassTemplate(name: String,
                         attribute: String,
                         needInit: Bool,
                         initParams: [Model]?,
+                        typealiasWhitelist: [String: [String]]?,
                         entities: [(String, Model)]) -> String {
     
     var initTemplate = ""
@@ -35,7 +36,6 @@ func applyClassTemplate(name: String,
         if let initParams = initParams, !initParams.isEmpty {
             params = initParams
                 .map { (element: Model) -> String in
-                    
                     if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys, initParam: true), !val.isEmpty {
                         return "\(element.name): \(element.type) = \(val)"
                     }
@@ -76,6 +76,11 @@ func applyClassTemplate(name: String,
     
     let renderedEntities = entities
         .compactMap { (uniqueId: String, model: Model) -> (String, Int64)? in
+            if model.modelType == .typeAlias, let val = typealiasWhitelist?[model.name] {
+                // this case will be handlded by typealiasWhitelist look up later
+                return nil
+            }
+            
             if let ret = model.render(with: uniqueId, typeKeys: typeKeys) {
                 return (ret, model.offset)
             }
@@ -84,15 +89,25 @@ func applyClassTemplate(name: String,
         .sorted { $0.1 < $1.1 }
         .map {$0.0}
         .joined(separator: "\n")
-
+    
+    var typealiasTemplate = ""
+    if let typealiasWhitelist = typealiasWhitelist {
+        typealiasTemplate = typealiasWhitelist.map { (arg: (key: String, value: [String])) -> String in
+            let joinedType = arg.value.sorted().joined(separator: " & ")
+            return  "\(String.typealias) \(arg.key) = \(joinedType)"
+            }.joined(separator: "\n")
+    }
+    
     let template =
     """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
+        \(typealiasTemplate)
         \(initTemplate)
         \(extraVarsNeeded)
         \(renderedEntities)
     }
     """
+    
     return template
 }
