@@ -145,7 +145,7 @@ It currently supports protocol mocking.  Class mocking will be added in the futu
 
 
 ## How to contribute to Mockolo
-Feel free to push a PR along with detailed descriptions for a review. 
+See [CONTRIBUTING](CONTRIBUTING.md) for more info.
 
 ## Report any issues
 
