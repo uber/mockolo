@@ -14,6 +14,7 @@ let protocolWithInitResultMock =
 public class HasInitMock: HasInit {
     
     private var arg: String!
+    public init() {}
     required public init(arg: String) {
         self.arg = arg
     }
