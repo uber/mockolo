@@ -32,18 +32,28 @@ func applyClosureTemplate(name: String,
     var returnTypeCast = ""
     if !returnAs.isEmpty {
         let asSuffix = returnAs.hasSuffix("?") ? "?" : "!"
-        returnTypeCast = " as\(asSuffix) " + returnAs
+
+        var returnAsStr = returnAs
+        if returnAsStr.hasSuffix("?") || returnAsStr.hasSuffix("!") {
+            returnAsStr.removeLast()
+        }
+
+        returnTypeCast = " as\(asSuffix) " + returnAsStr
     }
     
     let prefix = suffix.isThrowsOrRethrows ? String.forceTry + " " : ""
-    let template =
-    """
-        if let \(name) = \(name) {
-            return \(prefix)\(name)(\(handlerParamValsStr))\(returnTypeCast)
-        }
-        \(handlerReturnDefault)
-    """
     
+    let returnStr = returnDefaultType.isEmpty ? "" : "return "
+    let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(returnTypeCast)"
+    
+    let template = """
+    
+            if let \(name) = \(name) {
+                \(callExpr)
+            }
+            \(handlerReturnDefault)
+    """
+
     return template
 }
 

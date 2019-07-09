@@ -33,7 +33,13 @@ struct VariableModel: Model {
     
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
-            return self.content.extract(offset: self.offset, length: self.length)
+            var ret = self.content.extract(offset: self.offset, length: self.length)
+            if !ret.contains(identifier),
+                let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
+                let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
+                ret = ret.replacingOccurrences(of: found, with: identifier)
+            }
+            return ret
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,

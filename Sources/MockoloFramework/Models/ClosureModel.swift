@@ -57,7 +57,13 @@ struct ClosureModel: Model {
         
         var returnAsStr = ""
         if !genericTypeNameList.filter({returnComps.contains($0)}).isEmpty {
-            displayableReturnType = .any
+            if displayableReturnType.hasSuffix("?") {
+                displayableReturnType = .any + "?"
+            } else if displayableReturnType.hasSuffix("!") {
+                displayableReturnType = .any + "!"
+            } else {
+                displayableReturnType = .any
+            }
             returnAsStr = formattedReturnType
         }
 

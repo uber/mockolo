@@ -12,39 +12,41 @@ func update(arg: Int)
 }
 """
 
-let duplicateSigInheritanceMock2 = """
+let duplicateSigInheritanceMock2 =
+"""
+
 class FooMock: Foo {
-
-init() {
-
-}
-
-var updateCallCount = 0
-var updateHandler: ((Int) -> ())?
-func update(arg: Int)  {
-updateCallCount += 1
-if let updateHandler = updateHandler {
-return updateHandler(arg)
-}
-
-}
+    
+    
+    init() {
+        
+    }
+    var updateCallCount = 0
+    var updateHandler: ((Int) -> ())?
+    func update(arg: Int)  {
+        updateCallCount += 1
+        if let updateHandler = updateHandler {
+            updateHandler(arg)
+        }
+        
+    }
 }
 
 class BarMock: Bar {
-
-init() {
-
-}
-
-var updateCallCount = 0
-var updateHandler: ((Int) -> ())?
-func update(arg: Int)  {
-updateCallCount += 1
-if let updateHandler = updateHandler {
-return updateHandler(arg)
-}
-
-}
+    
+    
+    init() {
+        
+    }
+    var updateCallCount = 0
+    var updateHandler: ((Int) -> ())?
+    func update(arg: Int)  {
+        updateCallCount += 1
+        if let updateHandler = updateHandler {
+            updateHandler(arg)
+        }
+        
+    }
 }
 
 """

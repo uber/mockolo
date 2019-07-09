@@ -12,30 +12,31 @@ func popViewController()
 let duplicatesMock4 =
 """
 class SomeVCMock: SomeVC {
-
-init() {
-
+    
+    
+    init() {
+        
+    }
+    var popViewControllerCallCount = 0
+    var popViewControllerHandler: ((UIViewController) -> ())?
+    func popViewController(viewController: UIViewController)  {
+        popViewControllerCallCount += 1
+        if let popViewControllerHandler = popViewControllerHandler {
+            popViewControllerHandler(viewController)
+        }
+        
+    }
+    var popViewController1CallCount = 0
+    var popViewController1Handler: (() -> ())?
+    func popViewController()  {
+        popViewController1CallCount += 1
+        if let popViewController1Handler = popViewController1Handler {
+            popViewController1Handler()
+        }
+        
+    }
 }
 
-var popViewControllerCallCount = 0
-var popViewControllerHandler: ((UIViewController) -> ())?
-func popViewController(viewController: UIViewController)  {
-popViewControllerCallCount += 1
-if let popViewControllerHandler = popViewControllerHandler {
-return popViewControllerHandler(viewController)
-}
-
-}
-var popViewController1CallCount = 0
-var popViewController1Handler: (() -> ())?
-func popViewController()  {
-popViewController1CallCount += 1
-if let popViewController1Handler = popViewController1Handler {
-return popViewController1Handler()
-}
-
-}
-}
 """
 
 
@@ -64,7 +65,6 @@ public protocol Foo: Bar2, Bar3, Bar4, Bar5 {
 
 
 let duplicatesMock5 =
-
 """
 public class FooMock: Foo {
     
@@ -72,13 +72,12 @@ public class FooMock: Foo {
     public init() {
         
     }
-    
     var customizeCallCount = 0
     public var customizeHandler: ((String?) -> ())?
     public func customize(text: String?)  {
         customizeCallCount += 1
         if let customizeHandler = customizeHandler {
-            return customizeHandler(text)
+            customizeHandler(text)
         }
         
     }
@@ -87,7 +86,7 @@ public class FooMock: Foo {
     public func customize(text: String?, textColor: UIColor?)  {
         customizeTextCallCount += 1
         if let customizeTextHandler = customizeTextHandler {
-            return customizeTextHandler(text, textColor)
+            customizeTextHandler(text, textColor)
         }
         
     }
@@ -96,14 +95,12 @@ public class FooMock: Foo {
     public func customize(text: String?, textColor: UIColor?, loadId: String?)  {
         customizeTextTextColorCallCount += 1
         if let customizeTextTextColorHandler = customizeTextTextColorHandler {
-            return customizeTextTextColorHandler(text, textColor, loadId)
+            customizeTextTextColorHandler(text, textColor, loadId)
         }
         
     }
 }
-
 """
-
 
 
 let sameVarFuncName = """
@@ -119,54 +116,53 @@ func talk(_ dismiss: Bool)
 """
 
 let sameVarFuncNameMock =
+
 """
 public class BarMock: Bar {
-
-public init() {}
-public init(talk: Int = 0) {
-self.talk = talk
-}
-
-var talkSetCallCount = 0
-var underlyingTalk: Int = 0
-public var talk: Int {
-get {
-return underlyingTalk
-}
-set {
-underlyingTalk = newValue
-talkSetCallCount += 1
-}
-}
+    
+    public init() {}
+    public init(talk: Int = 0) {
+        self.talk = talk
+    }
+    var talkSetCallCount = 0
+    var underlyingTalk: Int = 0
+    public var talk: Int {
+        get {
+            return underlyingTalk
+        }
+        set {
+            underlyingTalk = newValue
+            talkSetCallCount += 1
+        }
+    }
 }
 
 public class FooMock: Foo {
-
-public init() {}
-public init(talk: Int = 0) {
-self.talk = talk
-}
-
-var talkSetCallCount = 0
-var underlyingTalk: Int = 0
-public var talk: Int {
-get {
-return underlyingTalk
-}
-set {
-underlyingTalk = newValue
-talkSetCallCount += 1
-}
-}
-var talkDismissCallCount = 0
-public var talkDismissHandler: ((Bool) -> ())?
-public func talk(_ dismiss: Bool)  {
-talkDismissCallCount += 1
-if let talkDismissHandler = talkDismissHandler {
-return talkDismissHandler(dismiss)
-}
-
-}
+    
+    public init() {}
+    public init(talk: Int = 0) {
+        self.talk = talk
+    }
+    var talkSetCallCount = 0
+    var underlyingTalk: Int = 0
+    public var talk: Int {
+        get {
+            return underlyingTalk
+        }
+        set {
+            underlyingTalk = newValue
+            talkSetCallCount += 1
+        }
+    }
+    var talkDismissCallCount = 0
+    public var talkDismissHandler: ((Bool) -> ())?
+    public func talk(_ dismiss: Bool)  {
+        talkDismissCallCount += 1
+        if let talkDismissHandler = talkDismissHandler {
+            talkDismissHandler(dismiss)
+        }
+        
+    }
 }
 
 """

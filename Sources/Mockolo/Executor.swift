@@ -121,7 +121,7 @@ class Executor {
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
         let annotation = arguments.get(self.annotation) ?? String.mockAnnotation
         let header = arguments.get(self.header)
-        let annotatedOnly = arguments.get(self.annotatedOnly) ?? true
+        let annotatedOnly = arguments.get(self.annotatedOnly) ?? false
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
         
@@ -138,7 +138,7 @@ class Executor {
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
                          onCompletion: { _ in 
-                    log("Done. Exiting program", level: .info)
+                    log("Done. Exiting program.", level: .info)
             })
         } catch {
             fatalError("Generation error: \(error)")

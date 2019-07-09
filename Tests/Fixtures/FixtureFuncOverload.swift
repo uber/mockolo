@@ -38,16 +38,18 @@ return 0
 
 """
 
-let overloadMock = """
+let overloadMock =
+"""
 public class FooMock: Foo {
-    
     public init() {
         
     }
+    
     var tellStatusCallCount = 0
     public var tellStatusHandler: ((Int, String) -> (Double))?
     public func tell(status: Int, msg: String) -> Double {
         tellStatusCallCount += 1
+        
         if let tellStatusHandler = tellStatusHandler {
             return tellStatusHandler(status, msg)
         }
@@ -72,4 +74,5 @@ public class FooMock: Foo {
         return 0
     }
 }
+
 """
