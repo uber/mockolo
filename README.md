@@ -8,6 +8,10 @@
 **Mockolo** is a mock generator for Swift. Swift doesn't provide mocking support, and Mockolo provides a fast and easy way to autogenerate mock objects that can be tested in your code. One of the main objectives of Mockolo is performance.  Unlike other frameworks, Mockolo provides highly performant and scalable generation of mocks via a lightweight commandline tool, so it can  run as part of a linter or during a build if one chose to do so. Try Mockolo and enhance your project's test coverage in an efficient, performant way. 
 
 
+## Disclaimer 
+This project may contain unstable APIs which may not be ready for general use. Support and/or new releases may be limited. 
+
+
 ## System Requirements 
 
 * Swift 4.2 or later
