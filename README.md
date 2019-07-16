@@ -1,4 +1,5 @@
 # ![](Images/logo.png)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/2964/badge)](https://bestpractices.coreinfrastructure.org/projects/2964)
 [![Build Status](https://travis-ci.com/uber/mockolo.svg?token=xLqK5hKgjQBvRErSp7Wk&branch=master)](https://travis-ci.com/uber/mockolo.svg?token=xLqK5hKgjQBvRErSp7Wk&branch=master)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
