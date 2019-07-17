@@ -1,9 +1,13 @@
 language: objective-c
 osx_image: xcode10.1
+before_script:
+  - "curl -H 'Cache-Control: no-cache' https://raw.githubusercontent.com/fossas/fossa-cli/master/install.sh | sudo bash"
 matrix:
     include:
         - name: "MockoloTests"
           script: swift test -Xswiftc -DDEBUG
         - name: "MockoloBinary"
           script: swift build --static-swift-stdlib -c release
-          
+script:
+  - fossa
+  
