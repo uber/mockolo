@@ -9,5 +9,5 @@ matrix:
         - name: "MockoloBinary"
           script: swift build --static-swift-stdlib -c release
 script:
-  - fossa
-  
+- fossa init
+- fossa analyze
