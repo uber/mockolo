@@ -139,6 +139,7 @@ class Executor {
                          concurrencyLimit: concurrencyLimit,
                          onCompletion: { _ in 
                     log("Done. Exiting program", level: .info)
+                    exit(0)
             })
         } catch {
             fatalError("Generation error: \(error)")
