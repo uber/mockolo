@@ -41,7 +41,7 @@ struct ResolvedEntity {
 
 struct ResolvedEntityContainer {
     let entity: ResolvedEntity
-    let imports: [(String, String)]
+    let imports: [(String, String, Int64)]
 }
 
 

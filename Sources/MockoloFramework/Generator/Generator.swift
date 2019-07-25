@@ -38,7 +38,7 @@ public func generate(sourceDirs: [String]?,
     var annotatedProtocolMap = [String: Entity]()
     var protocolMap = [String: Entity]()
     var processedImportLines = [String: [String]]()
-    var pathToContentMap = [(String, String)]()
+    var pathToContentMap = [(String, String, Int64)]()
     var resolvedEntities = [ResolvedEntity]()
     
     let maxConcurrentThreads = concurrencyLimit ?? 0
