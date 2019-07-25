@@ -25,7 +25,7 @@ func generateUniqueModels(protocolMap: [String: Entity],
                           typeKeys: [String: String]?,
                           semaphore: DispatchSemaphore?,
                           queue: DispatchQueue?,
-                          process: @escaping (ResolvedEntity, [(String, String)]) -> ()) {
+                          process: @escaping (ResolvedEntity, [(String, String, Int64)]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for (key, val) in annotatedProtocolMap {
@@ -75,7 +75,7 @@ func generateUniqueModels(key: String,
         .compactMap { (key, value) in value.first }
         .map { element in (element.fullName, element) }
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
-    
+
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
     let existingInits = orderedModels.filter {$0.isInitializer && !$0.processed}
     let existingInitVars = existingInits.compactMap { ($0 as? MethodModel)?.params }.flatMap {$0}
@@ -96,7 +96,7 @@ func generateUniqueModels(key: String,
                           protocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
                           lock: NSLock? = nil,
-                          process: @escaping (ResolvedEntity, [(String, String)]) -> ()) {
+                          process: @escaping (ResolvedEntity, [(String, String, Int64)]) -> ()) {
     let ret = generateUniqueModels(key: key, entity: entity, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
     lock?.lock()

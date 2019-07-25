@@ -31,7 +31,6 @@ public func generate(sourceDirs: [String]?,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
                      onCompletion: @escaping (String) -> ()) throws {
-    
     assert(sourceDirs != nil || sourceFiles != nil)
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
@@ -39,7 +38,7 @@ public func generate(sourceDirs: [String]?,
     var annotatedProtocolMap = [String: Entity]()
     var protocolMap = [String: Entity]()
     var processedImportLines = [String: [String]]()
-    var pathToContentMap = [(String, String)]()
+    var pathToContentMap = [(String, String, Int64)]()
     var resolvedEntities = [ResolvedEntity]()
     
     let maxConcurrentThreads = concurrencyLimit ?? 0

@@ -28,7 +28,6 @@ struct ClassModel: Model {
     let needInit: Bool
     let initParams: [Model]?
     let typealiasWhitelist: [String: [String]]?
-    
     var modelType: ModelType {
         return .class
     }

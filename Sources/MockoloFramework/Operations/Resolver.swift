@@ -27,7 +27,7 @@ import SourceKittenFramework
 ///          cumulated attributes, and a map of filepaths and file contents (used for import lines lookup later).
 func lookupEntities(key: String,
                     protocolMap: [String: Entity],
-                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [(String, String)]) {
+                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [(String, String, Int64)]) {
     
     // Used to keep track of types to be mocked
     var models = [Model]()
@@ -36,7 +36,7 @@ func lookupEntities(key: String,
     // Gather attributes declared in current or parent protocols
     var attributes = [String]()
     // Gather filepaths used for import lines look up later
-    var pathToContents = [(String, String)]()
+    var pathToContents = [(String, String, Int64)]()
     
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
@@ -46,7 +46,7 @@ func lookupEntities(key: String,
             attributes.append(contentsOf: curAttributes)
         }
         
-        pathToContents.append((current.filepath, current.content))
+        pathToContents.append((current.filepath, current.content, current.ast.offset))
         
         // If the protocol inherits other protocols, look up their entities as well.
         for parent in current.ast.inheritedTypes {
@@ -67,7 +67,7 @@ func lookupEntities(key: String,
         if let parentAttributes = parentMock.subAttributes() {
             attributes.append(contentsOf: parentAttributes)
         }
-        pathToContents.append((parentMock.filepath, parentMock.content))
+        pathToContents.append((parentMock.filepath, parentMock.content, parentMock.ast.offset))
     }
     
     return (models, processedModels, attributes, pathToContents)
@@ -190,8 +190,15 @@ func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
 /// Returns import lines of a file
 /// @param content The source file content
 /// @returns A list of import lines from the content
-func findImportLines(content: String) -> [String] {
-    let lines = content.components(separatedBy: "\n")
-    let importlines = lines.filter {$0.contains(String.import)}
+func findImportLines(content: String, offset: Int64?) -> [String] {
+
+    var trimmedContent = content
+    if let offset = offset, offset > 0 {
+        trimmedContent = trimmedContent.extract(offset: 0, length: offset)
+    }
+    
+    let lines = trimmedContent.components(separatedBy: "\n")
+    let importlines = lines.filter {$0.trimmingCharacters(in: CharacterSet.whitespaces).hasPrefix(String.import)}
     return importlines
 }
+

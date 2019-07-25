@@ -19,6 +19,7 @@ import SourceKittenFramework
 
 
 struct TypeAliasModel: Model {
+    var filePath: String
     var name: String
     var type: String
     var offset: Int64 = .max
@@ -34,8 +35,9 @@ struct TypeAliasModel: Model {
         return .typeAlias
     }
 
-    init(_ ast: Structure, content: String, overrideTypes: [String: String]?, processed: Bool) {
+    init(_ ast: Structure, filepath: String, content: String, overrideTypes: [String: String]?, processed: Bool) {
         self.name = ast.name
+        self.filePath = filepath
         self.offset = ast.offset
         self.length = ast.length
         self.typeOffset = ast.nameOffset + ast.nameLength + 1

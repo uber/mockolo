@@ -36,7 +36,7 @@ func generateProcessedTypeMap(_ paths: [String],
         queue.sync(flags: .barrier) {}
     } else {
         for filePath in paths {
-                _ = generateProcessedModels(filePath, lock: nil, process: process)
+            _ = generateProcessedModels(filePath, lock: nil, process: process)
         }
     }
 }
@@ -47,16 +47,16 @@ private func generateProcessedModels(_ path: String,
     guard let content = try? String(contentsOfFile: path) else { return false }
 //    guard content.contains("public class") else { return false }
 
-    let imports = findImportLines(content: content)
-    
     if let topstructure = try? Structure(path: path) {
-        let results = topstructure.substructures.compactMap { current -> Entity? in
+        let subs = topstructure.substructures
+        let results = subs.compactMap { current -> Entity? in
 //            if current.accessControlLevel == "public" {
                 return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
 //            }
 //            return nil
         }
         
+        let imports = findImportLines(content: content, offset: subs.first?.offset)
         lock?.lock()
         process(results, imports)
         lock?.unlock()

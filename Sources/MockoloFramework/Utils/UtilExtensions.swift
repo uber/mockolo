@@ -119,6 +119,7 @@ extension String {
         return displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
     
+    
     func extract(offset: Int64, length: Int64) -> String {
         let end = offset + length
         let start = offset
@@ -426,4 +427,25 @@ public extension Sequence {
     }
 }
 
+
+extension NSString {
+    // Internal shared cache
+    // Note: You can add, remove, and query items in the cache from different threads without having to lock the cache yourself.
+    // Ref https://developer.apple.com/documentation/foundation/nscache?language=objc
+    private static var sharedCache = NSCache<NSString, NSString>()
+
+    // Returns a cached value as String using self as key
+    func cached() -> String? {
+        if let cached = NSString.sharedCache.object(forKey: self) {
+            return cached as String
+        }
+        return nil
+    }
+
+    // Cache a value as String for self as key
+    func cache(with val: String) {
+        let nsString = val as NSString
+        NSString.sharedCache.setObject(nsString, forKey: self)
+    }
+}
 
