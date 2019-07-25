@@ -118,16 +118,10 @@ extension String {
     }
     
     func extract(offset: Int64, length: Int64) -> String {
-        let end = offset + length
-        let start = offset
         let utf = self.utf8
-        if start >= 0 && length > 0 {
-            if end > utf.count {
-                print("No content found", start, length, end, utf.count)
-                return ""
-            }
-            let startIdx = utf.index(utf.startIndex, offsetBy: Int(start))
-            let endIdx = utf.index(utf.startIndex, offsetBy: Int(end))
+        if offset >= 0 && length > 0 {
+            let startIdx = utf.index(utf.startIndex, offsetBy: Int(offset))
+            let endIdx = utf.index(startIdx, offsetBy: Int(length))
             let body = self[startIdx ..< endIdx]
             return String(body)
         }
