@@ -60,7 +60,6 @@ extension String {
     static public let mockAnnotation = "@mockable"
     static public let poundIf = "#if "
     static public let poundEndIf = "#endif"
-    static public let markComment = "/// MARK - Mocks"
     static public let headerDoc =
     """
     ///
