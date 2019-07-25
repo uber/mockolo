@@ -30,7 +30,7 @@ var updateHandler: ((Int) -> ())?
 func update(arg: Int)  {
 updateCallCount += 1
 if let updateHandler = updateHandler {
-return updateHandler(arg)
+updateHandler(arg)
 }
 
 }
@@ -47,7 +47,7 @@ var updateHandler: ((Int) -> ())?
 func update(arg: Int)  {
 updateCallCount += 1
 if let updateHandler = updateHandler {
-return updateHandler(arg)
+updateHandler(arg)
 }
 
 }
@@ -64,7 +64,7 @@ var updateHandler: ((Int) -> ())?
 func update(arg: Int)  {
 updateCallCount += 1
 if let updateHandler = updateHandler {
-return updateHandler(arg)
+updateHandler(arg)
 }
 
 }

@@ -3,10 +3,14 @@ import MockoloFramework
 
 class MockoloTests: XCTestCase {
     var srcFilePathsCount = 1
+    var mockFilePathsCount = 1
+
     let bundle = Bundle(for: MockoloTests.self)
+
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
+    
     lazy var srcFilePaths: [String] = {
         var idx = 0
         var paths = [String]()
@@ -19,8 +23,18 @@ class MockoloTests: XCTestCase {
         }
         return paths
     }()
-    lazy var mockFilePath: String = {
-        return bundle.bundlePath + "/Mocks.swift"
+    
+    lazy var mockFilePaths: [String] = {
+        var idx = 0
+        var paths = [String]()
+        let prefix = bundle.bundlePath + "/Mocks"
+        let suffix = ".swift"
+        while idx < mockFilePathsCount {
+            let path = prefix + "\(idx)" + suffix
+            paths.append(path)
+            idx += 1
+        }
+        return paths
     }()
     
     override func setUp() {
@@ -35,8 +49,8 @@ class MockoloTests: XCTestCase {
         for srcpath in srcFilePaths {
             try? FileManager.default.removeItem(atPath: srcpath)
         }
-        if FileManager.default.fileExists(atPath: mockFilePath) {
-            try? FileManager.default.removeItem(atPath: mockFilePath)
+        for mockpath in mockFilePaths {
+            try? FileManager.default.removeItem(atPath: mockpath)
         }
     }
     
@@ -230,11 +244,19 @@ class MockoloTests: XCTestCase {
         verify(srcContent: patNameCollision,
                dstContent: patNameCollisionMock)
     }
+    
+   
+    func testRxVar() {
+        verify(srcContent: rxVar,
+            dstContent: rxVarMock)
+    }
 
-    private func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
+
+    private func verify(srcContents: [String], mockContents: [String]? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
         var index = 0
         srcFilePathsCount = srcContents.count
-        
+        mockFilePathsCount = mockContents?.count ?? 0
+
         for src in srcContents {
             if index < srcContents.count {
                 let srcCreated = FileManager.default.createFile(atPath: srcFilePaths[index], contents: src.data(using: .utf8), attributes: nil)
@@ -247,15 +269,21 @@ class MockoloTests: XCTestCase {
         let macroEnd = String.poundEndIf
         
         let headerStr = header + String.headerDoc
-        if let mockContent = mockContent {
+        index = 0
+        if let mockContents = mockContents {
+            
+            for mockContent in mockContents {
+                
             let formattedMockContent = """
             \(headerStr)
             \(macroStart)
             \(mockContent)
             \(macroEnd)
             """
-            let mockCreated = FileManager.default.createFile(atPath: mockFilePath, contents: formattedMockContent.data(using: .utf8), attributes: nil)
+            let mockCreated = FileManager.default.createFile(atPath: mockFilePaths[index], contents: formattedMockContent.data(using: .utf8), attributes: nil)
+                index += 1
             XCTAssert(mockCreated)
+            }
         }
         
         let formattedDstContent = """
@@ -268,7 +296,7 @@ class MockoloTests: XCTestCase {
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
                       exclusionSuffixes: ["Mocks", "Tests"],
-                      mockFilePaths: [mockFilePath],
+                      mockFilePaths: mockFilePaths,
                       annotatedOnly: false,
                       annotation: String.mockAnnotation,
                       header: header,
@@ -285,6 +313,13 @@ class MockoloTests: XCTestCase {
     }
     
     private func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
-        verify(srcContents: [srcContent], mockContent: mockContent, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit)
+        var mockList: [String]?
+        if let mock = mockContent {
+            if mockList == nil {
+                mockList = [String]()
+            }
+            mockList?.append(mock)
+        }
+        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit)
     }
 }

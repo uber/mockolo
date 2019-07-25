@@ -45,12 +45,15 @@ func lookupEntities(key: String,
         if let curAttributes = current.subAttributes() {
             attributes.append(contentsOf: curAttributes)
         }
+        
         pathToContents.append((current.filepath, current.content))
         
         // If the protocol inherits other protocols, look up their entities as well.
         for parent in current.ast.inheritedTypes {
             if parent != .class, parent != .any, parent != .anyObject {
-                let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+                let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent,
+                                                                                                                   protocolMap: protocolMap,
+                                                                                                                   inheritanceMap: inheritanceMap)
                 models.append(contentsOf: parentModels)
                 processedModels.append(contentsOf: parentProcessedModels)
                 attributes.append(contentsOf: parentAttributes)
@@ -145,10 +148,22 @@ func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [
 /// @returns A list of init parameter models
 func potentialInitVars(`in` models: [String: Model], processed: [String: Model]) -> [Model]? {
     // Named params in init should be unique. Add a duplicate param check to ensure it.
-    let curVars = models.values.filter(path: \.canBeInitParam).sorted(path: \.offset)
+    let curVars = models.values.filter(path: \.canBeInitParam).sorted { (left: Model, right: Model) -> Bool in
+        if left.offset == right.offset {
+            return left.name < right.name
+        }
+        return left.offset < right.offset
+    }
+    
     let curVarNames = curVars.map(path: \.name)
-    let parentVars = processed.values.filter {!curVarNames.contains($0.name)}.filter(path: \.canBeInitParam).sorted(path: \.offset)
-    let result = [curVars, parentVars].flatMap{$0}
+    let parentVars = processed.values.filter {!curVarNames.contains($0.name)}.filter(path: \.canBeInitParam)
+    let parentVarsSorted = parentVars.sorted { (left: Model, right: Model) -> Bool in
+        if left.offset == right.offset {
+            return left.name < right.name
+        }
+        return left.offset < right.offset
+    }
+    let result = [curVars, parentVarsSorted].flatMap{$0}
     return result
 }
 

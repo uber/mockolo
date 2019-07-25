@@ -42,6 +42,8 @@ extension String {
     static let observableVarPrefix = "Observable<"
     static let rxObservableVarPrefix = "RxSwift.Observable<"
     static let rxPublishSubject = "RxSwift.PublishSubject"
+    static let rxReplaySubject = "RxSwift.ReplaySubject"
+    static let replaySubjectAllocSuffix = ".create(bufferSize: 1)"
     static let publishSubject = "PublishSubject"
     static let behaviorSubject = "BehaviorSubject"
     static let replaySubject = "ReplaySubject"

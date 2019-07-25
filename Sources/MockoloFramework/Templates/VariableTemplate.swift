@@ -37,8 +37,8 @@ func applyVariableTemplate(name: String,
         acl = acl + " "
     }
 
-    let template =
-    """
+    let template = """
+    
     \(staticStr)var \(underlyingSetCallCount) = 0
     \(staticStr)var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
     \(acl)\(staticStr)var \(name): \(typeName) {
@@ -50,7 +50,7 @@ func applyVariableTemplate(name: String,
             \(underlyingSetCallCount) += 1
         }
     }
-    """
+"""
     return template
 }
 
@@ -76,8 +76,8 @@ func applyRxVariableTemplate(name: String,
         let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         
-        let template =
-        """
+        let template = """
+        
         \(staticStr)private var \(whichSubject) = 0
         \(staticStr)var \(underlyingSetCallCount) = 0
         \(staticStr)var \(publishSubjectName) = \(publishSubjectType)() { didSet { \(underlyingSetCallCount) += 1 } }
@@ -112,7 +112,7 @@ func applyRxVariableTemplate(name: String,
                 }
             }
         }
-        """
+    """
         return template
     }
     return nil

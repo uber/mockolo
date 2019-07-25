@@ -24,6 +24,8 @@ func write(candidates: [(String, Int64)],
            macro: String?,
            to outputFilePath: String) -> String {
     
+    var importLineStr = ""
+    
     var importLines = processedImportLines
     for (filepath, filecontent) in pathToContentMap {
         if importLines[filepath] == nil {
@@ -36,7 +38,16 @@ func write(candidates: [(String, Int64)],
     }
     
     let importsSet = Set(imports)
-    let entities = candidates.sorted{$0.1 < $1.1}.map{$0.0}
+    importLineStr = importsSet.sorted().joined(separator: "\n")
+    
+    let entities = candidates
+        .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
+            if left.1 == right.1 {
+                return left.0 < right.0
+            }
+            return left.1 < right.1
+        }
+        .map{$0.0}
     
     let headerStr = (header ?? "") + .headerDoc
     var macroStart = ""
@@ -45,7 +56,7 @@ func write(candidates: [(String, Int64)],
         macroStart = .poundIf + mcr
         macroEnd = .poundEndIf
     }
-    let ret = [headerStr, macroStart, importsSet.joined(separator: "\n"), entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
+    let ret = [headerStr, macroStart, importLineStr, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
     
     _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
     return ret

@@ -16,21 +16,23 @@ func update(arg: Float)
 }
 """
 
-let duplicateMock1 = """
+let duplicateMock1 =
+"""
 import UIKit
 
+
 class DuplicateFuncNamesMock: DuplicateFuncNames {
+    
     
     init() {
         
     }
-    
     var displayCallCount = 0
     var displayHandler: (() -> ())?
     func display()  {
         displayCallCount += 1
         if let displayHandler = displayHandler {
-            return displayHandler()
+            displayHandler()
         }
         
     }
@@ -39,7 +41,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func display(x: Int)  {
         displayXCallCount += 1
         if let displayXHandler = displayXHandler {
-            return displayXHandler(x)
+            displayXHandler(x)
         }
         
     }
@@ -48,7 +50,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func display(y: Int)  {
         displayYCallCount += 1
         if let displayYHandler = displayYHandler {
-            return displayYHandler(y)
+            displayYHandler(y)
         }
         
     }
@@ -57,7 +59,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func update()  {
         updateCallCount += 1
         if let updateHandler = updateHandler {
-            return updateHandler()
+            updateHandler()
         }
         
     }
@@ -75,7 +77,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func update(arg: Int)  {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
-            return updateArgHandler(arg)
+            updateArgHandler(arg)
         }
         
     }
@@ -84,11 +86,10 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func update(arg: Float)  {
         updateArgFloatCallCount += 1
         if let updateArgFloatHandler = updateArgFloatHandler {
-            return updateArgFloatHandler(arg)
+            updateArgFloatHandler(arg)
         }
         
     }
 }
+
 """
-
-

@@ -43,7 +43,7 @@ public class simpleChildMock: simpleChild {
     public func foo()  {
         fooCallCount += 1
         if let fooHandler = fooHandler {
-            return fooHandler()
+            fooHandler()
         }
         
     }

@@ -15,8 +15,10 @@ func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -
 }
 """
 
-let duplicatesMock3 = """
+let duplicatesMock3 =
+"""
 class DuplicateFuncNamesMock: DuplicateFuncNames {
+    
     
     init() {
         
@@ -35,7 +37,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)  {
         collectionViewConfigureCellCallCount += 1
         if let collectionViewConfigureCellHandler = collectionViewConfigureCellHandler {
-            return collectionViewConfigureCellHandler(collectionView, cell, index)
+            collectionViewConfigureCellHandler(collectionView, cell, index)
         }
         
     }
@@ -53,7 +55,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)  {
         collectionViewDidEndDisplayingCallCount += 1
         if let collectionViewDidEndDisplayingHandler = collectionViewDidEndDisplayingHandler {
-            return collectionViewDidEndDisplayingHandler(collectionView, cell, index)
+            collectionViewDidEndDisplayingHandler(collectionView, cell, index)
         }
         
     }
@@ -62,7 +64,7 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
     func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int)  {
         collectionViewConfigureCallCount += 1
         if let collectionViewConfigureHandler = collectionViewConfigureHandler {
-            return collectionViewConfigureHandler(collectionView, cell, index)
+            collectionViewConfigureHandler(collectionView, cell, index)
         }
         
     }
@@ -94,4 +96,5 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         return Observable.empty()
     }
 }
+
 """

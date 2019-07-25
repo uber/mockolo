@@ -8,7 +8,7 @@ protocol P1: P0 {
 
 let overloadParent1 = """
 
-class P0Mock: P0 {
+public class P0Mock: P0 {
 
 init() {
 

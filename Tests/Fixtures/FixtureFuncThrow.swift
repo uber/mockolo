@@ -38,7 +38,7 @@ class FuncThrowMock: FuncThrow {
     func f2(arg: Int) throws  {
         f2CallCount += 1
         if let f2Handler = f2Handler {
-            return try! f2Handler(arg)
+            try! f2Handler(arg)
         }
         
     }
@@ -56,7 +56,7 @@ class FuncThrowMock: FuncThrow {
     func g2(arg: (Int) throws -> ()) throws  {
         g2CallCount += 1
         if let g2Handler = g2Handler {
-            return try! g2Handler(arg)
+            try! g2Handler(arg)
         }
         
     }

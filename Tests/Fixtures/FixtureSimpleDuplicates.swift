@@ -13,19 +13,20 @@ func push(state: Double, flag: Float, attachTransition: Int, detachTransition: F
 }
 """
 
-let simpleDuplicatesMock = """
+let simpleDuplicatesMock =
+"""
 public class SimpleDuplicateMock: SimpleDuplicate {
+    
     
     public init() {
         
     }
-    
     var removeCallCount = 0
     public var removeHandler: ((Int) -> ())?
     public func remove(_ arg: Int)  {
         removeCallCount += 1
         if let removeHandler = removeHandler {
-            return removeHandler(arg)
+            removeHandler(arg)
         }
         
     }
@@ -34,7 +35,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
     public func remove(_ arg: String)  {
         removeArgCallCount += 1
         if let removeArgHandler = removeArgHandler {
-            return removeArgHandler(arg)
+            removeArgHandler(arg)
         }
         
     }
@@ -43,7 +44,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
     public func remove(_ arg: Float)  {
         removeArgFloatCallCount += 1
         if let removeArgFloatHandler = removeArgFloatHandler {
-            return removeArgFloatHandler(arg)
+            removeArgFloatHandler(arg)
         }
         
     }
@@ -52,7 +53,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
     public func remove(_ arg: Double)  {
         removeArgDoubleCallCount += 1
         if let removeArgDoubleHandler = removeArgDoubleHandler {
-            return removeArgDoubleHandler(arg)
+            removeArgDoubleHandler(arg)
         }
         
     }
@@ -61,7 +62,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
     public func push(state: Double, attachTransition: Int, detachTransition: Float?)  {
         pushCallCount += 1
         if let pushHandler = pushHandler {
-            return pushHandler(state, attachTransition, detachTransition)
+            pushHandler(state, attachTransition, detachTransition)
         }
         
     }
@@ -70,9 +71,11 @@ public class SimpleDuplicateMock: SimpleDuplicate {
     public func push(state: Double, flag: Float, attachTransition: Int, detachTransition: Float?)  {
         pushStateCallCount += 1
         if let pushStateHandler = pushStateHandler {
-            return pushStateHandler(state, flag, attachTransition, detachTransition)
+            pushStateHandler(state, flag, attachTransition, detachTransition)
         }
         
     }
 }
+
+
 """
