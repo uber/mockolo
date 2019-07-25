@@ -18,6 +18,7 @@ import Foundation
 import SourceKittenFramework
 
 struct MethodModel: Model {
+    var filePath: String
     var name: String
     var type: String
     var offset: Int64
@@ -33,18 +34,20 @@ struct MethodModel: Model {
     let signatureComponents: [String]
     let isInitializer: Bool
     let suffix: String
-    
+    let cacheKey: NSString
+
     var modelType: ModelType {
         return .method
     }
     
-    init(_ ast: Structure, content: String, processed: Bool) {
+    init(_ ast: Structure, filepath: String, content: String, processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
         // give the name part that we expect.
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
         let nameString = comps.removeFirst()
-        
+        self.filePath = filepath
+
         self.content = content
         self.name = nameString
         self.type = ast.typeName == .unknownVal ? "" : ast.typeName
@@ -83,34 +86,28 @@ struct MethodModel: Model {
         let capped = String.Index(encodedOffset: min(self.type.displayableForType.count, 32))
         args.append(self.type.displayableForType.substring(to: capped))
         
-
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
         self.signatureComponents = args.filter{ arg in !arg.isEmpty }
 
         // Sourcekit structure api doesn't provide info on throws/rethrows, so manually parse it here
-        var plast: Int64 = 0
-        var plastLen: Int64 = 0
-        paramDecls.forEach { (p: Structure) in
-            if p.offset > plast {
-                plast = p.offset
-                plastLen = p.length
+        let suffixOffset = ast.nameOffset + ast.nameLength + 1
+        let suffixLen = ast.offset + ast.length - suffixOffset
+        if suffixLen > 0, suffixOffset > ast.bodyOffset - 1{
+            let suffixPart = content.extract(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            if suffixPart.hasPrefix("\(String.rethrows)") {
+                self.suffix = String.rethrows
+            } else if suffixPart.hasPrefix("\(String.throws)") {
+                self.suffix = String.throws
+            } else {
+                self.suffix = ""
             }
-        }
-
-        let suffixOffset = plast + plastLen + 1
-        let suffixPart = content.extract(offset: suffixOffset, length: self.offset + self.length - suffixOffset).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-        
-        if suffixPart.hasPrefix("\(String.rethrows)") {
-            self.suffix = String.rethrows
-        } else if suffixPart.hasPrefix("\(String.throws)") {
-            self.suffix = String.throws
         } else {
             self.suffix = ""
         }
 
         self.handler = self.isInitializer ? nil :
-                        ClosureModel(name: self.name,
+                        ClosureModel(name: name,
                                     genericTypeParams: genericTypeParams,
                                     paramNames: paramNames,
                                     paramTypes: paramTypes,
@@ -119,12 +116,13 @@ struct MethodModel: Model {
                                     staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
+        self.cacheKey = NSString(string: "\(filePath)_\(name)_\(type)_\(offset)_\(length)")
+
     }
     
     var fullName: String {
         return self.name + self.signatureComponents.joined()
     }
-    
     
     func name(by level: Int) -> String {
         if level <= 0 {
@@ -138,7 +136,17 @@ struct MethodModel: Model {
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
-            return isInitializer ? nil : self.content.extract(offset: self.offset, length: self.length)
+            if isInitializer {
+                return nil
+            }
+            
+            if let val = cacheKey.cached() {
+                return val
+            }
+
+            let ret = self.content.extract(offset: self.offset, length: self.length)
+            cacheKey.cache(with: ret)
+            return ret
         }
     
         let returnType = type != .unknownVal ? type : ""
@@ -155,4 +163,7 @@ struct MethodModel: Model {
                                          typeKeys: typeKeys)
         return result
     }
+    
+    
 }
+

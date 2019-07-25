@@ -12,13 +12,15 @@ struct VariableModel: Model {
     var canBeInitParam: Bool
     let processed: Bool
     let content: String
+    var filePath: String
 
+    let cacheKey: NSString
+    
     var modelType: ModelType {
         return .variable
     }
     
-
-    init(_ ast: Structure, content: String, processed: Bool) {
+    init(_ ast: Structure, filepath: String, content: String, processed: Bool) {
         name = ast.name
         type = ast.typeName
         offset = ast.range.offset
@@ -29,16 +31,25 @@ struct VariableModel: Model {
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
         self.processed = processed
         self.content = content
+        self.filePath = filepath
+        self.cacheKey = NSString(string: "\(filePath)_\(name)_\(type)_\(offset)_\(length)")
     }
     
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
+
+            if let val = cacheKey.cached() {
+                return val
+            }
+            
             var ret = self.content.extract(offset: self.offset, length: self.length)
             if !ret.contains(identifier),
                 let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
                 let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
                 ret = ret.replacingOccurrences(of: found, with: identifier)
             }
+            
+            cacheKey.cache(with: ret)
             return ret
         }
 

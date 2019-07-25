@@ -75,7 +75,7 @@ func generateUniqueModels(key: String,
         .compactMap { (key, value) in value.first }
         .map { element in (element.fullName, element) }
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
-    
+
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
     let existingInits = orderedModels.filter {$0.isInitializer && !$0.processed}
     let existingInitVars = existingInits.compactMap { ($0 as? MethodModel)?.params }.flatMap {$0}

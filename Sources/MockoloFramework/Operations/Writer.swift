@@ -29,7 +29,7 @@ func write(candidates: [(String, Int64)],
     var importLines = processedImportLines
     for (filepath, filecontent) in pathToContentMap {
         if importLines[filepath] == nil {
-            importLines[filepath] = findImportLines(content: filecontent)
+            importLines[filepath] = findImportLines(content: filecontent, offset: nil)
         }
     }
     
@@ -56,7 +56,7 @@ func write(candidates: [(String, Int64)],
         macroStart = .poundIf + mcr
         macroEnd = .poundEndIf
     }
-    let ret = [headerStr, macroStart, importLineStr, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
+    let ret = [headerStr, macroStart, importLineStr, String.markComment, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
     
     _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
     return ret

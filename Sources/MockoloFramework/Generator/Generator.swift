@@ -31,7 +31,6 @@ public func generate(sourceDirs: [String]?,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
                      onCompletion: @escaping (String) -> ()) throws {
-    
     assert(sourceDirs != nil || sourceFiles != nil)
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()

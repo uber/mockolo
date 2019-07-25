@@ -62,7 +62,7 @@ struct Entity {
     
     func subModels() -> [Model] {
         return ast.substructures.compactMap { (child: Structure) -> Model? in
-            return model(for: child, content: content, processed: isProcessed)
+            return model(for: child, filepath: filepath, content: content, processed: isProcessed)
         }
     }
     
@@ -76,13 +76,13 @@ struct Entity {
             }.flatMap {$0}
     }
     
-    func model(for element: Structure, content: String, processed: Bool = false) -> Model? {
+    func model(for element: Structure, filepath: String, content: String, processed: Bool = false) -> Model? {
         if element.isVariable {
-            return VariableModel(element, content: content, processed: processed)
+            return VariableModel(element, filepath: filepath, content: content, processed: processed)
         } else if element.isMethod {
-            return MethodModel(element, content: content, processed: processed)
+            return MethodModel(element, filepath: filepath, content: content, processed: processed)
         } else if element.isAssociatedType {
-            return TypeAliasModel(element, content: content, overrideTypes: metadata, processed: processed)
+            return TypeAliasModel(element, filepath: filepath, content: content, overrideTypes: metadata, processed: processed)
         }
         
         return nil

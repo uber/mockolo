@@ -60,6 +60,7 @@ extension String {
     static public let mockAnnotation = "@mockable"
     static public let poundIf = "#if "
     static public let poundEndIf = "#endif"
+    static public let markComment = "/// MARK - Mocks"
     static public let headerDoc =
     """
     ///
@@ -118,6 +119,7 @@ extension String {
     var displayableForType: String {
         return displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
+    
     
     func extract(offset: Int64, length: Int64) -> String {
         let end = offset + length
@@ -426,4 +428,29 @@ public extension Sequence {
     }
 }
 
+
+extension NSString {
+    // Internal shared cache
+    private static var sharedCache = NSCache<NSString, NSString>()
+    // Internal shared cache lock used in get/set
+    private static var sharedCacheLock = NSLock()
+
+    // Returns a cached value as String using self as key
+    func cached() -> String? {
+        NSString.sharedCacheLock.lock()
+        defer { NSString.sharedCacheLock.unlock() }
+        if let cached = NSString.sharedCache.object(forKey: self) {
+            return cached as String
+        }
+        return nil
+    }
+
+    // Cache a value as String for self as key
+    func cache(with val: String) {
+        NSString.sharedCacheLock.lock()
+        defer { NSString.sharedCacheLock.unlock() }
+        let nsString = val as NSString
+        NSString.sharedCache.setObject(nsString, forKey: self)
+    }
+}
 

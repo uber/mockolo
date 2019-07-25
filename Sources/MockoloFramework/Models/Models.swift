@@ -27,7 +27,7 @@ public protocol Model {
 
     /// Fully qualified identifier
     var fullName: String { get }
-    
+
     /// Type of this model
     var modelType: ModelType { get }
     
