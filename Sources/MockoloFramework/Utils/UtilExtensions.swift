@@ -430,14 +430,12 @@ public extension Sequence {
 
 extension NSString {
     // Internal shared cache
+    // Note: You can add, remove, and query items in the cache from different threads without having to lock the cache yourself.
+    // Ref https://developer.apple.com/documentation/foundation/nscache?language=objc
     private static var sharedCache = NSCache<NSString, NSString>()
-    // Internal shared cache lock used in get/set
-    private static var sharedCacheLock = NSLock()
 
     // Returns a cached value as String using self as key
     func cached() -> String? {
-        NSString.sharedCacheLock.lock()
-        defer { NSString.sharedCacheLock.unlock() }
         if let cached = NSString.sharedCache.object(forKey: self) {
             return cached as String
         }
@@ -446,8 +444,6 @@ extension NSString {
 
     // Cache a value as String for self as key
     func cache(with val: String) {
-        NSString.sharedCacheLock.lock()
-        defer { NSString.sharedCacheLock.unlock() }
         let nsString = val as NSString
         NSString.sharedCache.setObject(nsString, forKey: self)
     }
