@@ -44,7 +44,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
     func variadicFunc(_ arg: Int, for key: String)  {
         variadicFuncCallCount += 1
         if let variadicFuncHandler = variadicFuncHandler {
-            return variadicFuncHandler(arg, key)
+            variadicFuncHandler(arg, key)
         }
         
     }

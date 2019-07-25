@@ -36,13 +36,17 @@ func applyMethodTemplate(name: String,
     let paramDeclsStr = params.compactMap{$0.render(with: "")}.joined(separator: ", ")
 
     if isInitializer {
-        let paramsAssign = params.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
-        template =
-        """
+        let paramsAssign = params.map { param in
+            return """
+                self.\(param.name) = \(param.name)
+            """
+            }.joined(separator: "\n")
+        template = """
+        
         \(String.required) \(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-            \(paramsAssign)
+        \(paramsAssign)
         }
-        """
+    """
     } else {
         let callCount = "\(identifier)\(String.callCountSuffix)"
         let handlerVarName = "\(identifier)\(String.handlerSuffix)"
@@ -52,15 +56,15 @@ func applyMethodTemplate(name: String,
         let suffixStr = suffix.isEmpty ? "" : "\(suffix) "
         let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-        template =
-        """
+        template = """
+        
         \(staticStr)var \(callCount) = 0
         \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
         \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
             \(callCount) += 1
-            \(handlerReturn)
+        \(handlerReturn)
         }
-        """
+    """
     }
     return template
 }

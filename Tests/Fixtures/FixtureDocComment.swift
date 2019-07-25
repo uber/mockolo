@@ -59,7 +59,7 @@ public class DocProtocolMock: DocProtocol {
     public func foo(arg: Bool, tag: Int)  {
         fooCallCount += 1
         if let fooHandler = fooHandler {
-            return fooHandler(arg, tag)
+            fooHandler(arg, tag)
         }
         
     }
@@ -68,7 +68,7 @@ public class DocProtocolMock: DocProtocol {
     public func bar(name: String, more: Float)  {
         barCallCount += 1
         if let barHandler = barHandler {
-            return barHandler(name, more)
+            barHandler(name, more)
         }
         
     }

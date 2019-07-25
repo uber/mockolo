@@ -90,6 +90,7 @@ public func generate(sourceDirs: [String]?,
     }
     
     log("Resolve inheritance and generate unique entity models...", level: .info)
+    
     generateUniqueModels(protocolMap: protocolMap,
                          annotatedProtocolMap: annotatedProtocolMap,
                          inheritanceMap: parentMocks,

@@ -38,7 +38,7 @@ class GenericFuncMock: GenericFunc {
     func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())  {
         sendEventsCallCount += 1
         if let sendEventsHandler = sendEventsHandler {
-            return sendEventsHandler(events, value, once, closure)
+            sendEventsHandler(events, value, once, closure)
         }
         
     }

@@ -28,9 +28,7 @@ func generateProcessedTypeMap(_ paths: [String],
         for filePath in paths {
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                if let content = try? String(contentsOfFile: filePath) {
-                    _ = generateProcessedModels(filePath, content: content, lock: lock, process: process)
-                }
+                    _ = generateProcessedModels(filePath, lock: lock, process: process)
                 semaphore?.signal()
             }
         }
@@ -38,23 +36,25 @@ func generateProcessedTypeMap(_ paths: [String],
         queue.sync(flags: .barrier) {}
     } else {
         for filePath in paths {
-            if let content = try? String(contentsOfFile: filePath) {
-                _ = generateProcessedModels(filePath, content: content, lock: nil, process: process)
-            }
+                _ = generateProcessedModels(filePath, lock: nil, process: process)
         }
     }
 }
 
 private func generateProcessedModels(_ path: String,
-                                     content: String,
                                      lock: NSLock?,
                                      process: @escaping ([Entity], [String]) -> ()) -> Bool {
     guard let content = try? String(contentsOfFile: path) else { return false }
+//    guard content.contains("public class") else { return false }
+
     let imports = findImportLines(content: content)
     
     if let topstructure = try? Structure(path: path) {
-        let results = topstructure.substructures.map { current -> Entity in
-            return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
+        let results = topstructure.substructures.compactMap { current -> Entity? in
+//            if current.accessControlLevel == "public" {
+                return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
+//            }
+//            return nil
         }
         
         lock?.lock()

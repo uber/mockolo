@@ -34,7 +34,7 @@ class FooMock: Foo {
     func update(arg: Int)  {
         updateCallCount += 1
         if let updateHandler = updateHandler {
-            return updateHandler(arg)
+            updateHandler(arg)
         }
         
     }
@@ -43,7 +43,7 @@ class FooMock: Foo {
     func update(arg: Float)  {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
-            return updateArgHandler(arg)
+            updateArgHandler(arg)
         }
         
     }
@@ -52,7 +52,7 @@ class FooMock: Foo {
     func display(param: String)  {
         displayCallCount += 1
         if let displayHandler = displayHandler {
-            return displayHandler(param)
+            displayHandler(param)
         }
         
     }
@@ -69,7 +69,7 @@ class BarMock: Bar {
     func update(arg: Int)  {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
-            return updateArgHandler(arg)
+            updateArgHandler(arg)
         }
         
     }
@@ -78,7 +78,7 @@ class BarMock: Bar {
     func display(param: String)  {
         displayParamCallCount += 1
         if let displayParamHandler = displayParamHandler {
-            return displayParamHandler(param)
+            displayParamHandler(param)
         }
         
     }
@@ -87,7 +87,7 @@ class BarMock: Bar {
     func update(arg: Float)  {
         updateCallCount += 1
         if let updateHandler = updateHandler {
-            return updateHandler(arg)
+            updateHandler(arg)
         }
         
     }
@@ -96,7 +96,7 @@ class BarMock: Bar {
     func display(param: Double)  {
         displayCallCount += 1
         if let displayHandler = displayHandler {
-            return displayHandler(param)
+            displayHandler(param)
         }
         
     }
@@ -113,7 +113,7 @@ class BazMock: Baz {
     func update(arg: Int)  {
         updateCallCount += 1
         if let updateHandler = updateHandler {
-            return updateHandler(arg)
+            updateHandler(arg)
         }
         
     }
@@ -122,7 +122,7 @@ class BazMock: Baz {
     func update(arg: Float)  {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
-            return updateArgHandler(arg)
+            updateArgHandler(arg)
         }
         
     }
@@ -131,7 +131,7 @@ class BazMock: Baz {
     func display(param: String)  {
         displayParamStringCallCount += 1
         if let displayParamStringHandler = displayParamStringHandler {
-            return displayParamStringHandler(param)
+            displayParamStringHandler(param)
         }
         
     }
@@ -140,7 +140,7 @@ class BazMock: Baz {
     func display(param: Double)  {
         displayCallCount += 1
         if let displayHandler = displayHandler {
-            return displayHandler(param)
+            displayHandler(param)
         }
         
     }
@@ -149,7 +149,7 @@ class BazMock: Baz {
     func display(param: Int)  {
         displayParamCallCount += 1
         if let displayParamHandler = displayParamHandler {
-            return displayParamHandler(param)
+            displayParamHandler(param)
         }
         
     }
@@ -158,7 +158,7 @@ class BazMock: Baz {
     func show(param: String)  {
         showCallCount += 1
         if let showHandler = showHandler {
-            return showHandler(param)
+            showHandler(param)
         }
         
     }

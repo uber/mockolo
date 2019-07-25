@@ -12,19 +12,21 @@ func update(arg: Int, some: Float) -> Array<String, Float>
 }
 """
 
-let duplicatesMock2 = """
+let duplicatesMock2 =
+"""
+
 class DuplicateFuncNamesMock: DuplicateFuncNames {
+    
     
     init() {
         
     }
-    
     var updateCallCount = 0
     var updateHandler: ((Int, Float) -> ())?
     func update(arg: Int, some: Float)  {
         updateCallCount += 1
         if let updateHandler = updateHandler {
-            return updateHandler(arg, some)
+            updateHandler(arg, some)
         }
         
     }
@@ -65,4 +67,5 @@ class DuplicateFuncNamesMock: DuplicateFuncNames {
         return Array<String, Float>()
     }
 }
+
 """

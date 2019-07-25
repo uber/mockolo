@@ -48,16 +48,20 @@ func applyClassTemplate(name: String,
             
             // Besides the default init, we want to provide an empty init block (unless the default init is empty)
             // since vars do not need to be set via init (since they all have get/set; see VariableTemplate for more detail)
-            extraInitBlock = "\(accessControlLevelDescription)init() {}"
-            paramsAssign = initParams.map { "self.\($0.name) = \($0.name)" }.joined(separator: "\n")
+            extraInitBlock = "    \(accessControlLevelDescription)init() {}"
+            paramsAssign = initParams.map { param in
+                return """
+                        self.\(param.name) = \(param.name)
+                """
+                }.joined(separator: "\n")
         }
         
-        initTemplate =
-        """
+        initTemplate = """
+        
         \(extraInitBlock)
-        \(accessControlLevelDescription)init(\(params)) {
-            \(paramsAssign)
-        }
+            \(accessControlLevelDescription)init(\(params)) {
+        \(paramsAssign)
+            }
         """
     } else {
         
@@ -74,10 +78,10 @@ func applyClassTemplate(name: String,
             extraInitBlock = "\(accessControlLevelDescription)init() {}"
             
             initTemplate =
-            """
+        """
             \(extraVarsNeeded)
             \(extraInitBlock)
-            """
+        """
         }
     }
     
@@ -87,13 +91,17 @@ func applyClassTemplate(name: String,
                 // this case will be handlded by typealiasWhitelist look up later
                 return nil
             }
-            
             if let ret = model.render(with: uniqueId, typeKeys: typeKeys) {
                 return (ret, model.offset)
             }
             return nil
         }
-        .sorted { $0.1 < $1.1 }
+        .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
+            if left.1 == right.1 {
+                return left.0 < right.0
+            }
+            return left.1 < right.1
+            }
         .map {$0.0}
         .joined(separator: "\n")
     
@@ -109,7 +117,7 @@ func applyClassTemplate(name: String,
     """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
-        \(typealiasTemplate)
+    \(typealiasTemplate)
         \(initTemplate)
         \(renderedEntities)
     }

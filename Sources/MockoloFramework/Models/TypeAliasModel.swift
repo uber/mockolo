@@ -71,6 +71,9 @@ struct TypeAliasModel: Model {
             acl = acl + " "
         }
         
-        return "\(acl)\(String.typealias) \(self.name) = \(self.type)"
+        let ret = """
+            \(acl)\(String.typealias) \(self.name) = \(self.type)
+        """
+        return ret
     }
 }
