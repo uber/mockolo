@@ -119,8 +119,7 @@ extension String {
         return displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
     
-    
-    func extract(offset: Int64, length: Int64) -> String {
+    public func extract(offset: Int64, length: Int64) -> String {
         let end = offset + length
         let start = offset
         let utf = self.utf8
@@ -133,6 +132,19 @@ extension String {
             let endIdx = utf.index(utf.startIndex, offsetBy: Int(end))
             let body = self[startIdx ..< endIdx]
             return String(body)
+        }
+        return ""
+    }
+}
+
+extension Data {
+    public func extract(offset: Int64, length: Int64) -> String {
+        let start = Int(offset)
+        let end = Int(offset + length)
+        
+        let subdata = self.subdata(in: start..<end)
+        if let ret = String(data: subdata, encoding: String.Encoding.utf8) {
+            return ret
         }
         return ""
     }
@@ -428,24 +440,31 @@ public extension Sequence {
 }
 
 
+class CacheValue {
+    var data: Data
+    init(data: Data) {
+        self.data = data
+    }
+}
+
 extension NSString {
     // Internal shared cache
     // Note: You can add, remove, and query items in the cache from different threads without having to lock the cache yourself.
     // Ref https://developer.apple.com/documentation/foundation/nscache?language=objc
-    private static var sharedCache = NSCache<NSString, NSString>()
+    private static var sharedCache = NSCache<NSString, CacheValue>()
 
     // Returns a cached value as String using self as key
-    func cached() -> String? {
+    func cached() -> Data? {
         if let cached = NSString.sharedCache.object(forKey: self) {
-            return cached as String
+            return (cached as CacheValue).data
         }
         return nil
     }
 
     // Cache a value as String for self as key
-    func cache(with val: String) {
-        let nsString = val as NSString
-        NSString.sharedCache.setObject(nsString, forKey: self)
+    func cache(with val: Data) {
+        let obj = CacheValue(data: val)
+        NSString.sharedCache.setObject(obj, forKey: self)
     }
 }
 

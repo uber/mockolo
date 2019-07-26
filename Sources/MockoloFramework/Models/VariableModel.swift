@@ -38,19 +38,22 @@ struct VariableModel: Model {
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
 
-            if let val = cacheKey.cached() {
-                return val
+            if cacheKey.cached() == nil {
+                if let utf8data = content.data(using: .utf8) {
+                    cacheKey.cache(with: utf8data)
+                }
             }
             
-            var ret = self.content.extract(offset: self.offset, length: self.length)
-            if !ret.contains(identifier),
-                let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
-                let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
-                ret = ret.replacingOccurrences(of: found, with: identifier)
+            let utf8data = cacheKey.cached()
+            if var ret = utf8data?.extract(offset: self.offset, length: self.length) {
+                if !ret.contains(identifier),
+                    let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
+                    let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
+                    ret = ret.replacingOccurrences(of: found, with: identifier)
+                }
+                return ret
             }
-            
-            cacheKey.cache(with: ret)
-            return ret
+            return nil
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,

@@ -120,10 +120,9 @@ private func generateProtcolMap(_ path: String,
     if annotatedOnly, !content.contains(annotation) {
         return false
     }
-    
+
     if let topstructure = try? Structure(path: path) {
         var results = [Entity]()
-        
         for current in topstructure.substructures {
             if current.isProtocol {
                 let metadata = current.annotationMetadata(with: annotation, in: content)

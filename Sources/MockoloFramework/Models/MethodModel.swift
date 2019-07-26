@@ -140,12 +140,14 @@ struct MethodModel: Model {
                 return nil
             }
             
-            if let val = cacheKey.cached() {
-                return val
+            if cacheKey.cached() == nil {
+                if let utf8data = content.data(using: .utf8) {
+                    cacheKey.cache(with: utf8data)
+                }
             }
 
-            let ret = self.content.extract(offset: self.offset, length: self.length)
-            cacheKey.cache(with: ret)
+            let utf8data = cacheKey.cached()
+            let ret = utf8data?.extract(offset: self.offset, length: self.length)
             return ret
         }
     

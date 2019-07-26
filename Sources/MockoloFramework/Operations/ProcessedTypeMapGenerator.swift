@@ -51,7 +51,8 @@ private func generateProcessedModels(_ path: String,
         let subs = topstructure.substructures
         let results = subs.compactMap { current -> Entity? in
 //            if current.accessControlLevel == "public" {
-                return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
+            
+            return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
 //            }
 //            return nil
         }
