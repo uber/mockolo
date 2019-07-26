@@ -165,10 +165,11 @@ extension Structure {
             "key.sourcefile": path
             ]).send())
     }
-    
-    func annotationMetadata(with annotation: String, in content: String) -> AnnotationMetadata? {
-        if let part = extractDocComment(content)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) {
-            guard part.contains(annotation) else { return nil }
+
+    func annotationMetadata(with annotation: Data, in data: Data) -> AnnotationMetadata? {
+        if let part = extractDocComment(data)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) {
+            
+            guard let rng = data.range(of: annotation) else { return nil }
             
             var ret = AnnotationMetadata()
             // Look up the typealias argument if any
@@ -193,16 +194,19 @@ extension Structure {
         return nil
     }
     
+
     
-    func extractDocComment(_ content: String) -> String? {
+    func extractDocComment(_ data: Data) -> String? {
+        
         if let len = dictionary["key.doclength"] as? Int64,
             let offset = dictionary["key.docoffset"] as? Int64 {
-            return content.extract(offset: offset, length: len)
+            return data.extract(offset: offset, length: len)
         }
         return nil
     }
     
-    func extractAttributes(_ content: String, filterOn: String? = nil) -> [String] {
+    
+    func extractAttributes(_ data: Data, filterOn: String? = nil) -> [String] {
         guard let attributeDict = attributes else {
             return []
         }
@@ -213,21 +217,22 @@ extension Structure {
                     return nil
                 }
                 
-                return extract(attribute, from: content)
+                return extract(attribute, from: data)
             }
             return nil
         }
+    
     }
     
     
-    func extract(_ source: [String: SourceKitRepresentable], from content: String) -> String {
+    func extract(_ source: [String: SourceKitRepresentable], from data: Data) -> String {
         if let offset = source[SwiftDocKey.offset.rawValue] as? Int64,
             let len = source[SwiftDocKey.length.rawValue] as? Int64 {
-            return content.extract(offset: offset, length: len)
+            return data.extract(offset: offset, length: len)
         }
         return ""
     }
-    
+
     
     /// The substructures of this structure.
     var substructures: [Structure] {

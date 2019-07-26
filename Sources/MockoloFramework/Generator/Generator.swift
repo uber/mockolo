@@ -17,8 +17,12 @@
 import Foundation
 import SourceKittenFramework
 
-/// Performs end to end mock generation flow
+enum InputError: Error {
+    case annotationError
+    case sourceFilesError
+}
 
+/// Performs end to end mock generation flow
 public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,
                      exclusionSuffixes: [String],
@@ -31,14 +35,24 @@ public func generate(sourceDirs: [String]?,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
                      onCompletion: @escaping (String) -> ()) throws {
-    assert(sourceDirs != nil || sourceFiles != nil)
+
+    guard let annotationData = annotation.data(using: .utf8) else {
+        log("Annotation is invalid", level: .error)
+        throw InputError.annotationError
+    }
+
+    guard sourceDirs != nil || sourceFiles != nil else {
+        log("Source files or directories do not exist", level: .error)
+        throw InputError.sourceFilesError
+    }
+
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
     var parentMocks = [String: Entity]()
     var annotatedProtocolMap = [String: Entity]()
     var protocolMap = [String: Entity]()
     var processedImportLines = [String: [String]]()
-    var pathToContentMap = [(String, String, Int64)]()
+    var pathToContentMap = [(String, Data, Int64)]()
     var resolvedEntities = [ResolvedEntity]()
     
     let maxConcurrentThreads = concurrencyLimit ?? 0
@@ -68,7 +82,7 @@ public func generate(sourceDirs: [String]?,
                         sourceFiles: sourceFiles,
                         exclusionSuffixes: exclusionSuffixes,
                         annotatedOnly: annotatedOnly,
-                        annotation: annotation,
+                        annotation: annotationData,
                         semaphore: sema,
                         queue: mockgenQueue) { (elements) in
                             elements.forEach { element in

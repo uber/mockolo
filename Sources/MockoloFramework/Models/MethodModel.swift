@@ -26,7 +26,6 @@ struct MethodModel: Model {
     let accessControlLevelDescription: String
     let attributes: [String]
     let staticKind: String
-    let content: String
     let genericTypeParams: [ParamModel]
     let params: [ParamModel]
     let handler: ClosureModel?
@@ -34,13 +33,15 @@ struct MethodModel: Model {
     let signatureComponents: [String]
     let isInitializer: Bool
     let suffix: String
+    let data: Data
+
     let cacheKey: NSString
 
     var modelType: ModelType {
         return .method
     }
     
-    init(_ ast: Structure, filepath: String, content: String, processed: Bool) {
+    init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
         // give the name part that we expect.
@@ -48,7 +49,7 @@ struct MethodModel: Model {
         let nameString = comps.removeFirst()
         self.filePath = filepath
 
-        self.content = content
+        self.data = data
         self.name = nameString
         self.type = ast.typeName == .unknownVal ? "" : ast.typeName
         self.staticKind = ast.isStaticMethod ? .static : ""
@@ -93,8 +94,8 @@ struct MethodModel: Model {
         // Sourcekit structure api doesn't provide info on throws/rethrows, so manually parse it here
         let suffixOffset = ast.nameOffset + ast.nameLength + 1
         let suffixLen = ast.offset + ast.length - suffixOffset
-        if suffixLen > 0, suffixOffset > ast.bodyOffset - 1{
-            let suffixPart = content.extract(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        if suffixLen > 0, suffixOffset > ast.bodyOffset - 1 {
+            let suffixPart = data.extract(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if suffixPart.hasPrefix("\(String.rethrows)") {
                 self.suffix = String.rethrows
             } else if suffixPart.hasPrefix("\(String.throws)") {
@@ -115,7 +116,7 @@ struct MethodModel: Model {
                                     returnType: ast.typeName,
                                     staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
-        self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
+        self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
         self.cacheKey = NSString(string: "\(filePath)_\(name)_\(type)_\(offset)_\(length)")
 
     }
@@ -141,9 +142,7 @@ struct MethodModel: Model {
             }
             
             if cacheKey.cached() == nil {
-                if let utf8data = content.data(using: .utf8) {
-                    cacheKey.cache(with: utf8data)
-                }
+                cacheKey.cache(with: self.data)
             }
 
             let utf8data = cacheKey.cached()

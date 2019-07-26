@@ -23,21 +23,21 @@ func generateProtocolMap(sourceDirs: [String]?,
                          sourceFiles: [String]?,
                          exclusionSuffixes: [String]? = nil,
                          annotatedOnly: Bool,
-                         annotation: String,
+                         annotation: Data,
                          semaphore: DispatchSemaphore?,
                          queue: DispatchQueue?,
                          process: @escaping ([Entity]) -> ()) {
     if let sourceDirs = sourceDirs {
         return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
-        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
+        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
     }
 }
 
 private func generateProtcolMap(dirs: [String],
                                 exclusionSuffixes: [String]? = nil,
                                 annotatedOnly: Bool,
-                                annotation: String,
+                                annotation: Data,
                                 semaphore: DispatchSemaphore?,
                                 queue: DispatchQueue?,
                                 process: @escaping ([Entity]) -> ()) {
@@ -75,7 +75,7 @@ private func generateProtcolMap(dirs: [String],
 private func generateProtcolMap(files: [String],
                                 exclusionSuffixes: [String]? = nil,
                                 annotatedOnly: Bool,
-                                annotation: String,
+                                annotation: Data,
                                 semaphore: DispatchSemaphore?,
                                 queue: DispatchQueue?,
                                 process: @escaping ([Entity]) -> ()) {
@@ -111,13 +111,14 @@ private func generateProtcolMap(files: [String],
 private func generateProtcolMap(_ path: String,
                                 exclusionSuffixes: [String]? = nil,
                                 annotatedOnly: Bool,
-                                annotation: String,
+                                annotation: Data,
                                 lock: NSLock?,
                                 process: @escaping ([Entity]) -> ()) -> Bool {
     
     guard path.shouldParse(with: exclusionSuffixes) else { return false }
-    guard let content = try? String(contentsOfFile: path) else { return false }
-    if annotatedOnly, !content.contains(annotation) {
+    guard let content = FileManager.default.contents(atPath: path) else { return false }
+    
+    if annotatedOnly, content.range(of: annotation) == nil {
         return false
     }
 
@@ -131,7 +132,7 @@ private func generateProtcolMap(_ path: String,
                 if !annotatedOnly || isAnnotated {
                     let node = Entity(name: current.name,
                                       filepath: path,
-                                      content: content,
+                                      data: content,
                                       ast: current,
                                       isAnnotated: isAnnotated,
                                       metadata: metadata?.typealiases,

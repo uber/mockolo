@@ -29,7 +29,7 @@ struct ResolvedEntity {
     
     func model() -> Model {
         return ClassModel(entity.ast,
-                          content: entity.content,
+                          data: entity.data,
                           identifier: key,
                           additionalAttributes: attributes,
                           needInit: !hasInit,
@@ -41,7 +41,7 @@ struct ResolvedEntity {
 
 struct ResolvedEntityContainer {
     let entity: ResolvedEntity
-    let imports: [(String, String, Int64)]
+    let imports: [(String, Data, Int64)]
 }
 
 
@@ -50,7 +50,7 @@ struct ResolvedEntityContainer {
 struct Entity {
     let name: String
     let filepath: String
-    let content: String
+    let data: Data
     let ast: Structure
     let isAnnotated: Bool
     let metadata: [String: String]?
@@ -62,7 +62,7 @@ struct Entity {
     
     func subModels() -> [Model] {
         return ast.substructures.compactMap { (child: Structure) -> Model? in
-            return model(for: child, filepath: filepath, content: content, processed: isProcessed)
+            return model(for: child, filepath: filepath, data: data, processed: isProcessed)
         }
     }
     
@@ -72,17 +72,17 @@ struct Entity {
         }
         
         return ast.substructures.compactMap { (child: Structure) -> [String]? in
-            return child.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+            return child.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
             }.flatMap {$0}
     }
     
-    func model(for element: Structure, filepath: String, content: String, processed: Bool = false) -> Model? {
+    func model(for element: Structure, filepath: String, data: Data, processed: Bool = false) -> Model? {
         if element.isVariable {
-            return VariableModel(element, filepath: filepath, content: content, processed: processed)
+            return VariableModel(element, filepath: filepath, data: data, processed: processed)
         } else if element.isMethod {
-            return MethodModel(element, filepath: filepath, content: content, processed: processed)
+            return MethodModel(element, filepath: filepath, data: data,  processed: processed)
         } else if element.isAssociatedType {
-            return TypeAliasModel(element, filepath: filepath, content: content, overrideTypes: metadata, processed: processed)
+            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: metadata, processed: processed)
         }
         
         return nil

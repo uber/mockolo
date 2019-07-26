@@ -11,7 +11,7 @@ struct VariableModel: Model {
     let staticKind: String
     var canBeInitParam: Bool
     let processed: Bool
-    let content: String
+    let data: Data
     var filePath: String
 
     let cacheKey: NSString
@@ -20,7 +20,7 @@ struct VariableModel: Model {
         return .variable
     }
     
-    init(_ ast: Structure, filepath: String, content: String, processed: Bool) {
+    init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
         name = ast.name
         type = ast.typeName
         offset = ast.range.offset
@@ -28,9 +28,9 @@ struct VariableModel: Model {
         canBeInitParam = ast.canBeInitParam
         staticKind = ast.isStaticVariable ? .static : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
-        attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
+        attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
         self.processed = processed
-        self.content = content
+        self.data = data
         self.filePath = filepath
         self.cacheKey = NSString(string: "\(filePath)_\(name)_\(type)_\(offset)_\(length)")
     }
@@ -39,9 +39,7 @@ struct VariableModel: Model {
         if processed {
 
             if cacheKey.cached() == nil {
-                if let utf8data = content.data(using: .utf8) {
-                    cacheKey.cache(with: utf8data)
-                }
+                cacheKey.cache(with: self.data)
             }
             
             let utf8data = cacheKey.cached()

@@ -33,7 +33,7 @@ struct ClassModel: Model {
     }
     
     init(_ ast: Structure,
-         content: String,
+         data: Data,
          identifier: String,
          additionalAttributes: [String],
          needInit: Bool,
@@ -48,7 +48,7 @@ struct ClassModel: Model {
         self.initParams = initParams
         self.offset = ast.offset
         var mutableAttributes = additionalAttributes
-        let curAttributes = ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+        let curAttributes = ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
         mutableAttributes.append(contentsOf: curAttributes)
         let attributeSet = Set(mutableAttributes)
         self.attribute = attributeSet.joined(separator: " ")
