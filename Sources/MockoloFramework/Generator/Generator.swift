@@ -58,7 +58,8 @@ public func generate(sourceDirs: [String]?,
     let maxConcurrentThreads = concurrencyLimit ?? 0
     let sema = maxConcurrentThreads <= 1 ? nil: DispatchSemaphore(value: maxConcurrentThreads)
     let mockgenQueue = maxConcurrentThreads == 1 ? nil: DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
-    
+
+    signpost_begin(name: "Process input")
     let t0 = CFAbsoluteTimeGetCurrent()
     log("Process input mock files...", level: .info)
     if let mockFilePaths = mockFilePaths {
@@ -73,10 +74,11 @@ public func generate(sourceDirs: [String]?,
                                     }
         }
     }
-    
+    signpost_end(name: "Process input")
     let t1 = CFAbsoluteTimeGetCurrent()
     log("Took", t1-t0, level: .verbose)
 
+    signpost_begin(name: "Generate protocol map")
     log("Process source files and generate an annotated/protocol map...", level: .info)
     generateProtocolMap(sourceDirs: sourceDirs,
                         sourceFiles: sourceFiles,
@@ -92,10 +94,11 @@ public func generate(sourceDirs: [String]?,
                                 }
                             }
     }
-    
+    signpost_end(name: "Generate protocol map")
     let t2 = CFAbsoluteTimeGetCurrent()
     log("Took", t2-t1, level: .verbose)
-    
+
+    signpost_begin(name: "Generate models")
     let typeKeyList = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
     var typeKeys = [String: String]()
     typeKeyList.forEach { (t: String) in
@@ -114,10 +117,11 @@ public func generate(sourceDirs: [String]?,
                             pathToContentMap.append(contentsOf: pathsToContents)
                             resolvedEntities.append(entity)
     })
-    
+    signpost_end(name: "Generate models")
     let t3 = CFAbsoluteTimeGetCurrent()
     log("Took", t3-t2, level: .verbose)
-    
+
+    signpost_begin(name: "Render models")
     log("Render models with templates...", level: .info)
     renderTemplates(entities: resolvedEntities,
                     typeKeys: typeKeys,
@@ -126,10 +130,11 @@ public func generate(sourceDirs: [String]?,
                     process: { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
     })
-    
+    signpost_end(name: "Render models")
     let t4 = CFAbsoluteTimeGetCurrent()
     log("Took", t4-t3, level: .verbose)
-    
+
+    signpost_begin(name: "Write results")
     log("Write the mock results and import lines to", outputFilePath, level: .info)
     let result = write(candidates: candidates,
                        processedImportLines: processedImportLines,
@@ -137,7 +142,7 @@ public func generate(sourceDirs: [String]?,
                        header: header,
                        macro: macro,
                        to: outputFilePath)
-    
+    signpost_end(name: "Write results")
     let t5 = CFAbsoluteTimeGetCurrent()
     log("Took", t5-t4, level: .verbose)
     
