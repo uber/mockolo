@@ -73,7 +73,7 @@ class Executor {
         depFileList = parser.add(option: "--depfilelist",
                                    shortName: "-deplist",
                                    kind: String.self,
-                                   usage: "Path to a file containing a list of dependent files (separated by a space) from modules this target depends on. ",
+                                   usage: "Path to a file containing a list of dependent files (separated by a new line) from modules this target depends on. ",
                                    completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles",
                                    shortName: "-mocks",
@@ -122,22 +122,26 @@ class Executor {
         guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         
         let srcDirs = arguments.get(sourceDirs)
-        var srcs = arguments.get(sourceFiles)
+        var srcs: [String]?
         // If source file list exists, source files value will be overriden (see the usage in setupArguments above)
         if let srcList = arguments.get(sourceFileList) {
             let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
             srcs = text?.components(separatedBy: "\n")
+        } else {
+            srcs = arguments.get(sourceFiles)
         }
 
         if srcDirs == nil, srcs == nil {
             fatalError("Missing source files or directories")
         }
         
-        var mockFilePaths = arguments.get(self.mockFilePaths)
+        var mockFilePaths: [String]?
         // If dep file list exists, mock filepaths value will be overriden (see the usage in setupArguments above)
         if let depList = arguments.get(self.depFileList) {
             let text = try? String(contentsOfFile: depList, encoding: String.Encoding.utf8)
-            mockFilePaths = text?.components(separatedBy: " ")
+            mockFilePaths = text?.components(separatedBy: "\n")
+        } else {
+             mockFilePaths = arguments.get(self.mockFilePaths)
         }
 
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
