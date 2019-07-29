@@ -3,6 +3,9 @@ import PackageDescription
 
 let package = Package(
     name: "Mockolo",
+    platforms: [
+        .macOS(.v10_14),
+    ],
     products: [
         .executable(name: "mockolo", targets: ["Mockolo"]),
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
