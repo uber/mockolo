@@ -117,7 +117,6 @@ private func generateProtcolMap(_ path: String,
     
     guard path.shouldParse(with: exclusionSuffixes) else { return false }
     guard let content = FileManager.default.contents(atPath: path) else { return false }
-    
     if annotatedOnly, content.range(of: annotation) == nil {
         return false
     }

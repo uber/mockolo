@@ -34,9 +34,6 @@ struct MethodModel: Model {
     let isInitializer: Bool
     let suffix: String
     let data: Data
-
-    let cacheKey: NSString
-
     var modelType: ModelType {
         return .method
     }
@@ -95,7 +92,7 @@ struct MethodModel: Model {
         let suffixOffset = ast.nameOffset + ast.nameLength + 1
         let suffixLen = ast.offset + ast.length - suffixOffset
         if suffixLen > 0, suffixOffset > ast.bodyOffset - 1 {
-            let suffixPart = data.extract(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if suffixPart.hasPrefix("\(String.rethrows)") {
                 self.suffix = String.rethrows
             } else if suffixPart.hasPrefix("\(String.throws)") {
@@ -117,8 +114,6 @@ struct MethodModel: Model {
                                     staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
-        self.cacheKey = NSString(string: "\(filePath)_\(name)_\(type)_\(offset)_\(length)")
-
     }
     
     var fullName: String {
@@ -141,12 +136,7 @@ struct MethodModel: Model {
                 return nil
             }
             
-            if cacheKey.cached() == nil {
-                cacheKey.cache(with: self.data)
-            }
-
-            let utf8data = cacheKey.cached()
-            let ret = utf8data?.extract(offset: self.offset, length: self.length)
+            let ret = self.data.toString(offset: offset, length: length)
             return ret
         }
     

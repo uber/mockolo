@@ -54,7 +54,7 @@ struct TypeAliasModel: Model {
             if typeLength < 0 {
                 self.type = String.any
             } else {
-                self.type = data.extract(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
+                self.type = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
             }
         }
     }

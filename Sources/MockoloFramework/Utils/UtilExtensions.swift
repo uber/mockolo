@@ -118,35 +118,23 @@ extension String {
     var displayableForType: String {
         return displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
-    
-    public func extract(offset: Int64, length: Int64) -> String {
-        let end = offset + length
-        let start = offset
-        let utf = self.utf8
-        if start >= 0 && length > 0 {
-            if end > utf.count {
-                print("No content found", start, length, end, utf.count)
-                return ""
-            }
-            let startIdx = utf.index(utf.startIndex, offsetBy: Int(start))
-            let endIdx = utf.index(utf.startIndex, offsetBy: Int(end))
-            let body = self[startIdx ..< endIdx]
-            return String(body)
-        }
-        return ""
-    }
 }
 
 extension Data {
-    public func extract(offset: Int64, length: Int64) -> String {
+    static public let `typealias` = "typealias:".data(using: String.Encoding.utf8)
+    
+    public func sliced(offset: Int64, length: Int64) -> Data? {
+        guard offset >= 0, length > 0 else { return nil }
         let start = Int(offset)
         let end = Int(offset + length)
-        
-        let subdata = self.subdata(in: start..<end)
-        if let ret = String(data: subdata, encoding: String.Encoding.utf8) {
-            return ret
-        }
-        return ""
+        guard end < self.count else { return nil }
+        let subdata = self[start..<end]
+        return subdata
+    }
+
+    public func toString(offset: Int64, length: Int64) -> String {
+        guard let subdata = sliced(offset: offset, length: length) else { return "" }
+        return String(data: subdata, encoding: .utf8) ?? ""
     }
 }
 
@@ -167,20 +155,21 @@ extension Structure {
     }
 
     func annotationMetadata(with annotation: Data, in data: Data) -> AnnotationMetadata? {
-        if let part = extractDocComment(data)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines) {
-            
-            guard let rng = data.range(of: annotation) else { return nil }
-            
-            var ret = AnnotationMetadata()
-            // Look up the typealias argument if any
-            let patComps = part.components(separatedBy: String.typealias)
-            if patComps.count > 1, let patVal = patComps.last, !patVal.isEmpty {
-                var patValStr = patVal
-                patValStr.removeFirst()
+        guard let extracted = data.sliced(offset: docOffset, length: docLength) else { return nil }
+        guard let rng = extracted.range(of: annotation) else { return nil }
+        var ret = AnnotationMetadata()
+        
+        // Look up the typealias argument if any
+        if let arg = Data.typealias,
+            let argRange = extracted.range(of: arg) {
+            let args = extracted[argRange.endIndex...]
+            let argsStr = String(data: args, encoding: .utf8)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+
+            if var patValStr = argsStr {
                 patValStr.removeLast()
                 let aliases = patValStr.components(separatedBy: String.annotationArgDelimiter).filter { !$0.isEmpty }
                 var aliasMap = [String: String]()
-                
+
                 aliases.forEach { (item: String) in
                     let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: CharacterSet.whitespaces)}
                     if let key = keyVal.first, let val = keyVal.last {
@@ -189,20 +178,8 @@ extension Structure {
                 }
                 ret.typealiases = aliasMap
             }
-            return ret
         }
-        return nil
-    }
-    
-
-    
-    func extractDocComment(_ data: Data) -> String? {
-        
-        if let len = dictionary["key.doclength"] as? Int64,
-            let offset = dictionary["key.docoffset"] as? Int64 {
-            return data.extract(offset: offset, length: len)
-        }
-        return nil
+        return ret
     }
     
     
@@ -228,7 +205,7 @@ extension Structure {
     func extract(_ source: [String: SourceKitRepresentable], from data: Data) -> String {
         if let offset = source[SwiftDocKey.offset.rawValue] as? Int64,
             let len = source[SwiftDocKey.length.rawValue] as? Int64 {
-            return data.extract(offset: offset, length: len)
+            return data.toString(offset: offset, length: len)
         }
         return ""
     }
@@ -398,7 +375,15 @@ extension Structure {
     var nameLength: Int64 {
         return dictionary[SwiftDocKey.nameLength.rawValue] as? Int64 ?? -1
     }
+
+    var docOffset: Int64 {
+        return dictionary["key.docoffset"] as? Int64 ?? -1
+    }
     
+    var docLength: Int64 {
+        return dictionary["key.doclength"] as? Int64 ?? -1
+    }
+
     var offset: Int64 {
         return dictionary[SwiftDocKey.offset.rawValue] as? Int64 ?? -1
     }
@@ -410,12 +395,6 @@ extension Structure {
         return dictionary[SwiftDocKey.bodyOffset.rawValue] as? Int64 ?? -1
     }
     
-    // This extracts the body of this structure, i.e. it doens't include the decl or signature
-    func extractBody(_ file: String) -> String {
-        let start = dictionary["key.bodyoffset"] as? Int64 ?? -1
-        let len = dictionary["key.bodylength"] as? Int64 ?? 0
-        return file.extract(offset: start, length: len)
-    }
 }
 
 public extension Sequence {
@@ -443,33 +422,3 @@ public extension Sequence {
         }
     }
 }
-
-
-class CacheValue {
-    var data: Data
-    init(data: Data) {
-        self.data = data
-    }
-}
-
-extension NSString {
-    // Internal shared cache
-    // Note: You can add, remove, and query items in the cache from different threads without having to lock the cache yourself.
-    // Ref https://developer.apple.com/documentation/foundation/nscache?language=objc
-    private static var sharedCache = NSCache<NSString, CacheValue>()
-
-    // Returns a cached value as String using self as key
-    func cached() -> Data? {
-        if let cached = NSString.sharedCache.object(forKey: self) {
-            return (cached as CacheValue).data
-        }
-        return nil
-    }
-
-    // Cache a value as String for self as key
-    func cache(with val: Data) {
-        let obj = CacheValue(data: val)
-        NSString.sharedCache.setObject(obj, forKey: self)
-    }
-}
-

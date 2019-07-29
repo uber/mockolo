@@ -193,7 +193,7 @@ func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
 func findImportLines(data: Data, offset: Int64?) -> [String] {
 
         if let offset = offset, offset > 0 {
-            let part = data.extract(offset: 0, length: offset)
+            let part = data.toString(offset: 0, length: offset)
             let lines = part.components(separatedBy: "\n")
             let importlines = lines.filter {$0.trimmingCharacters(in: CharacterSet.whitespaces).hasPrefix(String.import)}
             return importlines

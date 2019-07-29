@@ -262,6 +262,17 @@ class MockoloTests: XCTestCase {
             dstContent: rxVarMock)
     }
 
+    func testKrJp() {
+        verify(srcContent: krJp,
+               mockContent: krJpParentMock,
+               dstContent: krJpMock)
+    }
+
+    func testFamilyEmoji() {
+        verify(srcContent: familyEmoji,
+               mockContent: familyEmojiParentMock,
+               dstContent: familyEmojiMock)
+    }
 
     private func verify(srcContents: [String], mockContents: [String]? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
         var index = 0

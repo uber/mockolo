@@ -91,7 +91,3 @@ class RxVarMock: RxVar {
 """
 
 
-
-
-let asdf =
-"hello"
