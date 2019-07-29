@@ -19,7 +19,7 @@ import Foundation
 /// Combines a list of entities and import lines and header and writes the final output
 func write(candidates: [(String, Int64)],
            processedImportLines: [String: [String]],
-           pathToContentMap: [(String, String, Int64)],
+           pathToContentMap: [(String, Data, Int64)],
            header: String?,
            macro: String?,
            to outputFilePath: String) -> String {
@@ -29,7 +29,7 @@ func write(candidates: [(String, Int64)],
     var importLines = processedImportLines
     for (filepath, filecontent, offset) in pathToContentMap {
         if importLines[filepath] == nil {
-            importLines[filepath] = findImportLines(content: filecontent, offset: offset)
+            importLines[filepath] = findImportLines(data: filecontent, offset: offset)
         }
     }
     

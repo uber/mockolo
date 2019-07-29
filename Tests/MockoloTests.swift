@@ -157,7 +157,13 @@ class MockoloTests: XCTestCase {
         verify(srcContent: docComment1,
                dstContent: docCommentMock)
     }
-    
+
+    func testDocCommentParent() {
+        verify(srcContent: docComment1,
+               mockContent: docCommentParentMock,
+               dstContent: docCommentMock)
+    }
+
     func testDocComment2() {
         verify(srcContent: docComment2,
                dstContent: docCommentMock)
@@ -203,10 +209,15 @@ class MockoloTests: XCTestCase {
 
     func testEmojis() {
         verify(srcContent: emojiVars,
-               mockContent: nonSimpleVarsMock,
                dstContent: emojiVarsMock)
     }
-    
+
+    func testEmojisExtract() {
+        verify(srcContent: emojiVars,
+               mockContent: emojiParentMock,
+               dstContent: emojiCombMock)
+    }
+
     func testInitParams() {
         verify(srcContent: simpleInit,
                mockContent: simpleInitParentMock,
@@ -251,6 +262,17 @@ class MockoloTests: XCTestCase {
             dstContent: rxVarMock)
     }
 
+    func testKrJp() {
+        verify(srcContent: krJp,
+               mockContent: krJpParentMock,
+               dstContent: krJpMock)
+    }
+
+    func testFamilyEmoji() {
+        verify(srcContent: familyEmoji,
+               mockContent: familyEmojiParentMock,
+               dstContent: familyEmojiMock)
+    }
 
     private func verify(srcContents: [String], mockContents: [String]? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = nil) {
         var index = 0

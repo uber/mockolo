@@ -44,19 +44,17 @@ func generateProcessedTypeMap(_ paths: [String],
 private func generateProcessedModels(_ path: String,
                                      lock: NSLock?,
                                      process: @escaping ([Entity], [String]) -> ()) -> Bool {
-    guard let content = try? String(contentsOfFile: path) else { return false }
-//    guard content.contains("public class") else { return false }
+    
+    
+    guard let content = FileManager.default.contents(atPath: path) else { return false }
 
     if let topstructure = try? Structure(path: path) {
         let subs = topstructure.substructures
         let results = subs.compactMap { current -> Entity? in
-//            if current.accessControlLevel == "public" {
-                return Entity(name: current.name, filepath: path, content: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
-//            }
-//            return nil
+            return Entity(name: current.name, filepath: path, data: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
         }
         
-        let imports = findImportLines(content: content, offset: subs.first?.offset)
+        let imports = findImportLines(data: content, offset: subs.first?.offset)
         lock?.lock()
         process(results, imports)
         lock?.unlock()

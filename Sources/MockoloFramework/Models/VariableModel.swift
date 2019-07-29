@@ -11,16 +11,13 @@ struct VariableModel: Model {
     let staticKind: String
     var canBeInitParam: Bool
     let processed: Bool
-    let content: String
+    let data: Data
     var filePath: String
-
-    let cacheKey: NSString
-    
     var modelType: ModelType {
         return .variable
     }
     
-    init(_ ast: Structure, filepath: String, content: String, processed: Bool) {
+    init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
         name = ast.name
         type = ast.typeName
         offset = ast.range.offset
@@ -28,28 +25,20 @@ struct VariableModel: Model {
         canBeInitParam = ast.canBeInitParam
         staticKind = ast.isStaticVariable ? .static : ""
         accessControlLevelDescription = ast.accessControlLevelDescription
-        attributes = ast.hasAvailableAttribute ? ast.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
+        attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
         self.processed = processed
-        self.content = content
+        self.data = data
         self.filePath = filepath
-        self.cacheKey = NSString(string: "\(filePath)_\(name)_\(type)_\(offset)_\(length)")
     }
     
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
-
-            if let val = cacheKey.cached() {
-                return val
-            }
-            
-            var ret = self.content.extract(offset: self.offset, length: self.length)
+            var ret = self.data.toString(offset: self.offset, length: self.length)
             if !ret.contains(identifier),
                 let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
                 let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
                 ret = ret.replacingOccurrences(of: found, with: identifier)
             }
-            
-            cacheKey.cache(with: ret)
             return ret
         }
 

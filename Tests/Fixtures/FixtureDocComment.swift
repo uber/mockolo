@@ -17,7 +17,7 @@ import Foundation
  * in this comment.
  * \(String.mockAnnotation)
  */
-public protocol DocProtocol {
+public protocol DocProtocol: Doc {
     func foo(arg: Bool, tag: Int)
     func bar(name: String, more: Float)
 }
@@ -45,6 +45,17 @@ func bar(name: String, more: Float)
 }
 """
 
+let docCommentParentMock = """
+//
+//  Copyright © Some Co, Inc. All rights reserved.
+//
+
+import Foundation
+
+class DocMock: Doc {
+
+}
+"""
 let docCommentMock = """
 import Foundation
 

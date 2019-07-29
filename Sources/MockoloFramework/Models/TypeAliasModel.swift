@@ -28,14 +28,14 @@ struct TypeAliasModel: Model {
     var typeLength: Int64
     let accessControlLevelDescription: String
     let processed: Bool
-    let content: String
+    let data: Data
     let overrideTypes: [String: String]?
     
     var modelType: ModelType {
         return .typeAlias
     }
 
-    init(_ ast: Structure, filepath: String, content: String, overrideTypes: [String: String]?, processed: Bool) {
+    init(_ ast: Structure, filepath: String, data: Data, overrideTypes: [String: String]?, processed: Bool) {
         self.name = ast.name
         self.filePath = filepath
         self.offset = ast.offset
@@ -44,7 +44,7 @@ struct TypeAliasModel: Model {
         self.typeLength = ast.offset + ast.length - typeOffset
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.processed = processed
-        self.content = content
+        self.data = data
         self.overrideTypes = overrideTypes
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
@@ -54,7 +54,7 @@ struct TypeAliasModel: Model {
             if typeLength < 0 {
                 self.type = String.any
             } else {
-                self.type = content.extract(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
+                self.type = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
             }
         }
     }

@@ -25,7 +25,7 @@ func generateUniqueModels(protocolMap: [String: Entity],
                           typeKeys: [String: String]?,
                           semaphore: DispatchSemaphore?,
                           queue: DispatchQueue?,
-                          process: @escaping (ResolvedEntity, [(String, String, Int64)]) -> ()) {
+                          process: @escaping (ResolvedEntity, [(String, Data, Int64)]) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for (key, val) in annotatedProtocolMap {
@@ -96,7 +96,7 @@ func generateUniqueModels(key: String,
                           protocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
                           lock: NSLock? = nil,
-                          process: @escaping (ResolvedEntity, [(String, String, Int64)]) -> ()) {
+                          process: @escaping (ResolvedEntity, [(String, Data, Int64)]) -> ()) {
     let ret = generateUniqueModels(key: key, entity: entity, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
     lock?.lock()
