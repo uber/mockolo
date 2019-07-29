@@ -54,7 +54,6 @@ private func generateProcessedModels(_ path: String,
             return Entity(name: current.name, filepath: path, data: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
         }
         
-//        SharedCache.instance.cache(content, for: path as NSString)
         let imports = findImportLines(data: content, offset: subs.first?.offset)
         lock?.lock()
         process(results, imports)
