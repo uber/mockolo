@@ -27,6 +27,8 @@ class Executor {
     private var mockFilePaths: OptionArgument<[String]>!
     private var sourceDirs: OptionArgument<[String]>!
     private var sourceFiles: OptionArgument<[String]>!
+    private var sourceFileList: OptionArgument<String>!
+    private var depFileList: OptionArgument<String>!
     private var exclusionSuffixes: OptionArgument<[String]>!
     private var header: OptionArgument<String>!
     private var macro: OptionArgument<String>!
@@ -56,17 +58,27 @@ class Executor {
         sourceFiles = parser.add(option: "--sourcefiles",
                                  shortName: "-srcs",
                                  kind: [String].self,
-                                 usage: "List of source files (separated by a comma or a space) to generate mocks for. If no value is given, the --srcdir value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.",
+                                 usage: "List of source files (separated by a comma or a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored. ",
+                                 completion: .filename)
+        sourceFileList = parser.add(option: "--filelist",
+                                 shortName: "-f",
+                                 kind: String.self,
+                                 usage: "Path to a file containing a list of source file paths (delimited by a new line). If the --sourcedirs value exists, this will be ignored. ",
                                  completion: .filename)
         sourceDirs = parser.add(option: "--sourcedirs",
                                 shortName: "-s",
                                 kind: [String].self,
-                                usage: "Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.",
+                                usage: "Paths to the directories containing source files to generate mocks for. If the --filelist or --sourcefiles values exist, they will be ignored. ",
                                 completion: .filename)
+        depFileList = parser.add(option: "--depfilelist",
+                                   shortName: "-deplist",
+                                   kind: String.self,
+                                   usage: "Path to a file containing a list of dependent files (separated by a space) from modules this target depends on. ",
+                                   completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles",
                                    shortName: "-mocks",
                                    kind: [String].self,
-                                   usage: "List of mock files (separated by a comma or a space) from modules this target depends on. ",
+                                   usage: "List of mock files (separated by a comma or a space) from modules this target depends on. If the --depfilelist value exists, this will be ignored.",
                                    completion: .filename)
         outputFilePath = parser.add(option: "--destination",
                                     shortName: "-d",
@@ -79,11 +91,10 @@ class Executor {
                                        usage: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).",
                                        completion: .filename)
         annotation = parser.add(option: "--annotation",
-                                shortName: "-ant",
+                                shortName: "-a",
                                 kind: String.self,
                                 usage: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
         annotatedOnly = parser.add(option: "--annotated-only",
-                                   shortName: "-ant-only",
                                    kind: Bool.self,
                                    usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
         macro = parser.add(option: "--macro",
@@ -111,14 +122,26 @@ class Executor {
         guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         
         let srcDirs = arguments.get(sourceDirs)
-        let srcs = arguments.get(sourceFiles)
-        if sourceDirs == nil, srcs == nil {
-            fatalError("Missing source files or their directory")
+        var srcs = arguments.get(sourceFiles)
+        // If source file list exists, source files value will be overriden (see the usage in setupArguments above)
+        if let srcList = arguments.get(sourceFileList) {
+            let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
+            srcs = text?.components(separatedBy: "\n")
+        }
+
+        if srcDirs == nil, srcs == nil {
+            fatalError("Missing source files or directories")
         }
         
-        let exclusionSuffixes = arguments.get(self.exclusionSuffixes) ?? []
-        let mockFilePaths = arguments.get(self.mockFilePaths) ?? []
+        var mockFilePaths = arguments.get(self.mockFilePaths)
+        // If dep file list exists, mock filepaths value will be overriden (see the usage in setupArguments above)
+        if let depList = arguments.get(self.depFileList) {
+            let text = try? String(contentsOfFile: depList, encoding: String.Encoding.utf8)
+            mockFilePaths = text?.components(separatedBy: " ")
+        }
+
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
+        let exclusionSuffixes = arguments.get(self.exclusionSuffixes) ?? []
         let annotation = arguments.get(self.annotation) ?? String.mockAnnotation
         let header = arguments.get(self.header)
         let annotatedOnly = arguments.get(self.annotatedOnly) ?? false
