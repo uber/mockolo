@@ -22,8 +22,8 @@ This project may contain unstable APIs which may not be ready for general use. S
 ## System Requirements
 
 * Swift 4.2 or later
-* Xcode 10.1 or later
-* MacOS 10.13.6 or later
+* Xcode 10.2 or later
+* MacOS 10.14.3 or later
 * Support is included for the Swift Package Manager
 
 
