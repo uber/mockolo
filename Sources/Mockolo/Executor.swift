@@ -114,21 +114,32 @@ class Executor {
                              usage: "Xcode version.")
     }
     
+    private func fullPath(_ path: String) -> String {
+        if !path.hasPrefix("/") {
+            // The tool outputs no code if the paths are relative paths.
+            // Convert them to full paths using the current working directory
+            let cwd = FileManager.default.currentDirectoryPath
+            return cwd + "/" + path
+        }
+        return path
+    }
+
     /// Execute the command.
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
     func execute(with arguments: ArgumentParser.Result) {
 
-        guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
-        
-        let srcDirs = arguments.get(sourceDirs)
+        guard let outputArg = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
+        let outputFilePath = fullPath(outputArg)
+
+        let srcDirs = arguments.get(sourceDirs)?.map(fullPath)
         var srcs: [String]?
         // If source file list exists, source files value will be overriden (see the usage in setupArguments above)
         if let srcList = arguments.get(sourceFileList) {
             let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
-            srcs = text?.components(separatedBy: "\n")
+            srcs = text?.components(separatedBy: "\n").map(fullPath)
         } else {
-            srcs = arguments.get(sourceFiles)
+            srcs = arguments.get(sourceFiles)?.map(fullPath)
         }
 
         if srcDirs == nil, srcs == nil {
@@ -139,9 +150,9 @@ class Executor {
         // If dep file list exists, mock filepaths value will be overriden (see the usage in setupArguments above)
         if let depList = arguments.get(self.depFileList) {
             let text = try? String(contentsOfFile: depList, encoding: String.Encoding.utf8)
-            mockFilePaths = text?.components(separatedBy: "\n")
+            mockFilePaths = text?.components(separatedBy: "\n").map(fullPath)
         } else {
-             mockFilePaths = arguments.get(self.mockFilePaths)
+             mockFilePaths = arguments.get(self.mockFilePaths)?.map(fullPath)
         }
 
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
