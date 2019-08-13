@@ -115,13 +115,14 @@ class Executor {
     }
     
     private func fullPath(_ path: String) -> String {
-        if !path.hasPrefix("/") {
-            // The tool outputs no code if the paths are relative paths.
-            // Convert them to full paths using the current working directory
-            let cwd = FileManager.default.currentDirectoryPath
-            return cwd + "/" + path
+        if path.hasPrefix("/") {
+            return path
         }
-        return path
+        if path.hasPrefix("~") {
+            let home = FileManager.default.homeDirectoryForCurrentUser.path
+            return path.replacingOccurrences(of: "~", with: home, range: path.range(of: "~"))
+        }
+        return FileManager.default.currentDirectoryPath + "/" + path
     }
 
     /// Execute the command.
