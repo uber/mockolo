@@ -29,7 +29,7 @@ func main() {
          .build/release/mockolo -srcs File1.swift File2.swift -out result/Mocks.swift -mocks FooMocks.swift -exclude "Mocks" "Tests"
          */
         let args = try parser.parse(inputs)
-        command.execute(with: args)
+        command.mexecute(with: args)
     } catch {
         fatalError("Command-line pasing error (use --help for help): \(error)")
     }

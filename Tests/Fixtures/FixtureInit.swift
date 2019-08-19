@@ -18,7 +18,7 @@ public class HasInitMock: HasInit {
     required public init(arg: String) {
         self.arg = arg
     }
-    var numSetCallCount = 0
+    public var numSetCallCount = 0
     var underlyingNum: Int = 0
     public var num: Int {
         get {
@@ -29,7 +29,7 @@ public class HasInitMock: HasInit {
             numSetCallCount += 1
         }
     }
-    var rateSetCallCount = 0
+    public var rateSetCallCount = 0
     var underlyingRate: Double = 0.0
     public var rate: Double {
         get {
@@ -64,7 +64,7 @@ public class ParentMock: Parent {
         self.rate = rate
     }
     
-    var numSetCallCount = 0
+    public var numSetCallCount = 0
     var underlyingNum: Int = 0
     public var num: Int {
         get {
@@ -76,7 +76,7 @@ public class ParentMock: Parent {
         }
     }
     
-    var rateSetCallCount = 0
+    public var rateSetCallCount = 0
     var underlyingRate: Double = 0.0
     public var rate: Double {
         get {
@@ -101,7 +101,7 @@ public class CurrentMock: Current {
         self.num = num
         self.rate = rate
     }
-    var titleSetCallCount = 0
+    public var titleSetCallCount = 0
     var underlyingTitle: String = ""
     public var title: String {
         get {
@@ -112,7 +112,7 @@ public class CurrentMock: Current {
             titleSetCallCount += 1
         }
     }
-    var numSetCallCount = 0
+    public var numSetCallCount = 0
     var underlyingNum: Int = 0
     public var num: Int {
         get {
@@ -123,7 +123,7 @@ public class CurrentMock: Current {
             numSetCallCount += 1
         }
     }
-    var rateSetCallCount = 0
+    public var rateSetCallCount = 0
     var underlyingRate: Double = 0.0
     public var rate: Double {
         get {

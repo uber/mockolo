@@ -184,4 +184,64 @@ class Executor {
             fatalError("Generation error: \(error)")
         }
     }
+    
+    
+    func mexecute(with arguments: ArgumentParser.Result) {
+        
+        let root =  "/Users/ellie/uber/ios" // "/Users/ellieshin/Developer/uber/ios" //"/Users/ellie/Fuber/ios"
+        let outputFilePath = root + "/result.swift"
+        //           guard let outputFilePath = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
+        
+        let srcDirs = [root + "/apps/iphone-helix/src/Uber", root + "/libraries"] //arguments.get(sourceDirs)
+        var srcs: [String]?
+        // If source file list exists, source files value will be overriden (see the usage in setupArguments above)
+        if let srcList = arguments.get(sourceFileList) {
+            let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
+            srcs = text?.components(separatedBy: "\n")
+        } else {
+            srcs = arguments.get(sourceFiles)
+        }
+        
+        if srcDirs == nil, srcs == nil {
+            fatalError("Missing source files or directories")
+        }
+        
+        var mockFilePaths: [String]?
+        // If dep file list exists, mock filepaths value will be overriden (see the usage in setupArguments above)
+        if let depList = arguments.get(self.depFileList) {
+            let text = try? String(contentsOfFile: depList, encoding: String.Encoding.utf8)
+            mockFilePaths = text?.components(separatedBy: "\n")
+        } else {
+            mockFilePaths = arguments.get(self.mockFilePaths)
+        }
+        
+        let concurrencyLimit = arguments.get(self.concurrencyLimit)
+        let exclusionSuffixes = ["Test", "Tests", "Mock", "Mocks", "Images", "Strings", "Model", "Models", "Service", "Services"] //arguments.get(self.exclusionSuffixes) ?? []
+        let annotation = "@CreateMock"//arguments.get(self.annotation) ?? String.mockAnnotation
+        let header = arguments.get(self.header)
+        let annotatedOnly = arguments.get(self.annotatedOnly) ?? false
+        let loggingLevel = 3//arguments.get(self.loggingLevel) ?? 0
+        let macro = arguments.get(self.macro)
+        
+        do {
+            try generate(sourceDirs: srcDirs,
+                         sourceFiles: srcs,
+                         exclusionSuffixes: exclusionSuffixes,
+                         mockFilePaths: mockFilePaths,
+                         annotatedOnly: annotatedOnly,
+                         annotation: annotation,
+                         header: header,
+                         macro: macro,
+                         to: outputFilePath,
+                         loggingLevel: loggingLevel,
+                         concurrencyLimit: concurrencyLimit,
+                         onCompletion: { _ in
+                            log("Done. Exiting program.", level: .info)
+                            exit(0)
+            })
+        } catch {
+            fatalError("Generation error: \(error)")
+        }
+    }
 }
+

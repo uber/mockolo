@@ -124,7 +124,7 @@ public class BarMock: Bar {
     public init(talk: Int = 0) {
         self.talk = talk
     }
-    var talkSetCallCount = 0
+    public var talkSetCallCount = 0
     var underlyingTalk: Int = 0
     public var talk: Int {
         get {
@@ -143,7 +143,7 @@ public class FooMock: Foo {
     public init(talk: Int = 0) {
         self.talk = talk
     }
-    var talkSetCallCount = 0
+    public var talkSetCallCount = 0
     var underlyingTalk: Int = 0
     public var talk: Int {
         get {
@@ -154,7 +154,7 @@ public class FooMock: Foo {
             talkSetCallCount += 1
         }
     }
-    var talkDismissCallCount = 0
+    public var talkDismissCallCount = 0
     public var talkDismissHandler: ((Bool) -> ())?
     public func talk(_ dismiss: Bool)  {
         talkDismissCallCount += 1
