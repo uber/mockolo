@@ -72,7 +72,7 @@ public class FooMock: Foo {
     public init() {
         
     }
-    var customizeCallCount = 0
+    public var customizeCallCount = 0
     public var customizeHandler: ((String?) -> ())?
     public func customize(text: String?)  {
         customizeCallCount += 1
@@ -81,7 +81,7 @@ public class FooMock: Foo {
         }
         
     }
-    var customizeTextCallCount = 0
+    public var customizeTextCallCount = 0
     public var customizeTextHandler: ((String?, UIColor?) -> ())?
     public func customize(text: String?, textColor: UIColor?)  {
         customizeTextCallCount += 1
@@ -90,7 +90,7 @@ public class FooMock: Foo {
         }
         
     }
-    var customizeTextTextColorCallCount = 0
+    public var customizeTextTextColorCallCount = 0
     public var customizeTextTextColorHandler: ((String?, UIColor?, String?) -> ())?
     public func customize(text: String?, textColor: UIColor?, loadId: String?)  {
         customizeTextTextColorCallCount += 1

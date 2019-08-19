@@ -21,7 +21,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
     public init() {
         
     }
-    var removeCallCount = 0
+    public var removeCallCount = 0
     public var removeHandler: ((Int) -> ())?
     public func remove(_ arg: Int)  {
         removeCallCount += 1
@@ -30,7 +30,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var removeArgCallCount = 0
+    public var removeArgCallCount = 0
     public var removeArgHandler: ((String) -> ())?
     public func remove(_ arg: String)  {
         removeArgCallCount += 1
@@ -39,7 +39,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var removeArgFloatCallCount = 0
+    public var removeArgFloatCallCount = 0
     public var removeArgFloatHandler: ((Float) -> ())?
     public func remove(_ arg: Float)  {
         removeArgFloatCallCount += 1
@@ -48,7 +48,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var removeArgDoubleCallCount = 0
+    public var removeArgDoubleCallCount = 0
     public var removeArgDoubleHandler: ((Double) -> ())?
     public func remove(_ arg: Double)  {
         removeArgDoubleCallCount += 1
@@ -57,7 +57,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var pushCallCount = 0
+    public var pushCallCount = 0
     public var pushHandler: ((Double, Int, Float?) -> ())?
     public func push(state: Double, attachTransition: Int, detachTransition: Float?)  {
         pushCallCount += 1
@@ -66,7 +66,7 @@ public class SimpleDuplicateMock: SimpleDuplicate {
         }
         
     }
-    var pushStateCallCount = 0
+    public var pushStateCallCount = 0
     public var pushStateHandler: ((Double, Float, Int, Float?) -> ())?
     public func push(state: Double, flag: Float, attachTransition: Int, detachTransition: Float?)  {
         pushStateCallCount += 1

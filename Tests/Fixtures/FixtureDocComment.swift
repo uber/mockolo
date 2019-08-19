@@ -65,7 +65,7 @@ public class DocProtocolMock: DocProtocol {
         
     }
     
-    var fooCallCount = 0
+    public var fooCallCount = 0
     public var fooHandler: ((Bool, Int) -> ())?
     public func foo(arg: Bool, tag: Int)  {
         fooCallCount += 1
@@ -74,7 +74,7 @@ public class DocProtocolMock: DocProtocol {
         }
         
     }
-    var barCallCount = 0
+    public var barCallCount = 0
     public var barHandler: ((String, Float) -> ())?
     public func bar(name: String, more: Float)  {
         barCallCount += 1
