@@ -39,7 +39,7 @@ func applyVariableTemplate(name: String,
 
     let template = """
     
-    \(staticStr)var \(underlyingSetCallCount) = 0
+    \(acl)\(staticStr)var \(underlyingSetCallCount) = 0
     \(staticStr)var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
     \(acl)\(staticStr)var \(name): \(typeName) {
         get {
@@ -79,7 +79,7 @@ func applyRxVariableTemplate(name: String,
         let template = """
         
         \(staticStr)private var \(whichSubject) = 0
-        \(staticStr)var \(underlyingSetCallCount) = 0
+        \(acl)\(staticStr)var \(underlyingSetCallCount) = 0
         \(staticStr)var \(publishSubjectName) = \(publishSubjectType)() { didSet { \(underlyingSetCallCount) += 1 } }
         \(staticStr)var \(replaySubjectName) = \(replaySubjectType).create(bufferSize: 1) { didSet { \(underlyingSetCallCount) += 1 } }
         \(staticStr)var \(behaviorSubjectName): \(behaviorSubjectType)! { didSet { \(underlyingSetCallCount) += 1 } }

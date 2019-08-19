@@ -28,7 +28,7 @@ func generateProcessedTypeMap(_ paths: [String],
         for filePath in paths {
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                    _ = generateProcessedModels(filePath, lock: lock, process: process)
+                generateProcessedModels(filePath, lock: lock, process: process)
                 semaphore?.signal()
             }
         }
@@ -36,19 +36,21 @@ func generateProcessedTypeMap(_ paths: [String],
         queue.sync(flags: .barrier) {}
     } else {
         for filePath in paths {
-            _ = generateProcessedModels(filePath, lock: nil, process: process)
+            generateProcessedModels(filePath, lock: nil, process: process)
         }
     }
 }
 
 private func generateProcessedModels(_ path: String,
                                      lock: NSLock?,
-                                     process: @escaping ([Entity], [String]) -> ()) -> Bool {
+                                     process: @escaping ([Entity], [String]) -> ()) {
     
-    
-    guard let content = FileManager.default.contents(atPath: path) else { return false }
+    guard let content = FileManager.default.contents(atPath: path) else {
+        fatalError("Retrieving contents of \(path) failed")
+    }
 
-    if let topstructure = try? Structure(path: path) {
+    do {
+        let topstructure = try Structure(path: path)
         let subs = topstructure.substructures
         let results = subs.compactMap { current -> Entity? in
             return Entity(name: current.name, filepath: path, data: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
@@ -58,7 +60,7 @@ private func generateProcessedModels(_ path: String,
         lock?.lock()
         process(results, imports)
         lock?.unlock()
-        return true
+    } catch {
+        fatalError(error.localizedDescription)
     }
-    return false
 }
