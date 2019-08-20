@@ -3,7 +3,7 @@ import SourceKittenFramework
 
 struct VariableModel: Model {
     var name: String
-    var type: String
+    var type: Type
     var offset: Int64
     var length: Int64
     let accessControlLevelDescription: String
@@ -19,7 +19,7 @@ struct VariableModel: Model {
     
     init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
         name = ast.name
-        type = ast.typeName
+        type = Type(ast.typeName)
         offset = ast.range.offset
         length = ast.range.length
         canBeInitParam = ast.canBeInitParam
@@ -43,14 +43,14 @@ struct VariableModel: Model {
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,
-                                               typeName: type,
+                                               type: type,
                                                typeKeys: typeKeys,
                                                staticKind: staticKind,
                                                accessControlLevelDescription: accessControlLevelDescription) {
             return rxVar
         }
         return applyVariableTemplate(name: identifier,
-                                     typeName: type,
+                                     type: type,
                                      typeKeys: typeKeys, 
                                      staticKind: staticKind,
                                      accessControlLevelDescription: accessControlLevelDescription)

@@ -18,19 +18,21 @@ import Foundation
 import SourceKittenFramework
 
 func applyVariableTemplate(name: String,
-                           typeName: String,
+                           type: Type,
                            typeKeys: [String: String]?,
                            staticKind: String,
                            accessControlLevelDescription: String) -> String {
+
     let underlyingName = "\(String.underlyingVarPrefix)\(name.capitlizeFirstLetter)"
     let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
-    let underlyingVarDefaultVal = processDefaultVal(typeName: typeName, typeKeys: typeKeys) ?? ""
+    let underlyingVarDefaultVal = type.defaultVal(with: typeKeys) ?? ""
     
-    var underlyingType = typeName
+    var underlyingType = type.typeName
     if underlyingVarDefaultVal.isEmpty {
-        underlyingType = typeName.forceUnwrappedType
+        underlyingType = type.forceUnwrapped
     }
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
+    let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
 
     var acl = accessControlLevelDescription
     if !acl.isEmpty {
@@ -41,13 +43,11 @@ func applyVariableTemplate(name: String,
     
     \(acl)\(staticStr)var \(underlyingSetCallCount) = 0
     \(staticStr)var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
-    \(acl)\(staticStr)var \(name): \(typeName) {
-        get {
-            return \(underlyingName)
-        }
+    \(acl)\(staticStr)var \(name): \(type.typeName) {
+        get { return \(underlyingName) }
         set {
             \(underlyingName) = newValue
-            \(underlyingSetCallCount) += 1
+            \(setCallCountStmt)
         }
     }
 """
@@ -55,10 +55,11 @@ func applyVariableTemplate(name: String,
 }
 
 func applyRxVariableTemplate(name: String,
-                             typeName: String,
+                             type: Type,
                              typeKeys: [String: String]?,
                              staticKind: String,
                              accessControlLevelDescription: String) -> String? {
+    let typeName = type.typeName
     if let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {
         let typeParamStr = typeName[range.upperBound..<lastIdx]
         
@@ -72,18 +73,19 @@ func applyRxVariableTemplate(name: String,
         let replaySubjectName = "\(name)\(String.replaySubject)"
         let replaySubjectType = "\(String.replaySubject)<\(typeParamStr)>"
         let underlyingObservableName = "\(name)\(String.rx)\(String.subjectSuffix)"
-        let underlyingObservableType = typeName.substring(to: typeName.index(after: lastIdx))
+        let underlyingObservableType = typeName[typeName.startIndex..<typeName.index(after: lastIdx)]
         let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-        
+        let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
+
         let template = """
         
         \(staticStr)private var \(whichSubject) = 0
         \(acl)\(staticStr)var \(underlyingSetCallCount) = 0
-        \(staticStr)var \(publishSubjectName) = \(publishSubjectType)() { didSet { \(underlyingSetCallCount) += 1 } }
-        \(staticStr)var \(replaySubjectName) = \(replaySubjectType).create(bufferSize: 1) { didSet { \(underlyingSetCallCount) += 1 } }
-        \(staticStr)var \(behaviorSubjectName): \(behaviorSubjectType)! { didSet { \(underlyingSetCallCount) += 1 } }
-        \(staticStr)var \(underlyingObservableName): \(underlyingObservableType)! { didSet { \(underlyingSetCallCount) += 1 } }
+        \(acl)\(staticStr)var \(publishSubjectName) = \(publishSubjectType)() { didSet { \(setCallCountStmt) } }
+        \(acl)\(staticStr)var \(replaySubjectName) = \(replaySubjectType).create(bufferSize: 1) { didSet { \(setCallCountStmt) } }
+        \(acl)\(staticStr)var \(behaviorSubjectName): \(behaviorSubjectType)! { didSet { \(setCallCountStmt) } }
+        \(acl)\(staticStr)var \(underlyingObservableName): \(underlyingObservableType)! { didSet { \(setCallCountStmt) } }
         \(acl)\(staticStr)var \(name): \(typeName) {
             get {
                 if \(whichSubject) == 0 {

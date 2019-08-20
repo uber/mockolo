@@ -19,45 +19,42 @@ import SourceKittenFramework
 
 struct ParamModel: Model {
     var name: String
-    var offset: Int64 = .max
-    var type: String
+    var offset: Int64
+    var length: Int64
+    var type: Type
     let label: String
     let isGeneric: Bool
     let isInitializer: Bool
-
+    let data: Data
+    let isVariadic: Bool
+    
     var modelType: ModelType {
         return .parameter
     }
     
-
-    init(_ ast: Structure, label: String = "", isGeneric: Bool = false, isInitializer: Bool = false) {
+    init(_ ast: Structure, label: String = "", offset: Int64, length: Int64, data: Data, isGeneric: Bool = false, isInitializer: Bool = false) {
         self.name = ast.name
+        self.offset = offset
+        self.length = length
+        self.data = data
+        // Sourcekit doesn't specify if a func arg is variadic, so look ahead for the following characters to  determine.
+        let lookahead = data.toString(offset: offset + length, length: 3)
+        self.isVariadic = lookahead == "..."
         self.isGeneric = isGeneric
         self.isInitializer = isInitializer
-        self.type = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : ast.typeName
+        let typeArg = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : (isVariadic ? ast.typeName + "..." : ast.typeName)
+        self.type = Type(typeArg)
         self.label = ast.name != label ? label: ""
     }
 
     var asVarDecl: String? {
         if self.isInitializer {
-            assert(!type.isEmpty && type != .unknownVal)
-            let vardecl =
-            """
-            private var \(name): \(type.forceUnwrappedType)
-            """
-            return vardecl
+            return applyVarTemplate(name: name, type: type)
         }
         return nil
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        var result = name
-        if !label.isEmpty {
-            result = "\(label) \(name)"
-        }
-        if !type.isEmpty, type != .unknownVal {
-            result = "\(result): \(type)"
-        }
-        return result
+        return applyParamTemplate(name: name, label: label, type: type)
     }
 }

@@ -54,11 +54,12 @@ func generateUniqueModels(key: String,
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
     let processedElements = processedModels.compactMap { (element: Model) -> (String, Model)? in
-        if let rng = element.name.range(of: String.setCallCountSuffix) {
-            return (element.name.substring(to: rng.lowerBound), element)
+        let name = element.name
+        if let rng = name.range(of: String.setCallCountSuffix) {
+            return (String(name[name.startIndex..<rng.lowerBound]), element)
         }
-        if let rng = element.name.range(of: String.callCountSuffix) {
-            return (element.name.substring(to: rng.lowerBound), element)
+        if let rng = name.range(of: String.callCountSuffix) {
+            return (String(name[name.startIndex..<rng.lowerBound]), element)
         }
         return nil
     }

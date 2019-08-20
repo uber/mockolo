@@ -35,20 +35,22 @@ func applyClassTemplate(name: String,
         if let initParams = initParams, !initParams.isEmpty {
             params = initParams
                 .map { (element: Model) -> String in
-                    if let val = processDefaultVal(typeName: element.type, typeKeys: typeKeys, initParam: true), !val.isEmpty {
-                        return "\(element.name): \(element.type) = \(val)"
+                    if let val =  element.type.defaultVal(with: typeKeys, isInitParam: true), !val.isEmpty {
+                        return "\(element.name): \(element.type.typeName) = \(val)"
                     }
                     var prefix = ""
-                    if element.type.contains(String.closureArrow) {
-                        prefix = String.escaping + " "
+                    if element.type.hasClosure {
+                        if !element.type.isOptional {
+                            prefix = String.escaping + " "
+                        }
                     }
-                    return "\(element.name): \(prefix)\(element.type)"
+                    return "\(element.name): \(prefix)\(element.type.typeName)"
                 }
                 .joined(separator: ", ")
             
             // Besides the default init, we want to provide an empty init block (unless the default init is empty)
             // since vars do not need to be set via init (since they all have get/set; see VariableTemplate for more detail)
-            extraInitBlock = "    \(accessControlLevelDescription)init() {}"
+            extraInitBlock = "    \(accessControlLevelDescription)init() { \(String.doneInit) = true }"
             paramsAssign = initParams.map { param in
                 return """
                         self.\(param.name) = \(param.name)
@@ -57,10 +59,10 @@ func applyClassTemplate(name: String,
         }
         
         initTemplate = """
-        
         \(extraInitBlock)
             \(accessControlLevelDescription)init(\(params)) {
         \(paramsAssign)
+                \(String.doneInit) = true
             }
         """
     } else {
@@ -75,7 +77,7 @@ func applyClassTemplate(name: String,
                 .compactMap { ($0 as? ParamModel)?.asVarDecl }
                 .joined(separator: "\n")
 
-            extraInitBlock = "\(accessControlLevelDescription)init() {}"
+            extraInitBlock = "\(accessControlLevelDescription)init() { \(String.doneInit) = true }"
             
             initTemplate =
         """
@@ -87,8 +89,11 @@ func applyClassTemplate(name: String,
     
     let renderedEntities = entities
         .compactMap { (uniqueId: String, model: Model) -> (String, Int64)? in
-            if model.modelType == .typeAlias, let val = typealiasWhitelist?[model.name] {
+            if model.modelType == .typeAlias, let _ = typealiasWhitelist?[model.name] {
                 // this case will be handlded by typealiasWhitelist look up later
+                return nil
+            }
+            if model.modelType == .variable, model.name == String.doneInit {
                 return nil
             }
             if let ret = model.render(with: uniqueId, typeKeys: typeKeys) {
@@ -118,6 +123,7 @@ func applyClassTemplate(name: String,
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
     \(typealiasTemplate)
+        private var \(String.doneInit) = false
         \(initTemplate)
         \(renderedEntities)
     }
