@@ -20,7 +20,7 @@ public class NonSimpleVarsMock: NonSimpleVars {
     public init(dict: Dictionary<String, Int> = Dictionary<String, Int>()) {
         self.dict = dict
     }
-    var dictSetCallCount = 0
+    public var dictSetCallCount = 0
     var underlyingDict: Dictionary<String, Int> = Dictionary<String, Int>()
     public var dict: Dictionary<String, Int> {
         get {

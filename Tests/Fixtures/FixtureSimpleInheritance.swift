@@ -27,7 +27,7 @@ public class simpleChildMock: simpleChild {
         self.number = number
     }
     
-    var nameSetCallCount = 0
+    public var nameSetCallCount = 0
     var underlyingName: String = ""
     public var name: String {
         get {
@@ -38,7 +38,7 @@ public class simpleChildMock: simpleChild {
             nameSetCallCount += 1
         }
     }
-    var fooCallCount = 0
+    public var fooCallCount = 0
     public var fooHandler: (() -> ())?
     public func foo()  {
         fooCallCount += 1
@@ -47,7 +47,7 @@ public class simpleChildMock: simpleChild {
         }
         
     }
-    var numberSetCallCount = 0
+    public var numberSetCallCount = 0
     var underlyingNumber: Int = 0
     public var number: Int {
         get {
@@ -58,7 +58,7 @@ public class simpleChildMock: simpleChild {
             numberSetCallCount += 1
         }
     }
-    var barCallCount = 0
+    public var barCallCount = 0
     public var barHandler: ((Double) -> (Float?))?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1
@@ -75,7 +75,7 @@ public class simpleParentMock: simpleParent {
         self.number = number
     }
     
-    var numberSetCallCount = 0
+    public var numberSetCallCount = 0
     var underlyingNumber: Int = 0
     public var number: Int {
         get {
@@ -86,7 +86,7 @@ public class simpleParentMock: simpleParent {
             numberSetCallCount += 1
         }
     }
-    var barCallCount = 0
+    public var barCallCount = 0
     public var barHandler: ((Double) -> (Float?))?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1

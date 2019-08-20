@@ -58,7 +58,7 @@ func applyMethodTemplate(name: String,
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         template = """
         
-        \(staticStr)var \(callCount) = 0
+        \(acl)\(staticStr)var \(callCount) = 0
         \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
         \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
             \(callCount) += 1
