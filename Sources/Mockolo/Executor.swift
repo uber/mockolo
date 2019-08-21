@@ -138,7 +138,7 @@ class Executor {
         // If source file list exists, source files value will be overriden (see the usage in setupArguments above)
         if let srcList = arguments.get(sourceFileList) {
             let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
-            srcs = text?.components(separatedBy: "\n").map(fullPath)
+            srcs = text?.components(separatedBy: "\n").filter{!$0.isEmpty}.map(fullPath)
         } else {
             srcs = arguments.get(sourceFiles)?.map(fullPath)
         }
@@ -151,7 +151,7 @@ class Executor {
         // If dep file list exists, mock filepaths value will be overriden (see the usage in setupArguments above)
         if let depList = arguments.get(self.depFileList) {
             let text = try? String(contentsOfFile: depList, encoding: String.Encoding.utf8)
-            mockFilePaths = text?.components(separatedBy: "\n").map(fullPath)
+            mockFilePaths = text?.components(separatedBy: "\n").filter{!$0.isEmpty}.map(fullPath)
         } else {
              mockFilePaths = arguments.get(self.mockFilePaths)?.map(fullPath)
         }
