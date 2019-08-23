@@ -13,29 +13,25 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
+
 import Foundation
-import SPMUtility
-import Basic
 
-func main() {
+extension Data {
+    static public let `typealias` = "typealias:".data(using: String.Encoding.utf8)
     
-    let parser = ArgumentParser(usage: "<options>", overview: "Mockolo: Swift mock generator.")
-    let command = Executor(parser: parser)
-    let inputs = Array(CommandLine.arguments.dropFirst())
-
-    print("Start...")
-    do {
-        /* Example:
-         .build/release/mockolo -srcs File1.swift File2.swift -out result/Mocks.swift -mocks FooMocks.swift -exclude "Mocks" "Tests"
-         */
-        let args = try parser.parse(inputs)
-        command.execute(with: args)
-    } catch {
-        fatalError("Command-line pasing error (use --help for help): \(error)")
+    public func sliced(offset: Int64, length: Int64) -> Data? {
+        guard offset >= 0, length > 0 else { return nil }
+        let start = Int(offset)
+        let end = Int(offset + length)
+        guard end < self.count else { return nil }
+        let subdata = self[start..<end]
+        return subdata
     }
-    
-    print("Done.")
+
+    public func toString(offset: Int64, length: Int64) -> String {
+        guard let subdata = sliced(offset: offset, length: length) else { return "" }
+        return String(data: subdata, encoding: .utf8) ?? ""
+    }
 }
 
 
-main()

@@ -21,7 +21,7 @@ import SourceKittenFramework
 struct TypeAliasModel: Model {
     var filePath: String
     var name: String
-    var type: String
+    var type: Type
     var offset: Int64 = .max
     var length: Int64
     var typeOffset: Int64
@@ -48,19 +48,20 @@ struct TypeAliasModel: Model {
         self.overrideTypes = overrideTypes
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
-            self.type  = val
+            self.type  = Type(val)
         } else {
             // Sourcekit doesn't give inheritance type info for an associatedtype, so need to manually parse it from the content
             if typeLength < 0 {
-                self.type = String.any
+                self.type = Type(String.any)
             } else {
-                self.type = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
+                let typeArg = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
+                self.type = Type(typeArg)
             }
         }
     }
 
     var fullName: String {
-        return self.name + self.type.displayableForType
+        return self.name + self.type.displayName
     }
     
     func name(by level: Int) -> String {
@@ -68,14 +69,6 @@ struct TypeAliasModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        var acl = self.accessControlLevelDescription
-        if !acl.isEmpty {
-            acl = acl + " "
-        }
-        
-        let ret = """
-            \(acl)\(String.typealias) \(self.name) = \(self.type)
-        """
-        return ret
+        return applyTypealiasTemplate(name: name, type: type, acl: accessControlLevelDescription)
     }
 }

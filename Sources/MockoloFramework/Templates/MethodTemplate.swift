@@ -22,7 +22,7 @@ func applyMethodTemplate(name: String,
                          isInitializer: Bool,
                          genericTypeParams: [ParamModel],
                          params: [ParamModel],
-                         returnType: String,
+                         returnType: Type,
                          staticKind: String,
                          accessControlLevelDescription: String,
                          suffix: String,
@@ -30,6 +30,8 @@ func applyMethodTemplate(name: String,
                          typeKeys: [String: String]?) -> String {
     var template = ""
     
+    let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
+
     let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
     let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "")}.joined(separator: ", ")
     let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
@@ -42,19 +44,19 @@ func applyMethodTemplate(name: String,
             """
             }.joined(separator: "\n")
         template = """
-        
         \(String.required) \(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
         \(paramsAssign)
+            \(String.doneInit) = true
         }
     """
     } else {
         let callCount = "\(identifier)\(String.callCountSuffix)"
         let handlerVarName = "\(identifier)\(String.handlerSuffix)"
-        let handlerVarType = handler?.type ?? "Any"
+        let handlerVarType = handler?.type.typeName ?? "Any"
         let handlerReturn = handler?.render(with: identifier, typeKeys: typeKeys) ?? ""
         
         let suffixStr = suffix.isEmpty ? "" : "\(suffix) "
-        let returnStr = returnType.isEmpty ? "" : "-> \(returnType)"
+        let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         template = """
         

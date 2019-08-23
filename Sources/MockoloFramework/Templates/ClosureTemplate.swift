@@ -18,33 +18,31 @@ import Foundation
 import SourceKittenFramework
 
 func applyClosureTemplate(name: String,
-                          type: String,
+                          type: Type,
                           typeKeys: [String: String]?,
                           genericTypeNames: [String],
                           paramVals: [String]?,
-                          paramTypes: [String]?,
+                          paramTypes: [Type]?,
                           suffix: String,
-                          returnAs: String,
-                          returnDefaultType: String) -> String {
-    let handlerParamValsStr = paramVals?.joined(separator: ", ") ?? ""
+                          returnDefaultType: Type) -> String {
+    
+    var handlerParamValsStr = ""
+    if let paramVals = paramVals, let paramTypes = paramTypes {
+        let zipped = zip(paramVals, paramTypes).map { (arg) -> String in
+            let (argName, argType) = arg
+            if argType.typeName.hasPrefix(String.autoclosure) {
+                return argName + "()"
+            }
+            return argName
+        }
+        handlerParamValsStr = zipped.joined(separator: ", ")
+    }
     let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType, typeKeys: typeKeys)
 
-    var returnTypeCast = ""
-    if !returnAs.isEmpty {
-        let asSuffix = returnAs.hasSuffix("?") ? "?" : "!"
-
-        var returnAsStr = returnAs
-        if returnAsStr.hasSuffix("?") || returnAsStr.hasSuffix("!") {
-            returnAsStr.removeLast()
-        }
-
-        returnTypeCast = " as\(asSuffix) " + returnAsStr
-    }
+    let prefix = suffix.isThrowsOrRethrows ? String.try + " " : ""
     
-    let prefix = suffix.isThrowsOrRethrows ? String.forceTry + " " : ""
-    
-    let returnStr = returnDefaultType.isEmpty ? "" : "return "
-    let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(returnTypeCast)"
+    let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "
+    let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")"
     
     let template = """
     
@@ -58,21 +56,16 @@ func applyClosureTemplate(name: String,
 }
 
 
-private func renderReturnDefaultStatement(name: String, type: String, typeKeys: [String: String]?) -> String {
-    if type != .unknownVal, !type.isEmpty {
-        if type.contains("->") {
-            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-        }
-        
-        let result = processDefaultVal(typeName: type, typeKeys: typeKeys) ?? String.fatalError
-        
-        if result.isEmpty {
-            return ""
-        }
-        if result.contains(String.fatalError) {
-            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-        }
-        return  "return \(result)"
+private func renderReturnDefaultStatement(name: String, type: Type, typeKeys: [String: String]?) -> String {
+    guard !type.isUnknown else { return "" }
+
+    let result = type.defaultVal(with: typeKeys) ?? String.fatalError
+    
+    if result.isEmpty {
+        return ""
     }
-    return ""
+    if result.contains(String.fatalError) {
+        return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
+    }
+    return  "return \(result)"
 }

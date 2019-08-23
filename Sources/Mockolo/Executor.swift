@@ -15,7 +15,7 @@
 //
 
 import Foundation
-import Utility
+import SPMUtility
 import MockoloFramework
 
 class Executor {

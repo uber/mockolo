@@ -20,7 +20,7 @@ import SourceKittenFramework
 struct MethodModel: Model {
     var filePath: String
     var name: String
-    var type: String
+    var type: Type
     var offset: Int64
     let length: Int64
     let accessControlLevelDescription: String
@@ -37,7 +37,7 @@ struct MethodModel: Model {
     var modelType: ModelType {
         return .method
     }
-    
+
     init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
@@ -48,7 +48,7 @@ struct MethodModel: Model {
 
         self.data = data
         self.name = nameString
-        self.type = ast.typeName == .unknownVal ? "" : ast.typeName
+        self.type = Type(ast.typeName) // == .unknownVal ? "" : ast.typeName
         self.staticKind = ast.isStaticMethod ? .static : ""
         self.processed = processed
         self.isInitializer = ast.isInitializer
@@ -60,18 +60,18 @@ struct MethodModel: Model {
         
         let zippedParams = zip(paramDecls, comps)
         self.params = zippedParams.map { (argAst: Structure, argLabel: String) -> ParamModel in
-            ParamModel(argAst, label: argLabel, isInitializer: ast.isInitializer)
+            ParamModel(argAst, label: argLabel, offset: argAst.offset, length: argAst.length, data: data, isInitializer: ast.isInitializer)
         }
 
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
-        let paramNames = paramDecls.map(path: \.name)
-        let paramTypes = paramDecls.map(path: \.typeName)
+        let paramNames = self.params.map(path: \.name)
+        let paramTypes = self.params.map(path: \.type)
         self.genericTypeParams = ast.substructures
             .filter(path: \.isGenericTypeParam)
             .map { (arg: Structure) -> ParamModel in
-                ParamModel(arg, label: arg.name, isGeneric: true)
+                ParamModel(arg, label: arg.name, offset: arg.offset, length: arg.length, data: data, isGeneric: true)
         }
-        let genericNameTypes = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayableForType }
+        let genericNameTypes = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayName }
         var args = zip(paramLabels, paramNames).compactMap { (argLabel: String, argName: String) -> String? in
             let val = argLabel.isEmpty ? argName : argLabel
             if val.count < 2 || !nameString.lowercased().hasSuffix(val.lowercased()) {
@@ -80,9 +80,11 @@ struct MethodModel: Model {
             return nil
         }
         args.append(contentsOf: genericNameTypes)
-        args.append(contentsOf: paramTypes.map(path: \.displayableForType))
-        let capped = String.Index(encodedOffset: min(self.type.displayableForType.count, 32))
-        args.append(self.type.displayableForType.substring(to: capped))
+        args.append(contentsOf: paramTypes.map(path: \.displayName))
+        var dtype = self.type.displayName
+        let capped = min(dtype.count, 32)
+        dtype.removeLast(dtype.count-capped)
+        args.append(dtype)
         
         // Used to make the underlying function handler var name unique by providing args
         // that can be appended to the name
@@ -92,7 +94,7 @@ struct MethodModel: Model {
         let suffixOffset = ast.nameOffset + ast.nameLength + 1
         let suffixLen = ast.offset + ast.length - suffixOffset
         if suffixLen > 0, suffixOffset > ast.bodyOffset - 1 {
-            let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
             if suffixPart.hasPrefix("\(String.rethrows)") {
                 self.suffix = String.rethrows
             } else if suffixPart.hasPrefix("\(String.throws)") {
@@ -110,7 +112,7 @@ struct MethodModel: Model {
                                     paramNames: paramNames,
                                     paramTypes: paramTypes,
                                     suffix: suffix,
-                                    returnType: ast.typeName,
+                                    returnType: type,
                                     staticKind: staticKind)
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
@@ -140,13 +142,12 @@ struct MethodModel: Model {
             return ret
         }
     
-        let returnType = type != .unknownVal ? type : ""
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
                                          isInitializer: isInitializer,
                                          genericTypeParams: genericTypeParams,
                                          params: params,
-                                         returnType: returnType,
+                                         returnType: type,
                                          staticKind: staticKind,
                                          accessControlLevelDescription: accessControlLevelDescription,
                                          suffix: suffix,

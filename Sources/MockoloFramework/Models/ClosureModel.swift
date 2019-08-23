@@ -19,65 +19,29 @@ import SourceKittenFramework
 
 struct ClosureModel: Model {
     var name: String
-    var type: String
+    var type: Type
     var offset: Int64 = .max
-    let returnAs: String
-    let funcReturnType: String
+    let funcReturnType: Type
     let staticKind: String
     let genericTypeNames: [String]
     let paramNames: [String]
-    let paramTypes: [String]
+    let paramTypes: [Type]
     let suffix: String
 
     var modelType: ModelType {
         return .class
     }
-    
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [String], suffix: String, returnType: String, staticKind: String) {
+
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, staticKind: String) {
         self.name = name + .handlerSuffix
         self.staticKind = staticKind
         self.suffix = suffix
         let genericTypeNameList = genericTypeParams.map(path: \.name)
+        self.genericTypeNames = genericTypeNameList
         self.paramNames = paramNames
         self.paramTypes = paramTypes
-        let displayableParamTypes = paramTypes.map { (subtype: String) -> String in
-            let hasGenericType = genericTypeNameList.filter{ (item: String) -> Bool in
-                subtype.displayableComponents.contains(item)
-            }
-            return hasGenericType.isEmpty ? subtype : .any
-        }
-        
-        self.genericTypeNames = genericTypeNameList
-        let displayableParamStr = displayableParamTypes.joined(separator: ", ")
-        let formattedReturnType = returnType == .unknownVal ? "" : returnType
-        self.funcReturnType = formattedReturnType
-
-        var displayableReturnType = formattedReturnType
-        let returnComps = formattedReturnType.displayableComponents
-        
-        var returnAsStr = ""
-        if !genericTypeNameList.filter({returnComps.contains($0)}).isEmpty {
-            if displayableReturnType.hasSuffix("?") {
-                displayableReturnType = .any + "?"
-            } else if displayableReturnType.hasSuffix("!") {
-                displayableReturnType = .any + "!"
-            } else {
-                displayableReturnType = .any
-            }
-            returnAsStr = formattedReturnType
-        }
-
-        let isSimpleTuple = displayableReturnType.hasPrefix("(") &&
-            displayableReturnType.hasSuffix(")") &&
-            displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
-        
-        if !isSimpleTuple {
-            displayableReturnType = "(\(displayableReturnType))"
-        }
-        
-        let suffixStr = suffix.isThrowsOrRethrows ? String.throws + " " : ""
-        self.type = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
-        self.returnAs = returnAsStr
+        self.funcReturnType = returnType
+        self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType)
     }
     
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
@@ -88,7 +52,6 @@ struct ClosureModel: Model {
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,
                                     suffix: suffix,
-                                    returnAs: returnAs,
                                     returnDefaultType: funcReturnType)
     }
 }

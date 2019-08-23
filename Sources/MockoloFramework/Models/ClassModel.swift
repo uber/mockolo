@@ -20,7 +20,7 @@ import SourceKittenFramework
 struct ClassModel: Model {
     var name: String
     var offset: Int64
-    var type: String
+    var type: Type
     let attribute: String
     let accessControlLevelDescription: String
     let identifier: String
@@ -42,7 +42,7 @@ struct ClassModel: Model {
          entities: [(String, Model)]) {
         self.identifier = identifier
         self.name = identifier + "Mock"
-        self.type = .class
+        self.type = Type(.class)
         self.entities = entities
         self.needInit = needInit
         self.initParams = initParams
