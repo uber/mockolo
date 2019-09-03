@@ -95,22 +95,26 @@ OVERVIEW: Mockolo: Swift mock generator.
 USAGE: mockolo <options>
 
 OPTIONS:
-  --annotated-only, -ant-only
-                          True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.
-  --annotation, -ant      A custom annotation string used to indicate if a type should be mocked (default = @mockable).
+  --annotated-only
+                          True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to false.
+  --annotation, -a        A custom annotation string used to indicate if a type should be mocked (default = @mockable).
   --concurrency-limit, -j
                           Maximum number of threads to execute concurrently (default = number of cores on the running machine).
+  --depfilelist, -deplist
+                          Path to a file containing a list of dependent files (separated by a new line) from modules this target depends on. 
   --destination, -d       Output file path containing the generated Swift mock classes. If no value is given, the program will exit.
   --exclude-suffixes, -x
                           List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).
+  --filelist, -f
+                          Path to a file containing a list of source file paths (delimited by a new line). If the --sourcedirs value exists, this will be ignored.
   --header, -h            A custom header documentation to be added to the beginning of a generated mock file.
   --logging-level, -v     The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
   --macro, -m             If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
   --mockfiles, -mocks     List of mock files (separated by a comma or a space) from modules this target depends on.
-  --sourcedirs, -s        Path to the directories containing source files to generate mocks for. If no value is given, the --srcs value will be used. If neither value is given, the program will exit. If both values are given, the --srcdirs value will override.
-  --sourcefiles, -srcs    List of source files (separated by a comma or a space) to generate mocks for. If no value is given, the --srcdir value will be used. If neither value is given, the program will exit. If both values are given, the --srcdir value will override.
-  --version               Xcode version.
-  --help                  Display available options
+  --sourcedirs, -s        Paths to the directories containing source files to generate mocks for. If the --filelist or --sourcefiles values exist, they will be ignored.
+  --sourcefiles, -srcs    List of source files (separated by a comma or a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.
+  --version               Xcode version used in source files.
+  --help                  Displays available options.
   ```
 
 
