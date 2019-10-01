@@ -28,9 +28,9 @@ func generateProtocolMap(sourceDirs: [String]?,
                          queue: DispatchQueue?,
                          process: @escaping ([Entity]) -> ()) {
     if let sourceDirs = sourceDirs {
-        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
+        generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
-        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
+        generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
     }
 }
 
@@ -47,12 +47,12 @@ private func generateProtcolMap(dirs: [String],
         scanPaths(dirs) { filePath in
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                _ = generateProtcolMap(filePath,
-                                       exclusionSuffixes: exclusionSuffixes,
-                                       annotatedOnly: annotatedOnly,
-                                       annotation: annotation,
-                                       lock: lock,
-                                       process: process)
+                generateProtcolMap(filePath,
+                                   exclusionSuffixes: exclusionSuffixes,
+                                   annotatedOnly: annotatedOnly,
+                                   annotation: annotation,
+                                   lock: lock,
+                                   process: process)
                 semaphore?.signal()
             }
         }
@@ -61,12 +61,12 @@ private func generateProtcolMap(dirs: [String],
         queue.sync(flags: .barrier) {}
     } else {
         scanPaths(dirs) { filePath in
-            _ = generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotatedOnly: annotatedOnly,
-                                   annotation: annotation,
-                                   lock: nil,
-                                   process: process)
+            generateProtcolMap(filePath,
+                               exclusionSuffixes: exclusionSuffixes,
+                               annotatedOnly: annotatedOnly,
+                               annotation: annotation,
+                               lock: nil,
+                               process: process)
         }
     }
 }
@@ -84,12 +84,12 @@ private func generateProtcolMap(files: [String],
         for filePath in files {
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                _ = generateProtcolMap(filePath,
-                                       exclusionSuffixes: exclusionSuffixes,
-                                       annotatedOnly: annotatedOnly,
-                                       annotation: annotation,
-                                       lock: lock,
-                                       process: process)
+                generateProtcolMap(filePath,
+                                   exclusionSuffixes: exclusionSuffixes,
+                                   annotatedOnly: annotatedOnly,
+                                   annotation: annotation,
+                                   lock: lock,
+                                   process: process)
                 semaphore?.signal()
             }
         }
@@ -98,12 +98,12 @@ private func generateProtcolMap(files: [String],
         
     } else {
         for filePath in files {
-            _ = generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotatedOnly: annotatedOnly,
-                                   annotation: annotation,
-                                   lock: nil,
-                                   process: process)
+            generateProtcolMap(filePath,
+                               exclusionSuffixes: exclusionSuffixes,
+                               annotatedOnly: annotatedOnly,
+                               annotation: annotation,
+                               lock: nil,
+                               process: process)
         }
     }
 }
