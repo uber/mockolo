@@ -28,9 +28,9 @@ func generateProtocolMap(sourceDirs: [String]?,
                          queue: DispatchQueue?,
                          process: @escaping ([Entity]) -> ()) {
     if let sourceDirs = sourceDirs {
-        return generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
+        generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
-        return generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
+        generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
     }
 }
 
@@ -47,12 +47,12 @@ private func generateProtcolMap(dirs: [String],
         scanPaths(dirs) { filePath in
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                _ = generateProtcolMap(filePath,
-                                       exclusionSuffixes: exclusionSuffixes,
-                                       annotatedOnly: annotatedOnly,
-                                       annotation: annotation,
-                                       lock: lock,
-                                       process: process)
+                generateProtcolMap(filePath,
+                                   exclusionSuffixes: exclusionSuffixes,
+                                   annotatedOnly: annotatedOnly,
+                                   annotation: annotation,
+                                   lock: lock,
+                                   process: process)
                 semaphore?.signal()
             }
         }
@@ -61,12 +61,12 @@ private func generateProtcolMap(dirs: [String],
         queue.sync(flags: .barrier) {}
     } else {
         scanPaths(dirs) { filePath in
-            _ = generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotatedOnly: annotatedOnly,
-                                   annotation: annotation,
-                                   lock: nil,
-                                   process: process)
+            generateProtcolMap(filePath,
+                               exclusionSuffixes: exclusionSuffixes,
+                               annotatedOnly: annotatedOnly,
+                               annotation: annotation,
+                               lock: nil,
+                               process: process)
         }
     }
 }
@@ -84,12 +84,12 @@ private func generateProtcolMap(files: [String],
         for filePath in files {
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                _ = generateProtcolMap(filePath,
-                                       exclusionSuffixes: exclusionSuffixes,
-                                       annotatedOnly: annotatedOnly,
-                                       annotation: annotation,
-                                       lock: lock,
-                                       process: process)
+                generateProtcolMap(filePath,
+                                   exclusionSuffixes: exclusionSuffixes,
+                                   annotatedOnly: annotatedOnly,
+                                   annotation: annotation,
+                                   lock: lock,
+                                   process: process)
                 semaphore?.signal()
             }
         }
@@ -98,12 +98,12 @@ private func generateProtcolMap(files: [String],
         
     } else {
         for filePath in files {
-            _ = generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotatedOnly: annotatedOnly,
-                                   annotation: annotation,
-                                   lock: nil,
-                                   process: process)
+            generateProtcolMap(filePath,
+                               exclusionSuffixes: exclusionSuffixes,
+                               annotatedOnly: annotatedOnly,
+                               annotation: annotation,
+                               lock: nil,
+                               process: process)
         }
     }
 }
@@ -113,15 +113,19 @@ private func generateProtcolMap(_ path: String,
                                 annotatedOnly: Bool,
                                 annotation: Data,
                                 lock: NSLock?,
-                                process: @escaping ([Entity]) -> ()) -> Bool {
+                                process: @escaping ([Entity]) -> ()) {
     
-    guard path.shouldParse(with: exclusionSuffixes) else { return false }
-    guard let content = FileManager.default.contents(atPath: path) else { return false }
-    if annotatedOnly, content.range(of: annotation) == nil {
-        return false
+    guard path.shouldParse(with: exclusionSuffixes) else { return }
+    guard let content = FileManager.default.contents(atPath: path) else {
+        fatalError("Retrieving contents of \(path) failed")
     }
-
-    if let topstructure = try? Structure(path: path) {
+    
+    if annotatedOnly, content.range(of: annotation) == nil {
+        return
+    }
+    
+    do {
+        let topstructure = try Structure(path: path)
         var results = [Entity]()
         for current in topstructure.substructures {
             if current.isProtocol {
@@ -144,7 +148,8 @@ private func generateProtcolMap(_ path: String,
         lock?.lock()
         process(results)
         lock?.unlock()
-        return true
+        
+    } catch {
+        fatalError(error.localizedDescription)
     }
-    return false
 }
