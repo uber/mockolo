@@ -16,6 +16,12 @@
 
 import Foundation
 
+fileprivate var validIdentifierChars: CharacterSet = {
+    var valid = CharacterSet.alphanumerics
+    valid.insert(charactersIn: "_.")
+    return valid
+}()
+
 public struct Type {
     let typeName: String
     let cast: String?
@@ -70,8 +76,7 @@ public struct Type {
     /// If it can be split into an input / output, e.g. T -> U, it will return false.
     /// Note that (T -> U) will be considered atomic, but T -> U won't.
     var isSingular: Bool {
-        let arg = typeName
-        if arg.hasPrefix("@") {
+        if typeName.hasPrefix("@") {
             return false
         }
         
@@ -129,28 +134,25 @@ public struct Type {
     }
     
     var isIdentifier: Bool {
-        let arg = typeName
-        if arg.unicodeScalars.contains(" ") {
+        if isUnknown {
             return false
         }
+        for scalar in typeName.unicodeScalars {
+            if scalar == " " {
+                return false
+            }
 
-        guard let first = arg.unicodeScalars.first,
-            first.properties.isAlphabetic || first.properties.isEmoji else { return false }
-
-        for s in arg.unicodeScalars {
-            let valid = s.properties.isAlphabetic || s.properties.isEmoji || s.properties.numericType == Swift.Unicode.NumericType.decimal || s == "_" ||  s == "."
-
-            if !valid {
+            if !validIdentifierChars.contains(scalar) && !scalar.properties.isEmoji {
                 return false
             }
         }
-
+        
         return true
     }
     
     var hasValidBrackets: Bool {
         let arg = typeName
-        if let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "<", "["), options: .caseInsensitive, range: nil) {
+        if let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "<", "["), options: [], range: nil) {
             let scalars = arg.unicodeScalars
             let suffix = scalars.last!
             var angleBracketCount = 0
@@ -186,7 +188,7 @@ public struct Type {
     
     var hasValidParens: Bool {
         let arg = typeName
-        if  let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "("), options: .caseInsensitive, range: nil) {
+        if  let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "("), options: [], range: nil) {
             let scalars = arg.unicodeScalars
             let prefix = scalars.first!
             let suffix = scalars.last!
@@ -447,8 +449,7 @@ public struct Type {
             }
         }
         
-        let isSimpleTuple = displayableReturnType.hasPrefix("(") &&
-            displayableReturnType.hasSuffix(")") &&
+        let isSimpleTuple = displayableReturnType.hasPrefix("(") && displayableReturnType.hasSuffix(")") &&
             displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
         
         if !isSimpleTuple {
