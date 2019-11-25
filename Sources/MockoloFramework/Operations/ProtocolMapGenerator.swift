@@ -22,21 +22,19 @@ import SourceKittenFramework
 func generateProtocolMap(sourceDirs: [String]?,
                          sourceFiles: [String]?,
                          exclusionSuffixes: [String]? = nil,
-                         annotatedOnly: Bool,
                          annotation: Data,
                          semaphore: DispatchSemaphore?,
                          queue: DispatchQueue?,
                          process: @escaping ([Entity]) -> ()) {
     if let sourceDirs = sourceDirs {
-        generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
+        generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
     } else if let sourceFiles = sourceFiles {
-        generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotatedOnly: annotatedOnly, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
+        generateProtcolMap(files: sourceFiles, exclusionSuffixes: exclusionSuffixes, annotation: annotation,semaphore: semaphore, queue: queue, process: process)
     }
 }
 
 private func generateProtcolMap(dirs: [String],
                                 exclusionSuffixes: [String]? = nil,
-                                annotatedOnly: Bool,
                                 annotation: Data,
                                 semaphore: DispatchSemaphore?,
                                 queue: DispatchQueue?,
@@ -49,7 +47,6 @@ private func generateProtcolMap(dirs: [String],
             queue.async {
                 generateProtcolMap(filePath,
                                    exclusionSuffixes: exclusionSuffixes,
-                                   annotatedOnly: annotatedOnly,
                                    annotation: annotation,
                                    lock: lock,
                                    process: process)
@@ -63,7 +60,6 @@ private func generateProtcolMap(dirs: [String],
         scanPaths(dirs) { filePath in
             generateProtcolMap(filePath,
                                exclusionSuffixes: exclusionSuffixes,
-                               annotatedOnly: annotatedOnly,
                                annotation: annotation,
                                lock: nil,
                                process: process)
@@ -74,7 +70,6 @@ private func generateProtcolMap(dirs: [String],
 
 private func generateProtcolMap(files: [String],
                                 exclusionSuffixes: [String]? = nil,
-                                annotatedOnly: Bool,
                                 annotation: Data,
                                 semaphore: DispatchSemaphore?,
                                 queue: DispatchQueue?,
@@ -86,7 +81,6 @@ private func generateProtcolMap(files: [String],
             queue.async {
                 generateProtcolMap(filePath,
                                    exclusionSuffixes: exclusionSuffixes,
-                                   annotatedOnly: annotatedOnly,
                                    annotation: annotation,
                                    lock: lock,
                                    process: process)
@@ -100,7 +94,6 @@ private func generateProtcolMap(files: [String],
         for filePath in files {
             generateProtcolMap(filePath,
                                exclusionSuffixes: exclusionSuffixes,
-                               annotatedOnly: annotatedOnly,
                                annotation: annotation,
                                lock: nil,
                                process: process)
@@ -110,7 +103,6 @@ private func generateProtcolMap(files: [String],
 
 private func generateProtcolMap(_ path: String,
                                 exclusionSuffixes: [String]? = nil,
-                                annotatedOnly: Bool,
                                 annotation: Data,
                                 lock: NSLock?,
                                 process: @escaping ([Entity]) -> ()) {
@@ -118,10 +110,6 @@ private func generateProtcolMap(_ path: String,
     guard path.shouldParse(with: exclusionSuffixes) else { return }
     guard let content = FileManager.default.contents(atPath: path) else {
         fatalError("Retrieving contents of \(path) failed")
-    }
-    
-    if annotatedOnly, content.range(of: annotation) == nil {
-        return
     }
     
     do {
@@ -132,16 +120,32 @@ private func generateProtcolMap(_ path: String,
                 let metadata = current.annotationMetadata(with: annotation, in: content)
                 let isAnnotated = metadata != nil
                 
-                if !annotatedOnly || isAnnotated {
-                    let node = Entity(name: current.name,
-                                      filepath: path,
-                                      data: content,
-                                      ast: current,
-                                      isAnnotated: isAnnotated,
-                                      metadata: metadata?.typealiases,
-                                      isProcessed: false)
-                    results.append(node)
+                let members = current.substructures.compactMap { (child: Structure) -> Model? in
+                    return Entity.model(for: child, filepath: path, data: content, metadata: metadata?.typealiases, processed: false)
                 }
+                
+                var attributes = current.substructures.compactMap { (child: Structure) -> [String]? in
+                    return child.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+                }.flatMap {$0}
+                
+                let curAttributes = current.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+                attributes.append(contentsOf: curAttributes)
+
+                let hasInit = current.substructures.filter(path: \.isInitializer).count > 0
+                
+                let node = Entity(name: current.name,
+                                  filepath: path,
+                                  data: content,
+                                  acl: current.accessControlLevelDescription,
+                                  attributes: attributes,
+                                  parents: current.inheritedTypes,
+                                  hasInit: hasInit,
+                                  offset: current.offset,
+                                  isAnnotated: isAnnotated,
+                                  metadata: metadata?.typealiases,
+                                  members: members,
+                                  isProcessed: false)
+                results.append(node)
             }
         }
         

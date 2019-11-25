@@ -53,7 +53,14 @@ private func generateProcessedModels(_ path: String,
         let topstructure = try Structure(path: path)
         let subs = topstructure.substructures
         let results = subs.compactMap { current -> Entity? in
-            return Entity(name: current.name, filepath: path, data: content, ast: current, isAnnotated: false, metadata: nil, isProcessed: true)
+
+            let members = current.substructures.compactMap { (child: Structure) -> Model? in
+                return Entity.model(for: child, filepath: path, data: content, metadata: nil, processed: true)
+            }
+
+            let curAttributes = current.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+            let hasInit = current.substructures.filter(path: \.isInitializer).count > 0
+            return Entity(name: current.name, filepath: path, data: content, acl: current.accessControlLevelDescription, attributes: curAttributes, parents: nil, hasInit: hasInit,  offset: current.offset, isAnnotated: false, metadata: nil, members: members, isProcessed: true)
         }
         
         let imports = findImportLines(data: content, offset: subs.first?.offset)

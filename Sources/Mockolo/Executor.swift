@@ -33,7 +33,6 @@ class Executor {
     private var header: OptionArgument<String>!
     private var macro: OptionArgument<String>!
     private var annotation: OptionArgument<String>!
-    private var annotatedOnly: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var version: OptionArgument<String>!
     
@@ -94,9 +93,6 @@ class Executor {
                                 shortName: "-a",
                                 kind: String.self,
                                 usage: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
-        annotatedOnly = parser.add(option: "--annotated-only",
-                                   kind: Bool.self,
-                                   usage: "True if mock generation should be done on types that are annotated only, thus requiring all the types that the annotated type inherits to be also annotated. If set to false, the inherited types of the annotated types will also be considered for mocking. Default is set to true.")
         macro = parser.add(option: "--macro",
                                 shortName: "-m",
                                 kind: String.self,
@@ -160,7 +156,6 @@ class Executor {
         let exclusionSuffixes = arguments.get(self.exclusionSuffixes) ?? []
         let annotation = arguments.get(self.annotation) ?? String.mockAnnotation
         let header = arguments.get(self.header)
-        let annotatedOnly = arguments.get(self.annotatedOnly) ?? false
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
         
@@ -169,7 +164,6 @@ class Executor {
                          sourceFiles: srcs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
-                         annotatedOnly: annotatedOnly,
                          annotation: annotation,
                          header: header,
                          macro: macro, 

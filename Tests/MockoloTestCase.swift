@@ -110,7 +110,6 @@ class MockoloTestCase: XCTestCase {
                       sourceFiles: srcFilePaths,
                       exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: mockFilePaths,
-                      annotatedOnly: false,
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",

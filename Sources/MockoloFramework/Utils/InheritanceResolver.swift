@@ -41,17 +41,16 @@ func lookupEntities(key: String,
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
         
-        models.append(contentsOf: current.subModels())
+        models.append(contentsOf: current.members)
         if let curAttributes = current.subAttributes() {
             attributes.append(contentsOf: curAttributes)
         }
-        if let data = current.data, let ast = current.ast {
-            pathToContents.append((current.filepath, data, ast.offset))
+        if let data = current.data {
+            pathToContents.append((current.filepath, data, current.offset))
         }
         
-        if let parents = current.ast?.inheritedTypes {
             // If the protocol inherits other protocols, look up their entities as well.
-            for parent in parents {
+            for parent in current.inheritedTypes {
                 if parent != .class, parent != .any, parent != .anyObject {
                     let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent,
                                                                                                                        protocolMap: protocolMap,
@@ -62,16 +61,15 @@ func lookupEntities(key: String,
                     pathToContents.append(contentsOf:parentPathToContents)
                 }
             }
-        }
         
     } else if let parentMock = inheritanceMap["\(key)Mock"] {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        processedModels.append(contentsOf: parentMock.subModels())
+        processedModels.append(contentsOf: parentMock.members)
         if let parentAttributes = parentMock.subAttributes() {
             attributes.append(contentsOf: parentAttributes)
         }
-        if let data = parentMock.data, let ast = parentMock.ast {
-            pathToContents.append((parentMock.filepath, data, ast.offset))
+        if let data = parentMock.data {
+            pathToContents.append((parentMock.filepath, data, parentMock.offset))
         }
         
     }
