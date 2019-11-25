@@ -19,7 +19,7 @@ import SourceKittenFramework
 
 
 final class TypeAliasModel: Model {
-    var filePath: String
+    var filePath: String = ""
     var name: String
     var type: Type
     var offset: Int64 = .max

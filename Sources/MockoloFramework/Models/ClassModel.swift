@@ -32,8 +32,8 @@ final class ClassModel: Model {
         return .class
     }
     
-    init(_ ast: Structure,
-         data: Data,
+    init(_ ast: Structure?,
+         data: Data?,
          identifier: String,
          additionalAttributes: [String],
          needInit: Bool,
@@ -46,13 +46,21 @@ final class ClassModel: Model {
         self.entities = entities
         self.needInit = needInit
         self.initParams = initParams
-        self.offset = ast.offset
+        self.offset = ast?.offset ?? -1
         var mutableAttributes = additionalAttributes
-        let curAttributes = ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
-        mutableAttributes.append(contentsOf: curAttributes)
-        let attributeSet = Set(mutableAttributes)
-        self.attribute = attributeSet.joined(separator: " ")
-        self.accessControlLevelDescription = ast.accessControlLevelDescription.isEmpty ? "" : ast.accessControlLevelDescription + " "
+        if let ast = ast, let data = data {
+            let curAttributes = ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+            mutableAttributes.append(contentsOf: curAttributes)
+            let attributeSet = Set(mutableAttributes)
+            self.attribute = attributeSet.joined(separator: " ")
+        } else {
+            self.attribute = ""
+        }
+        if let acl = ast?.accessControlLevelDescription {
+            self.accessControlLevelDescription = acl.isEmpty ? "" : acl + " "
+        } else {
+            self.accessControlLevelDescription = ""
+        }
         self.typealiasWhitelist = typealiasWhitelist
     }
     

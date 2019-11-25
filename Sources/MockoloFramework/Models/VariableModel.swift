@@ -12,7 +12,7 @@ final class VariableModel: Model {
     var canBeInitParam: Bool
     let processed: Bool
     let data: Data
-    var filePath: String
+    var filePath: String = ""
     var modelType: ModelType {
         return .variable
     }

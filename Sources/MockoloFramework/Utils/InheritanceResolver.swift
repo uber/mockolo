@@ -45,19 +45,22 @@ func lookupEntities(key: String,
         if let curAttributes = current.subAttributes() {
             attributes.append(contentsOf: curAttributes)
         }
+        if let data = current.data, let ast = current.ast {
+            pathToContents.append((current.filepath, data, ast.offset))
+        }
         
-        pathToContents.append((current.filepath, current.data, current.ast.offset))
-        
-        // If the protocol inherits other protocols, look up their entities as well.
-        for parent in current.ast.inheritedTypes {
-            if parent != .class, parent != .any, parent != .anyObject {
-                let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent,
-                                                                                                                   protocolMap: protocolMap,
-                                                                                                                   inheritanceMap: inheritanceMap)
-                models.append(contentsOf: parentModels)
-                processedModels.append(contentsOf: parentProcessedModels)
-                attributes.append(contentsOf: parentAttributes)
-                pathToContents.append(contentsOf:parentPathToContents)
+        if let parents = current.ast?.inheritedTypes {
+            // If the protocol inherits other protocols, look up their entities as well.
+            for parent in parents {
+                if parent != .class, parent != .any, parent != .anyObject {
+                    let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent,
+                                                                                                                       protocolMap: protocolMap,
+                                                                                                                       inheritanceMap: inheritanceMap)
+                    models.append(contentsOf: parentModels)
+                    processedModels.append(contentsOf: parentProcessedModels)
+                    attributes.append(contentsOf: parentAttributes)
+                    pathToContents.append(contentsOf:parentPathToContents)
+                }
             }
         }
         
@@ -67,7 +70,10 @@ func lookupEntities(key: String,
         if let parentAttributes = parentMock.subAttributes() {
             attributes.append(contentsOf: parentAttributes)
         }
-        pathToContents.append((parentMock.filepath, parentMock.data, parentMock.ast.offset))
+        if let data = parentMock.data, let ast = parentMock.ast {
+            pathToContents.append((parentMock.filepath, data, ast.offset))
+        }
+        
     }
     
     return (models, processedModels, attributes, pathToContents)
@@ -106,7 +112,7 @@ private func uniquifyDuplicates(group: [String: [Model]],
             // Check if full name has been looked up
             let visited = models.filter {fullNameVisited.contains($0.fullName)}.compactMap{$0}
             let unvisited = models.filter {!fullNameVisited.contains($0.fullName)}.compactMap{$0}
-
+            
             if let first = unvisited.first {
                 // If not, add it to the fullname map to keep track of duplicates
                 if !visited.isEmpty {
@@ -193,13 +199,13 @@ func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
 /// @param content The source file content
 /// @returns A list of import lines from the content
 func findImportLines(data: Data, offset: Int64?) -> [String] {
-
-        if let offset = offset, offset > 0 {
-            let part = data.toString(offset: 0, length: offset)
-            let lines = part.components(separatedBy: "\n")
-            let importlines = lines.filter {$0.trimmingCharacters(in: CharacterSet.whitespaces).hasPrefix(String.import)}
-            return importlines
-        }
+    
+    if let offset = offset, offset > 0 {
+        let part = data.toString(offset: 0, length: offset)
+        let lines = part.components(separatedBy: "\n")
+        let importlines = lines.filter {$0.trimmingCharacters(in: CharacterSet.whitespaces).hasPrefix(String.import)}
+        return importlines
+    }
     
     return []
 }
