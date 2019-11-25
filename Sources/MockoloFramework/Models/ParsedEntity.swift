@@ -64,6 +64,7 @@ final class Entity {
         self.name = name
         self.filepath = filepath
         self.data = data
+        self.ast = ast
         self.isAnnotated = isAnnotated
         self.metadata = metadata
         self.isProcessed = isProcessed
