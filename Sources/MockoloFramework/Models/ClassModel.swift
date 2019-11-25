@@ -40,7 +40,7 @@ final class ClassModel: Model {
          initParams: [Model]?,
          typealiasWhitelist: [String: [String]]?,
          entities: [(String, Model)]) {
-        self.identifier = identifier
+        self.identifier = identifier 
         self.name = identifier + "Mock"
         self.type = Type(.class)
         self.entities = entities

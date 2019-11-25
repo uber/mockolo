@@ -25,21 +25,31 @@ final class ParamModel: Model {
     let label: String
     let isGeneric: Bool
     let isInitializer: Bool
-    let data: Data
-    let isVariadic: Bool
     
     var modelType: ModelType {
         return .parameter
+    }
+
+    init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, isInitializer: Bool = false, offset: Int64, length: Int64) {
+        self.name = name.trimmingCharacters(in: .whitespaces)
+        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
+
+        let lbl = label.trimmingCharacters(in: .whitespaces)
+        self.label = name != lbl ? lbl: ""
+
+        self.offset = offset
+        self.length = length
+        self.isGeneric = isGeneric
+        self.isInitializer = isInitializer
     }
     
     init(_ ast: Structure, label: String = "", offset: Int64, length: Int64, data: Data, isGeneric: Bool = false, isInitializer: Bool = false) {
         self.name = ast.name
         self.offset = offset
         self.length = length
-        self.data = data
         // Sourcekit doesn't specify if a func arg is variadic, so look ahead for the following characters to  determine.
         let lookahead = data.toString(offset: offset + length, length: 3)
-        self.isVariadic = lookahead == "..."
+        let isVariadic = lookahead == "..."
         self.isGeneric = isGeneric
         self.isInitializer = isInitializer
         let typeArg = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : (isVariadic ? ast.typeName + "..." : ast.typeName)

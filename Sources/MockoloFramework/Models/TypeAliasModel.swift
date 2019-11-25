@@ -24,15 +24,31 @@ final class TypeAliasModel: Model {
     var type: Type
     var offset: Int64 = .max
     var length: Int64
-    var typeOffset: Int64
-    var typeLength: Int64
+    var typeOffset: Int64 = 0
+    var typeLength: Int64 = 0
     let accessControlLevelDescription: String
     let processed: Bool
-    let data: Data
+    var modelDescription: String? = nil
     let overrideTypes: [String: String]?
     
     var modelType: ModelType {
         return .typeAlias
+    }
+
+    init(name: String, typeName: String, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, processed: Bool) {
+        self.name = name
+        self.accessControlLevelDescription = acl ?? ""
+        self.offset = offset
+        self.length = length
+        self.processed = processed
+        self.modelDescription = modelDescription
+        self.overrideTypes = overrideTypes
+        // If there's an override typealias value, set it to type
+        if let val = overrideTypes?[self.name] {
+            self.type  = Type(val)
+        } else {
+            self.type = typeName.isEmpty ? Type(String.any) : Type(typeName)
+        }
     }
 
     init(_ ast: Structure, filepath: String, data: Data, overrideTypes: [String: String]?, processed: Bool) {
@@ -44,7 +60,6 @@ final class TypeAliasModel: Model {
         self.typeLength = ast.offset + ast.length - typeOffset
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.processed = processed
-        self.data = data
         self.overrideTypes = overrideTypes
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
@@ -69,6 +84,12 @@ final class TypeAliasModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
+        if processed {
+            if let modelDescription = modelDescription {
+                return modelDescription
+            }
+        }
+        
         return applyTypealiasTemplate(name: name, type: type, acl: accessControlLevelDescription)
     }
 }
