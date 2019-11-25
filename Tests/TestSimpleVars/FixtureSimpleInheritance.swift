@@ -4,13 +4,13 @@ let simpleInheritance = """
 import Foundation
 
 /// \(String.mockAnnotation)
-public protocol simpleChild: simpleParent {
+public protocol SimpleChild: SimpleParent {
     var name: String { get set }
     func foo()
 }
     
 /// \(String.mockAnnotation)
-public protocol simpleParent: AnyObject {
+public protocol SimpleParent: AnyObject {
     var number: Int { get set }
     func bar(arg: Double) -> Float?
 }
@@ -22,7 +22,7 @@ let simpleInheritanceMock =
 import Foundation
 
 
-public class simpleChildMock: simpleChild {
+public class SimpleChildMock: SimpleChild {
     
     private var _doneInit = false
     public init() { _doneInit = true }
@@ -72,7 +72,7 @@ public class simpleChildMock: simpleChild {
     }
 }
 
-public class simpleParentMock: simpleParent {
+public class SimpleParentMock: SimpleParent {
     
     private var _doneInit = false
     public init() { _doneInit = true }

@@ -26,8 +26,8 @@ final class MethodModel: Model {
     let accessControlLevelDescription: String
     let attributes: [String]
     let staticKind: String
-    let genericTypeParams: [ParamModel]
-    let params: [ParamModel]
+    var genericTypeParams: [ParamModel] = []
+    var params: [ParamModel] = []
     let handler: ClosureModel?
     let processed: Bool
     let signatureComponents: [String]

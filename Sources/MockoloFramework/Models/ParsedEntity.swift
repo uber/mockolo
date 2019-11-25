@@ -54,59 +54,70 @@ final class Entity {
     var offset: Int64 = 0
     var acl: String = ""
     var attributes: [String]
-    var parents: [String]? = nil
+    var inheritedTypes: [String] = []
     var hasInit: Bool = false
     var isAnnotated: Bool = false
-    var metadata: [String: String]? = nil
+    var overrides: [String: String]? = nil
     var isProcessed: Bool = false
     
     init(name: String,
-         filepath: String,
-         data: Data?,
-         acl: String,
+         filepath: String = "",
+         data: Data? = nil,
+         isAnnotated: Bool = false,
+         overrides: [String: String]? = nil,
+         acl: String = "",
          attributes: [String] = [],
-         parents: [String]?,
-         hasInit: Bool,
+         inheritedTypes: [String] = [],
+         members: [Model] = [],
+         hasInit: Bool = false,
          offset: Int64,
-         isAnnotated: Bool,
-         metadata: [String: String]?,
-         members: [Model],
          isProcessed: Bool) {
         self.name = name
         self.filepath = filepath
         self.data = data
         self.acl = acl
         self.attributes = attributes
-        self.parents = parents
+        self.inheritedTypes = inheritedTypes
         self.hasInit = hasInit
         self.isAnnotated = isAnnotated
-        self.metadata = metadata
+        self.overrides = overrides
         self.isProcessed = isProcessed
         self.offset = offset
         self.members = members
     }
-    
-    var inheritedTypes: [String] {
-        if let parents = parents {
-            return parents
-        }
-        return []
-    }
+
     
     func subAttributes() -> [String]? {
         if isProcessed {
             return nil
         }
-        return attributes
+        return attributes.filter {$0.contains(String.available)}
+    }
+
+    static func model(name: String,
+                      label: String = "",
+                      typeName: String,
+                      acl: String? = nil,
+                      overrideTypes: [String: String]? = nil,
+                      throwsOrRethrows: String? = nil,
+                      isStatic: Bool = false,
+                      isGeneric: Bool = false,
+                      isInitializer: Bool = false,
+                      canBeInitParam: Bool = false,
+                      offset: Int64,
+                      length: Int64,
+                      modelDescription: String? = nil,
+                      processed: Bool = false) -> Model? {
+        return nil
     }
     
-    static func model(for element: Structure, filepath: String, data: Data, metadata: [String: String]?, processed: Bool = false) -> Model? {
+    static func model(for element: Structure, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
             return VariableModel(element, filepath: filepath, data: data, processed: processed)
         } else if element.isMethod {
             return MethodModel(element, filepath: filepath, data: data,  processed: processed)
         } else if element.isAssociatedType {
-            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: metadata, processed: processed)
+            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
         }
         
         return nil

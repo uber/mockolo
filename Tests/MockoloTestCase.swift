@@ -4,9 +4,9 @@ import MockoloFramework
 class MockoloTestCase: XCTestCase {
     var srcFilePathsCount = 1
     var mockFilePathsCount = 1
-
+    
     let bundle = Bundle(for: MockoloTestCase.self)
-
+    
     lazy var dstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
@@ -69,7 +69,7 @@ class MockoloTestCase: XCTestCase {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
-
+        
         for src in srcContents {
             if index < srcContents.count {
                 let srcCreated = FileManager.default.createFile(atPath: srcFilePaths[index], contents: src.data(using: .utf8), attributes: nil)
@@ -77,7 +77,7 @@ class MockoloTestCase: XCTestCase {
                 XCTAssert(srcCreated)
             }
         }
-
+        
         let macroStart = String.poundIf + "MOCK"
         let macroEnd = String.poundEndIf
         
@@ -87,15 +87,15 @@ class MockoloTestCase: XCTestCase {
             
             for mockContent in mockContents {
                 
-            let formattedMockContent = """
-            \(headerStr)
-            \(macroStart)
-            \(mockContent)
-            \(macroEnd)
-            """
-            let mockCreated = FileManager.default.createFile(atPath: mockFilePaths[index], contents: formattedMockContent.data(using: .utf8), attributes: nil)
+                let formattedMockContent = """
+                \(headerStr)
+                \(macroStart)
+                \(mockContent)
+                \(macroEnd)
+                """
+                let mockCreated = FileManager.default.createFile(atPath: mockFilePaths[index], contents: formattedMockContent.data(using: .utf8), attributes: nil)
                 index += 1
-            XCTAssert(mockCreated)
+                XCTAssert(mockCreated)
             }
         }
         
@@ -113,14 +113,15 @@ class MockoloTestCase: XCTestCase {
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
+                      parserType: .sourceKit,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,
-                      onCompletion: { ret in
-        let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
-        let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-        let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-        XCTAssert(fixtureContents == outputContents)
+            onCompletion: { ret in
+                let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
+                let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
+                let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
+                XCTAssert(fixtureContents == outputContents)
         })
     }
 }
