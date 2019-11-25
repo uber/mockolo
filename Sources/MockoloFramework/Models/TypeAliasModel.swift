@@ -18,7 +18,7 @@ import Foundation
 import SourceKittenFramework
 
 
-struct TypeAliasModel: Model {
+final class TypeAliasModel: Model {
     var filePath: String
     var name: String
     var type: Type

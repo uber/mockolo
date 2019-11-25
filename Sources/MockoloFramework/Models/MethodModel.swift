@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-struct MethodModel: Model {
+final class MethodModel: Model {
     var filePath: String
     var name: String
     var type: Type

@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-struct ClassModel: Model {
+final class ClassModel: Model {
     var name: String
     var offset: Int64
     var type: Type

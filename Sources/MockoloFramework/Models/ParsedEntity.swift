@@ -18,7 +18,7 @@ import Foundation
 import SourceKittenFramework
 
 /// Metadata containing unique models and potential init params ready to be rendered for output
-struct ResolvedEntity {
+final class ResolvedEntity {
     let key: String
     let entity: Entity
     let uniqueModels: [(String, Model)]
@@ -39,15 +39,13 @@ struct ResolvedEntity {
     }
 }
 
-struct ResolvedEntityContainer {
+final class ResolvedEntityContainer {
     let entity: ResolvedEntity
     let imports: [(String, Data, Int64)]
 }
 
-
-
 /// Metadata for a type being mocked
-struct Entity {
+final class Entity {
     let name: String
     let filepath: String
     let data: Data

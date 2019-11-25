@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-struct ParamModel: Model {
+final class ParamModel: Model {
     var name: String
     var offset: Int64
     var length: Int64

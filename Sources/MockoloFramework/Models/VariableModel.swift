@@ -1,7 +1,7 @@
 import Foundation
 import SourceKittenFramework
 
-struct VariableModel: Model {
+final class VariableModel: Model {
     var name: String
     var type: Type
     var offset: Int64

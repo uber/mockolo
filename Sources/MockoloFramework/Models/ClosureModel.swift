@@ -17,7 +17,7 @@
 import Foundation
 import SourceKittenFramework
 
-struct ClosureModel: Model {
+final class ClosureModel: Model {
     var name: String
     var type: Type
     var offset: Int64 = .max
