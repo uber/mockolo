@@ -206,19 +206,12 @@ private func generateProtcolMap(_ path: String,
                                 process: @escaping ([Entity]) -> ()) {
     
     guard path.shouldParse(with: exclusionSuffixes) else { return }
-    guard let content = FileManager.default.contents(atPath: path) else {
-        fatalError("Retrieving contents of \(path) failed")
-    }
     
     do {
         var results = [Entity]()
         let node = try SyntaxParser.parse(path)
         node.walk(&treeVisitor)
         let ret = treeVisitor.entities
-        for ent in ret {
-            ent.filepath = path
-            ent.data = content
-        }
         results.append(contentsOf: ret)
         
         lock?.lock()

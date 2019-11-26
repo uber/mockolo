@@ -97,20 +97,11 @@ private func generateProcessedModels(_ path: String,
                                      treeVisitor: inout EntityVisitor,
                                      lock: NSLock?,
                                      process: @escaping ([Entity], [String]) -> ()) {
-    
-    guard let content = FileManager.default.contents(atPath: path) else {
-        fatalError("Retrieving contents of \(path) failed")
-    }
-    
     do {
         var results = [Entity]()
         let node = try SyntaxParser.parse(path)
         node.walk(&treeVisitor)
         let ret = treeVisitor.entities
-        for ent in ret {
-            ent.filepath = path
-            ent.data = content
-        }
         results.append(contentsOf: ret)
         
         let imports = treeVisitor.imports

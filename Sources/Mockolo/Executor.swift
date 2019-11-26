@@ -34,7 +34,7 @@ class Executor {
     private var macro: OptionArgument<String>!
     private var annotation: OptionArgument<String>!
     private var concurrencyLimit: OptionArgument<Int>!
-    private var parserType: OptionArgument<Int>!
+    private var useSourceKit: OptionArgument<Bool>!
     
     /// Initializer.
     ///
@@ -105,9 +105,9 @@ class Executor {
                                       shortName: "-j",
                                       kind: Int.self,
                                       usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
-        parserType = parser.add(option: "--parser",
-                             kind: Int.self,
-                             usage: "Type of source file parser: 0 for SwiftSyntax, 1 for SourceKit (default = 0).")
+        useSourceKit = parser.add(option: "--use-sourcekit",
+                             kind: Bool.self,
+                             usage: "Whether to use SourceKit for parsing. By default it will use SwiftSyntax.")
     }
     
     private func fullPath(_ path: String) -> String {
@@ -157,7 +157,7 @@ class Executor {
         let header = arguments.get(self.header)
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
-        let parserArg = arguments.get(parserType)
+        let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
 
         do {
             try generate(sourceDirs: srcDirs,
@@ -167,7 +167,7 @@ class Executor {
                          annotation: annotation,
                          header: header,
                          macro: macro,
-                         parserType: parserArg == 1 ? .sourceKit : .swiftSyntax,
+                         parserType: shouldUseSourceKit ? .sourceKit : .swiftSyntax,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
