@@ -15,11 +15,17 @@
 //
 
 import Foundation
+import SwiftSyntax
 import SourceKittenFramework
 
 enum InputError: Error {
     case annotationError
     case sourceFilesError
+}
+
+public enum ParserType {
+    case swiftSyntax
+    case sourceKit
 }
 
 /// Performs end to end mock generation flow
@@ -30,15 +36,11 @@ public func generate(sourceDirs: [String]?,
                      annotation: String,
                      header: String?,
                      macro: String?,
+                     parserType: ParserType = .swiftSyntax,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
                      onCompletion: @escaping (String) -> ()) throws {
-
-    guard let annotationData = annotation.data(using: .utf8) else {
-        log("Annotation is invalid", level: .error)
-        throw InputError.annotationError
-    }
 
     guard sourceDirs != nil || sourceFiles != nil else {
         log("Source files or directories do not exist", level: .error)
@@ -63,6 +65,7 @@ public func generate(sourceDirs: [String]?,
     log("Process input mock files...", level: .info)
     if let mockFilePaths = mockFilePaths {
         generateProcessedTypeMap(mockFilePaths,
+                                 parserType: parserType,
                                  semaphore: sema,
                                  queue: mockgenQueue) { (elements, imports) in
                                     elements.forEach { element in
@@ -79,10 +82,12 @@ public func generate(sourceDirs: [String]?,
 
     signpost_begin(name: "Generate protocol map")
     log("Process source files and generate an annotated/protocol map...", level: .info)
+
     generateProtocolMap(sourceDirs: sourceDirs,
                         sourceFiles: sourceFiles,
                         exclusionSuffixes: exclusionSuffixes,
-                        annotation: annotationData,
+                        annotation: annotation,
+                        parserType: parserType,
                         semaphore: sema,
                         queue: mockgenQueue) { (elements) in
                             elements.forEach { element in

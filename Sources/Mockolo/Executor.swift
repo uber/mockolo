@@ -34,7 +34,7 @@ class Executor {
     private var macro: OptionArgument<String>!
     private var annotation: OptionArgument<String>!
     private var concurrencyLimit: OptionArgument<Int>!
-    private var version: OptionArgument<String>!
+    private var useSourceKit: OptionArgument<Bool>!
     
     /// Initializer.
     ///
@@ -105,9 +105,9 @@ class Executor {
                                       shortName: "-j",
                                       kind: Int.self,
                                       usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
-        version = parser.add(option: "--version",
-                             kind: String.self,
-                             usage: "Xcode version.")
+        useSourceKit = parser.add(option: "--use-sourcekit",
+                             kind: Bool.self,
+                             usage: "Whether to use SourceKit for parsing. By default it will use SwiftSyntax.")
     }
     
     private func fullPath(_ path: String) -> String {
@@ -120,12 +120,11 @@ class Executor {
         }
         return FileManager.default.currentDirectoryPath + "/" + path
     }
-
+    
     /// Execute the command.
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
     func execute(with arguments: ArgumentParser.Result) {
-
         guard let outputArg = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         let outputFilePath = fullPath(outputArg)
 
@@ -158,7 +157,8 @@ class Executor {
         let header = arguments.get(self.header)
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
-        
+        let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
+
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
@@ -166,7 +166,8 @@ class Executor {
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,
                          header: header,
-                         macro: macro, 
+                         macro: macro,
+                         parserType: shouldUseSourceKit ? .sourceKit : .swiftSyntax,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,

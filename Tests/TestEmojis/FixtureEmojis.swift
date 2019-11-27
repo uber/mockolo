@@ -7,6 +7,7 @@ protocol EmojiVars: EmojiParent {
     @available(iOS 10.0, *)
     var 😂: Emoji { get set }
 }
+
 """
 
 
@@ -22,7 +23,18 @@ class EmojiParentMock: EmojiParent {
         self.👌😳👍 = 👌😳👍
         _doneInit = true
     }
-    var dict: Dictionary<String, Int> { get set }
+
+    var dictSetCallCount = 0
+    var underlyingDict: Dictionary<String, Int>!
+    var dict: Dictionary<String, Int> {
+        get {
+            return underlyingDict
+        }
+        set {
+            underlyingDict = newValue
+            if _doneInit { dictSetCallCount += 1 }
+        }
+    }
     
     var 👍SetCallCount = 0
     var underlying👍: Emoji!
@@ -47,7 +59,7 @@ class EmojiParentMock: EmojiParent {
             if _doneInit { 👌😳👍SetCallCount += 1 }
         }
     }
-
+}
 
 """
 
@@ -77,12 +89,11 @@ let emojiVarsMock =
 """
 
 
-let emojiCombMock =
-"""
-    import Foundation
+let emojiCombMock = """
+import Foundation
 
-    @available(iOS 10.0, *)
-    class EmojiVarsMock: EmojiVars {
+@available(iOS 10.0, *)
+class EmojiVarsMock: EmojiVars {
 
         private var _doneInit = false
             init() { _doneInit = true }
@@ -103,7 +114,20 @@ let emojiCombMock =
                 if _doneInit { 😂SetCallCount += 1 }
             }
         }
-    var dict: Dictionary<String, Int> { get set }
+
+    var dictSetCallCount = 0
+    var underlyingDict: Dictionary<String, Int>!
+
+    var dict: Dictionary<String, Int> {
+        get {
+            return underlyingDict
+        }
+        set {
+            underlyingDict = newValue
+            if _doneInit { dictSetCallCount += 1 }
+        }
+    }
+
     var 👍SetCallCount = 0
     var underlying👍: Emoji!
     var 👍: Emoji {
@@ -114,7 +138,7 @@ let emojiCombMock =
                 underlying👍 = newValue
                 if _doneInit { 👍SetCallCount += 1 }
             }
-        }
+    }
     var 👌😳👍SetCallCount = 0
     var underlying👌😳👍: Emoji!
     var 👌😳👍: Emoji {
@@ -125,8 +149,8 @@ let emojiCombMock =
                 underlying👌😳👍 = newValue
                 if _doneInit { 👌😳👍SetCallCount += 1 }
             }
-        }
     }
+}
 
 
 """

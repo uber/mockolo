@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.1
 import PackageDescription
 
 let package = Package(
@@ -11,8 +11,9 @@ let package = Package(
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
         ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.4.0")),
-        .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.23.0"),
+        .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.5.0")),
+        .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.26.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", from: "0.50100.0"),
         ],
     targets: [
         .target(
@@ -24,7 +25,8 @@ let package = Package(
         .target(
             name: "MockoloFramework",
             dependencies: [
-                "SourceKittenFramework"
+                "SourceKittenFramework",
+                "SwiftSyntax",
             ]
         ),
         .testTarget(
