@@ -28,6 +28,7 @@ extension String {
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
     static let available = "available"
+    static let `open` = "open"
     static let handlerSuffix = "Handler"
     static let observableVarPrefix = "Observable<"
     static let rxObservableVarPrefix = "RxSwift.Observable<"
