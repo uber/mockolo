@@ -47,29 +47,30 @@ struct ResolvedEntityContainer {
 
 /// Metadata for a type being mocked
 final class Entity {
-    var name: String = ""
     var filepath: String = ""
     var data: Data? = nil
-    var members: [Model]
-    var offset: Int64 = 0
-    var acl: String = ""
-    var attributes: [String]
-    var inheritedTypes: [String] = []
-    var hasInit: Bool = false
-    var isAnnotated: Bool = false
-    var overrides: [String: String]? = nil
-    var isProcessed: Bool = false
+
+    let name: String
+    let members: [Model]
+    let offset: Int64
+    let acl: String
+    let attributes: [String]
+    let inheritedTypes: [String]
+    let hasInit: Bool
+    let isAnnotated: Bool
+    let overrides: [String: String]?
+    let isProcessed: Bool
     
     init(name: String,
          filepath: String = "",
          data: Data? = nil,
-         isAnnotated: Bool = false,
-         overrides: [String: String]? = nil,
-         acl: String = "",
-         attributes: [String] = [],
-         inheritedTypes: [String] = [],
-         members: [Model] = [],
-         hasInit: Bool = false,
+         isAnnotated: Bool,
+         overrides: [String: String]?,
+         acl: String,
+         attributes: [String],
+         inheritedTypes: [String],
+         members: [Model],
+         hasInit: Bool,
          offset: Int64,
          isProcessed: Bool) {
         self.name = name

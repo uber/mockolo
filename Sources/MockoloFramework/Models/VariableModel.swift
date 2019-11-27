@@ -1,5 +1,6 @@
 import Foundation
 import SourceKittenFramework
+import SwiftSyntax
 
 final class VariableModel: Model {
     var name: String
@@ -8,13 +9,39 @@ final class VariableModel: Model {
     var length: Int64
     let accessControlLevelDescription: String
     let attributes: [String]?
-    let staticKind: String
     var canBeInitParam: Bool
     let processed: Bool
-    let data: Data
+    var data: Data? = nil
     var filePath: String = ""
+    var isStatic = false
+    var modelDescription: String? = nil
     var modelType: ModelType {
         return .variable
+    }
+
+    var staticKind: String {
+        return isStatic ? .static : ""
+    }
+
+    init(name: String,
+         typeName: String,
+         acl: String?,
+         isStatic: Bool,
+         canBeInitParam: Bool,
+         offset: Int64,
+         length: Int64,
+         modelDescription: String?,
+         processed: Bool) {
+
+        self.name = name.trimmingCharacters(in: .whitespaces)
+        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
+        self.offset = offset
+        self.length = length
+        self.canBeInitParam = canBeInitParam
+        self.processed = processed
+        self.accessControlLevelDescription = acl ?? ""
+        self.attributes = nil
+        self.modelDescription = modelDescription
     }
     
     init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
@@ -23,7 +50,7 @@ final class VariableModel: Model {
         offset = ast.range.offset
         length = ast.range.length
         canBeInitParam = ast.canBeInitParam
-        staticKind = ast.isStaticVariable ? .static : ""
+        isStatic = ast.isStaticVariable
         accessControlLevelDescription = ast.accessControlLevelDescription
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
         self.processed = processed
@@ -33,13 +60,21 @@ final class VariableModel: Model {
     
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
-            var ret = self.data.toString(offset: self.offset, length: self.length)
-            if !ret.contains(identifier),
-                let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
-                let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
-                ret = ret.replacingOccurrences(of: found, with: identifier)
+            
+            if let modelDescription = modelDescription {
+                return modelDescription
             }
-            return ret
+            
+            if let ret = self.data?.toString(offset: self.offset, length: self.length) {
+                if !ret.contains(identifier),
+                    let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
+                    let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
+                    let replaced = ret.replacingOccurrences(of: found, with: identifier)
+                    return replaced
+                }
+                return ret
+            }
+            return nil
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,

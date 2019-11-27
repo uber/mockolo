@@ -33,7 +33,7 @@ func applyMethodTemplate(name: String,
     let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
 
     let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription+" "
-    let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "")}.joined(separator: ", ")
+    let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "")}.joined(separator: ", ") ?? ""
     let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
     let paramDeclsStr = params.compactMap{$0.render(with: "")}.joined(separator: ", ")
 
