@@ -518,7 +518,6 @@ private let defaultTypeValueMap =
      "Character": "\"\"",
      "TimeInterval": "0.0",
      "NSTimeInterval": "0.0",
-     "RxTimeInterval": "0.0",
      "PublishSubject": "PublishSubject()",
      "Date": "Date()",
      "NSDate": "NSDate()",
