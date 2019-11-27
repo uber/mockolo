@@ -73,7 +73,11 @@ final class EntityVisitor: SyntaxVisitor {
         }
         return ""
     }
-    
+
+    private func attributesDescription(_ attributes: AttributeListSyntax?) -> String? {
+        return attributes?.withoutTrivia().description
+    }
+
     private func hasStaticModifier(_  modifiers: ModifierListSyntax) -> Bool {
         return modifiers.tokens.filter {$0.tokenKind == .staticKeyword }.count > 0
     }
@@ -95,7 +99,7 @@ final class EntityVisitor: SyntaxVisitor {
     
     private func initModel(_ node: InitializerDeclSyntax, acl: String, processed: Bool) -> Model? {
         let params = node.parameters.parameterList.compactMap { paramModel($0, isInitializer: true) }
-        let genericTypeParams = node.genericParameterClause?.genericParameterList.compactMap { genericTypeParamModel($0, isInitializer: true) }
+        let genericTypeParams = node.genericParameterClause?.genericParameterList.compactMap { genericTypeParamModel($0, isInitializer: true) } ?? []
         
         return Entity.model(name: "init",
                            typeName: "",
@@ -118,7 +122,7 @@ final class EntityVisitor: SyntaxVisitor {
         }
         
         let params = node.signature.input.parameterList.compactMap { paramModel($0, isInitializer: false) }
-        let genericTypeParams = node.genericParameterClause?.genericParameterList.compactMap { genericTypeParamModel($0, isInitializer: false) }
+        let genericTypeParams = node.genericParameterClause?.genericParameterList.compactMap { genericTypeParamModel($0, isInitializer: false) } ?? []
         
         let funcmodel = Entity.model(name: node.identifier.description,
                                     typeName: node.signature.output?.returnType.description ?? "",
@@ -144,7 +148,12 @@ final class EntityVisitor: SyntaxVisitor {
                 label = first
                 name = second
             } else {
-                name = first
+                if first == "_" {
+                    label = first
+                    name = first + "arg"
+                } else {
+                    name = first
+                }
             }
         }
         
@@ -216,36 +225,32 @@ final class EntityVisitor: SyntaxVisitor {
         var attributeList = [String]()
         var memberList = [Model]()
         var hasInit = false
-        
+        var attrDesc: String? = nil
         for m in members {
             if let varMember = m.decl as? VariableDeclSyntax {
                 let ret = varModels(varMember, acl: acl, processed: processed)
                 memberList.append(contentsOf: ret)
-                if let attrDesc = varMember.attributes?.withoutTrivia().description {
-                    attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
-                }
+                attrDesc = attributesDescription(varMember.attributes)
             } else if let funcMember = m.decl as? FunctionDeclSyntax {
                 if let ret = funcModel(funcMember, acl: acl, processed: processed) {
                     memberList.append(ret)
                 }
-                if let attrDesc = funcMember.attributes?.withoutTrivia().description {
-                    attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
-                }
+                attrDesc = attributesDescription(funcMember.attributes)
             } else if let initMember = m.decl as? InitializerDeclSyntax {
                 hasInit = true
                 if let ret = initModel(initMember, acl: acl, processed: processed) {
                     memberList.append(ret)
                 }
-                if let attrDesc = initMember.attributes?.withoutTrivia().description {
-                    attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
-                }
+                attrDesc = attributesDescription(initMember.attributes)
             } else if let patMember = m.decl as? AssociatedtypeDeclSyntax {
                 if let ret = typealiasModel(patMember, overrides: overrides, acl: acl, processed: processed) {
                     memberList.append(ret)
                 }
-                if let attrDesc = patMember.attributes?.withoutTrivia().description {
-                    attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
-                }
+                attrDesc = attributesDescription(patMember.attributes)
+            }
+            
+            if let attrDesc = attrDesc {
+                attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
             }
         }
         
@@ -271,7 +276,7 @@ final class EntityVisitor: SyntaxVisitor {
         }
         
         var aclDesc = ""
-        if let mds = node.modifiers{
+        if let mds = node.modifiers {
             aclDesc = acl(mds)
         }
         
@@ -333,6 +338,11 @@ final class EntityVisitor: SyntaxVisitor {
 }
 
 extension Trivia {
+    // This parses arguments in annotation which can be used to override certain types.
+    //
+    // E.g. given /// @mockolo(typealias: T = Any; U = AnyObject), it returns
+    // a dictionary: [T: Any, U: AnyObject] which will be used to override inhertied types
+    // of typealias decls for T and U.
     private func metadata(with annotation: String, in val: String) -> AnnotationMetadata? {
         if val.contains(annotation) {
             var aliasMap: [String: String]?
@@ -359,6 +369,9 @@ extension Trivia {
         }
         return nil
     }
+    
+    // Looks up an annotation (e.g. /// @mockolo) and its arguments if any.
+    // See metadata(with:, in:) for more info on the annotation arguments.
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         var ret: AnnotationMetadata?
         for i in 0..<count {
