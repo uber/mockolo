@@ -28,22 +28,22 @@ final class MethodModel: Model {
     let length: Int64
     let accessControlLevelDescription: String
     let attributes: [String]
-    let genericTypeParams: [ParamModel]?
+    let genericTypeParams: [ParamModel]
     let params: [ParamModel]
     let processed: Bool
     var modelDescription: String? = nil
     let isInitializer: Bool
     let isStatic: Bool
     let suffix: String
-
+    
     var modelType: ModelType {
         return .method
     }
-
+    
     var staticKind: String {
         return isStatic ? .static : ""
     }
-
+    
     lazy var signatureComponents: [String] = {
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
         let paramNames = self.params.map(path: \.name)
@@ -56,16 +56,15 @@ final class MethodModel: Model {
             }
             return nil
         }
-        if let genericParams = self.genericTypeParams {
-            let genericTypeNames = genericParams.map { $0.name.capitlizeFirstLetter + $0.type.displayName }
-            args.append(contentsOf: genericTypeNames)
-        }
-            
+        
+        let genericTypeNames = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayName }
+        args.append(contentsOf: genericTypeNames)
+        
         args.append(contentsOf: paramTypes.map(path: \.displayName))
-        var dtype = self.type.displayName
-        let capped = min(dtype.count, 32)
-        dtype.removeLast(dtype.count-capped)
-        args.append(dtype)
+        var displayType = self.type.displayName
+        let capped = min(displayType.count, 32)
+        displayType.removeLast(displayType.count-capped)
+        args.append(displayType)
         let ret = args.filter{ arg in !arg.isEmpty }
         return ret
     }()
@@ -94,7 +93,7 @@ final class MethodModel: Model {
          typeName: String,
          acl: String?,
          attributes: [String],
-         genericTypeParams: [ParamModel]?,
+         genericTypeParams: [ParamModel],
          params: [ParamModel],
          throwsOrRethrows: String?,
          isStatic: Bool,
@@ -125,11 +124,9 @@ final class MethodModel: Model {
         var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
         let nameString = comps.removeFirst()
         self.filePath = filepath
-        
         self.data = data
         self.name = nameString
-        self.type = Type(ast.typeName) // == .unknownVal ? "" : ast.typeName
-        
+        self.type = Type(ast.typeName)
         self.isStatic = ast.isStaticMethod
         self.processed = processed
         self.isInitializer = ast.isInitializer
@@ -149,7 +146,7 @@ final class MethodModel: Model {
             .map { (arg: Structure) -> ParamModel in
                 ParamModel(arg, label: arg.name, offset: arg.offset, length: arg.length, data: data, isGeneric: true)
         }
-
+        
         // Sourcekit structure api doesn't provide info on throws/rethrows, so manually parse it here
         let suffixOffset = ast.nameOffset + ast.nameLength + 1
         let suffixLen = ast.offset + ast.length - suffixOffset
@@ -188,15 +185,7 @@ final class MethodModel: Model {
             if isInitializer {
                 return nil
             }
-
-            if let modelDescription = modelDescription {
-                return modelDescription
-            }
-
-            if let ret = self.data?.toString(offset: offset, length: length) {
-                return ret
-            }
-            return nil
+            return modelDescription ?? self.data?.toString(offset: offset, length: length)
         }
         
         let result = applyMethodTemplate(name: name,

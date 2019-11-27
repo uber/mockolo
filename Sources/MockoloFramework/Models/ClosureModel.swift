@@ -23,7 +23,7 @@ final class ClosureModel: Model {
     var offset: Int64 = .max
     let funcReturnType: Type
     let staticKind: String
-    let genericTypeNames: [String]?
+    let genericTypeNames: [String]
     let paramNames: [String]
     let paramTypes: [Type]
     let suffix: String
@@ -32,16 +32,16 @@ final class ClosureModel: Model {
         return .class
     }
 
-    init(name: String, genericTypeParams: [ParamModel]?, paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, staticKind: String) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, staticKind: String) {
         self.name = name + .handlerSuffix
         self.staticKind = staticKind
         self.suffix = suffix
-        let genericTypeNameList = genericTypeParams?.map(path: \.name)
+        let genericTypeNameList = genericTypeParams.map(path: \.name)
         self.genericTypeNames = genericTypeNameList
         self.paramNames = paramNames
         self.paramTypes = paramTypes
         self.funcReturnType = returnType
-        self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList ?? [], suffix: suffix, returnType: returnType)
+        self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType)
     }
     
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {

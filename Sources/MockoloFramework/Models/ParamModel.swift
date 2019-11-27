@@ -33,10 +33,8 @@ final class ParamModel: Model {
     init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, isInitializer: Bool = false, offset: Int64, length: Int64) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
-
-        let lbl = label.trimmingCharacters(in: .whitespaces)
-        self.label = name != lbl ? lbl: ""
-
+        let labelStr = label.trimmingCharacters(in: .whitespaces)
+        self.label = name != labelStr ? labelStr: ""
         self.offset = offset
         self.length = length
         self.isGeneric = isGeneric

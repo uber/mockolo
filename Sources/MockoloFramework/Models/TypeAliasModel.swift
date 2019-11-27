@@ -84,10 +84,8 @@ final class TypeAliasModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        if processed {
-            if let modelDescription = modelDescription {
-                return modelDescription
-            }
+        if processed, let modelDescription = modelDescription {
+            return modelDescription
         }
         
         return applyTypealiasTemplate(name: name, type: type, acl: accessControlLevelDescription)

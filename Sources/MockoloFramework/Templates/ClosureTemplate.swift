@@ -20,7 +20,7 @@ import SourceKittenFramework
 func applyClosureTemplate(name: String,
                           type: Type,
                           typeKeys: [String: String]?,
-                          genericTypeNames: [String]?,
+                          genericTypeNames: [String],
                           paramVals: [String]?,
                           paramTypes: [Type]?,
                           suffix: String,
