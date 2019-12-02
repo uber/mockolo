@@ -27,7 +27,7 @@ import SourceKittenFramework
 ///          cumulated attributes, and a map of filepaths and file contents (used for import lines lookup later).
 func lookupEntities(key: String,
                     protocolMap: [String: Entity],
-                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [(String, Data, Int64)]) {
+                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [String], [(String, Data, Int64)]) {
     
     // Used to keep track of types to be mocked
     var models = [Model]()
@@ -35,9 +35,11 @@ func lookupEntities(key: String,
     var processedModels = [Model]()
     // Gather attributes declared in current or parent protocols
     var attributes = [String]()
-    // Gather filepaths used for import lines look up later
+    // Gather filepaths and contents used for imports
     var pathToContents = [(String, Data, Int64)]()
-    
+    // Gather filepaths used for imports
+    var paths = [String]()
+
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
         
@@ -48,16 +50,17 @@ func lookupEntities(key: String,
         if let data = current.data {
             pathToContents.append((current.filepath, data, current.offset))
         }
-        
+        paths.append(current.filepath)
             // If the protocol inherits other protocols, look up their entities as well.
             for parent in current.inheritedTypes {
                 if parent != .class, parent != .any, parent != .anyObject {
-                    let (parentModels, parentProcessedModels, parentAttributes, parentPathToContents) = lookupEntities(key: parent,
+                    let (parentModels, parentProcessedModels, parentAttributes, parentPaths, parentPathToContents) = lookupEntities(key: parent,
                                                                                                                        protocolMap: protocolMap,
                                                                                                                        inheritanceMap: inheritanceMap)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
                     attributes.append(contentsOf: parentAttributes)
+                    paths.append(contentsOf: parentPaths)
                     pathToContents.append(contentsOf:parentPathToContents)
                 }
             }
@@ -71,10 +74,10 @@ func lookupEntities(key: String,
         if let data = parentMock.data {
             pathToContents.append((parentMock.filepath, data, parentMock.offset))
         }
-        
+        paths.append(parentMock.filepath)
     }
     
-    return (models, processedModels, attributes, pathToContents)
+    return (models, processedModels, attributes, paths, pathToContents)
 }
 
 

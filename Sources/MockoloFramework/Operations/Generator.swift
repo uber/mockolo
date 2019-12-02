@@ -52,8 +52,9 @@ public func generate(sourceDirs: [String]?,
     var parentMocks = [String: Entity]()
     var annotatedProtocolMap = [String: Entity]()
     var protocolMap = [String: Entity]()
-    var processedImportLines = [String: [String]]()
     var pathToContentMap = [(String, Data, Int64)]()
+    var pathToImportsMap = [String: [String]]()
+    var relevantPaths = [String]()
     var resolvedEntities = [ResolvedEntity]()
     
     let maxConcurrentThreads = concurrencyLimit ?? 0
@@ -70,9 +71,13 @@ public func generate(sourceDirs: [String]?,
                                  queue: mockgenQueue) { (elements, imports) in
                                     elements.forEach { element in
                                         parentMocks[element.name] = element
-                                        if processedImportLines[element.filepath] == nil {
-                                            processedImportLines[element.filepath] = imports
+                                    }
+
+                                    for (path, modules) in imports {
+                                        if pathToImportsMap[path] == nil {
+                                            pathToImportsMap[path] = []
                                         }
+                                        pathToImportsMap[path]?.append(contentsOf: modules)
                                     }
         }
     }
@@ -89,11 +94,19 @@ public func generate(sourceDirs: [String]?,
                         annotation: annotation,
                         parserType: parserType,
                         semaphore: sema,
-                        queue: mockgenQueue) { (elements) in
+                        queue: mockgenQueue) { (elements, imports) in
                             elements.forEach { element in
                                 protocolMap[element.name] = element
                                 if element.isAnnotated {
                                     annotatedProtocolMap[element.name] = element
+                                }
+                            }
+                            if let imports = imports {
+                                for (path, modules) in imports {
+                                    if pathToImportsMap[path] == nil {
+                                        pathToImportsMap[path] = []
+                                    }
+                                    pathToImportsMap[path]?.append(contentsOf: modules)
                                 }
                             }
     }
@@ -116,9 +129,10 @@ public func generate(sourceDirs: [String]?,
                          typeKeys: typeKeys,
                          semaphore: sema,
                          queue: mockgenQueue,
-                         process: { (entity, pathsToContents) in
-                            pathToContentMap.append(contentsOf: pathsToContents)
-                            resolvedEntities.append(entity)
+                         process: { container in
+                            pathToContentMap.append(contentsOf: container.imports)
+                            relevantPaths.append(contentsOf: container.paths)
+                            resolvedEntities.append(container.entity)
     })
     signpost_end(name: "Generate models")
     let t3 = CFAbsoluteTimeGetCurrent()
@@ -140,7 +154,8 @@ public func generate(sourceDirs: [String]?,
     signpost_begin(name: "Write results")
     log("Write the mock results and import lines to", outputFilePath, level: .info)
     let result = write(candidates: candidates,
-                       processedImportLines: processedImportLines,
+                       pathToImportsMap: pathToImportsMap,
+                       relevantPaths: relevantPaths,
                        pathToContentMap: pathToContentMap,
                        header: header,
                        macro: macro,

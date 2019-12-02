@@ -23,7 +23,7 @@ func generateProcessedTypeMap(_ paths: [String],
                               parserType: ParserType,
                               semaphore: DispatchSemaphore?,
                               queue: DispatchQueue?,
-                              process: @escaping ([Entity], [String]) -> ()) {
+                              process: @escaping ([Entity], [String: [String]]) -> ()) {
     
     switch parserType {
     case .sourceKit:
@@ -55,7 +55,7 @@ func generateProcessedTypeMap(_ paths: [String],
 
 private func generateProcessedModels(_ path: String,
                                      lock: NSLock?,
-                                     process: @escaping ([Entity], [String]) -> ()) {
+                                     process: @escaping ([Entity], [String: [String]]) -> ()) {
     
     guard let content = FileManager.default.contents(atPath: path) else {
         fatalError("Retrieving contents of \(path) failed")
@@ -87,7 +87,32 @@ private func generateProcessedModels(_ path: String,
         
         let imports = findImportLines(data: content, offset: subs.first?.offset)
         lock?.lock()
-        process(results, imports)
+        process(results, [path: imports])
+        lock?.unlock()
+    } catch {
+        fatalError(error.localizedDescription)
+    }
+}
+
+private func generateProcessedModels(_ path: String,
+                                     treeVisitor: inout EntityVisitor,
+                                     lock: NSLock?,
+                                     process: @escaping ([Entity], [String: [String]]) -> ()) {
+    
+    do {
+        var results = [Entity]()
+        let node = try SyntaxParser.parse(path)
+        node.walk(&treeVisitor)
+        let ret = treeVisitor.entities
+        for ent in ret {
+            ent.filepath = path
+        }
+        results.append(contentsOf: ret)
+        let imports = treeVisitor.imports
+        treeVisitor.reset()
+
+        lock?.lock()
+        process(results, [path: imports])
         lock?.unlock()
     } catch {
         fatalError(error.localizedDescription)
