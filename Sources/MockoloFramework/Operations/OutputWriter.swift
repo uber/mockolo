@@ -18,28 +18,29 @@ import Foundation
 
 /// Combines a list of entities and import lines and header and writes the final output
 func write(candidates: [(String, Int64)],
-           processedImportLines: [String: [String]],
+           pathToImportsMap: [String: [String]],
+           relevantPaths: [String],
            pathToContentMap: [(String, Data, Int64)],
            header: String?,
            macro: String?,
            to outputFilePath: String) -> String {
     
-    var importLineStr = ""
-    
-    var importLines = processedImportLines
-    for (filepath, filecontent, offset) in pathToContentMap {
-        if importLines[filepath] == nil {
-            importLines[filepath] = findImportLines(data: filecontent, offset: offset)
+    var importLines = [String]()
+    for path in relevantPaths {
+        if let lines = pathToImportsMap[path] {
+            importLines.append(contentsOf: lines)
+        } else {
+            for (filepath, filecontent, offset) in pathToContentMap {
+                if path == filepath {
+                    let v = findImportLines(data: filecontent, offset: offset)
+                    importLines.append(contentsOf: v)
+                }
+            }
         }
     }
-    
-    let imports = importLines.values.joined().map { line in
-        return line.trimmingCharacters(in: CharacterSet.whitespaces)
-    }
-    
-    let importsSet = Set(imports)
-    importLineStr = importsSet.sorted().joined(separator: "\n")
-    
+    let importsSet = Set(importLines.map{$0.trimmingCharacters(in: .whitespaces)})
+    let importLineStr = importsSet.sorted().joined(separator: "\n")
+
     let entities = candidates
         .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
             if left.1 == right.1 {

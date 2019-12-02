@@ -1,12 +1,16 @@
 import MockoloFramework
 
 let overload1 = """
+import AVFoundation
+
 /// \(String.mockAnnotation)
 protocol P1: P0 {
 }
 """
 
 let overloadParent1 = """
+import Foundation
+import CoreLocation
 
 public class P0Mock: P0 {
     private var _doneInit = false
@@ -36,6 +40,9 @@ public class P0Mock: P0 {
 
 let overloadMock1 =
 """
+import AVFoundation
+import CoreLocation
+import Foundation
 
 class P1Mock: P1 {
     

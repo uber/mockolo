@@ -25,7 +25,7 @@ func generateUniqueModels(protocolMap: [String: Entity],
                           typeKeys: [String: String]?,
                           semaphore: DispatchSemaphore?,
                           queue: DispatchQueue?,
-                          process: @escaping (ResolvedEntity, [(String, Data, Int64)]) -> ()) {
+                          process: @escaping (ResolvedEntityContainer) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for (key, val) in annotatedProtocolMap {
@@ -49,7 +49,7 @@ func generateUniqueModels(key: String,
                           protocolMap: [String: Entity],
                           inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
-    let (models, processedModels, attributes, pathToContentList) = lookupEntities(key: key, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+    let (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
@@ -86,7 +86,7 @@ func generateUniqueModels(key: String,
     let whitelist = typealiasWhitelist(in: uniqueModels)
     let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars, typealiasWhitelist: whitelist)
     
-    return ResolvedEntityContainer(entity: resolvedEntity, imports: pathToContentList)
+    return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }
 
 
@@ -97,11 +97,11 @@ func generateUniqueModels(key: String,
                           protocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
                           lock: NSLock? = nil,
-                          process: @escaping (ResolvedEntity, [(String, Data, Int64)]) -> ()) {
+                          process: @escaping (ResolvedEntityContainer) -> ()) {
     let ret = generateUniqueModels(key: key, entity: entity, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
     lock?.lock()
-    process(ret.entity, ret.imports)
+    process(ret)
     lock?.unlock()
 }
 

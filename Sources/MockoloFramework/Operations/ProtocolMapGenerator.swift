@@ -27,7 +27,7 @@ func generateProtocolMap(sourceDirs: [String]?,
                          parserType: ParserType,
                          semaphore: DispatchSemaphore?,
                          queue: DispatchQueue?,
-                         process: @escaping ([Entity]) -> ()) {
+                         process: @escaping ([Entity], [String: [String]]?) -> ()) {
     
     if let sourceDirs = sourceDirs {
         generateProtcolMap(dirs: sourceDirs, exclusionSuffixes: exclusionSuffixes, annotation: annotation, parserType: parserType, semaphore: semaphore, queue: queue, process: process)
@@ -42,7 +42,7 @@ private func generateProtcolMap(dirs: [String],
                                 parserType: ParserType,
                                 semaphore: DispatchSemaphore?,
                                 queue: DispatchQueue?,
-                                process: @escaping ([Entity]) -> ()) {
+                                process: @escaping ([Entity], [String: [String]]?) -> ()) {
     
     switch parserType {
     case .sourceKit:
@@ -94,7 +94,7 @@ private func generateProtcolMap(files: [String],
                                 parserType: ParserType,
                                 semaphore: DispatchSemaphore?,
                                 queue: DispatchQueue?,
-                                process: @escaping ([Entity]) -> ()) {
+                                process: @escaping ([Entity], [String: [String]]?) -> ()) {
     
     switch parserType {
     case .sourceKit:
@@ -145,7 +145,7 @@ private func generateProtcolMap(_ path: String,
                                 exclusionSuffixes: [String]? = nil,
                                 annotationData: Data,
                                 lock: NSLock?,
-                                process: @escaping ([Entity]) -> ()) {
+                                process: @escaping ([Entity], [String: [String]]?) -> ()) {
     
     guard path.shouldParse(with: exclusionSuffixes) else { return }
     guard let content = FileManager.default.contents(atPath: path) else {
@@ -189,7 +189,7 @@ private func generateProtcolMap(_ path: String,
         }
         
         lock?.lock()
-        process(results)
+        process(results, nil)
         lock?.unlock()
         
     } catch {
@@ -203,19 +203,23 @@ private func generateProtcolMap(_ path: String,
                                 annotation: String,
                                 treeVisitor: inout EntityVisitor,
                                 lock: NSLock?,
-                                process: @escaping ([Entity]) -> ()) {
+                                process: @escaping ([Entity], [String: [String]]?) -> ()) {
     
     guard path.shouldParse(with: exclusionSuffixes) else { return }
-    
     do {
         var results = [Entity]()
         let node = try SyntaxParser.parse(path)
         node.walk(&treeVisitor)
         let ret = treeVisitor.entities
+        for ent in ret {
+            ent.filepath = path
+        }
         results.append(contentsOf: ret)
-        
+        let imports = treeVisitor.imports
+        treeVisitor.reset()
+
         lock?.lock()
-        process(results)
+        process(results, [path: imports])
         lock?.unlock()
         
     } catch {
