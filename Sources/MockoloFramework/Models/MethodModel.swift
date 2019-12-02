@@ -27,7 +27,7 @@ final class MethodModel: Model {
     var offset: Int64
     let length: Int64
     let accessControlLevelDescription: String
-    let attributes: [String]
+    var attributes: [String]? = nil
     let genericTypeParams: [ParamModel]
     let params: [ParamModel]
     let processed: Bool
@@ -91,11 +91,10 @@ final class MethodModel: Model {
     
     init(name: String,
          typeName: String,
-         acl: String?,
-         attributes: [String],
+         acl: String,
          genericTypeParams: [ParamModel],
          params: [ParamModel],
-         throwsOrRethrows: String?,
+         throwsOrRethrows: String,
          isStatic: Bool,
          isInitializer: Bool,
          offset: Int64,
@@ -104,8 +103,7 @@ final class MethodModel: Model {
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
-        self.suffix = throwsOrRethrows ?? ""
-        self.attributes = attributes
+        self.suffix = throwsOrRethrows
         self.offset = offset
         self.length = length
         self.isInitializer = isInitializer
@@ -114,7 +112,7 @@ final class MethodModel: Model {
         self.genericTypeParams = genericTypeParams
         self.processed = processed
         self.modelDescription = modelDescription
-        self.accessControlLevelDescription = acl ?? ""
+        self.accessControlLevelDescription = acl
     }
     
     init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {

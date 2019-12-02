@@ -95,25 +95,6 @@ final class Entity {
         return attributes.filter {$0.contains(String.available)}
     }
 
-    static func model(label: String = "",
-                      name: String,
-                      typeName: String,
-                      acl: String? = nil,
-                      overrideTypes: [String: String]? = nil,
-                      genericTypeParams: [Model]? = nil,
-                      params: [Model]? = nil,
-                      throwsOrRethrows: String? = nil,
-                      isStatic: Bool = false,
-                      isGeneric: Bool = false,
-                      isInitializer: Bool = false,
-                      canBeInitParam: Bool = false,
-                      offset: Int64,
-                      length: Int64,
-                      modelDescription: String? = nil,
-                      processed: Bool = false) -> Model? {
-        return nil
-    }
-    
     static func model(for element: Structure, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
             return VariableModel(element, filepath: filepath, data: data, processed: processed)

@@ -37,6 +37,7 @@ final class VariableModel: Model {
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
         self.offset = offset
         self.length = length
+        self.isStatic = isStatic
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.accessControlLevelDescription = acl ?? ""
