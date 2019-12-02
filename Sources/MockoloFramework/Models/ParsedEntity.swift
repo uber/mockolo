@@ -95,11 +95,13 @@ final class Entity {
         return attributes.filter {$0.contains(String.available)}
     }
 
-    static func model(name: String,
-                      label: String = "",
+    static func model(label: String = "",
+                      name: String,
                       typeName: String,
                       acl: String? = nil,
                       overrideTypes: [String: String]? = nil,
+                      genericTypeParams: [Model]? = nil,
+                      params: [Model]? = nil,
                       throwsOrRethrows: String? = nil,
                       isStatic: Bool = false,
                       isGeneric: Bool = false,
