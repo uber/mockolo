@@ -16,7 +16,6 @@
 
 import Foundation
 import SourceKittenFramework
-import SwiftSyntax
 
 final class MethodModel: Model {
     

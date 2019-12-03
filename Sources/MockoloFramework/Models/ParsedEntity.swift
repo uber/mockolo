@@ -16,7 +16,6 @@
 
 import Foundation
 import SourceKittenFramework
-import SwiftSyntax
 
 /// Metadata containing unique models and potential init params ready to be rendered for output
 struct ResolvedEntity {

@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 func applyVariableTemplate(name: String,
                            type: Type,

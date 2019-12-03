@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 func applyClosureTemplate(name: String,
                           type: Type,

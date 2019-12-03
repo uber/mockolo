@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 final class ClassModel: Model {
     var name: String

@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 /// Used to resolve inheritance, uniquify duplicate entities, and compute potential init params.
 

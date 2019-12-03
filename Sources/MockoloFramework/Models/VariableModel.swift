@@ -1,6 +1,5 @@
 import Foundation
 import SourceKittenFramework
-import SwiftSyntax
 
 final class VariableModel: Model {
     var name: String

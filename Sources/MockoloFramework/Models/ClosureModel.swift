@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 final class ClosureModel: Model {
     var name: String

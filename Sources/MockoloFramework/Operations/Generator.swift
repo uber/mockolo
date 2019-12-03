@@ -15,8 +15,6 @@
 //
 
 import Foundation
-import SwiftSyntax
-import SourceKittenFramework
 
 enum InputError: Error {
     case annotationError

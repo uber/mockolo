@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 /// Performs uniquifying operations on models of an entity
 

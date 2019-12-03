@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 func scanDirectory(_ path: String, with callBack: (String) -> Void) {
     let errorHandler = { (url: URL, error: Error) -> Bool in

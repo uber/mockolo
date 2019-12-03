@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 /// Renders models with temeplates for output
 
