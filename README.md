@@ -170,7 +170,7 @@ func testMock() {
 }
 ```
 
-An override argument, e.g. for a typelias, can be passed into the annotation (default or custom) delimited by a semi-colon. 
+An override argument, e.g. for a typealias, can be passed into the annotation (default or custom) delimited by a semi-colon. 
 
 ```swift
 /// @mockable(typealias: T = AnyObject; U = StringProtocol)
