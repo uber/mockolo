@@ -134,8 +134,9 @@ final class MethodModel: Model {
         assert(paramDecls.count == comps.count)
         
         let zippedParams = zip(paramDecls, comps)
-        self.params = zippedParams.map { (argAst: Structure, argLabel: String) -> ParamModel in
-            ParamModel(argAst, label: argLabel, offset: argAst.offset, length: argAst.length, data: data, isInitializer: ast.isInitializer)
+        self.params = zippedParams.map { (arg: (Structure, String)) -> ParamModel in
+            let (argAst, argLabel) = arg
+            return ParamModel(argAst, label: argLabel, offset: argAst.offset, length: argAst.length, data: data, inInit: ast.isInitializer)
         }
         
         self.genericTypeParams = ast.substructures

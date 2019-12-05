@@ -113,7 +113,7 @@ class MockoloTestCase: XCTestCase {
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
-                      parserType: .sourceKit,
+                      parserType: .swiftSyntax,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,

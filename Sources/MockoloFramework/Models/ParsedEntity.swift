@@ -29,9 +29,9 @@ struct ResolvedEntity {
     
     func model() -> Model {
         return ClassModel(identifier: key,
-                          acl: entity.acl,
+                          acl: entity.entityNode.acl,
                           attributes: attributes,
-                          offset: entity.offset,
+                          offset: entity.entityNode.offset,
                           needInit: !hasInit,
                           initParams: initVars,
                           typealiasWhitelist: typealiasWhitelist,
@@ -45,65 +45,48 @@ struct ResolvedEntityContainer {
     let imports: [(String, Data, Int64)]
 }
 
+protocol EntityNode {
+    var name: String { get }
+    var acl: String { get }
+    var attributesDescription: String { get }
+    var inheritedTypes: [String] { get }
+    var offset: Int64 { get }
+    func subContainer(overrides: [String: String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
+}
+
+final class EntityNodeSubContainer {
+    let attributes: [String]
+    let members: [Model]
+    let hasInit: Bool
+    init(attributes: [String], members: [Model], hasInit: Bool) {
+        self.attributes = attributes
+        self.members = members
+        self.hasInit = hasInit
+    }
+}
+
+
 /// Metadata for a type being mocked
 final class Entity {
     var filepath: String = ""
     var data: Data? = nil
 
-    let name: String
-    let members: [Model]
-    let offset: Int64
-    let acl: String
-    let attributes: [String]
-    let inheritedTypes: [String]
-    let hasInit: Bool
     let isAnnotated: Bool
     let overrides: [String: String]?
+    let entityNode: EntityNode
     let isProcessed: Bool
     
-    init(name: String,
+    init(entityNode: EntityNode,
          filepath: String = "",
          data: Data? = nil,
          isAnnotated: Bool,
          overrides: [String: String]?,
-         acl: String,
-         attributes: [String],
-         inheritedTypes: [String],
-         members: [Model],
-         hasInit: Bool,
-         offset: Int64,
          isProcessed: Bool) {
-        self.name = name
+        self.entityNode = entityNode
         self.filepath = filepath
         self.data = data
-        self.acl = acl
-        self.attributes = attributes
-        self.inheritedTypes = inheritedTypes
-        self.hasInit = hasInit
         self.isAnnotated = isAnnotated
         self.overrides = overrides
         self.isProcessed = isProcessed
-        self.offset = offset
-        self.members = members
-    }
-
-    
-    func subAttributes() -> [String]? {
-        if isProcessed {
-            return nil
-        }
-        return attributes.filter {$0.contains(String.available)}
-    }
-
-    static func model(for element: Structure, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
-        if element.isVariable {
-            return VariableModel(element, filepath: filepath, data: data, processed: processed)
-        } else if element.isMethod {
-            return MethodModel(element, filepath: filepath, data: data,  processed: processed)
-        } else if element.isAssociatedType {
-            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
-        }
-        
-        return nil
     }
 }

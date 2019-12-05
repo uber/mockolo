@@ -46,7 +46,8 @@ final class ClassModel: Model {
         self.needInit = needInit
         self.initParams = initParams
         self.offset = offset
-        self.attribute = Set(attributes).joined(separator: " ")
+        let ret = attributes.filter {$0.contains(String.available)}
+        self.attribute = Set(ret).joined(separator: " ")
         self.accessControlLevelDescription = acl.isEmpty ? "" : acl + " "
         self.typealiasWhitelist = typealiasWhitelist
     }

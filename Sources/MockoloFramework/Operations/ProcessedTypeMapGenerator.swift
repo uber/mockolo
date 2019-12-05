@@ -65,23 +65,11 @@ private func generateProcessedModels(_ path: String,
         let topstructure = try Structure(path: path)
         let subs = topstructure.substructures
         let results = subs.compactMap { current -> Entity? in
-            let members = current.substructures.compactMap { (child: Structure) -> Model? in
-                return Entity.model(for: child, filepath: path, data: content, overrides: nil, processed: true)
-            }
-            
-            let curAttributes = current.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
-            let hasInit = current.substructures.filter(path: \.isInitializer).count > 0
-            return Entity(name: current.name,
+            return Entity(entityNode: current,
                           filepath: path,
                           data: content,
                           isAnnotated: false,
                           overrides: nil,
-                          acl: current.accessControlLevelDescription,
-                          attributes: curAttributes,
-                          inheritedTypes: [],
-                          members: members,
-                          hasInit: hasInit,
-                          offset: current.offset,
                           isProcessed: true)
         }
         
