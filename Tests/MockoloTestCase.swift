@@ -106,6 +106,7 @@ class MockoloTestCase: XCTestCase {
         \(macroEnd)
         """
         
+        let useSourceKit = Int.random(in: 0..<10) > 5
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
                       exclusionSuffixes: ["Mocks", "Tests"],
@@ -113,7 +114,7 @@ class MockoloTestCase: XCTestCase {
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
-                      parserType: .swiftSyntax,
+                      parserType: useSourceKit ? .sourceKit : .swiftSyntax,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,
