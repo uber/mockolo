@@ -336,13 +336,20 @@ extension AssociatedtypeDeclSyntax {
     
     
 }
+
+enum EntityType {
+    case protocolType, classType
+}
+
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
     var imports: [String] = []
     let annotation: String
+    let entityType: EntityType
     
-    init(annotation: String = "") {
+    init(annotation: String = "", entityType: EntityType) {
         self.annotation = annotation
+        self.entityType = entityType
     }
     
     func reset() {
@@ -351,25 +358,29 @@ final class EntityVisitor: SyntaxVisitor {
     }
     
     func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
-        var isAnnotated = false
-        var overrides: [String: String]? = nil
-        if !annotation.isEmpty {
-            let metadata = node.annotationMetadata(with: annotation)
-            isAnnotated = metadata != nil
-            overrides = metadata?.typealiases
+        if entityType == .protocolType {
+            var isAnnotated = false
+            var overrides: [String: String]? = nil
+            if !annotation.isEmpty {
+                let metadata = node.annotationMetadata(with: annotation)
+                isAnnotated = metadata != nil
+                overrides = metadata?.typealiases
+            }
+            
+            let ent = Entity(entityNode: node,
+                             isAnnotated: isAnnotated,
+                             overrides: overrides,
+                             isProcessed: false)
+            entities.append(ent)
         }
-        
-        let ent = Entity(entityNode: node,
-                         isAnnotated: isAnnotated,
-                         overrides: overrides,
-                         isProcessed: false)
-        entities.append(ent)
         return .skipChildren
     }
     
     func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        let ent = Entity(entityNode: node, isAnnotated: false, overrides: nil, isProcessed: true)
-        entities.append(ent)
+        if entityType == .classType {
+            let ent = Entity(entityNode: node, isAnnotated: false, overrides: nil, isProcessed: true)
+            entities.append(ent)
+        }
         return .skipChildren
     }
     

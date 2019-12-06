@@ -45,7 +45,7 @@ func generateProcessedTypeMap(_ paths: [String],
             }
         }
     default:
-        var treeVisitor = EntityVisitor()
+        var treeVisitor = EntityVisitor(entityType: .classType)
         for filePath in paths {
             generateProcessedModels(filePath, treeVisitor: &treeVisitor, lock: nil, process: process)
         }
@@ -101,27 +101,6 @@ private func generateProcessedModels(_ path: String,
 
         lock?.lock()
         process(results, [path: imports])
-        lock?.unlock()
-    } catch {
-        fatalError(error.localizedDescription)
-    }
-}
-
-private func generateProcessedModels(_ path: String,
-                                     treeVisitor: inout EntityVisitor,
-                                     lock: NSLock?,
-                                     process: @escaping ([Entity], [String]) -> ()) {
-    do {
-        var results = [Entity]()
-        let node = try SyntaxParser.parse(path)
-        node.walk(&treeVisitor)
-        let ret = treeVisitor.entities
-        results.append(contentsOf: ret)
-        
-        let imports = treeVisitor.imports
-        treeVisitor.reset()
-        lock?.lock()
-        process(results, imports)
         lock?.unlock()
     } catch {
         fatalError(error.localizedDescription)

@@ -29,15 +29,14 @@ func write(candidates: [(String, Int64)],
     for path in relevantPaths {
         if let lines = pathToImportsMap[path] {
             importLines.append(contentsOf: lines)
-        } else {
-            for (filepath, filecontent, offset) in pathToContentMap {
-                if path == filepath {
-                    let v = findImportLines(data: filecontent, offset: offset)
-                    importLines.append(contentsOf: v)
-                }
-            }
         }
     }
+    for (filepath, filecontent, offset) in pathToContentMap {
+        let v = findImportLines(data: filecontent, offset: offset)
+        importLines.append(contentsOf: v)
+        break
+    }
+
     let importsSet = Set(importLines.map{$0.trimmingCharacters(in: .whitespaces)})
     let importLineStr = importsSet.sorted().joined(separator: "\n")
 

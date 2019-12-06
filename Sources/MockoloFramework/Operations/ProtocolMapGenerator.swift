@@ -76,7 +76,7 @@ private func generateProtcolMap(dirs: [String],
             }
         }
     default:
-        var treeVisitor = EntityVisitor(annotation: annotation)
+        var treeVisitor = EntityVisitor(annotation: annotation, entityType: .protocolType)
         scanPaths(dirs) { filePath in
             generateProtcolMap(filePath,
                                exclusionSuffixes: exclusionSuffixes,
@@ -128,7 +128,7 @@ private func generateProtcolMap(files: [String],
             }
         }
     default:
-        var treeVisitor = EntityVisitor(annotation: annotation)
+        var treeVisitor = EntityVisitor(annotation: annotation, entityType: .protocolType)
         for filePath in files {
             generateProtcolMap(filePath,
                                exclusionSuffixes: exclusionSuffixes,
