@@ -24,7 +24,7 @@ struct AnnotationMetadata {
     var typealiases: [String: String]?
 }
 
-extension Structure {
+extension Structure: EntityNode {
     
     init(path: String) throws {
         self.init(sourceKitResponse: try Request.customRequest(request: [
@@ -103,6 +103,52 @@ extension Structure {
             }
         }
         return result
+    }
+    
+    func subContainer(overrides: [String: String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        let memberList = members(with: path, data: data, overrides: overrides, processed: isProcessed)
+        let subAttributes = memberAttributes(with: data)
+        return EntityNodeSubContainer(attributes: subAttributes, members: memberList, hasInit: hasInitMember)
+    }
+    
+    func members(with path: String?, data: Data?, overrides: [String: String]?, processed: Bool) -> [Model] {
+        guard let path = path, let data = data else { return [] }
+        return self.substructures.compactMap { (child: Structure) -> Model? in
+            return model(for: child, filepath: path, data: data, overrides: overrides, processed: processed)
+        }
+    }
+    
+    func memberAttributes(with data: Data?) -> [String] {
+        guard let data = data else { return [] }
+        return self.substructures.compactMap { (child: Structure) -> [String]? in
+            return child.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
+        }.flatMap {$0}
+    }
+    
+    func model(for element: Structure, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
+        if element.isVariable {
+            return VariableModel(element, filepath: filepath, data: data, processed: processed)
+        } else if element.isMethod {
+            return MethodModel(element, filepath: filepath, data: data,  processed: processed)
+        } else if element.isAssociatedType {
+            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
+        }
+        
+        return nil
+    }
+
+    
+    var acl: String {
+        return accessControlLevelDescription
+    }
+    
+    var attributesDescription: String {
+        return attributes?.description ?? ""
+    }
+    
+    
+    var hasInitMember: Bool {
+        return self.substructures.filter(path: \.isInitializer).count > 0
     }
     
     var name: String {

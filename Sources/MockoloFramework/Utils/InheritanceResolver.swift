@@ -41,17 +41,17 @@ func lookupEntities(key: String,
 
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
-        
-        models.append(contentsOf: current.members)
-        if let curAttributes = current.subAttributes() {
-            attributes.append(contentsOf: curAttributes)
+        let sub = current.entityNode.subContainer(overrides: current.overrides, path: current.filepath, data: current.data, isProcessed: current.isProcessed)
+        models.append(contentsOf: sub.members)
+        if !current.isProcessed {
+            attributes.append(contentsOf: sub.attributes)
         }
         if let data = current.data {
-            pathToContents.append((current.filepath, data, current.offset))
+            pathToContents.append((current.filepath, data, current.entityNode.offset))
         }
         paths.append(current.filepath)
             // If the protocol inherits other protocols, look up their entities as well.
-            for parent in current.inheritedTypes {
+            for parent in current.entityNode.inheritedTypes {
                 if parent != .class, parent != .any, parent != .anyObject {
                     let (parentModels, parentProcessedModels, parentAttributes, parentPaths, parentPathToContents) = lookupEntities(key: parent,
                                                                                                                        protocolMap: protocolMap,
@@ -66,12 +66,13 @@ func lookupEntities(key: String,
         
     } else if let parentMock = inheritanceMap["\(key)Mock"] {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        processedModels.append(contentsOf: parentMock.members)
-        if let parentAttributes = parentMock.subAttributes() {
-            attributes.append(contentsOf: parentAttributes)
+        let sub = parentMock.entityNode.subContainer(overrides: parentMock.overrides, path: parentMock.filepath, data: parentMock.data, isProcessed: parentMock.isProcessed)
+        processedModels.append(contentsOf: sub.members)
+        if !parentMock.isProcessed {
+            attributes.append(contentsOf: sub.attributes)
         }
         if let data = parentMock.data {
-            pathToContents.append((parentMock.filepath, data, parentMock.offset))
+            pathToContents.append((parentMock.filepath, data, parentMock.entityNode.offset))
         }
         paths.append(parentMock.filepath)
     }

@@ -35,30 +35,18 @@ extension Syntax {
     var length: Int64 {
         return Int64(self.totalLength.utf8Length)
     }
+}
 
-    func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia?.annotationMetadata(with: annotation)
+extension AttributeListSyntax {
+    var trimmedDescription: String? {
+        return self.withoutTrivia().description.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
-final class EntityVisitor: SyntaxVisitor {
-    var entities: [Entity] = []
-    var imports: [String] = []
-    let annotation: String
-    
-    init(annotation: String = "") {
-        self.annotation = annotation
-    }
-    
-    func reset() {
-        entities = []
-        imports = []
-    }
-
-    // Returns access control level
-    private func acl(_  modifiers: ModifierListSyntax) -> String {
-        for m in modifiers {
-            for token in m.tokens {
+extension ModifierListSyntax {
+    var acl: String {
+        for modifier in self {
+            for token in modifier.tokens {
                 switch token.tokenKind {
                 case .publicKeyword, .internalKeyword, .privateKeyword, .fileprivateKeyword:
                     return token.text
@@ -73,124 +61,129 @@ final class EntityVisitor: SyntaxVisitor {
         }
         return ""
     }
+    
+    var hasStatic: Bool {
+        return self.tokens.filter {$0.tokenKind == .staticKeyword }.count > 0
+    }
+}
 
-    private func attributesDescription(_ attributes: AttributeListSyntax?) -> String? {
-        return attributes?.withoutTrivia().description
-    }
-
-    private func hasStaticModifier(_  modifiers: ModifierListSyntax) -> Bool {
-        return modifiers.tokens.filter {$0.tokenKind == .staticKeyword }.count > 0
-    }
-    
-    private func typealiasModel(_ node: AssociatedtypeDeclSyntax, overrides: [String: String]?, acl: String, processed: Bool) -> Model {
-        // Get the inhertied type for an associated type if any
-        var t = node.inheritanceClause?.inheritedTypeCollection.description ?? ""
-        t.append(node.genericWhereClause?.description ?? "")
-        
-        return TypeAliasModel(name: node.identifier.text,
-                              typeName: t,
-                              acl: acl,
-                              overrideTypes: overrides,
-                              offset: node.offset,
-                              length: node.length,
-                              modelDescription: node.description,
-                              processed: processed)
-    }
-    
-    private func initModel(_ node: InitializerDeclSyntax, acl: String, processed: Bool) -> Model {
-        let params = node.parameters.parameterList.compactMap { paramModel($0, isInitializer: true) }
-        let genericTypeParams = node.genericParameterClause?.genericParameterList.compactMap { genericTypeParamModel($0, isInitializer: true) } ?? []
-        
-        return MethodModel(name: "init",
-                           typeName: "",
-                           acl: acl,
-                           genericTypeParams: genericTypeParams,
-                           params: params,
-                           throwsOrRethrows: node.throwsOrRethrowsKeyword?.text ?? "",
-                           isStatic: false,
-                           isInitializer: true,
-                           offset: node.offset,
-                           length: node.length,
-                           modelDescription: node.description,
-                           processed: processed)
-    }
-    
-    private func funcModel(_ node: FunctionDeclSyntax, acl: String, processed: Bool) -> Model {
-        var isStatic = false
-        if let modifiers = node.modifiers {
-            isStatic = hasStaticModifier(modifiers)
+extension TypeInheritanceClauseSyntax {
+    var types: [String] {
+        var list = [String]()
+        for element in self.inheritedTypeCollection {
+            if let elementName = element.firstToken?.text {
+                list.append(elementName)
+            }
         }
-        
-        let params = node.signature.input.parameterList.compactMap { paramModel($0, isInitializer: false) }
-        let genericTypeParams = node.genericParameterClause?.genericParameterList.compactMap { genericTypeParamModel($0, isInitializer: false) } ?? []
-        
-        let funcmodel = MethodModel(name: node.identifier.description,
-                                    typeName: node.signature.output?.returnType.description ?? "",
-                                    acl: acl,
-                                    genericTypeParams: genericTypeParams,
-                                    params: params,
-                                    throwsOrRethrows: node.signature.throwsOrRethrowsKeyword?.text ?? "",
-                                    isStatic: isStatic,
-                                    isInitializer: false,
-                                    offset: node.offset,
-                                    length: node.length,
-                                    modelDescription: node.description,
-                                    processed: processed)
-        return funcmodel
+        return list
     }
     
-    private func paramModel(_ node: FunctionParameterSyntax, isInitializer: Bool) -> ParamModel {
-        var label = ""
-        var name = ""
-        // Get label and name of args
-        if let first = node.firstName?.text {
-            if let second = node.secondName?.text {
-                label = first
-                name = second
-            } else {
-                if first == "_" {
-                    label = first
-                    name = first + "arg"
-                } else {
-                    name = first
-                }
+    var typesDescription: String {
+        return self.inheritedTypeCollection.description
+    }
+}
+
+extension MemberDeclListSyntax {
+    
+    func memberData(with acl: String, overrides: [String: String]?, processed: Bool) -> EntityNodeSubContainer {
+        var attributeList = [String]()
+        var memberList = [Model]()
+        var hasInit = false
+        var attrDesc: String? = nil
+        for m in self {
+            if let varMember = m.decl as? VariableDeclSyntax {
+                memberList.append(contentsOf: varMember.models(with: acl, processed: processed))
+                attrDesc = varMember.attributes?.trimmedDescription
+            } else if let funcMember = m.decl as? FunctionDeclSyntax {
+                memberList.append(funcMember.model(with: acl, processed: processed))
+                attrDesc = funcMember.attributes?.trimmedDescription
+            } else if let initMember = m.decl as? InitializerDeclSyntax {
+                hasInit = true
+                memberList.append(initMember.model(with: acl, processed: processed))
+                attrDesc = initMember.attributes?.trimmedDescription
+            } else if let patMember = m.decl as? AssociatedtypeDeclSyntax {
+                memberList.append(patMember.model(with: acl, overrides: overrides, processed: processed))
+                attrDesc = patMember.attributes?.trimmedDescription
+            }
+            
+            if let attrDesc = attrDesc {
+                attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
             }
         }
         
-        // Variadic args are not detected in the parser so need to manually look up
-        var type = node.type?.description ?? ""
-        if node.description.contains(type + "...") {
-            type.append("...")
-        }
-        
-        return ParamModel(label: label,
-                          name: name,
-                          typeName: type,
-                          isGeneric: false,
-                          isInitializer: isInitializer,
-                          offset: node.offset,
-                          length: node.length)
+        return EntityNodeSubContainer(attributes: attributeList, members: memberList, hasInit: hasInit)
+    }
+}
+
+extension ProtocolDeclSyntax: EntityNode {
+    var name: String {
+        return identifier.text
     }
     
-    private func genericTypeParamModel(_ node: GenericParameterSyntax, isInitializer: Bool) -> ParamModel {
-        return ParamModel(label: "",
-                            name: node.name.text,
-                            typeName: node.inheritedType?.description ?? "",
-                            isGeneric: true,
-                            isInitializer: isInitializer,
-                            offset: node.offset,
-                            length: node.length)
+    var acl: String {
+        return self.modifiers?.acl ?? ""
     }
     
-    private func varModels(_ node: VariableDeclSyntax, acl: String, processed: Bool) -> [Model] {
+    var inheritedTypes: [String] {
+        return inheritanceClause?.types ?? []
+    }
+    
+    var attributesDescription: String {
+        self.attributes?.trimmedDescription ?? ""
+    }
+    
+    var offset: Int64 {
+        return Int64(self.position.utf8Offset)
+    }
+
+    func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
+        return leadingTrivia?.annotationMetadata(with: annotation)
+    }
+
+    func subContainer(overrides: [String: String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        let ret = self.members.members.memberData(with: acl, overrides: overrides, processed: isProcessed)
+        return ret
+    }
+}
+
+extension ClassDeclSyntax: EntityNode {
+    
+    var name: String {
+        return identifier.text
+    }
+    
+    var acl: String {
+        return self.modifiers?.acl ?? ""
+    }
+    
+    var inheritedTypes: [String] {
+        return inheritanceClause?.types ?? []
+    }
+    
+    var attributesDescription: String {
+        self.attributes?.trimmedDescription ?? ""
+    }
+    
+    var offset: Int64 {
+        return Int64(self.position.utf8Offset)
+    }
+    
+    func subContainer(overrides: [String : String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        let ret = self.members.members.memberData(with: acl, overrides: nil, processed: true)
+        return ret
+    }
+}
+
+extension VariableDeclSyntax {
+    func models(with acl: String, processed: Bool) -> [Model] {
         // Detect whether it's static
         var isStatic = false
-        if let modifiers = node.modifiers {
-            isStatic = hasStaticModifier(modifiers)
+        if let modifiers = self.modifiers {
+            isStatic = modifiers.hasStatic
         }
-
+        
         // Need to access pattern bindings to get name, type, and other info of a var decl
-        let varmodels = node.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
+        let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
             let name = v.pattern.firstToken?.text ?? String.unknownVal
             var typeName = ""
             var canBeInitParam = false
@@ -214,40 +207,147 @@ final class EntityVisitor: SyntaxVisitor {
                                          canBeInitParam: canBeInitParam,
                                          offset: v.offset,
                                          length: v.length,
-                                         modelDescription: node.description,
+                                         modelDescription: self.description,
                                          processed: processed)
             return varmodel
         }
         return varmodels
     }
+}
+
+extension FunctionDeclSyntax {
     
-    private func memberList(_ members: MemberDeclListSyntax, overrides: [String: String]?, acl: String, processed: Bool) -> ([String], [Model], Bool) {
-        var attributeList = [String]()
-        var memberList = [Model]()
-        var hasInit = false
-        var attrDesc: String? = nil
-        for m in members {
-            if let varMember = m.decl as? VariableDeclSyntax {
-                memberList.append(contentsOf: varModels(varMember, acl: acl, processed: processed))
-                attrDesc = attributesDescription(varMember.attributes)
-            } else if let funcMember = m.decl as? FunctionDeclSyntax {
-                memberList.append(funcModel(funcMember, acl: acl, processed: processed))
-                attrDesc = attributesDescription(funcMember.attributes)
-            } else if let initMember = m.decl as? InitializerDeclSyntax {
-                hasInit = true
-                memberList.append(initModel(initMember, acl: acl, processed: processed))
-                attrDesc = attributesDescription(initMember.attributes)
-            } else if let patMember = m.decl as? AssociatedtypeDeclSyntax {
-                memberList.append(typealiasModel(patMember, overrides: overrides, acl: acl, processed: processed))
-                attrDesc = attributesDescription(patMember.attributes)
-            }
-            
-            if let attrDesc = attrDesc {
-                attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
+    func model(with acl: String, processed: Bool) -> Model {
+        var isStatic = false
+        if let modifiers = self.modifiers {
+            isStatic = modifiers.hasStatic
+        }
+        
+        let params = self.signature.input.parameterList.compactMap { $0.model(inInit: false) }
+        let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
+        
+        let funcmodel = MethodModel(name: self.identifier.description,
+                                    typeName: self.signature.output?.returnType.description ?? "",
+                                    acl: acl,
+                                    genericTypeParams: genericTypeParams,
+                                    params: params,
+                                    throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text ?? "",
+                                    isStatic: isStatic,
+                                    isInitializer: false,
+                                    offset: self.offset,
+                                    length: self.length,
+                                    modelDescription: self.description,
+                                    processed: processed)
+        return funcmodel
+    }
+    
+    
+    
+    
+}
+
+extension InitializerDeclSyntax {
+    func model(with acl: String, processed: Bool) -> Model {
+        let params = self.parameters.parameterList.compactMap { $0.model(inInit: true) }
+        let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: true) } ?? []
+        
+        return MethodModel(name: "init",
+                           typeName: "",
+                           acl: acl,
+                           genericTypeParams: genericTypeParams,
+                           params: params,
+                           throwsOrRethrows: self.throwsOrRethrowsKeyword?.text ?? "",
+                           isStatic: false,
+                           isInitializer: true,
+                           offset: self.offset,
+                           length: self.length,
+                           modelDescription: self.description,
+                           processed: processed)
+    }
+    
+}
+
+
+extension GenericParameterSyntax {
+    func model(inInit: Bool) -> ParamModel {
+        return ParamModel(label: "",
+                          name: self.name.text,
+                          typeName: self.inheritedType?.description ?? "",
+                          isGeneric: true,
+                          inInit: inInit,
+                          offset: self.offset,
+                          length: self.length)
+    }
+    
+}
+
+extension FunctionParameterSyntax {
+    func model(inInit: Bool) -> ParamModel {
+        var label = ""
+        var name = ""
+        // Get label and name of args
+        if let first = self.firstName?.text {
+            if let second = self.secondName?.text {
+                label = first
+                name = second
+            } else {
+                if first == "_" {
+                    label = first
+                    name = first + "arg"
+                } else {
+                    name = first
+                }
             }
         }
         
-        return (attributeList, memberList, hasInit)
+        // Variadic args are not detected in the parser so need to manually look up
+        var type = self.type?.description ?? ""
+        if self.description.contains(type + "...") {
+            type.append("...")
+        }
+        
+        return ParamModel(label: label,
+                          name: name,
+                          typeName: type,
+                          isGeneric: false,
+                          inInit: inInit,
+                          offset: self.offset,
+                          length: self.length)
+    }
+    
+}
+
+extension AssociatedtypeDeclSyntax {
+    func model(with acl: String, overrides: [String: String]?, processed: Bool) -> Model {
+        // Get the inhertied type for an associated type if any
+        var t = self.inheritanceClause?.typesDescription ?? ""
+        t.append(self.genericWhereClause?.description ?? "")
+        
+        return TypeAliasModel(name: self.identifier.text,
+                              typeName: t,
+                              acl: acl,
+                              overrideTypes: overrides,
+                              offset: self.offset,
+                              length: self.length,
+                              modelDescription: self.description,
+                              processed: processed)
+    }
+    
+    
+    
+}
+final class EntityVisitor: SyntaxVisitor {
+    var entities: [Entity] = []
+    var imports: [String] = []
+    let annotation: String
+    
+    init(annotation: String = "") {
+        self.annotation = annotation
+    }
+    
+    func reset() {
+        entities = []
+        imports = []
     }
     
     func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
@@ -259,64 +359,16 @@ final class EntityVisitor: SyntaxVisitor {
             overrides = metadata?.typealiases
         }
         
-        var parentList = [String]()
-        if let parents = node.inheritanceClause?.inheritedTypeCollection {
-            for p in parents {
-                if let pname = p.firstToken?.text {
-                    parentList.append(pname)
-                }
-            }
-        }
-        
-        var aclDesc = ""
-        if let mds = node.modifiers {
-            aclDesc = acl(mds)
-        }
-        
-        let (attributes, members, hasInit) = memberList(node.members.members, overrides: overrides, acl: aclDesc, processed: false)
-        
-        var attributeList = attributes
-        if let attrDesc = node.attributes?.withoutTrivia().description {
-            attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
-        }
-        
-        let ent = Entity(name: node.identifier.text,
+        let ent = Entity(entityNode: node,
                          isAnnotated: isAnnotated,
                          overrides: overrides,
-                         acl: aclDesc,
-                         attributes: attributeList,
-                         inheritedTypes: parentList,
-                         members: members,
-                         hasInit: hasInit,
-                         offset: node.offset,
                          isProcessed: false)
         entities.append(ent)
         return .skipChildren
     }
     
     func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        var aclDesc = ""
-        if let mds = node.modifiers {
-            aclDesc = acl(mds)
-        }
-        
-        let (attributes, members, hasInit) = memberList(node.members.members, overrides: nil, acl: aclDesc, processed: true)
-        
-        var attributeList = attributes
-        if let attrDesc = node.attributes?.withoutTrivia().description {
-            attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
-        }
-        
-        let ent = Entity(name: node.identifier.text,
-                         isAnnotated: false,
-                         overrides: nil,
-                         acl: aclDesc,
-                         attributes: attributeList,
-                         inheritedTypes: [],
-                         members: members,
-                         hasInit: hasInit,
-                         offset: node.offset,
-                         isProcessed: false)
+        let ent = Entity(entityNode: node, isAnnotated: false, overrides: nil, isProcessed: true)
         entities.append(ent)
         return .skipChildren
     }

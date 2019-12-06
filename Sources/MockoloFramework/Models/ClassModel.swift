@@ -46,7 +46,7 @@ final class ClassModel: Model {
         self.needInit = needInit
         self.initParams = initParams
         self.offset = offset
-        self.attribute = Set(attributes).joined(separator: " ")
+        self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessControlLevelDescription = acl.isEmpty ? "" : acl + " "
         self.typealiasWhitelist = typealiasWhitelist
     }

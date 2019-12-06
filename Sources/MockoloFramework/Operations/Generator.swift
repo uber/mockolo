@@ -68,7 +68,7 @@ public func generate(sourceDirs: [String]?,
                                  semaphore: sema,
                                  queue: mockgenQueue) { (elements, imports) in
                                     elements.forEach { element in
-                                        parentMocks[element.name] = element
+                                        parentMocks[element.entityNode.name] = element
                                     }
 
                                     for (path, modules) in imports {
@@ -94,9 +94,9 @@ public func generate(sourceDirs: [String]?,
                         semaphore: sema,
                         queue: mockgenQueue) { (elements, imports) in
                             elements.forEach { element in
-                                protocolMap[element.name] = element
+                                protocolMap[element.entityNode.name] = element
                                 if element.isAnnotated {
-                                    annotatedProtocolMap[element.name] = element
+                                    annotatedProtocolMap[element.entityNode.name] = element
                                 }
                             }
                             if let imports = imports {

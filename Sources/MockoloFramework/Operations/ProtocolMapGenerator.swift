@@ -159,30 +159,12 @@ private func generateProtcolMap(_ path: String,
             if current.isProtocol {
                 let metadata = current.annotationMetadata(with: annotationData, in: content)
                 let isAnnotated = metadata != nil
-                let members = current.substructures.compactMap { (child: Structure) -> Model? in
-                    return Entity.model(for: child, filepath: path, data: content, overrides: metadata?.typealiases, processed: false)
-                }
                 
-                var attributes = current.substructures.compactMap { (child: Structure) -> [String]? in
-                    return child.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
-                }.flatMap {$0}
-                
-                let curAttributes = current.extractAttributes(content, filterOn: SwiftDeclarationAttributeKind.available.rawValue)
-                attributes.append(contentsOf: curAttributes)
-                
-                let hasInit = current.substructures.filter(path: \.isInitializer).count > 0
-                
-                let node = Entity(name: current.name,
+                let node = Entity(entityNode: current,
                                   filepath: path,
                                   data: content,
                                   isAnnotated: isAnnotated,
                                   overrides: metadata?.typealiases,
-                                  acl: current.accessControlLevelDescription,
-                                  attributes: attributes,
-                                  inheritedTypes: current.inheritedTypes,
-                                  members: members,
-                                  hasInit: hasInit,
-                                  offset: current.offset,
                                   isProcessed: false)
                 results.append(node)
             }
