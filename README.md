@@ -107,7 +107,7 @@ OPTIONS:
   --macro, -m             If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
   --concurrency-limit, -j Maximum number of threads to execute concurrently (default = number of cores on the running machine).
   --logging-level, -v     The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
-  --use-sourcekit         If set to true, it will use SourceKit for source file parsing. By default it uses SwiftSyntax.
+  --use-sourcekit         If this argument is added, it will use SourceKit for parsing. By default it uses SwiftSyntax.
   --help                  Displays available options.
   ```
 
@@ -200,7 +200,7 @@ It currently supports protocol mocking.  Class mocking will be added in the futu
 
 ## Used libraries
 
-[SwiftSyntax](https://github.com/apple/swift-syntax)
+[SwiftSyntax](https://github.com/apple/swift-syntax) | 
 [SourceKitten](https://github.com/jpsim/SourceKitten)
 
 
