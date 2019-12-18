@@ -64,22 +64,22 @@ echo "OUTPUT FILE = ${OUTFILE}"
 
 
 echo "** Building..."
-cd $SRCDIR
+cd "$SRCDIR"
 rm -rf .build
 swift build -c release 
 
 cd .build/release
 
 echo "** Installing..."
-cp $(xcode-select -p)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib . 
+cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib . 
 
-install_name_tool -change @rpath/lib_InternalSwiftSyntaxParser.dylib @executable_path/lib_InternalSwiftSyntaxParser.dylib $TARGET
+install_name_tool -change @rpath/lib_InternalSwiftSyntaxParser.dylib @executable_path/lib_InternalSwiftSyntaxParser.dylib "$TARGET"
 
-tar -cvzf $OUTFILE $TARGET lib_InternalSwiftSyntaxParser.dylib
+tar -cvzf "$OUTFILE" "$TARGET" lib_InternalSwiftSyntaxParser.dylib
 
-mv $OUTFILE $DESTDIR
+mv "$OUTFILE" "$DESTDIR"
 
-cd $CUR
+cd "$CUR"
 
 echo "** Output file is at $DESTDIR/$OUTFILE"
 echo "** Done."
