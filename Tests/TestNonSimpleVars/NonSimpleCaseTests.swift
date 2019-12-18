@@ -2,6 +2,13 @@ import Foundation
 
 class NonSimpleVarTests: MockoloTestCase {
     
+    func testSubscripts() {
+        verify(srcContent: subscripts,
+               dstContent: subscriptsMocks,
+               useDefaultParser: true)
+    }
+    
+
     func testNonSimpleVars() {
         verify(srcContent: nonSimpleVars,
                dstContent: nonSimpleVarsMock)

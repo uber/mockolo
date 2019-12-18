@@ -32,6 +32,7 @@ final class MethodModel: Model {
     let processed: Bool
     var modelDescription: String? = nil
     let isInitializer: Bool
+    let isSubscript: Bool
     let isStatic: Bool
     let suffix: String
     
@@ -64,6 +65,7 @@ final class MethodModel: Model {
         let capped = min(displayType.count, 32)
         displayType.removeLast(displayType.count-capped)
         args.append(displayType)
+        args.append(self.staticKind)
         let ret = args.filter{ arg in !arg.isEmpty }
         return ret
     }()
@@ -96,6 +98,7 @@ final class MethodModel: Model {
          throwsOrRethrows: String,
          isStatic: Bool,
          isInitializer: Bool,
+         isSubscript: Bool,
          offset: Int64,
          length: Int64,
          modelDescription: String?,
@@ -107,6 +110,7 @@ final class MethodModel: Model {
         self.length = length
         self.isInitializer = isInitializer
         self.isStatic = isStatic
+        self.isSubscript = isSubscript
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.processed = processed
@@ -127,6 +131,7 @@ final class MethodModel: Model {
         self.isStatic = ast.isStaticMethod
         self.processed = processed
         self.isInitializer = ast.isInitializer
+        self.isSubscript = ast.isSubscript
         self.offset = ast.range.offset
         self.length = ast.range.length
         
@@ -188,6 +193,7 @@ final class MethodModel: Model {
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
                                          isInitializer: isInitializer,
+                                         isSubscript: isSubscript,
                                          genericTypeParams: genericTypeParams,
                                          params: params,
                                          returnType: type,

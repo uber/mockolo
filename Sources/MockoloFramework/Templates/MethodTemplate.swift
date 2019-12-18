@@ -20,6 +20,7 @@ import SourceKittenFramework
 func applyMethodTemplate(name: String,
                          identifier: String,
                          isInitializer: Bool,
+                         isSubscript: Bool,
                          genericTypeParams: [ParamModel],
                          params: [ParamModel],
                          returnType: Type,
@@ -43,12 +44,15 @@ func applyMethodTemplate(name: String,
                 self.\(param.name) = \(param.name)
             """
             }.joined(separator: "\n")
-        template = """
+        
+        template =
+        """
         \(String.required) \(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
         \(paramsAssign)
             \(String.doneInit) = true
         }
-    """
+        """
+ 
     } else {
         let callCount = "\(identifier)\(String.callCountSuffix)"
         let handlerVarName = "\(identifier)\(String.handlerSuffix)"
@@ -58,22 +62,30 @@ func applyMethodTemplate(name: String,
         let suffixStr = suffix.isEmpty ? "" : "\(suffix) "
         let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
-        template = """
-        
-        \(acl)\(staticStr)var \(callCount) = 0
-        \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-        \(acl)\(staticStr)func \(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
+        let keyword = isSubscript ? "" : "func "
+        let body =
+        """
             \(callCount) += 1
-        \(handlerReturn)
-        }
-    """
+            \(handlerReturn)
+        """
+            
+        let wrapped = !isSubscript ? body :
+        """
+        
+                get {
+                    \(body)
+                }
+                set { }
+        """
+
+        template =
+        """
+            \(acl)\(staticStr)var \(callCount) = 0
+            \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
+            \(acl)\(staticStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
+                \(wrapped)
+            }
+        """
     }
     return template
 }
-
-private func renderMethodParamNames(_ elements: [Structure], capitalized: Bool) -> [String] {
-    return elements.map { (element: Structure) -> String in
-        return capitalized ? element.name.capitlizeFirstLetter : element.name
-    }
-}
-

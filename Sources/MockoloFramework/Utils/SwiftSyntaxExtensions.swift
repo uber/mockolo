@@ -104,6 +104,9 @@ extension MemberDeclListSyntax {
             } else if let patMember = m.decl as? AssociatedtypeDeclSyntax {
                 memberList.append(patMember.model(with: acl, overrides: overrides, processed: processed))
                 attrDesc = patMember.attributes?.trimmedDescription
+            } else if let subscriptMember = m.decl as? SubscriptDeclSyntax {
+                memberList.append(subscriptMember.model(with: acl, processed: processed))
+                attrDesc = subscriptMember.attributes?.trimmedDescription
             }
             
             if let attrDesc = attrDesc {
@@ -135,11 +138,11 @@ extension ProtocolDeclSyntax: EntityNode {
     var offset: Int64 {
         return Int64(self.position.utf8Offset)
     }
-
+    
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         return leadingTrivia?.annotationMetadata(with: annotation)
     }
-
+    
     func subContainer(overrides: [String: String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
         let ret = self.members.members.memberData(with: acl, overrides: overrides, processed: isProcessed)
         return ret
@@ -215,6 +218,39 @@ extension VariableDeclSyntax {
     }
 }
 
+extension SubscriptDeclSyntax {
+    func model(with acl: String, processed: Bool) -> Model {
+        var isStatic = false
+        if let modifiers = self.modifiers {
+            isStatic = modifiers.hasStatic
+        }
+        
+        let params = self.indices.parameterList.compactMap { $0.model(inInit: false) }
+        let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
+        
+        let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
+                                            typeName: self.result.returnType.description,
+                                            acl: acl,
+                                            genericTypeParams: genericTypeParams,
+                                            params: params,
+                                            throwsOrRethrows: "",
+                                            isStatic: isStatic,
+                                            isInitializer: false,
+                                            isSubscript: true,
+                                            offset: self.offset,
+                                            length: self.length,
+                                            modelDescription: self.description,
+                                            processed: processed)
+        return subscriptModel
+    }
+}
+
+protocol SimpleVar {
+    var name: Int { get set }
+    subscript(key: Int) -> AnyObject? { get set }
+}
+
+
 extension FunctionDeclSyntax {
     
     func model(with acl: String, processed: Bool) -> Model {
@@ -234,16 +270,13 @@ extension FunctionDeclSyntax {
                                     throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text ?? "",
                                     isStatic: isStatic,
                                     isInitializer: false,
+                                    isSubscript: false,
                                     offset: self.offset,
                                     length: self.length,
                                     modelDescription: self.description,
                                     processed: processed)
         return funcmodel
     }
-    
-    
-    
-    
 }
 
 extension InitializerDeclSyntax {
@@ -259,6 +292,7 @@ extension InitializerDeclSyntax {
                            throwsOrRethrows: self.throwsOrRethrowsKeyword?.text ?? "",
                            isStatic: false,
                            isInitializer: true,
+                           isSubscript: false,
                            offset: self.offset,
                            length: self.length,
                            modelDescription: self.description,

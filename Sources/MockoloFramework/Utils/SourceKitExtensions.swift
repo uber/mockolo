@@ -128,8 +128,8 @@ extension Structure: EntityNode {
     func model(for element: Structure, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
             return VariableModel(element, filepath: filepath, data: data, processed: processed)
-        } else if element.isMethod {
-            return MethodModel(element, filepath: filepath, data: data,  processed: processed)
+        } else if element.isMethod || element.isSubscript {
+            return MethodModel(element, filepath: filepath, data: data, processed: processed)
         } else if element.isAssociatedType {
             return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
         }
@@ -181,6 +181,10 @@ extension Structure: EntityNode {
         return name.hasPrefix(.initializerPrefix) && isInstanceMethod
     }
     
+    var isSubscript: Bool {
+        return kind == SwiftDeclarationKind.functionSubscript.rawValue
+    }
+
     var isInstanceVariable: Bool {
         return kind == SwiftDeclarationKind.varInstance.rawValue
     }
