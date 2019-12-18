@@ -55,22 +55,20 @@ done
 
 CUR=$PWD
 
-echo "** Processing..."
+echo "** Clean/Build..."
 
 echo "SOURCE DIR = ${SRCDIR}"
 echo "TARGET = ${TARGET}"
 echo "DESTINATION DIR = ${DESTDIR}"
 echo "OUTPUT FILE = ${OUTFILE}"
 
-
-echo "** Building..."
 cd "$SRCDIR"
 rm -rf .build
 swift build -c release 
 
 cd .build/release
 
-echo "** Installing..."
+echo "** Install..."
 cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib . 
 
 install_name_tool -change @rpath/lib_InternalSwiftSyntaxParser.dylib @executable_path/lib_InternalSwiftSyntaxParser.dylib "$TARGET"
