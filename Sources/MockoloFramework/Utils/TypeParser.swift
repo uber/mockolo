@@ -481,13 +481,12 @@ public struct Type {
                 }
             }
             
-            var mutableSubtype = ret
             for item in typeParamList {
-                if mutableSubtype.literalComponents.contains(item) {
-                    mutableSubtype = mutableSubtype.replacingOccurrences(of: item, with: String.any)
+                if ret.literalComponents.contains(item) {
+                    ret = ret.replacingOccurrences(of: item, with: String.any)
                 }
             }
-            ret = mutableSubtype
+            return ret
         } else {
             let hasGenericType = typeParamList.filter{ (item: String) -> Bool in
                 ret.literalComponents.contains(item)
@@ -499,11 +498,10 @@ public struct Type {
                     ret += "?"
                 }
             }
+            return ret
         }
-        return ret
     }
 }
-
 
 
 private let defaultTypeValueMap =
