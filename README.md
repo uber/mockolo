@@ -43,15 +43,22 @@ $ git tag -l
 $ git checkout [tag]
 ```
 
-Run the following to make a release build.
+Option 1: Run the following to make a release build.
 
 ```
 $ swift build -c release
 ```
 
 This will create a binary called `mockolo` in the `.build/release` directory.
-
 To install, just copy this executable into a directory that is part of your `PATH` environment variable.
+
+Option 2: Run the install-script.sh (-h to see options)
+
+```
+$ ./install-script.sh -s [source dir] -t mockolo -d [destination dir] -o [output filename]
+```
+
+This will create a tarball for distribution, which contains the mockolo executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running mockolo without depending on where the dylib lives. 
 
 
 To use Xcode, run the following.
