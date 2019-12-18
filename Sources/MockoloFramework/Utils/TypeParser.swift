@@ -464,39 +464,44 @@ public struct Type {
     
     
     func processTypeParams(with typeParamList: [String]) -> String {
-        let subtypeName = typeName
-        let closureRng = subtypeName.range(of: String.closureArrow)
-        let isEscaping = subtypeName.hasPrefix(String.escaping)
+        let closureRng = typeName.range(of: String.closureArrow)
+        let isEscaping = typeName.hasPrefix(String.escaping)
         
-        var ret = subtypeName
+        let isTypeOptional = isOptional
+        var ret = typeName
         if let closureRng = closureRng {
             let left = ret[ret.startIndex..<closureRng.lowerBound]
             for item in typeParamList {
-                if isEscaping, left.displayableComponents.contains(item) {
-                    return String.any
+                if isEscaping, left.literalComponents.contains(item) {
+                    ret = String.any
+                    if isTypeOptional {
+                        ret += "?"
+                    }
+                    return ret
                 }
             }
             
-            var mutableSubtype = ret
             for item in typeParamList {
-                if mutableSubtype.displayableComponents.contains(item) {
-                    mutableSubtype = mutableSubtype.replacingOccurrences(of: item, with: String.any)
+                if ret.literalComponents.contains(item) {
+                    ret = ret.replacingOccurrences(of: item, with: String.any)
                 }
             }
-            ret = mutableSubtype
+            return ret
         } else {
             let hasGenericType = typeParamList.filter{ (item: String) -> Bool in
-                ret.displayableComponents.contains(item)
+                ret.literalComponents.contains(item)
             }
             
             if !hasGenericType.isEmpty {
                 ret = .any
+                if isTypeOptional {
+                    ret += "?"
+                }
             }
+            return ret
         }
-        return ret
     }
 }
-
 
 
 private let defaultTypeValueMap =

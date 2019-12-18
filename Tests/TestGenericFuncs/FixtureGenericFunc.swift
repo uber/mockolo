@@ -1,18 +1,21 @@
 import MockoloFramework
 
-
 let genericFunc = """
 import Foundation
 
-
 /// \(String.mockAnnotation)
 protocol GenericFunc {
-func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U))
-func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())
-func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
-func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
-func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
-func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
+    func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U))
+    func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())
+    func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
+    func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
+    func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
+    func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
+    func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T?) -> ())
+    func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())
+    func add<T: FixedWidthInteger>(n1: T, n2: T?)
+    func add<T: Sequence> (a: T?, b: T?)
+    func add<T: Collection> (a: T, b: T)
 }
 """
 
@@ -21,19 +24,19 @@ let genericFuncMock =
 import Foundation
 
 class GenericFuncMock: GenericFunc {
-    
+
     private var _doneInit = false
     
     init() {
-        
+
         _doneInit = true
     }
-    
+        
     var containsGenericCallCount = 0
     var containsGenericHandler: ((Any, Any) -> (Any))?
     func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U)) {
         containsGenericCallCount += 1
-        
+    
         if let containsGenericHandler = containsGenericHandler {
             return containsGenericHandler(arg1, arg2) as! ((T) -> (U))
         }
@@ -44,7 +47,7 @@ class GenericFuncMock: GenericFunc {
     var sendEventsHandler: (([SomeEvent], Any, Bool, Any) -> ())?
     func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())  {
         sendEventsCallCount += 1
-        
+    
         if let sendEventsHandler = sendEventsHandler {
             sendEventsHandler(events, value, once, closure)
         }
@@ -55,7 +58,7 @@ class GenericFuncMock: GenericFunc {
     var pushHandler: ((Request, StatusCode.Type?) -> (Any))?
     func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T> {
         pushCallCount += 1
-        
+    
         if let pushHandler = pushHandler {
             return pushHandler(request, statusErrorCodeType) as! Observable<T>
         }
@@ -66,7 +69,7 @@ class GenericFuncMock: GenericFunc {
     var fetchHandler: ((Request, StatusCode.Type?) -> (Any))?
     func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T> {
         fetchCallCount += 1
-        
+    
         if let fetchHandler = fetchHandler {
             return fetchHandler(request, statusErrorCodeType) as! Observable<T>
         }
@@ -77,7 +80,7 @@ class GenericFuncMock: GenericFunc {
     var tellHandler: ((ResponseType, Any) -> (Disposable))?
     func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable {
         tellCallCount += 1
-        
+    
         if let tellHandler = tellHandler {
             return tellHandler(type, handler)
         }
@@ -88,11 +91,68 @@ class GenericFuncMock: GenericFunc {
     var tellTypeHandler: ((ResponseType, Any) -> (Disposable))?
     func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable {
         tellTypeCallCount += 1
-        
+    
         if let tellTypeHandler = tellTypeHandler {
             return tellTypeHandler(type, handler)
         }
         fatalError("tellTypeHandler returns can't have a default value thus its handler must be set")
     }
+    
+    var pullCallCount = 0
+    var pullHandler: (([SomeEvent], Any, Bool, Any) -> ())?
+    func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T?) -> ())  {
+        pullCallCount += 1
+    
+        if let pullHandler = pullHandler {
+            pullHandler(events, value, once, closure)
+        }
+        
+    }
+    
+    var pullEventsCallCount = 0
+    var pullEventsHandler: (([SomeEvent], Any?, @escaping () -> ()) -> ())?
+    func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())  {
+        pullEventsCallCount += 1
+    
+        if let pullEventsHandler = pullEventsHandler {
+            pullEventsHandler(events, until, closure)
+        }
+        
+    }
+    
+    var addCallCount = 0
+    var addHandler: ((Any, Any?) -> ())?
+    func add<T: FixedWidthInteger>(n1: T, n2: T?)  {
+        addCallCount += 1
+    
+        if let addHandler = addHandler {
+            addHandler(n1, n2)
+        }
+        
+    }
+    
+    var addACallCount = 0
+    var addAHandler: ((Any?, Any?) -> ())?
+    func add<T: Sequence>(a: T?, b: T?)  {
+        addACallCount += 1
+    
+        if let addAHandler = addAHandler {
+            addAHandler(a, b)
+        }
+        
+    }
+    
+    var addABCallCount = 0
+    var addABHandler: ((Any, Any) -> ())?
+    func add<T: Collection>(a: T, b: T)  {
+        addABCallCount += 1
+    
+        if let addABHandler = addABHandler {
+            addABHandler(a, b)
+        }
+        
+    }
 }
+
+
 """
