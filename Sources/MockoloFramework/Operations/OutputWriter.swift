@@ -31,7 +31,7 @@ func write(candidates: [(String, Int64)],
             importLines.append(contentsOf: lines)
         }
     }
-    for (filepath, filecontent, offset) in pathToContentMap {
+    for (_, filecontent, offset) in pathToContentMap {
         let v = findImportLines(data: filecontent, offset: offset)
         importLines.append(contentsOf: v)
         break
