@@ -486,7 +486,7 @@ public struct Type {
             ret = mutableSubtype
         } else {
             let hasGenericType = typeParamList.filter{ (item: String) -> Bool in
-                ret.displayableComponents.contains(item)
+                ret.literalComponents.contains(item)
             }
             
             if !hasGenericType.isEmpty {

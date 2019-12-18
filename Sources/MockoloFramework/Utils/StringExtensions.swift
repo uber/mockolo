@@ -72,6 +72,9 @@ extension String {
     }
 }
 
+let separatorsForDisplay = CharacterSet(charactersIn: "<>[] :,()_-.&@#!{}@+\"\'")
+let separatorsForLiterals = CharacterSet(charactersIn: "?<>[] :,()_-.&@#!{}@+\"\'")
+
 extension StringProtocol {
     var isNotEmpty: Bool {
         return !isEmpty
@@ -95,10 +98,14 @@ extension StringProtocol {
         
         return false
     }
-    
+
+    var literalComponents: [String] {
+        return self.components(separatedBy: separatorsForLiterals)
+    }
+
     var displayableComponents: [String] {
         let ret = self.replacingOccurrences(of: "?", with: "Optional")
-        return ret.components(separatedBy: CharacterSet(charactersIn: "<>[] :,()_-.&@#!{}@+\"\'"))
+        return ret.components(separatedBy: separatorsForDisplay)
     }
 
 }

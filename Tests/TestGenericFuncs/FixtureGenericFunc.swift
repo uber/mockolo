@@ -1,23 +1,22 @@
 import MockoloFramework
 
-
 let genericFunc = """
 import Foundation
 
-
 /// \(String.mockAnnotation)
 protocol GenericFunc {
-func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U))
-func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())
-func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
-func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
-func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
-func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
+    func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U))
+    func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())
+    func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
+    func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T>
+    func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
+    func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
+    func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())
+    func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())
 }
 """
 
-let genericFuncMock =
-"""
+let genericFuncMock = """
 import Foundation
 
 class GenericFuncMock: GenericFunc {
@@ -93,6 +92,28 @@ class GenericFuncMock: GenericFunc {
             return tellTypeHandler(type, handler)
         }
         fatalError("tellTypeHandler returns can't have a default value thus its handler must be set")
+    }
+    
+    var pullCallCount = 0
+    var pullHandler: (([SomeEvent], Any, Bool, Any) -> ())?
+    func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())  {
+        pullCallCount += 1
+        
+        if let pullHandler = pullHandler {
+            pullHandler(events, value, once, closure)
+        }
+        
+    }
+    
+    var pullEventsCallCount = 0
+    var pullEventsHandler: (([SomeEvent], Any, @escaping () -> ()) -> ())?
+    func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())  {
+        pullEventsCallCount += 1
+        
+        if let pullEventsHandler = pullEventsHandler {
+            pullEventsHandler(events, until, closure)
+        }
+        
     }
 }
 """
