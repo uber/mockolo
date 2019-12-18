@@ -24,7 +24,7 @@ key="$1"
 
 case $key in
     -s|--source-dir)
-    SRCDIR="$2"
+    SRCDIR=$(realpath "$2")
     shift # past argument
     shift # past value
     ;;
