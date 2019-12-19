@@ -245,12 +245,6 @@ extension SubscriptDeclSyntax {
     }
 }
 
-protocol SimpleVar {
-    var name: Int { get set }
-    subscript(key: Int) -> AnyObject? { get set }
-}
-
-
 extension FunctionDeclSyntax {
     
     func model(with acl: String, processed: Bool) -> Model {
