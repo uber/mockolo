@@ -55,6 +55,7 @@ extension String {
     static let callCountSuffix = "CallCount"
     static let closureVarSuffix = "Handler"
     static let initializerPrefix = "init("
+    static let subscriptPrefix = "subscript"
     static let `escaping` = "@escaping"
     static let autoclosure = "@autoclosure"
     static public let mockAnnotation = "@mockable"

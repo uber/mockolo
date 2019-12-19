@@ -54,7 +54,7 @@ class MockoloTestCase: XCTestCase {
         }
     }
     
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = 1) {
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = 1, useDefaultParser: Bool = false) {
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -62,10 +62,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit)
+        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit, useDefaultParser: useDefaultParser)
     }
     
-    func verify(srcContents: [String], mockContents: [String]? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = 1) {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, concurrencyLimit: Int?, useDefaultParser: Bool) {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -106,7 +106,10 @@ class MockoloTestCase: XCTestCase {
         \(macroEnd)
         """
         
-        let useSourceKit = Int.random(in: 0..<10) > 5
+        var parser = ParserType.swiftSyntax
+        if !useDefaultParser {
+            parser = Int.random(in: 0..<10) > 5 ? .sourceKit : .swiftSyntax
+        }
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
                       exclusionSuffixes: ["Mocks", "Tests"],
@@ -114,7 +117,7 @@ class MockoloTestCase: XCTestCase {
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
-                      parserType: useSourceKit ? .sourceKit : .swiftSyntax,
+                      parserType: parser,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,
