@@ -60,6 +60,11 @@ $ ./install-script.sh -s [source dir] -t mockolo -d [destination dir] -o [output
 
 This will create a tarball for distribution, which contains the mockolo executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running mockolo without depending on where the dylib lives. 
 
+Option 3: Run by [Mint](https://github.com/yonaskolb/Mint)
+
+```
+$ mint run uber/mockolo mockolo -s [source dir] -t mockolo -d [destination dir] -o [output filename]
+```
 
 To use Xcode, run the following.
 
