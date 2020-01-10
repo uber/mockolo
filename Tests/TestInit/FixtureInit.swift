@@ -146,3 +146,66 @@ public class CurrentMock: Current {
 }
 
 """
+
+
+let nonSimpleInitVars = """
+
+public typealias ForcastCheckBlock = () -> ForcastUpdateConfig?
+
+/// \(String.mockAnnotation)
+@objc public protocol ForcastUpdating {
+    @objc init(checkBlock: @escaping ForcastCheckBlock, dataStream: DataStream)
+    @objc func enabled() -> Bool
+    @objc func forcastLoader() -> ForcastLoading?
+    @objc func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ())
+}
+"""
+
+
+let nonSimpleInitVarsMock =
+"""
+public class ForcastUpdatingMock: ForcastUpdating {
+
+    private var _doneInit = false
+            private var checkBlock: ForcastCheckBlock!
+    private var dataStream: DataStream!
+    public init() { _doneInit = true }
+    required public init(checkBlock: @escaping ForcastCheckBlock, dataStream: DataStream) {
+    self.checkBlock = checkBlock
+    self.dataStream = dataStream
+    _doneInit = true
+}
+    public var enabledCallCount = 0
+    public var enabledHandler: (() -> (Bool))?
+    public func enabled() -> Bool {
+            enabledCallCount += 1
+    
+            if let enabledHandler = enabledHandler {
+                return enabledHandler()
+            }
+            return false
+    }
+    public var forcastLoaderCallCount = 0
+    public var forcastLoaderHandler: (() -> (ForcastLoading?))?
+    public func forcastLoader() -> ForcastLoading? {
+            forcastLoaderCallCount += 1
+    
+            if let forcastLoaderHandler = forcastLoaderHandler {
+                return forcastLoaderHandler()
+            }
+            return nil
+    }
+    public var fetchInfoCallCount = 0
+    public var fetchInfoHandler: ((URL, @escaping (String?, URL?) -> ()) -> ())?
+    public func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ())  {
+            fetchInfoCallCount += 1
+    
+            if let fetchInfoHandler = fetchInfoHandler {
+                fetchInfoHandler(itmsURL, completionHandler)
+            }
+            
+    }
+}
+
+"""
+

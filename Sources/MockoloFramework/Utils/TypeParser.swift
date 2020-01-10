@@ -55,9 +55,15 @@ public struct Type {
         return sub.isSingular
     }
     
-    var forceUnwrapped: String {
+    var underlyingType: String {
         var ret = typeName
-        
+
+        // If @escaping, remove as it can only be used for a func parameter.
+        if isEscaping, let escapeRemoved = ret.components(separatedBy: String.escaping).last?.trimmingCharacters(in: .whitespaces) {
+            ret = escapeRemoved
+        }
+
+        // Use force unwrapped for the underlying type so it doesn't always have to be set in the init (need to allow blank init).
         if hasClosure {
             ret = "(\(ret))!"
         } else {
@@ -97,7 +103,11 @@ public struct Type {
     var hasClosure: Bool {
         return typeName.range(of: String.closureArrow) != nil
     }
-    
+
+    var isEscaping: Bool {
+        return typeName.hasPrefix(String.escaping)
+    }
+
     var splitByClosure: Bool {
         let arg = typeName
         if let closureOpRange = arg.range(of: String.closureArrow) {
