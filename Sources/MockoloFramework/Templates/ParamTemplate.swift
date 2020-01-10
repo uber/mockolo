@@ -34,7 +34,7 @@ func applyVarTemplate(name: String,
     assert(!type.isUnknown)
     let vardecl =
     """
-    private var \(name): \(type.forceUnwrapped)
+    private var \(name): \(type.underlyingType)
     """
     return vardecl
 }

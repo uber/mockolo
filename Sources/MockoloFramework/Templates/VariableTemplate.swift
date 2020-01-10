@@ -28,7 +28,7 @@ func applyVariableTemplate(name: String,
     
     var underlyingType = type.typeName
     if underlyingVarDefaultVal.isEmpty {
-        underlyingType = type.forceUnwrapped
+        underlyingType = type.underlyingType
     }
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
     let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
