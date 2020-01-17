@@ -162,16 +162,16 @@ class Executor {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
+                         parser: shouldUseSourceKit ? ParserViaSourceKit() : ParserViaSwiftSyntax(),
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,
                          header: header,
                          macro: macro,
-                         parserType: shouldUseSourceKit ? .sourceKit : .swiftSyntax,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
-                         onCompletion: { _ in 
+                         onCompletion: { _ in
                     log("Done. Exiting program.", level: .info)
                     exit(0)
             })

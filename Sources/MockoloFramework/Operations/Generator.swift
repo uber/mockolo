@@ -29,12 +29,12 @@ public enum ParserType {
 /// Performs end to end mock generation flow
 public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,
+                     parser: SourceParsing,
                      exclusionSuffixes: [String],
                      mockFilePaths: [String]?,
                      annotation: String,
                      header: String?,
                      macro: String?,
-                     parserType: ParserType,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
@@ -63,20 +63,19 @@ public func generate(sourceDirs: [String]?,
     let t0 = CFAbsoluteTimeGetCurrent()
     log("Process input mock files...", level: .info)
     if let mockFilePaths = mockFilePaths {
-        generateProcessedTypeMap(mockFilePaths,
-                                 parserType: parserType,
-                                 semaphore: sema,
-                                 queue: mockgenQueue) { (elements, imports) in
-                                    elements.forEach { element in
-                                        parentMocks[element.entityNode.name] = element
-                                    }
-
-                                    for (path, modules) in imports {
-                                        if pathToImportsMap[path] == nil {
-                                            pathToImportsMap[path] = []
-                                        }
-                                        pathToImportsMap[path]?.append(contentsOf: modules)
-                                    }
+        parser.parseClasses(mockFilePaths,
+                     semaphore: sema,
+                     queue: mockgenQueue) { (elements, imports) in
+                        elements.forEach { element in
+                            parentMocks[element.entityNode.name] = element
+                        }
+                        
+                        for (path, modules) in imports {
+                            if pathToImportsMap[path] == nil {
+                                pathToImportsMap[path] = []
+                            }
+                            pathToImportsMap[path]?.append(contentsOf: modules)
+                        }
         }
     }
     signpost_end(name: "Process input")
@@ -86,11 +85,12 @@ public func generate(sourceDirs: [String]?,
     signpost_begin(name: "Generate protocol map")
     log("Process source files and generate an annotated/protocol map...", level: .info)
 
-    generateProtocolMap(sourceDirs: sourceDirs,
-                        sourceFiles: sourceFiles,
+    let paths = sourceDirs ?? sourceFiles
+    let isDirs = sourceDirs != nil
+    parser.parseProtocols(paths,
+                        isDirs: isDirs,
                         exclusionSuffixes: exclusionSuffixes,
                         annotation: annotation,
-                        parserType: parserType,
                         semaphore: sema,
                         queue: mockgenQueue) { (elements, imports) in
                             elements.forEach { element in

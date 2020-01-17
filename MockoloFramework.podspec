@@ -11,6 +11,7 @@ Pod::Spec.new do |s|
   s.osx.deployment_target = '10.14'
   s.swift_version    = '5.1'
   s.dependency     'SourceKittenFramework', '~>0.26.0'
-  s.source         = { :http => "#{s.homepage}/archive/#{s.version}.zip", :flatten => true }
-#  s.source_files   = 'Sources/MockoloFramework/**/*.swift'
+  s.source         = { :git => 'https://github.com/uber/mockolo.git', :tag => '1.1.2' }
+  s.source_files   = 'Sources/MockoloFramework/**/*.swift'
+  s.exclude_files  = 'Sources/MockoloFramework/Parsers/ViaSwiftSyntax/**/*.swift'
 end

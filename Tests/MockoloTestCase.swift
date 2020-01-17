@@ -112,12 +112,12 @@ class MockoloTestCase: XCTestCase {
         }
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
+                      parser: parser == .sourceKit ? ParserViaSourceKit() : ParserViaSwiftSyntax(),
                       exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: mockFilePaths,
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
-                      parserType: parser,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,

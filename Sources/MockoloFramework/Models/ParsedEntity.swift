@@ -67,7 +67,7 @@ final class EntityNodeSubContainer {
 
 
 /// Metadata for a type being mocked
-final class Entity {
+public final class Entity {
     var filepath: String = ""
     var data: Data? = nil
 
