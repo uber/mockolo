@@ -18,7 +18,6 @@ import SPMUtility
 import Basic
 
 func main() {
-    
     let parser = ArgumentParser(usage: "<options>", overview: "Mockolo: Swift mock generator.")
     let command = Executor(parser: parser)
     let inputs = Array(CommandLine.arguments.dropFirst())

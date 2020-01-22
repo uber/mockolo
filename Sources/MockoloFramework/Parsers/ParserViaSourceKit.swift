@@ -21,19 +21,17 @@ public class ParserViaSourceKit: SourceParsing {
     
     public init() {}
     
-    /// Performs processed mock type map generation
-    public func parseClasses(_ paths: [String],
-                             semaphore: DispatchSemaphore?,
-                             queue: DispatchQueue?,
-                             process: @escaping ([Entity], [String: [String]]) -> ()) {
+    public func parseProcessedDecls(_ paths: [String],
+                                    semaphore: DispatchSemaphore?,
+                                    queue: DispatchQueue?,
+                                    completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         if let queue = queue {
             let lock = NSLock()
-            
             for filePath in paths {
                 _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
                 queue.async {
-                    self.generateProcessedModels(filePath, lock: lock, process: process)
+                    self.generateProcessedEntities(filePath, lock: lock, completion: completion)
                     semaphore?.signal()
                 }
             }
@@ -41,34 +39,34 @@ public class ParserViaSourceKit: SourceParsing {
             queue.sync(flags: .barrier) {}
         } else {
             for filePath in paths {
-                generateProcessedModels(filePath, lock: nil, process: process)
+                generateProcessedEntities(filePath, lock: nil, completion: completion)
             }
         }
     }
     
-    /// Performs protocol and annotated protocol map generation
-    public func parseProtocols(_ paths: [String]?,
-                               isDirs: Bool,
-                        exclusionSuffixes: [String]? = nil,
-                        annotation: String,
-                        semaphore: DispatchSemaphore?,
-                        queue: DispatchQueue?,
-                        process: @escaping ([Entity], [String: [String]]?) -> ()) {
-        
+    public func parseDecls(_ paths: [String]?,
+                           declType: DeclType,
+                           isDirs: Bool,
+                           exclusionSuffixes: [String]? = nil,
+                           annotation: String,
+                           semaphore: DispatchSemaphore?,
+                           queue: DispatchQueue?,
+                           completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+        guard !annotation.isEmpty else { return }
         guard let paths = paths else { return }
         if isDirs {
-            generateProtcolMap(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
+            generateEntities(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
         } else {
-            generateProtcolMap(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, process: process)
+            generateEntities(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
         }
     }
     
-    private func generateProtcolMap(dirs: [String],
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotation: String,
-                                    semaphore: DispatchSemaphore?,
-                                    queue: DispatchQueue?,
-                                    process: @escaping ([Entity], [String: [String]]?) -> ()) {
+    private func generateEntities(dirs: [String],
+                                  exclusionSuffixes: [String]? = nil,
+                                  annotation: String,
+                                  semaphore: DispatchSemaphore?,
+                                  queue: DispatchQueue?,
+                                  completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard let annotationData = annotation.data(using: .utf8) else {
             fatalError("Annotation is invalid: \(annotation)")
@@ -79,11 +77,11 @@ public class ParserViaSourceKit: SourceParsing {
             scanPaths(dirs) { filePath in
                 _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
                 queue.async {
-                    self.generateProtcolMap(filePath,
-                                       exclusionSuffixes: exclusionSuffixes,
-                                       annotationData: annotationData,
-                                       lock: lock,
-                                       process: process)
+                    self.generateEntities(filePath,
+                                          exclusionSuffixes: exclusionSuffixes,
+                                          annotationData: annotationData,
+                                          lock: lock,
+                                          completion: completion)
                     semaphore?.signal()
                 }
             }
@@ -92,22 +90,21 @@ public class ParserViaSourceKit: SourceParsing {
             queue.sync(flags: .barrier) {}
         } else {
             scanPaths(dirs) { filePath in
-                generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotationData: annotationData,
-                                   lock: nil,
-                                   process: process)
+                generateEntities(filePath,
+                                 exclusionSuffixes: exclusionSuffixes,
+                                 annotationData: annotationData,
+                                 lock: nil,
+                                 completion: completion)
             }
         }
     }
     
-    private func generateProtcolMap(files: [String],
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotation: String,
-                                    semaphore: DispatchSemaphore?,
-                                    queue: DispatchQueue?,
-                                    process: @escaping ([Entity], [String: [String]]?) -> ()) {
-        
+    private func generateEntities(files: [String],
+                                  exclusionSuffixes: [String]? = nil,
+                                  annotation: String,
+                                  semaphore: DispatchSemaphore?,
+                                  queue: DispatchQueue?,
+                                  completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         guard let annotationData = annotation.data(using: .utf8) else {
             fatalError("Annotation is invalid: \(annotation)")
         }
@@ -117,11 +114,11 @@ public class ParserViaSourceKit: SourceParsing {
             for filePath in files {
                 _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
                 queue.async {
-                    self.generateProtcolMap(filePath,
-                                       exclusionSuffixes: exclusionSuffixes,
-                                       annotationData: annotationData,
-                                       lock: lock,
-                                       process: process)
+                    self.generateEntities(filePath,
+                                          exclusionSuffixes: exclusionSuffixes,
+                                          annotationData: annotationData,
+                                          lock: lock,
+                                          completion: completion)
                     semaphore?.signal()
                 }
             }
@@ -130,20 +127,20 @@ public class ParserViaSourceKit: SourceParsing {
             
         } else {
             for filePath in files {
-                generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotationData: annotationData,
-                                   lock: nil,
-                                   process: process)
+                generateEntities(filePath,
+                                 exclusionSuffixes: exclusionSuffixes,
+                                 annotationData: annotationData,
+                                 lock: nil,
+                                 completion: completion)
             }
         }
     }
     
-    private func generateProtcolMap(_ path: String,
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotationData: Data,
-                                    lock: NSLock?,
-                                    process: @escaping ([Entity], [String: [String]]?) -> ()) {
+    private func generateEntities(_ path: String,
+                                  exclusionSuffixes: [String]? = nil,
+                                  annotationData: Data,
+                                  lock: NSLock?,
+                                  completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard path.shouldParse(with: exclusionSuffixes) else { return }
         guard let content = FileManager.default.contents(atPath: path) else {
@@ -154,22 +151,20 @@ public class ParserViaSourceKit: SourceParsing {
             var results = [Entity]()
             let topstructure = try Structure(path: path)
             for current in topstructure.substructures {
-                if current.isProtocol {
-                    let metadata = current.annotationMetadata(with: annotationData, in: content)
-                    let isAnnotated = metadata != nil
-                    
-                    let node = Entity(entityNode: current,
-                                      filepath: path,
-                                      data: content,
-                                      isAnnotated: isAnnotated,
-                                      overrides: metadata?.typealiases,
-                                      isProcessed: false)
-                    results.append(node)
-                }
+                let metadata = current.annotationMetadata(with: annotationData, in: content)
+                let isAnnotated = metadata != nil
+                
+                let node = Entity(entityNode: current,
+                                  filepath: path,
+                                  data: content,
+                                  isAnnotated: isAnnotated,
+                                  overrides: metadata?.typealiases,
+                                  isProcessed: false)
+                results.append(node)
             }
             
             lock?.lock()
-            process(results, nil)
+            completion(results, nil)
             lock?.unlock()
             
         } catch {
@@ -177,9 +172,9 @@ public class ParserViaSourceKit: SourceParsing {
         }
     }
     
-    private func generateProcessedModels(_ path: String,
-                                         lock: NSLock?,
-                                         process: @escaping ([Entity], [String: [String]]) -> ()) {
+    private func generateProcessedEntities(_ path: String,
+                                           lock: NSLock?,
+                                           completion: @escaping ([Entity], [String: [String]]) -> ()) {
         
         guard let content = FileManager.default.contents(atPath: path) else {
             fatalError("Retrieving contents of \(path) failed")
@@ -199,14 +194,12 @@ public class ParserViaSourceKit: SourceParsing {
             
             let imports = findImportLines(data: content, offset: subs.first?.offset)
             lock?.lock()
-            process(results, [path: imports])
+            completion(results, [path: imports])
             lock?.unlock()
         } catch {
             fatalError(error.localizedDescription)
         }
     }
-    
-    
 }
 
 

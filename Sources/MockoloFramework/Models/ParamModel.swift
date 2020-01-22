@@ -25,12 +25,13 @@ final class ParamModel: Model {
     let label: String
     let isGeneric: Bool
     let inInit: Bool
+    let needVarDecl: Bool
     
     var modelType: ModelType {
         return .parameter
     }
 
-    init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, offset: Int64, length: Int64) {
+    init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool, offset: Int64, length: Int64) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
         let labelStr = label.trimmingCharacters(in: .whitespaces)
@@ -39,9 +40,10 @@ final class ParamModel: Model {
         self.length = length
         self.isGeneric = isGeneric
         self.inInit = inInit
+        self.needVarDecl = needVarDecl
     }
     
-    init(_ ast: Structure, label: String = "", offset: Int64, length: Int64, data: Data, isGeneric: Bool = false, inInit: Bool = false) {
+    init(_ ast: Structure, label: String = "", offset: Int64, length: Int64, data: Data, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool) {
         self.name = ast.name
         self.offset = offset
         self.length = length
@@ -50,13 +52,14 @@ final class ParamModel: Model {
         let isVariadic = lookahead == "..."
         self.isGeneric = isGeneric
         self.inInit = inInit
+        self.needVarDecl = needVarDecl
         let typeArg = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : (isVariadic ? ast.typeName + "..." : ast.typeName)
         self.type = Type(typeArg)
         self.label = ast.name != label ? label: ""
     }
 
     var asVarDecl: String? {
-        if self.inInit {
+        if self.inInit, self.needVarDecl {
             return applyVarTemplate(name: name, type: type)
         }
         return nil

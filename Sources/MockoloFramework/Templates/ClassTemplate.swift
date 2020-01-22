@@ -21,6 +21,7 @@ func applyClassTemplate(name: String,
                         typeKeys: [String: String]?,
                         accessControlLevelDescription: String,
                         attribute: String,
+                        declType: DeclType,
                         needInit: Bool,
                         initParams: [Model]?,
                         typealiasWhitelist: [String: [String]]?,
@@ -59,15 +60,17 @@ func applyClassTemplate(name: String,
         }
         
         initTemplate = """
-        \(extraInitBlock)
+            \(extraInitBlock)
             \(accessControlLevelDescription)init(\(params)) {
-        \(paramsAssign)
+            \(paramsAssign)
                 \(String.doneInit) = true
             }
         """
     } else {
-        
         if let initParams = initParams, !initParams.isEmpty {
+            if declType == .protocolType { 
+                extraInitBlock = "\(accessControlLevelDescription)init() { \(String.doneInit) = true }"
+            }
             var varsForInit = [String: Model]()
             entities.filter {$0.1.canBeInitParam}.forEach { (arg: (String, Model)) in
                 varsForInit[arg.0] = arg.1
@@ -76,14 +79,12 @@ func applyClassTemplate(name: String,
                 .filter { varsForInit[$0.name] == nil }
                 .compactMap { ($0 as? ParamModel)?.asVarDecl }
                 .joined(separator: "\n")
-
-            extraInitBlock = "\(accessControlLevelDescription)init() { \(String.doneInit) = true }"
             
-            initTemplate =
-        """
-            \(extraVarsNeeded)
-            \(extraInitBlock)
-        """
+                initTemplate =
+                """
+                    \(extraVarsNeeded)
+                    \(extraInitBlock)
+                """
         }
     }
     

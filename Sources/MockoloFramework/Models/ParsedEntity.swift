@@ -30,6 +30,7 @@ struct ResolvedEntity {
     func model() -> Model {
         return ClassModel(identifier: key,
                           acl: entity.entityNode.acl,
+                          declType: entity.entityNode.declType,
                           attributes: attributes,
                           offset: entity.entityNode.offset,
                           needInit: !hasInit,
@@ -49,9 +50,10 @@ protocol EntityNode {
     var name: String { get }
     var acl: String { get }
     var attributesDescription: String { get }
+    var declType: DeclType { get }
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
-    func subContainer(overrides: [String: String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
+    func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
 final class EntityNodeSubContainer {

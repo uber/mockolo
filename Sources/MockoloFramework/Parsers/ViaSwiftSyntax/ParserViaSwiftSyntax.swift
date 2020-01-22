@@ -18,55 +18,53 @@ import Foundation
 import SwiftSyntax
 
 public class ParserViaSwiftSyntax: SourceParsing {
-
+    
     public init() {}
-
-    /// Performs processed mock type map generation
-    public func parseClasses(_ paths: [String],
-                             semaphore: DispatchSemaphore?,
-                             queue: DispatchQueue?,
-                             process: @escaping ([Entity], [String: [String]]) -> ()) {
-        var treeVisitor = EntityVisitor(entityType: .classType)
+    
+    public func parseProcessedDecls(_ paths: [String],
+                                    semaphore: DispatchSemaphore?,
+                                    queue: DispatchQueue?,
+                                    completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+        var treeVisitor = EntityVisitor()
         for filePath in paths {
-            generateProcessedModels(filePath, treeVisitor: &treeVisitor, lock: nil, process: process)
+            generateASTs(filePath, annotation: "", treeVisitor: &treeVisitor, completion: completion)
         }
     }
     
-    public func parseProtocols(_ paths: [String]?,
-                               isDirs: Bool,
-                               exclusionSuffixes: [String]? = nil,
-                               annotation: String,
-                               semaphore: DispatchSemaphore?,
-                               queue: DispatchQueue?,
-                               process: @escaping ([Entity], [String: [String]]?) -> ()) {
+    public func parseDecls(_ paths: [String]?,
+                           declType: DeclType,
+                           isDirs: Bool,
+                           exclusionSuffixes: [String]? = nil,
+                           annotation: String,
+                           semaphore: DispatchSemaphore?,
+                           queue: DispatchQueue?,
+                           completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard let paths = paths else { return }
         
-        var treeVisitor = EntityVisitor(annotation: annotation, entityType: .protocolType)
+        var treeVisitor = EntityVisitor(annotation: annotation)
         
         if isDirs {
             scanPaths(paths) { filePath in
-                generateProtcolMap(filePath,
-                                   exclusionSuffixes: exclusionSuffixes,
-                                   annotation: annotation,
-                                   treeVisitor: &treeVisitor,
-                                   lock: nil,
-                                   process: process)
+                generateASTs(filePath,
+                             exclusionSuffixes: exclusionSuffixes,
+                             annotation: annotation,
+                             treeVisitor: &treeVisitor,
+                             completion: completion)
             }
         } else {
             for filePath in paths {
-                generateProtcolMap(filePath, exclusionSuffixes: exclusionSuffixes, annotation: annotation, treeVisitor: &treeVisitor, lock: nil, process: process)
+                generateASTs(filePath, exclusionSuffixes: exclusionSuffixes, annotation: annotation, treeVisitor: &treeVisitor, completion: completion)
             }
             
         }
     }
     
-    private func generateProtcolMap(_ path: String,
-                                    exclusionSuffixes: [String]? = nil,
-                                    annotation: String,
-                                    treeVisitor: inout EntityVisitor,
-                                    lock: NSLock?,
-                                    process: @escaping ([Entity], [String: [String]]?) -> ()) {
+    private func generateASTs(_ path: String,
+                              exclusionSuffixes: [String]? = nil,
+                              annotation: String,
+                              treeVisitor: inout EntityVisitor,
+                              completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard path.shouldParse(with: exclusionSuffixes) else { return }
         do {
@@ -81,36 +79,7 @@ public class ParserViaSwiftSyntax: SourceParsing {
             let imports = treeVisitor.imports
             treeVisitor.reset()
             
-            lock?.lock()
-            process(results, [path: imports])
-            lock?.unlock()
-            
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
-    
-    
-    private func generateProcessedModels(_ path: String,
-                                         treeVisitor: inout EntityVisitor,
-                                         lock: NSLock?,
-                                         process: @escaping ([Entity], [String: [String]]) -> ()) {
-        
-        do {
-            var results = [Entity]()
-            let node = try SyntaxParser.parse(path)
-            node.walk(&treeVisitor)
-            let ret = treeVisitor.entities
-            for ent in ret {
-                ent.filepath = path
-            }
-            results.append(contentsOf: ret)
-            let imports = treeVisitor.imports
-            treeVisitor.reset()
-            
-            lock?.lock()
-            process(results, [path: imports])
-            lock?.unlock()
+            completion(results, [path: imports])
         } catch {
             fatalError(error.localizedDescription)
         }

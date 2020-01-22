@@ -105,16 +105,16 @@ extension Structure: EntityNode {
         return result
     }
     
-    func subContainer(overrides: [String: String]?, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        let memberList = members(with: path, data: data, overrides: overrides, processed: isProcessed)
+    func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        let memberList = members(with: path, encloserType: declType, data: data, overrides: overrides, processed: isProcessed)
         let subAttributes = memberAttributes(with: data)
         return EntityNodeSubContainer(attributes: subAttributes, members: memberList, hasInit: hasInitMember)
     }
     
-    func members(with path: String?, data: Data?, overrides: [String: String]?, processed: Bool) -> [Model] {
+    func members(with path: String?, encloserType: DeclType, data: Data?, overrides: [String: String]?, processed: Bool) -> [Model] {
         guard let path = path, let data = data else { return [] }
         return self.substructures.compactMap { (child: Structure) -> Model? in
-            return model(for: child, filepath: path, data: data, overrides: overrides, processed: processed)
+            return model(for: child, encloserType: declType, filepath: path, data: data, overrides: overrides, processed: processed)
         }
     }
     
@@ -125,12 +125,12 @@ extension Structure: EntityNode {
         }.flatMap {$0}
     }
     
-    func model(for element: Structure, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
+    func model(for element: Structure, encloserType: DeclType, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
-            return VariableModel(element, filepath: filepath, data: data, processed: processed)
-        } else if element.isMethod || element.isSubscript {
-            return MethodModel(element, filepath: filepath, data: data, processed: processed)
-        } else if element.isAssociatedType {
+            return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+        } else if element.isMethod || element.isSubscript { // initializer is considered a method by sourcekit
+            return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+        } else if element.isAssociatedType || element.isTypealias {
             return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
         }
         
@@ -146,6 +146,9 @@ extension Structure: EntityNode {
         return attributes?.description ?? ""
     }
     
+    var declType: DeclType {
+        return isProtocol ? .protocolType : (isClass ? .classType : .other)
+    }
     
     var hasInitMember: Bool {
         return self.substructures.filter(path: \.isInitializer).count > 0
@@ -193,6 +196,14 @@ extension Structure: EntityNode {
         return kind == SwiftDeclarationKind.varStatic.rawValue
     }
     
+    var isOverride: Bool {
+        return attributeValues?.contains(SwiftDeclarationAttributeKind.override.rawValue) ?? false
+    }
+
+    var isRequired: Bool {
+        return attributeValues?.contains(SwiftDeclarationAttributeKind.required.rawValue) ?? false
+    }
+
     var isStaticMethod: Bool {
         return kind == SwiftDeclarationKind.functionMethodStatic.rawValue
     }
@@ -214,7 +225,7 @@ extension Structure: EntityNode {
     }
     
     var isVarParameter: Bool {
-        return kind == "source.lang.swift.decl.var.parameter"
+        return kind == SwiftDeclarationKind.varParameter.rawValue
     }
     
     var isTypeNonOptional: Bool {
@@ -227,6 +238,10 @@ extension Structure: EntityNode {
     
     var isAssociatedType: Bool {
         return kind == SwiftDeclarationKind.associatedtype.rawValue
+    }
+    
+    var isTypealias: Bool {
+        return kind == SwiftDeclarationKind.typealias.rawValue
     }
     
     var isClosureVariable: Bool {

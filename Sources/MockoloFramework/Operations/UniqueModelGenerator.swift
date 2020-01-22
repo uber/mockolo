@@ -24,20 +24,20 @@ func generateUniqueModels(protocolMap: [String: Entity],
                           typeKeys: [String: String]?,
                           semaphore: DispatchSemaphore?,
                           queue: DispatchQueue?,
-                          process: @escaping (ResolvedEntityContainer) -> ()) {
+                          completion: @escaping (ResolvedEntityContainer) -> ()) {
     if let queue = queue {
         let lock = NSLock()
         for (key, val) in annotatedProtocolMap {
             _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
             queue.async {
-                generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: lock, process: process)
+                generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: lock, completion: completion)
                 semaphore?.signal()
             }
         }
         queue.sync(flags: .barrier) { }
     } else {
         for (key, val) in annotatedProtocolMap {
-            generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: nil, process: process)
+            generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: nil, completion: completion)
         }
     }
 }
@@ -96,11 +96,11 @@ func generateUniqueModels(key: String,
                           protocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
                           lock: NSLock? = nil,
-                          process: @escaping (ResolvedEntityContainer) -> ()) {
+                          completion: @escaping (ResolvedEntityContainer) -> ()) {
     let ret = generateUniqueModels(key: key, entity: entity, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
     lock?.lock()
-    process(ret)
+    completion(ret)
     lock?.unlock()
 }
 

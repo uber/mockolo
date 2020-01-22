@@ -17,8 +17,13 @@
 import Foundation
 import SourceKittenFramework
 
+public enum MethodKind: Equatable {
+    case funcKind
+    case initKind(required: Bool)
+    case subscriptKind
+}
+
 final class MethodModel: Model {
-    
     var filePath: String = ""
     var data: Data? = nil
     var name: String
@@ -31,17 +36,23 @@ final class MethodModel: Model {
     let params: [ParamModel]
     let processed: Bool
     var modelDescription: String? = nil
-    let isInitializer: Bool
-    let isSubscript: Bool
     let isStatic: Bool
+    let isOverride: Bool
     let suffix: String
-    
+    let kind: MethodKind
     var modelType: ModelType {
         return .method
     }
     
     var staticKind: String {
         return isStatic ? .static : ""
+    }
+    
+    var isInitializer: Bool {
+        if case .initKind(_) = kind {
+            return true
+        }
+        return false
     }
     
     lazy var signatureComponents: [String] = {
@@ -92,13 +103,13 @@ final class MethodModel: Model {
     
     init(name: String,
          typeName: String,
+         kind: MethodKind,
+         encloserType: DeclType,
          acl: String,
          genericTypeParams: [ParamModel],
          params: [ParamModel],
          throwsOrRethrows: String,
          isStatic: Bool,
-         isInitializer: Bool,
-         isSubscript: Bool,
          offset: Int64,
          length: Int64,
          modelDescription: String?,
@@ -108,9 +119,9 @@ final class MethodModel: Model {
         self.suffix = throwsOrRethrows
         self.offset = offset
         self.length = length
-        self.isInitializer = isInitializer
+        self.kind = kind
         self.isStatic = isStatic
-        self.isSubscript = isSubscript
+        self.isOverride = encloserType == .classType
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.processed = processed
@@ -118,7 +129,7 @@ final class MethodModel: Model {
         self.accessControlLevelDescription = acl
     }
     
-    init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
+    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
         // give the name part that we expect.
@@ -130,23 +141,31 @@ final class MethodModel: Model {
         self.type = Type(ast.typeName)
         self.isStatic = ast.isStaticMethod
         self.processed = processed
-        self.isInitializer = ast.isInitializer
-        self.isSubscript = ast.isSubscript
+        self.isOverride = ast.isOverride || encloserType == .classType
+        if ast.isSubscript {
+            self.kind = .subscriptKind
+        } else if ast.isInitializer {
+            let isRequired = ast.isRequired || encloserType == .protocolType
+            self.kind = .initKind(required: isRequired)
+        } else {
+            self.kind = .funcKind
+        }
         self.offset = ast.range.offset
         self.length = ast.range.length
+        let needVarDecl = encloserType == .protocolType // Params in protocol init should be declared as private vars if not done already
         
         let paramDecls = ast.substructures.filter(path: \.isVarParameter)
         assert(paramDecls.count == comps.count)
         
         let zippedParams = zip(paramDecls, comps)
         self.params = zippedParams.map { (argAst: Structure, argLabel: String) -> ParamModel in
-            return ParamModel(argAst, label: argLabel, offset: argAst.offset, length: argAst.length, data: data, inInit: ast.isInitializer)
+            return ParamModel(argAst, label: argLabel, offset: argAst.offset, length: argAst.length, data: data, inInit: ast.isInitializer, needVarDecl: needVarDecl)
         }
         
         self.genericTypeParams = ast.substructures
             .filter(path: \.isGenericTypeParam)
             .map { (arg: Structure) -> ParamModel in
-                ParamModel(arg, label: arg.name, offset: arg.offset, length: arg.length, data: data, isGeneric: true)
+                ParamModel(arg, label: arg.name, offset: arg.offset, length: arg.length, data: data, isGeneric: true, needVarDecl: false)
         }
         
         // Sourcekit structure api doesn't provide info on throws/rethrows, so manually parse it here
@@ -192,8 +211,8 @@ final class MethodModel: Model {
         
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
-                                         isInitializer: isInitializer,
-                                         isSubscript: isSubscript,
+                                         kind: kind,
+                                         isOverride: isOverride,
                                          genericTypeParams: genericTypeParams,
                                          params: params,
                                          returnType: type,

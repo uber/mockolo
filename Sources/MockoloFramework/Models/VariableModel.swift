@@ -13,6 +13,8 @@ final class VariableModel: Model {
     var data: Data? = nil
     var filePath: String = ""
     var isStatic = false
+    var isOverride = false
+    
     var modelDescription: String? = nil
     var modelType: ModelType {
         return .variable
@@ -25,6 +27,7 @@ final class VariableModel: Model {
     init(name: String,
          typeName: String,
          acl: String?,
+         encloserType: DeclType,
          isStatic: Bool,
          canBeInitParam: Bool,
          offset: Int64,
@@ -37,6 +40,7 @@ final class VariableModel: Model {
         self.offset = offset
         self.length = length
         self.isStatic = isStatic
+        self.isOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.accessControlLevelDescription = acl ?? ""
@@ -44,13 +48,14 @@ final class VariableModel: Model {
         self.modelDescription = modelDescription
     }
     
-    init(_ ast: Structure, filepath: String, data: Data, processed: Bool) {
+    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, processed: Bool) {
         name = ast.name
         type = Type(ast.typeName)
         offset = ast.range.offset
         length = ast.range.length
         canBeInitParam = ast.canBeInitParam
         isStatic = ast.isStaticVariable
+        isOverride = ast.isOverride || encloserType == .classType
         accessControlLevelDescription = ast.accessControlLevelDescription
         attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
         self.processed = processed
@@ -81,6 +86,7 @@ final class VariableModel: Model {
                                                type: type,
                                                typeKeys: typeKeys,
                                                staticKind: staticKind,
+                                               isOverride: isOverride,
                                                accessControlLevelDescription: accessControlLevelDescription) {
             return rxVar
         }
@@ -88,6 +94,7 @@ final class VariableModel: Model {
                                      type: type,
                                      typeKeys: typeKeys, 
                                      staticKind: staticKind,
+                                     isOverride: isOverride,
                                      accessControlLevelDescription: accessControlLevelDescription)
     }
 }

@@ -23,6 +23,7 @@ final class ClassModel: Model {
     let attribute: String
     let accessControlLevelDescription: String
     let identifier: String
+    let declType: DeclType
     let entities: [(String, Model)]
     let needInit: Bool
     let initParams: [Model]?
@@ -33,6 +34,7 @@ final class ClassModel: Model {
     
     init(identifier: String,
          acl: String,
+         declType: DeclType,
          attributes: [String],
          offset: Int64,
          needInit: Bool,
@@ -42,6 +44,7 @@ final class ClassModel: Model {
         self.identifier = identifier 
         self.name = identifier + "Mock"
         self.type = Type(.class)
+        self.declType = declType
         self.entities = entities
         self.needInit = needInit
         self.initParams = initParams
@@ -52,6 +55,6 @@ final class ClassModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, needInit: needInit, initParams: initParams, typealiasWhitelist: typealiasWhitelist, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, declType: declType, needInit: needInit, initParams: initParams, typealiasWhitelist: typealiasWhitelist, entities: entities)
     }
 }

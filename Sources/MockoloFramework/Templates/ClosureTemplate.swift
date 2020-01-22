@@ -46,10 +46,10 @@ func applyClosureTemplate(name: String,
     let template =
     """
     
-                if let \(name) = \(name) {
-                    \(callExpr)
-                }
-                \(handlerReturnDefault)
+            if let \(name) = \(name) {
+                \(callExpr)
+            }
+            \(handlerReturnDefault)
     """
 
     return template

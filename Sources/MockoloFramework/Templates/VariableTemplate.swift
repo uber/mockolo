@@ -20,6 +20,7 @@ func applyVariableTemplate(name: String,
                            type: Type,
                            typeKeys: [String: String]?,
                            staticKind: String,
+                           isOverride: Bool,
                            accessControlLevelDescription: String) -> String {
 
     let underlyingName = "\(String.underlyingVarPrefix)\(name.capitlizeFirstLetter)"
@@ -33,6 +34,7 @@ func applyVariableTemplate(name: String,
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
     let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
 
+    let overrideStr = isOverride ? "\(String.override) " : ""
     var acl = accessControlLevelDescription
     if !acl.isEmpty {
         acl = acl + " "
@@ -42,7 +44,7 @@ func applyVariableTemplate(name: String,
     
     \(acl)\(staticStr)var \(underlyingSetCallCount) = 0
     \(staticStr)var \(underlyingName): \(underlyingType) \(underlyingVarDefaultVal.isEmpty ? "" : "= \(underlyingVarDefaultVal)")
-    \(acl)\(staticStr)var \(name): \(type.typeName) {
+    \(acl)\(staticStr)\(overrideStr)var \(name): \(type.typeName) {
         get { return \(underlyingName) }
         set {
             \(underlyingName) = newValue
@@ -57,6 +59,7 @@ func applyRxVariableTemplate(name: String,
                              type: Type,
                              typeKeys: [String: String]?,
                              staticKind: String,
+                             isOverride: Bool,
                              accessControlLevelDescription: String) -> String? {
     let typeName = type.typeName
     if let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {

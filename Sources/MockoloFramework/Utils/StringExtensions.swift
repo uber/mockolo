@@ -86,8 +86,9 @@ extension StringProtocol {
     
     func shouldParse(with exclusionList: [String]? = nil) -> Bool {
         guard hasSuffix(".swift") else { return false }
+        guard let exlist = exclusionList else { return true }
         
-        if let name = components(separatedBy: ".swift").first, let exlist = exclusionList {
+        if let name = components(separatedBy: ".swift").first {
             for ex in exlist {
                 if name.hasSuffix(ex) {
                     return false

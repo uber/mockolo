@@ -1,6 +1,5 @@
 import MockoloFramework
 
-
 let subscripts = """
 
 /// \(String.mockAnnotation)
