@@ -32,6 +32,9 @@ func applyClosureTemplate(name: String,
             if argType.typeName.hasPrefix(String.autoclosure) {
                 return argName + "()"
             }
+            if argName.isSwiftKeyword {
+                return "`\(argName)`"
+            }
             return argName
         }
         handlerParamValsStr = zipped.joined(separator: ", ")

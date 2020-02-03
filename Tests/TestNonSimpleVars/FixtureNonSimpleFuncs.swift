@@ -416,3 +416,71 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 }
 """
+
+let forArgClosureFunc = """
+import Foundation
+
+/// \(String.mockAnnotation)
+protocol NonSimpleFuncs {
+func max(for: Int) -> (() -> Void)?
+func maxDo(do: Int) -> (() -> Void)?
+func maxIn(in: Int) -> (() -> Void)?
+func maxSwitch(for switch: Int) -> (() -> Void)?
+}
+"""
+
+let forArgClosureFuncMock = """
+
+import Foundation
+
+
+class NonSimpleFuncsMock: NonSimpleFuncs {
+
+    private var _doneInit = false
+
+    init() {
+
+        _doneInit = true
+    }
+        var maxCallCount = 0
+    var maxHandler: ((Int) -> ((() -> Void)?))?
+    func max(for: Int) -> (() -> Void)? {
+        maxCallCount += 1
+
+        if let maxHandler = maxHandler {
+            return maxHandler(`for`)
+        }
+        return nil
+    }
+    var maxDoCallCount = 0
+    var maxDoHandler: ((Int) -> ((() -> Void)?))?
+    func maxDo(do: Int) -> (() -> Void)? {
+        maxDoCallCount += 1
+
+        if let maxDoHandler = maxDoHandler {
+            return maxDoHandler(`do`)
+        }
+        return nil
+    }
+    var maxInCallCount = 0
+    var maxInHandler: ((Int) -> ((() -> Void)?))?
+    func maxIn(in: Int) -> (() -> Void)? {
+        maxInCallCount += 1
+
+        if let maxInHandler = maxInHandler {
+            return maxInHandler(`in`)
+        }
+        return nil
+    }
+    var maxSwitchCallCount = 0
+    var maxSwitchHandler: ((Int) -> ((() -> Void)?))?
+    func maxSwitch(for switch: Int) -> (() -> Void)? {
+        maxSwitchCallCount += 1
+
+        if let maxSwitchHandler = maxSwitchHandler {
+            return maxSwitchHandler(`switch`)
+        }
+        return nil
+    }
+}
+"""

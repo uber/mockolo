@@ -43,6 +43,14 @@ extension String {
     static let `throws` = "throws"
     static let `rethrows` = "rethrows"
     static let `try` = "try"
+    static let `for` = "for"
+    static let `in` = "in"
+    static let `where` = "where"
+    static let `while` = "while"
+    static let `default` = "default"
+    static let `fallthrough` = "fallthrough"
+    static let `do` = "do"
+    static let `switch` = "switch"
     static let closureArrow = "->"
     static let typealiasColon = "typealias:"
     static let `typealias` = "typealias"
@@ -69,6 +77,23 @@ extension String {
 
     var isThrowsOrRethrows: Bool {
         return self == .throws || self == .rethrows
+    }
+
+    var isSwiftKeyword: Bool {
+        [
+            .for,
+            .throws,
+            .rethrows,
+            .try,
+            .for,
+            .in,
+            .where,
+            .while,
+            .default,
+            .fallthrough,
+            .do,
+            .switch
+        ].contains(self)
     }
 }
 
