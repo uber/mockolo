@@ -37,7 +37,7 @@ func applyMethodTemplate(name: String,
     let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "")}.joined(separator: ", ")
     let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
     let paramDeclsStr = params.compactMap{$0.render(with: "")}.joined(separator: ", ")
-        
+    
     switch kind {
     case .initKind(let isRequired):
         if isOverride {
@@ -48,10 +48,9 @@ func applyMethodTemplate(name: String,
                 """
             }.joined(separator: ", ")
             
-            template =
-            """
+            template = """
                 \(modifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-                super.init(\(paramsList))
+                    super.init(\(paramsList))
                     \(String.doneInit) = true
                 }
             """
@@ -65,12 +64,11 @@ func applyMethodTemplate(name: String,
                 """
             }.joined(separator: "\n")
             
-            template =
-            """
+            template = """
                 \(reqModifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-                \(paramsAssign)
-                \(String.doneInit) = true
-            }
+                    \(paramsAssign)
+                    \(String.doneInit) = true
+                }
             """
         }
         

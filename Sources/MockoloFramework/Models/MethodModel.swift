@@ -187,9 +187,9 @@ final class MethodModel: Model {
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
-    
+
     var fullName: String {
-        return self.name + self.signatureComponents.joined()
+        return self.name + self.signatureComponents.joined() + staticKind
     }
     
     func name(by level: Int) -> String {
@@ -203,9 +203,6 @@ final class MethodModel: Model {
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
-            if isInitializer {
-                return nil
-            }
             return modelDescription ?? self.data?.toString(offset: offset, length: length)
         }
         
@@ -224,4 +221,3 @@ final class MethodModel: Model {
         return result
     }
 }
-

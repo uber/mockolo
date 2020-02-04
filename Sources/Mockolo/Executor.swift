@@ -125,6 +125,7 @@ class Executor {
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
     func execute(with arguments: ArgumentParser.Result) {
+      
         guard let outputArg = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         let outputFilePath = fullPath(outputArg)
 

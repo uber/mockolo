@@ -15,7 +15,7 @@ class InitTests: MockoloTestCase {
 
     func testInitMethod() {
         verify(srcContent: protocolWithInit,
-               mockContent: simpleInitParentMock,
+               mockContent: protocolWithInitParentMock,
                dstContent: protocolWithInitResultMock)
     }
 }

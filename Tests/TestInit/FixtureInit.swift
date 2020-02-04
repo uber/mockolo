@@ -2,10 +2,65 @@ import MockoloFramework
 
 //  MARK - protocol containing init
 
+    
 let protocolWithInit = """
 /// \(String.mockAnnotation)
-public protocol HasInit: Parent {
+public protocol HasInit: HasInitParent {
     init(arg: String)
+}
+"""
+
+
+
+let protocolWithInitParentMock = """
+public protocol HasInitParent {
+}
+public class HasInitParentMock: HasInitParent {
+    private var _doneInit = false
+    public init() {_doneInit = true}
+    required public init(order: Int) {
+        self.order = order
+        _doneInit = true
+    }
+    public init(num: Int, rate: Double) {
+        self.rate = rate
+        _doneInit = true
+    }
+    public var orderSetCallCount = 0
+    var underlyingOrder: Int = 0
+    public var order: Int {
+        get {
+            return underlyingOrder
+        }
+        set {
+            underlyingOrder = newValue
+            if _doneInit { orderSetCallCount += 1 }
+        }
+    }
+
+    public var numSetCallCount = 0
+    var underlyingNum: Int = 0
+    public var num: Int {
+        get {
+            return underlyingNum
+        }
+        set {
+            underlyingNum = newValue
+            if _doneInit { numSetCallCount += 1 }
+        }
+    }
+    
+    public var rateSetCallCount = 0
+    var underlyingRate: Double = 0.0
+    public var rate: Double {
+        get {
+            return underlyingRate
+        }
+        set {
+            underlyingRate = newValue
+            if _doneInit { rateSetCallCount += 1 }
+        }
+    }
 }
 """
 
@@ -17,10 +72,27 @@ public class HasInitMock: HasInit {
     private var _doneInit = false
     private var arg: String!
     public init() { _doneInit = true }
-    required public init(arg: String) {
+    required public init(arg: String = "") {
         self.arg = arg
         _doneInit = true
     }
+    required public init(order: Int) {
+        self.order = order
+        _doneInit = true
+    }
+
+    public var orderSetCallCount = 0
+    var underlyingOrder: Int = 0
+    public var order: Int {
+        get {
+            return underlyingOrder
+        }
+        set {
+            underlyingOrder = newValue
+            if _doneInit { orderSetCallCount += 1 }
+        }
+    }
+
     public var numSetCallCount = 0
     var underlyingNum: Int = 0
     public var num: Int {
@@ -45,7 +117,6 @@ public class HasInitMock: HasInit {
     }
 }
 """
-
 
 //  MARK - simple init
 

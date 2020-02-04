@@ -31,7 +31,6 @@ public protocol SourceParsing {
     
     /// Parses decls (protocol, class) with annotation (/// @mockable) and calls a completion block
     func parseDecls(_ paths: [String]?,
-                    declType: DeclType,
                     isDirs: Bool,
                     exclusionSuffixes: [String]?,
                     annotation: String,

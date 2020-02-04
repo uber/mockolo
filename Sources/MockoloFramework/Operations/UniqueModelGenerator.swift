@@ -69,7 +69,8 @@ func generateUniqueModels(key: String,
     let nonMethodModels = models.filter {$0.modelType != .method}
     let methodModels = models.filter {$0.modelType == .method}
     let orderedModels = [nonMethodModels, methodModels].flatMap {$0}
-    let unmockedUniqueEntities = uniqueEntities(in: orderedModels, exclude: processedLookup, fullnames: processedFullNames).filter {!$0.value.processed}
+    let x = uniqueEntities(in: orderedModels, exclude: processedLookup, fullnames: processedFullNames)
+    let unmockedUniqueEntities = x.filter {!$0.value.processed}
     
     let processedElementsMap = Dictionary(grouping: processedModels) { element in element.fullName }
         .compactMap { (key, value) in value.first }
@@ -77,13 +78,9 @@ func generateUniqueModels(key: String,
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
 
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
-    let existingInits = orderedModels.filter {$0.isInitializer && !$0.processed}
-    let existingInitVars = existingInits.compactMap { ($0 as? MethodModel)?.params }.flatMap {$0}
-    let containsInit = existingInitVars.count > 0
-    let initVars = containsInit ? existingInitVars : potentialInitVars(in: unmockedUniqueEntities, processed: mockedUniqueEntities)
     
     let whitelist = typealiasWhitelist(in: uniqueModels)
-    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, hasInit: containsInit, initVars: initVars, typealiasWhitelist: whitelist)
+    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, typealiasWhitelist: whitelist)
     
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }

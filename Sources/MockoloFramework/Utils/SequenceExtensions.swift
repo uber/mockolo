@@ -41,6 +41,16 @@ public extension Sequence {
             lhs[keyPath: path] < rhs[keyPath: path]
         }
     }
+
+    func sorted<T, U>(path: KeyPath<Element, T>, fallback: KeyPath<Element, U>) -> [Element] where T: Comparable, U: Comparable {
+        return sorted { (lhs, rhs) -> Bool in
+            if lhs[keyPath: path] == rhs[keyPath: path] {
+                return lhs[keyPath: fallback] < rhs[keyPath: fallback]
+            }
+
+            return lhs[keyPath: path] < rhs[keyPath: path]
+        }
+    }
 }
 
 

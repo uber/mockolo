@@ -25,8 +25,6 @@ final class ClassModel: Model {
     let identifier: String
     let declType: DeclType
     let entities: [(String, Model)]
-    let needInit: Bool
-    let initParams: [Model]?
     let typealiasWhitelist: [String: [String]]?
     var modelType: ModelType {
         return .class
@@ -37,8 +35,6 @@ final class ClassModel: Model {
          declType: DeclType,
          attributes: [String],
          offset: Int64,
-         needInit: Bool,
-         initParams: [Model]?,
          typealiasWhitelist: [String: [String]]?,
          entities: [(String, Model)]) {
         self.identifier = identifier 
@@ -46,8 +42,6 @@ final class ClassModel: Model {
         self.type = Type(.class)
         self.declType = declType
         self.entities = entities
-        self.needInit = needInit
-        self.initParams = initParams
         self.offset = offset
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessControlLevelDescription = acl.isEmpty ? "" : acl + " "
@@ -55,6 +49,6 @@ final class ClassModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, declType: declType, needInit: needInit, initParams: initParams, typealiasWhitelist: typealiasWhitelist, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, declType: declType, typealiasWhitelist: typealiasWhitelist, entities: entities)
     }
 }

@@ -62,7 +62,7 @@ extension ModifierListSyntax {
         return ""
     }
     
-    var hasStatic: Bool {
+    var isStatic: Bool {
         return self.tokens.filter {$0.tokenKind == .staticKeyword }.count > 0
     }
 
@@ -70,8 +70,24 @@ extension ModifierListSyntax {
         return self.tokens.filter {$0.text == String.required }.count > 0
     }
 
+    var isConvenience: Bool {
+        return self.tokens.filter {$0.text == String.convenience }.count > 0
+    }
+
     var isOverride: Bool {
         return self.tokens.filter {$0.text == String.override }.count > 0
+    }
+    
+    var isFinal: Bool {
+        return self.tokens.filter {$0.text == String.final }.count > 0
+    }
+
+    var isPrivate: Bool {
+        return self.tokens.filter {$0.tokenKind == .privateKeyword || $0.tokenKind == .fileprivateKeyword }.count > 0
+    }
+
+    var isPublic: Bool {
+        return self.tokens.filter {$0.tokenKind == .publicKeyword }.count > 0
     }
 }
 
@@ -93,31 +109,86 @@ extension TypeInheritanceClauseSyntax {
 
 extension MemberDeclListSyntax {
     
-    func memberData(with acl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> EntityNodeSubContainer {
+    private func validateMember(_ modifiers: ModifierListSyntax?, _ declType: DeclType) -> Bool {
+        if let mods = modifiers, mods.isStatic, declType == .classType {
+            return false
+        }
+        return true
+    }
+    
+    private func validateInit(_ initDecl: InitializerDeclSyntax, _ declType: DeclType, processed: Bool) -> Bool {
+        var isRequired = declType == .protocolType
+        if !isRequired {
+            if let modifiers = initDecl.modifiers {
+                isRequired = modifiers.isRequired
+            }
+        }
+
+        if processed {
+            return isRequired
+        }
+
+        var isConvenience = false
+        var isPrivate = false
+        if let modifiers = initDecl.modifiers {
+            isConvenience = modifiers.isConvenience
+            isPrivate = modifiers.isPrivate
+        }
+        
+        if isConvenience || isPrivate {
+            return false
+        }
+        return true
+    }
+    
+    private func memberAcl(_ modifiers: ModifierListSyntax?, _ encloserAcl: String, _ declType: DeclType) -> String {
+        if declType == .protocolType {
+             return encloserAcl
+        }
+        
+        return modifiers?.acl ?? ""
+    }
+    
+    func memberData(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> EntityNodeSubContainer {
         var attributeList = [String]()
         var memberList = [Model]()
         var hasInit = false
         var attrDesc: String? = nil
+        
         for m in self {
             if let varMember = m.decl as? VariableDeclSyntax {
-                memberList.append(contentsOf: varMember.models(with: acl, declType: declType, processed: processed))
-                attrDesc = varMember.attributes?.trimmedDescription
+                if validateMember(varMember.modifiers, declType) {
+                    let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
+                    memberList.append(contentsOf: varMember.models(with: acl, declType: declType, processed: processed))
+                    attrDesc = varMember.attributes?.trimmedDescription
+                }
             } else if let funcMember = m.decl as? FunctionDeclSyntax {
-                memberList.append(funcMember.model(with: acl, declType: declType, processed: processed))
-                attrDesc = funcMember.attributes?.trimmedDescription
+                if validateMember(funcMember.modifiers, declType) {
+                    let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
+                    memberList.append(funcMember.model(with: acl, declType: declType, processed: processed))
+                    attrDesc = funcMember.attributes?.trimmedDescription
+                }
+            } else if let subscriptMember = m.decl as? SubscriptDeclSyntax {
+                if validateMember(subscriptMember.modifiers, declType) {
+                    let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
+                    memberList.append(subscriptMember.model(with: acl, declType: declType, processed: processed))
+                    attrDesc = subscriptMember.attributes?.trimmedDescription
+                }
             } else if let initMember = m.decl as? InitializerDeclSyntax {
-                hasInit = true
-                memberList.append(initMember.model(with: acl, declType: declType, processed: processed))
-                attrDesc = initMember.attributes?.trimmedDescription
+                if validateInit(initMember, declType, processed: processed) {
+                    hasInit = true
+                    let acl = memberAcl(initMember.modifiers, encloserAcl, declType)
+                    memberList.append(initMember.model(with: acl, declType: declType, processed: processed))
+                    attrDesc = initMember.attributes?.trimmedDescription
+                }
             } else if let patMember = m.decl as? AssociatedtypeDeclSyntax {
+                let acl = memberAcl(patMember.modifiers, encloserAcl, declType)
                 memberList.append(patMember.model(with: acl, overrides: overrides, processed: processed))
                 attrDesc = patMember.attributes?.trimmedDescription
             } else if let taMember = m.decl as? TypealiasDeclSyntax {
+                let acl = memberAcl(taMember.modifiers, encloserAcl, declType)
                 memberList.append(taMember.model(with: acl, overrides: overrides, processed: processed))
                 attrDesc = taMember.attributes?.trimmedDescription
-            } else if let subscriptMember = m.decl as? SubscriptDeclSyntax {
-                memberList.append(subscriptMember.model(with: acl, declType: declType, processed: processed))
-                attrDesc = subscriptMember.attributes?.trimmedDescription
             }
             
             if let attrDesc = attrDesc {
@@ -140,6 +211,10 @@ extension ProtocolDeclSyntax: EntityNode {
     
     var declType: DeclType {
         return .protocolType
+    }
+    
+    var isPrivate: Bool {
+        return self.modifiers?.isPrivate ?? false
     }
 
     var inheritedTypes: [String] {
@@ -189,6 +264,18 @@ extension ClassDeclSyntax: EntityNode {
         return Int64(self.position.utf8Offset)
     }
     
+    var isFinal: Bool {
+        return self.modifiers?.isFinal ?? false
+    }
+
+    var isPrivate: Bool {
+        return self.modifiers?.isPrivate ?? false
+    }
+
+    var isPublic: Bool {
+        return self.modifiers?.isPublic ?? false
+    }
+
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         return leadingTrivia?.annotationMetadata(with: annotation)
     }
@@ -199,23 +286,24 @@ extension ClassDeclSyntax: EntityNode {
 }
 
 extension VariableDeclSyntax {
+    
     func models(with acl: String, declType: DeclType, processed: Bool) -> [Model] {
         // Detect whether it's static
         var isStatic = false
         if let modifiers = self.modifiers {
-            isStatic = modifiers.hasStatic
+            isStatic = modifiers.isStatic
         }
         
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
             let name = v.pattern.firstToken?.text ?? String.unknownVal
             var typeName = ""
-            var canBeInitParam = false
+            var potentialInitParam = false
             
             // Get the type info and whether it can be a var param for an initializer
             if let vtype = v.typeAnnotation?.type.description {
                 typeName = vtype
-                canBeInitParam = !isStatic &&
+                potentialInitParam = !isStatic &&
                     !vtype.hasSuffix("?") &&
                     !name.hasPrefix(.underlyingVarPrefix) &&
                     !name.hasSuffix(.closureVarSuffix) &&
@@ -229,7 +317,7 @@ extension VariableDeclSyntax {
                                          acl: acl,
                                          encloserType: declType,
                                          isStatic: isStatic,
-                                         canBeInitParam: canBeInitParam,
+                                         canBeInitParam: potentialInitParam,
                                          offset: v.offset,
                                          length: v.length,
                                          modelDescription: self.description,
@@ -244,7 +332,7 @@ extension SubscriptDeclSyntax {
     func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
-            isStatic = modifiers.hasStatic
+            isStatic = modifiers.isStatic
         }
 
         let params = self.indices.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
@@ -272,7 +360,7 @@ extension FunctionDeclSyntax {
     func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
-            isStatic = modifiers.hasStatic
+            isStatic = modifiers.isStatic
         }
 
         let params = self.signature.input.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
@@ -296,21 +384,30 @@ extension FunctionDeclSyntax {
 }
 
 extension InitializerDeclSyntax {
-    func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
-        var isRequired = false
-        
+    func isRequired(with declType: DeclType) -> Bool {
         if declType == .protocolType {
-            isRequired = true
-        } else if declType == .classType, let modifiers = self.modifiers {
-            isRequired = modifiers.isRequired
+            return true
+        } else if declType == .classType {
+            if let modifiers = self.modifiers {
+                
+                if modifiers.isConvenience {
+                    return false
+                }
+                return modifiers.isRequired
+            }
         }
+        return false
+    }
+    
+    func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
+        let requiredInit = isRequired(with: declType)
         
         let params = self.parameters.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: true) } ?? []
         
         return MethodModel(name: "init",
                            typeName: "",
-                           kind: .initKind(required: isRequired),
+                           kind: .initKind(required: requiredInit),
                            encloserType: declType,
                            acl: acl,
                            genericTypeParams: genericTypeParams,
@@ -429,30 +526,23 @@ final class EntityVisitor: SyntaxVisitor {
     
     func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
-        let isAnnotated = metadata != nil
-        let overrides = metadata?.typealiases
-        
-        let ent = Entity(entityNode: node,
-                         isAnnotated: isAnnotated,
-                         overrides: overrides,
-                         isProcessed: false)
-        entities.append(ent)
+        if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
+            entities.append(ent)
+        }
         return .skipChildren
     }
     
     func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.name.hasSuffix("Mock") {
-            let ent = Entity(entityNode: node, isAnnotated: false, overrides: nil, isProcessed: true)
-            entities.append(ent)
+            // this mock class node must be public else wouldn't have compiled before
+            if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
+                entities.append(ent)
+            }
         } else {
             let metadata = node.annotationMetadata(with: annotation)
-            let isAnnotated = metadata != nil
-            let overrides = metadata?.typealiases
-            let ent = Entity(entityNode: node,
-                             isAnnotated: isAnnotated,
-                             overrides: overrides,
-                             isProcessed: false)
-            entities.append(ent)
+            if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: node.isFinal, metadata: metadata, processed: false) {
+                entities.append(ent)
+            }
         }
         return .skipChildren
     }

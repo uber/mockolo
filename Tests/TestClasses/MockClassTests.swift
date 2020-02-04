@@ -5,8 +5,7 @@ class MockClassTests: MockoloTestCase {
     
     func testMockClass() {
         verify(srcContent: klass,
-               dstContent: klassMock,
-               useDefaultParser: true)
+               dstContent: klassMock)
     }
     
     func testMockClassWithParent() {
@@ -15,4 +14,16 @@ class MockClassTests: MockoloTestCase {
                dstContent: klassLongerMock,
                useDefaultParser: true)
     }
+
+    func testMockClassInits() {
+        verify(srcContent: klassInit,
+               dstContent: klassInitMock)
+    }
+
+    func testMockClassInitsWithParents() {
+        verify(srcContent: klassInit,
+               mockContent: klassInitParentMock,
+               dstContent: klassInitLongerMock)
+    }
 }
+
