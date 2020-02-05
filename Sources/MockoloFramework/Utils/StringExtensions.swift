@@ -79,8 +79,8 @@ extension String {
         return self == .throws || self == .rethrows
     }
 
-    var isSwiftKeyword: Bool {
-        [
+    var safeName: String {
+        let kewords: [String] = [
             .for,
             .throws,
             .rethrows,
@@ -93,7 +93,11 @@ extension String {
             .fallthrough,
             .do,
             .switch
-        ].contains(self)
+        ]
+        if kewords.contains(self) {
+            return "`\(self)`"
+        }
+        return self
     }
 }
 
