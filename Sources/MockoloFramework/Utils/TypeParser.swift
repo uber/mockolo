@@ -466,7 +466,7 @@ public struct Type {
             displayableReturnType = "(\(displayableReturnType))"
         }
         
-        let suffixStr = suffix.isThrowsOrRethrows ? String.throws + " " : ""
+        let suffixStr = suffix.isThrowsOrRethrows ? String.SwiftKeywords.throws.rawValue + " " : ""
         
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
         return Type(typeStr, cast: returnTypeCast)

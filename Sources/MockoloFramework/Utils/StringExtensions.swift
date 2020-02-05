@@ -17,6 +17,19 @@
 import Foundation
 
 extension String {
+    enum SwiftKeywords: String {
+        case `throws` = "throws"
+        case `rethrows` = "rethrows"
+        case `try` = "try"
+        case `for` = "for"
+        case `in` = "in"
+        case `where` = "where"
+        case `while` = "while"
+        case `default` = "default"
+        case `fallthrough` = "fallthrough"
+        case `do` = "do"
+        case `switch` = "switch"
+    }
     static let doneInit = "_doneInit"
     static let `static` = "static"
     static let `import` = "import "
@@ -40,9 +53,6 @@ extension String {
     static let observableEmpty = "Observable.empty()"
     static let rxObservableEmpty = "RxSwift.Observable.empty()"
     static let `required` = "required"
-    static let `throws` = "throws"
-    static let `rethrows` = "rethrows"
-    static let `try` = "try"
     static let closureArrow = "->"
     static let typealiasColon = "typealias:"
     static let `typealias` = "typealias"
@@ -68,7 +78,14 @@ extension String {
     """
 
     var isThrowsOrRethrows: Bool {
-        return self == .throws || self == .rethrows
+        return self == SwiftKeywords.throws.rawValue || self == SwiftKeywords.rethrows.rawValue
+    }
+
+    var safeName: String {
+        if let _ = SwiftKeywords(rawValue: self) {
+            return "`\(self)`"
+        }
+        return self
     }
 }
 

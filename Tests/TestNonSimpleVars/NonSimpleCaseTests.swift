@@ -25,14 +25,22 @@ class NonSimpleVarTests: MockoloTestCase {
                dstContent: variadicFuncMock,
                concurrencyLimit: nil)
     }
+
     func testAutoclosureArgFuncs() {
         verify(srcContent: autoclosureArgFunc,
                dstContent: autoclosureArgFuncMock,
                concurrencyLimit: nil)
     }
+
     func testClosureArgFuncs() {
         verify(srcContent: closureArgFunc,
                dstContent: closureArgFuncMock,
+               concurrencyLimit: nil)
+    }
+
+    func testForArgFuncs() {
+        verify(srcContent: forArgClosureFunc,
+               dstContent: forArgClosureFuncMock,
                concurrencyLimit: nil)
     }
 }

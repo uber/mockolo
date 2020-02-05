@@ -173,10 +173,10 @@ final class MethodModel: Model {
         let suffixLen = ast.offset + ast.length - suffixOffset
         if suffixLen > 0, suffixOffset > ast.bodyOffset - 1 {
             let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            if suffixPart.hasPrefix("\(String.rethrows)") {
-                self.suffix = String.rethrows
-            } else if suffixPart.hasPrefix("\(String.throws)") {
-                self.suffix = String.throws
+            if suffixPart.hasPrefix("\(String.SwiftKeywords.rethrows.rawValue)") {
+                self.suffix = String.SwiftKeywords.rethrows.rawValue
+            } else if suffixPart.hasPrefix("\(String.SwiftKeywords.throws.rawValue)") {
+                self.suffix = String.SwiftKeywords.throws.rawValue
             } else {
                 self.suffix = ""
             }
