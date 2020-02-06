@@ -29,7 +29,14 @@ This project may contain unstable APIs which may not be ready for general use. S
 
 ## Build / Install
 
-First, clone the project.
+Option 1: By [Mint](https://github.com/yonaskolb/Mint)
+
+```
+$ mint install uber/mockolo
+$ mint run uber/mockolo mockolo -h // see commandline input options below 
+```
+
+Option 2: Clone and build 
 
 ```
 $ git clone https://github.com/uber/mockolo.git
@@ -43,64 +50,35 @@ $ git tag -l
 $ git checkout [tag]
 ```
 
-Option 1: Run the following to make a release build.
+Build and run
 
 ```
 $ swift build -c release
+$ .build/release/mockolo -h  // see commandline input options below 
 ```
 
-This will create a binary called `mockolo` in the `.build/release` directory.
-To install, just copy this executable into a directory that is part of your `PATH` environment variable.
+Instead of calling the binary `mockolo` built in `.build/release`, you can copy the executable into a directory that is part of your `PATH` environment variable and call `mockolo`.
 
-Option 2: Run the install-script.sh (-h to see options)
-
-```
-$ ./install-script.sh -s [source dir] -t mockolo -d [destination dir] -o [output filename]
-```
-
-This will create a tarball for distribution, which contains the mockolo executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running mockolo without depending on where the dylib lives. 
-
-Option 3: Run by [Mint](https://github.com/yonaskolb/Mint)
-
-```
-$ mint run uber/mockolo mockolo -s [source dir] -t mockolo -d [destination dir] -o [output filename]
-```
-
-To use Xcode, run the following.
+Or use Xcode, via following.
 
 ```
 $ swift package generate-xcodeproj
 ```
-
-
-## Add MockoloFramework to your project
-
-```swift
-
-dependencies: [
-    .package(url: "https://github.com/uber/mockolo.git", from: "1.1.0"),
-],
-targets: [
-    .target(name: "MyTarget", dependencies: ["MockoloFramework"]),
-]
-
-```
-
 
 ## Run
 
 `Mockolo` is a commandline executable. To run it, pass in a list of the source file directories or file paths of a build target, and the destination filepath for the mock output. To see other arguments to the commandline, run `mockolo --help`.
 
 ```
-.build/release/mockolo -s MyDir -d ./MockResults.swift -x Images Strings
+./mockolo -s myDir -d ./OutputMocks.swift -x Images Strings
 ```
 
-This parses all the source files in `MyDir` directory, excluding any files ending with `Images` or `Strings` in the file name (e.g. MyImages.swift), and generates mocks to a file at `./MockResults.swift`.
+This parses all the source files in `myDir` directory, excluding any files ending with `Images` or `Strings` in the file name (e.g. MyImages.swift), and generates mocks to a file at `OutputMocks.swift` in the current directory.
 
 Use --help to see the complete argument options.
 
 ```
-.build/release/mockolo --help
+./mockolo -h  // or --help
 
 OVERVIEW: Mockolo: Swift mock generator.
 
@@ -124,6 +102,41 @@ OPTIONS:
   ```
 
 
+## Add MockoloFramework to your project
+
+Option 1: SPM 
+```swift
+
+dependencies: [
+    .package(url: "https://github.com/uber/mockolo.git", from: "1.1.2"),
+],
+targets: [
+    .target(name: "MyTarget", dependencies: ["MockoloFramework"]),
+]
+
+```
+Option 2: Cocoapods 
+```
+target 'MyTarget' do
+  platform :osx, '10.14'
+  pod 'MockoloFramework', '~>1.1.2' 
+end
+```
+
+
+## Distribution 
+
+The `install-script.sh` will build and package up the `mockolo` binary and other necessary resources in the same bundle. 
+
+```
+$ ./install-script.sh -h  // see input options 
+$ ./install-script.sh -s [source dir] -t mockolo -d [destination dir] -o [output filename]
+```
+
+This will create a tarball for distribution, which contains the `mockolo` executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running `mockolo` without depending on where the dylib lives. 
+
+
+
 ## How to use
 
 For example, Foo.swift contains:
@@ -136,7 +149,7 @@ public protocol Foo {
 }
 ```
 
-Running the commandline ```.build/release/mockolo -srcs Foo.swift -d ./MockResults.swift ``` will produce:
+Running ```./mockolo -srcs Foo.swift -d ./OutputMocks.swift ``` will output:
 
 ```swift
 public class FooMock: Foo {
@@ -204,10 +217,6 @@ public class FooMock: Foo {
     ...
 }
 ```
-
-
-## TODO
-It currently supports protocol mocking.  Class mocking will be added in the future.
 
 
 ## Used libraries
