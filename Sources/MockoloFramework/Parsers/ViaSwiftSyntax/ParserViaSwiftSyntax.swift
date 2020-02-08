@@ -32,7 +32,6 @@ public class ParserViaSwiftSyntax: SourceParsing {
     }
     
     public func parseDecls(_ paths: [String]?,
-                           declType: DeclType,
                            isDirs: Bool,
                            exclusionSuffixes: [String]? = nil,
                            annotation: String,

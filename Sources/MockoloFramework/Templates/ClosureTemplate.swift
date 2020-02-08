@@ -30,15 +30,15 @@ func applyClosureTemplate(name: String,
         let zipped = zip(paramVals, paramTypes).map { (arg) -> String in
             let (argName, argType) = arg
             if argType.typeName.hasPrefix(String.autoclosure) {
-                return argName + "()"
+                return argName.safeName + "()"
             }
-            return argName
+            return argName.safeName
         }
         handlerParamValsStr = zipped.joined(separator: ", ")
     }
     let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType, typeKeys: typeKeys)
 
-    let prefix = suffix.isThrowsOrRethrows ? String.try + " " : ""
+    let prefix = suffix.isThrowsOrRethrows ? String.SwiftKeywords.try.rawValue + " " : ""
     
     let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "
     let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")"

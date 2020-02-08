@@ -107,9 +107,9 @@ class MockoloTestCase: XCTestCase {
         """
         
         var parser = ParserType.swiftSyntax
-//        if !useDefaultParser {
-//            parser = Int.random(in: 0..<10) > 5 ? .sourceKit : .swiftSyntax
-//        }
+        if !useDefaultParser {
+            parser = Int.random(in: 0..<10) > 5 ? .sourceKit : .swiftSyntax
+        }
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
                       parser: parser == .sourceKit ? ParserViaSourceKit() : ParserViaSwiftSyntax(),

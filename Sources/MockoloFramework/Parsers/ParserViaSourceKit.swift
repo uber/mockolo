@@ -31,7 +31,7 @@ public class ParserViaSourceKit: SourceParsing {
             for filePath in paths {
                 _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
                 queue.async {
-                    self.generateProcessedEntities(filePath, lock: lock, completion: completion)
+                    self.generateProcessedASTs(filePath, lock: lock, completion: completion)
                     semaphore?.signal()
                 }
             }
@@ -39,13 +39,12 @@ public class ParserViaSourceKit: SourceParsing {
             queue.sync(flags: .barrier) {}
         } else {
             for filePath in paths {
-                generateProcessedEntities(filePath, lock: nil, completion: completion)
+                generateProcessedASTs(filePath, lock: nil, completion: completion)
             }
         }
     }
     
     public func parseDecls(_ paths: [String]?,
-                           declType: DeclType,
                            isDirs: Bool,
                            exclusionSuffixes: [String]? = nil,
                            annotation: String,
@@ -55,13 +54,13 @@ public class ParserViaSourceKit: SourceParsing {
         guard !annotation.isEmpty else { return }
         guard let paths = paths else { return }
         if isDirs {
-            generateEntities(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
+            generateASTs(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
         } else {
-            generateEntities(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
+            generateASTs(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
         }
     }
     
-    private func generateEntities(dirs: [String],
+    private func generateASTs(dirs: [String],
                                   exclusionSuffixes: [String]? = nil,
                                   annotation: String,
                                   semaphore: DispatchSemaphore?,
@@ -77,7 +76,7 @@ public class ParserViaSourceKit: SourceParsing {
             scanPaths(dirs) { filePath in
                 _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
                 queue.async {
-                    self.generateEntities(filePath,
+                    self.generateASTs(filePath,
                                           exclusionSuffixes: exclusionSuffixes,
                                           annotationData: annotationData,
                                           lock: lock,
@@ -90,7 +89,7 @@ public class ParserViaSourceKit: SourceParsing {
             queue.sync(flags: .barrier) {}
         } else {
             scanPaths(dirs) { filePath in
-                generateEntities(filePath,
+                generateASTs(filePath,
                                  exclusionSuffixes: exclusionSuffixes,
                                  annotationData: annotationData,
                                  lock: nil,
@@ -99,7 +98,7 @@ public class ParserViaSourceKit: SourceParsing {
         }
     }
     
-    private func generateEntities(files: [String],
+    private func generateASTs(files: [String],
                                   exclusionSuffixes: [String]? = nil,
                                   annotation: String,
                                   semaphore: DispatchSemaphore?,
@@ -114,7 +113,7 @@ public class ParserViaSourceKit: SourceParsing {
             for filePath in files {
                 _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
                 queue.async {
-                    self.generateEntities(filePath,
+                    self.generateASTs(filePath,
                                           exclusionSuffixes: exclusionSuffixes,
                                           annotationData: annotationData,
                                           lock: lock,
@@ -127,7 +126,7 @@ public class ParserViaSourceKit: SourceParsing {
             
         } else {
             for filePath in files {
-                generateEntities(filePath,
+                generateASTs(filePath,
                                  exclusionSuffixes: exclusionSuffixes,
                                  annotationData: annotationData,
                                  lock: nil,
@@ -136,7 +135,7 @@ public class ParserViaSourceKit: SourceParsing {
         }
     }
     
-    private func generateEntities(_ path: String,
+    private func generateASTs(_ path: String,
                                   exclusionSuffixes: [String]? = nil,
                                   annotationData: Data,
                                   lock: NSLock?,
@@ -152,15 +151,9 @@ public class ParserViaSourceKit: SourceParsing {
             let topstructure = try Structure(path: path)
             for current in topstructure.substructures {
                 let metadata = current.annotationMetadata(with: annotationData, in: content)
-                let isAnnotated = metadata != nil
-                
-                let node = Entity(entityNode: current,
-                                  filepath: path,
-                                  data: content,
-                                  isAnnotated: isAnnotated,
-                                  overrides: metadata?.typealiases,
-                                  isProcessed: false)
-                results.append(node)
+                if let node = Entity.node(with: current, filepath: path, data: content, isPrivate: current.isPrivate, isFinal: current.isFinal, metadata: metadata, processed: false) {
+                    results.append(node)
+                }
             }
             
             lock?.lock()
@@ -172,7 +165,7 @@ public class ParserViaSourceKit: SourceParsing {
         }
     }
     
-    private func generateProcessedEntities(_ path: String,
+    private func generateProcessedASTs(_ path: String,
                                            lock: NSLock?,
                                            completion: @escaping ([Entity], [String: [String]]) -> ()) {
         
@@ -184,12 +177,7 @@ public class ParserViaSourceKit: SourceParsing {
             let topstructure = try Structure(path: path)
             let subs = topstructure.substructures
             let results = subs.compactMap { current -> Entity? in
-                return Entity(entityNode: current,
-                              filepath: path,
-                              data: content,
-                              isAnnotated: false,
-                              overrides: nil,
-                              isProcessed: true)
+                return Entity.node(with: current, filepath: path, data: content, isPrivate: current.isPrivate, isFinal: current.isFinal, metadata: nil, processed: true)
             }
             
             let imports = findImportLines(data: content, offset: subs.first?.offset)

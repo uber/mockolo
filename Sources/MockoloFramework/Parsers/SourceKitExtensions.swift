@@ -18,12 +18,6 @@ import Foundation
 import SourceKittenFramework
 
 
-// Contains arguments to annotation
-// Ex. @mockable(typealias: T = Any; U = String; ...)
-struct AnnotationMetadata {
-    var typealiases: [String: String]?
-}
-
 extension Structure: EntityNode {
     
     init(path: String) throws {
@@ -125,11 +119,47 @@ extension Structure: EntityNode {
         }.flatMap {$0}
     }
     
+    private func validateMember(_ element: Structure, _ declType: DeclType) -> Bool {
+        if element.isStatic, declType == .classType {
+            return false
+        }
+        return true
+    }
+    
+    private func validateInit(_ element: Structure, _ declType: DeclType, processed: Bool) -> Bool {
+        var isRequired = declType == .protocolType
+        if !isRequired {
+            isRequired = element.isRequired
+        }
+
+        if processed {
+            return isRequired
+        }
+
+        if element.isConvenience || element.isPrivate {
+            return false
+        }
+        return true
+    }
+    
     func model(for element: Structure, encloserType: DeclType, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
-            return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+            if validateMember(element, declType) {
+                return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+            }
         } else if element.isMethod || element.isSubscript { // initializer is considered a method by sourcekit
-            return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+            var validated = false
+            if element.isInitializer {
+                validated = validateInit(element, declType, processed: processed)
+            } else {
+                validated = validateMember(element, declType)
+            }
+            
+            if validated {
+                return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+            }
+            return nil
+
         } else if element.isAssociatedType || element.isTypealias {
             return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
         }
@@ -180,6 +210,18 @@ extension Structure: EntityNode {
         }
         return .unknownVal
     }
+    
+    var isPrivate: Bool {
+        if let attrs = attributeValues {
+            return attrs.contains(SwiftDeclarationAttributeKind.private.rawValue) || attrs.contains(SwiftDeclarationAttributeKind.fileprivate.rawValue)
+        }
+        
+        return false
+    }
+    var isFinal: Bool {
+        return attributeValues?.contains(SwiftDeclarationAttributeKind.final.rawValue) ?? false
+    }
+    
     var isInitializer: Bool {
         return name.hasPrefix(.initializerPrefix) && isInstanceMethod
     }
@@ -195,13 +237,21 @@ extension Structure: EntityNode {
     var isStaticVariable: Bool {
         return kind == SwiftDeclarationKind.varStatic.rawValue
     }
-    
+
+    var isStatic: Bool {
+        return isStaticMethod || isStaticVariable
+    }
+
     var isOverride: Bool {
         return attributeValues?.contains(SwiftDeclarationAttributeKind.override.rawValue) ?? false
     }
 
     var isRequired: Bool {
         return attributeValues?.contains(SwiftDeclarationAttributeKind.required.rawValue) ?? false
+    }
+
+    var isConvenience: Bool {
+        return attributeValues?.contains(SwiftDeclarationAttributeKind.convenience.rawValue) ?? false
     }
 
     var isStaticMethod: Bool {

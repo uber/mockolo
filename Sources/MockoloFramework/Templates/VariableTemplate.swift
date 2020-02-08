@@ -20,7 +20,7 @@ func applyVariableTemplate(name: String,
                            type: Type,
                            typeKeys: [String: String]?,
                            staticKind: String,
-                           isOverride: Bool,
+                           shouldOverride: Bool,
                            accessControlLevelDescription: String) -> String {
 
     let underlyingName = "\(String.underlyingVarPrefix)\(name.capitlizeFirstLetter)"
@@ -34,7 +34,7 @@ func applyVariableTemplate(name: String,
     let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
     let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
 
-    let overrideStr = isOverride ? "\(String.override) " : ""
+    let overrideStr = shouldOverride ? "\(String.override) " : ""
     var acl = accessControlLevelDescription
     if !acl.isEmpty {
         acl = acl + " "
@@ -59,7 +59,7 @@ func applyRxVariableTemplate(name: String,
                              type: Type,
                              typeKeys: [String: String]?,
                              staticKind: String,
-                             isOverride: Bool,
+                             shouldOverride: Bool,
                              accessControlLevelDescription: String) -> String? {
     let typeName = type.typeName
     if let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {
@@ -80,6 +80,8 @@ func applyRxVariableTemplate(name: String,
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
 
+        let overrideStr = shouldOverride ? "\(String.override) " : ""
+        
         let template = """
         
         \(staticStr)private var \(whichSubject) = 0
@@ -88,7 +90,7 @@ func applyRxVariableTemplate(name: String,
         \(acl)\(staticStr)var \(replaySubjectName) = \(replaySubjectType).create(bufferSize: 1) { didSet { \(setCallCountStmt) } }
         \(acl)\(staticStr)var \(behaviorSubjectName): \(behaviorSubjectType)! { didSet { \(setCallCountStmt) } }
         \(acl)\(staticStr)var \(underlyingObservableName): \(underlyingObservableType)! { didSet { \(setCallCountStmt) } }
-        \(acl)\(staticStr)var \(name): \(typeName) {
+        \(acl)\(staticStr)\(overrideStr)var \(name): \(typeName) {
             get {
                 if \(whichSubject) == 0 {
                     return \(publishSubjectName)

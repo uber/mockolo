@@ -10,16 +10,14 @@ protocol EmojiVars: EmojiParent {
 
 """
 
-
 let emojiParentMock =
 """
 import Foundation
 
-class EmojiParentMock: EmojiParent {
+public class EmojiParentMock: EmojiParent {
     private var _doneInit = false
-    init(😂: Emoji, 👌😳👍: Emoji, dict: Dictionary<String, Int> = Dictionary<String, Int>()) {
+    init(👌😳👍: Emoji, dict: Dictionary<String, Int> = Dictionary<String, Int>()) {
         self.dict = dict
-        self.😂 = 😂
         self.👌😳👍 = 👌😳👍
         _doneInit = true
     }

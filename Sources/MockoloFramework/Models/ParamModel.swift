@@ -35,7 +35,7 @@ final class ParamModel: Model {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
         let labelStr = label.trimmingCharacters(in: .whitespaces)
-        self.label = name != labelStr ? labelStr: ""
+        self.label = name != labelStr ? labelStr : ""
         self.offset = offset
         self.length = length
         self.isGeneric = isGeneric
@@ -55,7 +55,7 @@ final class ParamModel: Model {
         self.needVarDecl = needVarDecl
         let typeArg = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : (isVariadic ? ast.typeName + "..." : ast.typeName)
         self.type = Type(typeArg)
-        self.label = ast.name != label ? label: ""
+        self.label = ast.name != label ? label : ""
     }
 
     var asVarDecl: String? {
@@ -66,6 +66,6 @@ final class ParamModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyParamTemplate(name: name, label: label, type: type)
+        return applyParamTemplate(name: name, label: label, type: type, inInit: inInit)
     }
 }

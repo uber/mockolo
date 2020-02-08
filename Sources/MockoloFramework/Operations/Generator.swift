@@ -90,7 +90,6 @@ public func generate(sourceDirs: [String]?,
     let paths = sourceDirs ?? sourceFiles
     let isDirs = sourceDirs != nil
     parser.parseDecls(paths,
-                      declType: .classType,
                       isDirs: isDirs,
                       exclusionSuffixes: exclusionSuffixes,
                       annotation: annotation,

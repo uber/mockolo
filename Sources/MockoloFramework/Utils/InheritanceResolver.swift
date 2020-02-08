@@ -149,30 +149,6 @@ func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [
     return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, nameByLevelVisited: exclude, fullNameVisited: fullnames)
 }
 
-/// Returns models that can be used as parameters to an initializer
-/// @param models The models of the current entity
-/// @param processed The processed models of the current entity
-/// @returns A list of init parameter models
-func potentialInitVars(`in` models: [String: Model], processed: [String: Model]) -> [Model]? {
-    // Named params in init should be unique. Add a duplicate param check to ensure it.
-    let curVars = models.values.filter(path: \.canBeInitParam).sorted { (left: Model, right: Model) -> Bool in
-        if left.offset == right.offset {
-            return left.name < right.name
-        }
-        return left.offset < right.offset
-    }
-    
-    let curVarNames = curVars.map(path: \.name)
-    let parentVars = processed.values.filter {!curVarNames.contains($0.name)}.filter(path: \.canBeInitParam)
-    let parentVarsSorted = parentVars.sorted { (left: Model, right: Model) -> Bool in
-        if left.offset == right.offset {
-            return left.name < right.name
-        }
-        return left.offset < right.offset
-    }
-    let result = [curVars, parentVarsSorted].flatMap{$0}
-    return result
-}
 
 /// Returns a map of typealiases with conflicting types to be whitelisted
 /// @param models Potentially contains typealias models

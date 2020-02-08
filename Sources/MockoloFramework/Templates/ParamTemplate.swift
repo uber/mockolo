@@ -18,13 +18,18 @@ import Foundation
 
 func applyParamTemplate(name: String,
                         label: String,
-                        type: Type) -> String {
+                        type: Type,
+                        inInit: Bool) -> String {
     var result = name
     if !label.isEmpty {
         result = "\(label) \(name)"
     }
     if !type.isUnknown {
         result = "\(result): \(type.typeName)"
+    }
+    
+    if inInit, let defaultVal = type.defaultVal() {
+        result = "\(result) = \(defaultVal)"
     }
     return result
 }

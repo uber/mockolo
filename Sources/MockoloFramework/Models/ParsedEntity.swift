@@ -23,8 +23,6 @@ struct ResolvedEntity {
     let entity: Entity
     let uniqueModels: [(String, Model)]
     let attributes: [String]
-    let hasInit: Bool
-    let initVars: [Model]?
     let typealiasWhitelist: [String: [String]]?
     
     func model() -> Model {
@@ -33,8 +31,6 @@ struct ResolvedEntity {
                           declType: entity.entityNode.declType,
                           attributes: attributes,
                           offset: entity.entityNode.offset,
-                          needInit: !hasInit,
-                          initParams: initVars,
                           typealiasWhitelist: typealiasWhitelist,
                           entities: uniqueModels)
     }
@@ -67,6 +63,12 @@ final class EntityNodeSubContainer {
     }
 }
 
+// Contains arguments to annotation
+// Ex. @mockable(typealias: T = Any; U = String; ...)
+struct AnnotationMetadata {
+    var typealiases: [String: String]?
+}
+
 
 /// Metadata for a type being mocked
 public final class Entity {
@@ -78,6 +80,26 @@ public final class Entity {
     let entityNode: EntityNode
     let isProcessed: Bool
     
+    static func node(with entityNode: EntityNode,
+                     filepath: String = "",
+                     data: Data? = nil,
+                     isPrivate: Bool,
+                     isFinal: Bool,
+                     metadata: AnnotationMetadata?,
+                     processed: Bool) -> Entity? {
+        
+        guard !isPrivate, !isFinal else {return nil}
+
+        let node = Entity(entityNode: entityNode,
+                          filepath: filepath,
+                          data: data,
+                          isAnnotated: metadata != nil,
+                          overrides: metadata?.typealiases,
+                          isProcessed: processed)
+        
+        return node
+    }
+
     init(entityNode: EntityNode,
          filepath: String = "",
          data: Data? = nil,
