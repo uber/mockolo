@@ -1,8 +1,71 @@
 import MockoloFramework
 
+
+let keywordParams = """
+/// \(String.mockAnnotation)
+protocol KeywordProtocol {
+    init(in: Int)
+}
+
+class KClass {
+    var k: Int = 0
+    init(in: Int) {
+        self.k = `in`
+    }
+}
+
+/// \(String.mockAnnotation)
+class KeywordClass: KClass {
+    override init(in: Int) {
+        super.init(in: `in`)
+    }
+}
+"""
+
+let keywordParamsMock = """
+
+class KeywordProtocolMock: KeywordProtocol {
+    
+        private var _doneInit = false
+    private var `in`: Int!
+    init() { _doneInit = true }
+    
+        required init(in: Int = 0) {
+        self.in = `in`
+        _doneInit = true
+    }
+}
+
+class KeywordClassMock: KeywordClass {
+    
+        private var _doneInit = false
+    
+    
+    init(k: Int = 0) {
+    self.k = k
+    _doneInit = true
+}
+        
+    var kSetCallCount = 0
+    var underlyingK: Int = 0
+    override var k: Int {
+        get { return underlyingK }
+        set {
+            underlyingK = newValue
+            if _doneInit { kSetCallCount += 1 }
+        }
+    }
+    override init(in: Int = 0) {
+        super.init(in: `in`)
+        _doneInit = true
+    }
+}
+
+"""
+
+
 //  MARK - protocol containing init
 
-    
 let protocolWithInit = """
 /// \(String.mockAnnotation)
 public protocol HasInit: HasInitParent {
@@ -238,14 +301,15 @@ let nonSimpleInitVarsMock =
 public class ForcastUpdatingMock: ForcastUpdating {
 
     private var _doneInit = false
-            private var checkBlock: ForcastCheckBlock!
+    private var checkBlock: ForcastCheckBlock!
     private var dataStream: DataStream!
     public init() { _doneInit = true }
     required public init(checkBlock: @escaping ForcastCheckBlock, dataStream: DataStream) {
-    self.checkBlock = checkBlock
-    self.dataStream = dataStream
-    _doneInit = true
-}
+        self.checkBlock = checkBlock
+        self.dataStream = dataStream
+        _doneInit = true
+    }
+
     public var enabledCallCount = 0
     public var enabledHandler: (() -> (Bool))?
     public func enabled() -> Bool {
@@ -274,7 +338,6 @@ public class ForcastUpdatingMock: ForcastUpdating {
             if let fetchInfoHandler = fetchInfoHandler {
                 fetchInfoHandler(itmsURL, completionHandler)
             }
-            
     }
 }
 

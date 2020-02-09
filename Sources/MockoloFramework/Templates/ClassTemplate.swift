@@ -133,7 +133,7 @@ private func extraInitsIfNeeded(_ entities: [(String, Model)],
         
         paramsAssign = extraInitParamCandidates.map { p in
             return """
-            self.\(p.name) = \(p.name)
+            self.\(p.name) = \(p.name.safeName)
             """
         }.joined(separator: "\n")
         
@@ -190,4 +190,3 @@ private func sortedInitVars(`in` models: [Model]) -> [Model] {
     let result = [curVarsSorted, parentVarsSorted].flatMap{$0}
     return result
 }
-
