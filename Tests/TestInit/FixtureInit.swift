@@ -64,18 +64,19 @@ public class HasInitParentMock: HasInitParent {
 }
 """
 
-let protocolWithInitResultMock =
-"""
+let protocolWithInitResultMock = """
 
 public class HasInitMock: HasInit {
     
     private var _doneInit = false
     private var arg: String!
     public init() { _doneInit = true }
+    
     required public init(arg: String = "") {
         self.arg = arg
         _doneInit = true
     }
+
     required public init(order: Int) {
         self.order = order
         _doneInit = true
@@ -104,6 +105,7 @@ public class HasInitMock: HasInit {
             if _doneInit { numSetCallCount += 1 }
         }
     }
+    
     public var rateSetCallCount = 0
     var underlyingRate: Double = 0.0
     public var rate: Double {
@@ -116,7 +118,9 @@ public class HasInitMock: HasInit {
         }
     }
 }
+
 """
+
 
 //  MARK - simple init
 

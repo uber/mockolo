@@ -10,6 +10,10 @@ public class Low: Mid {
         self.name = arg
     }
 
+    public required init(orderId: Int) {
+        super.init(orderId: orderId)
+    }
+
     public init(m: Int) {
         super.init(orderId: m)
     }
@@ -70,13 +74,6 @@ public class LowMock: Low {
     
     private var _doneInit = false
     
-    
-    public init(name: String = "", what: Double = 0.0) {
-        self.name = name
-        self.what = what
-        _doneInit = true
-    }
-    
     var nameSetCallCount = 0
     var underlyingName: String = ""
     override var name: String {
@@ -90,19 +87,15 @@ public class LowMock: Low {
         super.init(arg: arg)
         _doneInit = true
     }
+
+    required public init(orderId: Int = 0) {
+        super.init(orderId: orderId)
+        _doneInit = true
+    }
+
     override public init(m: Int = 0) {
         super.init(m: m)
         _doneInit = true
-    }
-    
-    var whatSetCallCount = 0
-    var underlyingWhat: Double = 0.0
-    override var what: Double {
-        get { return underlyingWhat }
-        set {
-            underlyingWhat = newValue
-            if _doneInit { whatSetCallCount += 1 }
-        }
     }
 }
 """
@@ -114,14 +107,6 @@ public class LowMock: Low {
     
     private var _doneInit = false
     
-    
-    public init(name: String = "", what: Double = 0.0, order: Int = 0) {
-        self.name = name
-        self.what = what
-        self.order = order
-        _doneInit = true
-    }
-    
     var nameSetCallCount = 0
     var underlyingName: String = ""
     override var name: String {
@@ -135,32 +120,13 @@ public class LowMock: Low {
         super.init(arg: arg)
         _doneInit = true
     }
-    public required init(orderId: Int) {
+    required public init(orderId: Int = 0) {
         super.init(orderId: orderId)
         _doneInit = true
     }
     override public init(m: Int = 0) {
         super.init(m: m)
         _doneInit = true
-    }
-    public var orderSetCallCount = 0
-    var underlyingOrder: Int = 0
-    public override var order: Int {
-        get { return underlyingOrder }
-        set {
-            underlyingOrder = newValue
-            if _doneInit { orderSetCallCount += 1 }
-        }
-    }
-    
-    var whatSetCallCount = 0
-    var underlyingWhat: Double = 0.0
-    override var what: Double {
-        get { return underlyingWhat }
-        set {
-            underlyingWhat = newValue
-            if _doneInit { whatSetCallCount += 1 }
-        }
     }
 }
 
