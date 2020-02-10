@@ -39,7 +39,7 @@ func applyVarTemplate(name: String,
     assert(!type.isUnknown)
     let vardecl =
     """
-    private var \(name): \(type.underlyingType)
+    private var \(name.safeName): \(type.underlyingType)
     """
     return vardecl
 }

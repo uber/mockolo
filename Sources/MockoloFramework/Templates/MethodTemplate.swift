@@ -44,7 +44,7 @@ func applyMethodTemplate(name: String,
             let modifier = isRequired ? "\(String.required) " : (isOverride ? "\(String.override) " : "") 
             let paramsList = params.map { param in
                 return """
-                \(param.name): \(param.name)
+                \(param.name): \(param.name.safeName)
                 """
             }.joined(separator: ", ")
             
@@ -60,7 +60,7 @@ func applyMethodTemplate(name: String,
             
             let paramsAssign = params.map { param in
                 return """
-                    self.\(param.name) = \(param.name)
+                self.\(param.name) = \(param.name.safeName)
                 """
             }.joined(separator: "\n")
             

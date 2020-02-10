@@ -18,4 +18,9 @@ class InitTests: MockoloTestCase {
                mockContent: protocolWithInitParentMock,
                dstContent: protocolWithInitResultMock)
     }
+
+    func testInitKeywordParams() {
+        verify(srcContent: keywordParams,
+               dstContent: keywordParamsMock)
+    }
 }
