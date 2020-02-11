@@ -37,7 +37,7 @@ final class MethodModel: Model {
     let processed: Bool
     var modelDescription: String? = nil
     let isStatic: Bool
-    let isOverride: Bool
+    let shouldOverride: Bool
     let suffix: String
     let kind: MethodKind
     var modelType: ModelType {
@@ -121,7 +121,7 @@ final class MethodModel: Model {
         self.length = length
         self.kind = kind
         self.isStatic = isStatic
-        self.isOverride = encloserType == .classType
+        self.shouldOverride = encloserType == .classType
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.processed = processed
@@ -141,7 +141,7 @@ final class MethodModel: Model {
         self.type = Type(ast.typeName)
         self.isStatic = ast.isStaticMethod
         self.processed = processed
-        self.isOverride = ast.isOverride || encloserType == .classType
+        self.shouldOverride = ast.isOverride || encloserType == .classType
         if ast.isSubscript {
             self.kind = .subscriptKind
         } else if ast.isInitializer {
@@ -203,13 +203,24 @@ final class MethodModel: Model {
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
         if processed {
-            return modelDescription ?? self.data?.toString(offset: offset, length: length)
+            var prefix = shouldOverride  ? "\(String.override) " : ""
+
+            if case .initKind(required: let isRequired) = self.kind {
+                if isRequired {
+                    prefix = ""
+                }
+            }
+            
+            if let ret = modelDescription ?? self.data?.toString(offset: offset, length: length) {
+                return prefix + ret
+            }
+            return nil
         }
         
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
                                          kind: kind,
-                                         isOverride: isOverride,
+                                         isOverride: shouldOverride,
                                          genericTypeParams: genericTypeParams,
                                          params: params,
                                          returnType: type,

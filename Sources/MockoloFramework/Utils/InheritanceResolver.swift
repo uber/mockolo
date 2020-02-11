@@ -25,6 +25,7 @@ import Foundation
 /// @returns a list of models representing sub-entities of the current entity, a list of models processed in dependent mock files if exists,
 ///          cumulated attributes, and a map of filepaths and file contents (used for import lines lookup later).
 func lookupEntities(key: String,
+                    declType: DeclType,
                     protocolMap: [String: Entity],
                     inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [String], [(String, Data, Int64)]) {
     
@@ -41,7 +42,7 @@ func lookupEntities(key: String,
 
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
-        let sub = current.entityNode.subContainer(overrides: current.overrides, declType: current.entityNode.declType, path: current.filepath, data: current.data, isProcessed: current.isProcessed)
+        let sub = current.entityNode.subContainer(overrides: current.overrides, declType: declType, path: current.filepath, data: current.data, isProcessed: current.isProcessed)
         models.append(contentsOf: sub.members)
         if !current.isProcessed {
             attributes.append(contentsOf: sub.attributes)
@@ -50,12 +51,13 @@ func lookupEntities(key: String,
             pathToContents.append((current.filepath, data, current.entityNode.offset))
         }
         paths.append(current.filepath)
+        
+        
+        if declType == .protocolType { // TODO: remove this once parent protocol (current decl = classtype) handling is resolved.
             // If the protocol inherits other protocols, look up their entities as well.
             for parent in current.entityNode.inheritedTypes {
                 if parent != .class, parent != .any, parent != .anyObject {
-                    let (parentModels, parentProcessedModels, parentAttributes, parentPaths, parentPathToContents) = lookupEntities(key: parent,
-                                                                                                                       protocolMap: protocolMap,
-                                                                                                                       inheritanceMap: inheritanceMap)
+                    let (parentModels, parentProcessedModels, parentAttributes, parentPaths, parentPathToContents) = lookupEntities(key: parent, declType: declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
                     attributes.append(contentsOf: parentAttributes)
@@ -63,10 +65,10 @@ func lookupEntities(key: String,
                     pathToContents.append(contentsOf:parentPathToContents)
                 }
             }
-        
-    } else if let parentMock = inheritanceMap["\(key)Mock"] {
+        }
+    } else if let parentMock = inheritanceMap["\(key)Mock"], declType == .protocolType {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        let sub = parentMock.entityNode.subContainer(overrides: parentMock.overrides, declType: parentMock.entityNode.declType, path: parentMock.filepath, data: parentMock.data, isProcessed: parentMock.isProcessed)
+        let sub = parentMock.entityNode.subContainer(overrides: parentMock.overrides, declType: declType, path: parentMock.filepath, data: parentMock.data, isProcessed: parentMock.isProcessed)
         processedModels.append(contentsOf: sub.members)
         if !parentMock.isProcessed {
             attributes.append(contentsOf: sub.attributes)

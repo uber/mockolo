@@ -10,19 +10,19 @@ class HeaderTests: MockoloTestCase {
                dstContent: simpleInitResultMock,
                header: "/// Copyright ©")
     }
-
+    
     func testHeader2() {
         verify(srcContent: simpleInit,
                mockContent: simpleInitParentMock,
                dstContent: simpleInitResultMock,
                header: "/// Copyright ©©©")
     }
-
+    
     func testHeader3() {
         verify(srcContent: simpleInit,
                mockContent: simpleInitParentMock,
                dstContent: simpleInitResultMock,
                header: "/// Copyright c")
     }
-
+    
 }

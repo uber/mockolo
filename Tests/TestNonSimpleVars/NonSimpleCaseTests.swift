@@ -5,7 +5,7 @@ class NonSimpleVarTests: MockoloTestCase {
     func testSubscripts() {
         verify(srcContent: subscripts,
                dstContent: subscriptsMocks,
-               useDefaultParser: true)
+               parser: .swiftSyntax)
     }
     
 

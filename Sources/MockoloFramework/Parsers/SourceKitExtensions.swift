@@ -108,7 +108,7 @@ extension Structure: EntityNode {
     func members(with path: String?, encloserType: DeclType, data: Data?, overrides: [String: String]?, processed: Bool) -> [Model] {
         guard let path = path, let data = data else { return [] }
         return self.substructures.compactMap { (child: Structure) -> Model? in
-            return model(for: child, encloserType: declType, filepath: path, data: data, overrides: overrides, processed: processed)
+            return model(for: child, encloserType: encloserType, filepath: path, data: data, overrides: overrides, processed: processed)
         }
     }
     
@@ -119,7 +119,10 @@ extension Structure: EntityNode {
         }.flatMap {$0}
     }
     
-    private func validateMember(_ element: Structure, _ declType: DeclType) -> Bool {
+    private func validateMember(_ element: Structure, _ declType: DeclType, processed: Bool) -> Bool {
+        if !processed, element.isPrivate {
+            return false
+        }
         if element.isStatic, declType == .classType {
             return false
         }
@@ -127,11 +130,10 @@ extension Structure: EntityNode {
     }
     
     private func validateInit(_ element: Structure, _ declType: DeclType, processed: Bool) -> Bool {
-        var isRequired = declType == .protocolType
-        if !isRequired {
-            isRequired = element.isRequired
+        if element.isPrivate {
+            return false
         }
-
+        let isRequired = element.isRequired
         if processed {
             return isRequired
         }
@@ -144,7 +146,7 @@ extension Structure: EntityNode {
     
     func model(for element: Structure, encloserType: DeclType, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
-            if validateMember(element, declType) {
+            if validateMember(element, declType, processed: processed) {
                 return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
             }
         } else if element.isMethod || element.isSubscript { // initializer is considered a method by sourcekit
@@ -152,7 +154,7 @@ extension Structure: EntityNode {
             if element.isInitializer {
                 validated = validateInit(element, declType, processed: processed)
             } else {
-                validated = validateMember(element, declType)
+                validated = validateMember(element, declType, processed: processed)
             }
             
             if validated {

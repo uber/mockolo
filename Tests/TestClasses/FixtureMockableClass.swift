@@ -1,6 +1,5 @@
 import MockoloFramework
 
-
 let klass =
 """
 /// \(String.mockAnnotation)
@@ -13,7 +12,7 @@ public class Low: Mid {
         self.name = arg
     }
 
-    override init(orderId: Int) {
+    required init(orderId: Int) {
         super.init(orderId: orderId)
     }
 
@@ -38,6 +37,10 @@ public class Low: Mid {
 
     func foo() -> Int {
         return 5
+    }
+
+    private func omg() {
+
     }
 }
 
@@ -105,14 +108,7 @@ let klassMock =
 public class LowMock: Low {
     
     private var _doneInit = false
-    
-    
-    public init(name: String = "", what: Float = 0.0) {
-        self.name = name
-        self.what = what
-        _doneInit = true
-    }
-    
+   
     var nameSetCallCount = 0
     var underlyingName: String = ""
     override var name: String {
@@ -126,7 +122,7 @@ public class LowMock: Low {
         super.init(arg: arg)
         _doneInit = true
     }
-    override init(orderId: Int = 0) {
+    required init(orderId: Int = 0) {
         super.init(orderId: orderId)
         _doneInit = true
     }
@@ -169,18 +165,9 @@ public class LowMock: Low {
 
 let klassLongerMock =
 """
+
 public class LowMock: Low {
-    
     private var _doneInit = false
-    
-    
-    public init(name: String = "", what: Float = 0.0, order: Int = 0) {
-        self.name = name
-        self.what = what
-        self.order = order
-        _doneInit = true
-    }
-    
     var nameSetCallCount = 0
     var underlyingName: String = ""
     override var name: String {
@@ -194,9 +181,7 @@ public class LowMock: Low {
         super.init(arg: arg)
         _doneInit = true
     }
-    
-    
-    required init(orderId: Int) {
+    required init(orderId: Int = 0) {
         super.init(orderId: orderId)
         _doneInit = true
     }
@@ -204,11 +189,6 @@ public class LowMock: Low {
         super.init(i: i)
         _doneInit = true
     }
-    
-    
-    var orderSetCallCount = 0
-    
-    var underlyingOrder: Int = 0
     
     var whatSetCallCount = 0
     var underlyingWhat: Float = 0.0
@@ -219,19 +199,11 @@ public class LowMock: Low {
             if _doneInit { whatSetCallCount += 1 }
         }
     }
-    
-    override var order: Int {
-        get { return underlyingOrder }
-        set {
-            underlyingOrder = newValue
-            if _doneInit { orderSetCallCount += 1 }
-        }
-    }
     var barCallCount = 0
     var barHandler: (() -> ())?
     override func bar()  {
         barCallCount += 1
-        
+
         if let barHandler = barHandler {
             barHandler()
         }
@@ -241,25 +213,11 @@ public class LowMock: Low {
     var fooHandler: (() -> (Int))?
     override func foo() -> Int {
         fooCallCount += 1
-        
+
         if let fooHandler = fooHandler {
             return fooHandler()
         }
         return 0
-    }
-    
-    
-    var bazCallCount = 0
-    
-    var bazHandler: (() -> (Double))?
-    
-    override func baz() -> Double {
-        bazCallCount += 1
-        
-        if let bazHandler = bazHandler {
-            return bazHandler()
-        }
-        return 0.0
     }
 }
 """

@@ -54,7 +54,7 @@ class MockoloTestCase: XCTestCase {
         }
     }
     
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = 1, useDefaultParser: Bool = false) {
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = 1, parser: ParserType = .random) {
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -62,10 +62,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit, useDefaultParser: useDefaultParser)
+        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit, parser: parser)
     }
     
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, concurrencyLimit: Int?, useDefaultParser: Bool) {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, concurrencyLimit: Int?, parser: ParserType) {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -106,13 +106,19 @@ class MockoloTestCase: XCTestCase {
         \(macroEnd)
         """
         
-        var parser = ParserType.swiftSyntax
-        if !useDefaultParser {
-            parser = Int.random(in: 0..<10) > 5 ? .sourceKit : .swiftSyntax
+        var parserToUse: SourceParsing
+        switch parser {
+        case .sourceKit:
+            parserToUse = ParserViaSourceKit()
+        case .swiftSyntax:
+            parserToUse = ParserViaSwiftSyntax()
+        case .random:
+            parserToUse = Int.random(in: 0..<10) > 5 ? ParserViaSourceKit() : ParserViaSwiftSyntax()
         }
+        
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
-                      parser: parser == .sourceKit ? ParserViaSourceKit() : ParserViaSwiftSyntax(),
+                      parser: parserToUse,
                       exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: mockFilePaths,
                       annotation: String.mockAnnotation,
@@ -129,3 +135,4 @@ class MockoloTestCase: XCTestCase {
         })
     }
 }
+

@@ -68,11 +68,19 @@ final class VariableModel: Model {
         self.filePath = filepath
     }
     
+    private func isGenerated(_ name: String) -> Bool {
+        return name.hasPrefix(.underlyingVarPrefix) || name.hasSuffix(.setCallCountSuffix) || name.hasSuffix(.callCountSuffix) || name.hasSuffix(.subjectSuffix) || name.hasSuffix("SubjectKind") || name.hasSuffix(.handlerSuffix)
+    }
+    
     func render(with identifier: String, typeKeys: [String: String]?) -> String? {
         if processed {
             
-            if let modelDescription = modelDescription {
-                return modelDescription
+            var prefix = ""
+            if shouldOverride, !isGenerated(name) {
+                prefix = "\(String.override) "
+            }
+            if let modelDescription = modelDescription, !modelDescription.isEmpty {
+                return prefix + modelDescription
             }
             
             if let ret = self.data?.toString(offset: self.offset, length: self.length) {
@@ -80,9 +88,9 @@ final class VariableModel: Model {
                     let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
                     let found = first.components(separatedBy: " ").filter({!$0.isEmpty}).last {
                     let replaced = ret.replacingOccurrences(of: found, with: identifier)
-                    return replaced
+                    return prefix + replaced
                 }
-                return ret
+                return prefix + ret
             }
             return nil
         }

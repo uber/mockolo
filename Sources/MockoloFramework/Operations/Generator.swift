@@ -24,6 +24,7 @@ enum InputError: Error {
 public enum ParserType {
     case swiftSyntax
     case sourceKit
+    case random
 }
 
 /// Performs end to end mock generation flow

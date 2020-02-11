@@ -82,9 +82,8 @@ private func extraInitsIfNeeded(_ entities: [(String, Model)],
     let hasBlankInit = !declaredInits.filter { $0.params.isEmpty }.isEmpty
     
     let extraInitParamCandidates = sortedInitVars(in: entities.map{$0.1})
-    let extraInitParamCandidatesSorted = extraInitParamCandidates.sorted(path: \.name)
 
-    var needParamedInit = true
+    var needParamedInit = false
     var needBlankInit = false
 
     if declaredInits.isEmpty, extraInitParamCandidates.isEmpty {
@@ -94,22 +93,6 @@ private func extraInitsIfNeeded(_ entities: [(String, Model)],
         if declType == .protocolType {
             needBlankInit = !hasBlankInit
             needParamedInit = declaredInitParamsPerInit.isEmpty && !extraInitParamCandidates.isEmpty
-        } else {
-            var matchingParamsFound = false
-            for declaredParams in declaredInitParamsPerInit {
-                if declaredParams.count == extraInitParamCandidates.count {
-                    let declaredParamsByName = declaredParams.sorted(path: \.name)
-                    let matchingParams = zip(extraInitParamCandidatesSorted, declaredParamsByName).filter { $0.name == $1.name && $0.type.typeName == $1.type.typeName }
-                    if !matchingParams.isEmpty {
-                        matchingParamsFound = true
-                        break
-                    }
-                }
-            }
-            
-            if matchingParamsFound || extraInitParamCandidates.isEmpty {
-                needParamedInit = false
-            }
         }
     }
 
@@ -169,7 +152,7 @@ private func extraInitsIfNeeded(_ entities: [(String, Model)],
         \(blankInit)
         \(initTemplate)
     """
-    
+ 
     return template
 }
 

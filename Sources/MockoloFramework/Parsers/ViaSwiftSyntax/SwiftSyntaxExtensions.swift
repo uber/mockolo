@@ -109,21 +109,20 @@ extension TypeInheritanceClauseSyntax {
 
 extension MemberDeclListSyntax {
     
-    private func validateMember(_ modifiers: ModifierListSyntax?, _ declType: DeclType) -> Bool {
-        if let mods = modifiers, mods.isStatic, declType == .classType {
-            return false
+    private func validateMember(_ modifiers: ModifierListSyntax?, _ declType: DeclType, processed: Bool) -> Bool {
+        if let mods = modifiers {
+            if !processed && mods.isPrivate || mods.isStatic && declType == .classType {
+                return false
+            }
         }
         return true
     }
     
     private func validateInit(_ initDecl: InitializerDeclSyntax, _ declType: DeclType, processed: Bool) -> Bool {
-        var isRequired = declType == .protocolType
-        if !isRequired {
-            if let modifiers = initDecl.modifiers {
-                isRequired = modifiers.isRequired
-            }
+        var isRequired = false
+        if let modifiers = initDecl.modifiers {
+            isRequired = modifiers.isRequired
         }
-
         if processed {
             return isRequired
         }
@@ -157,19 +156,19 @@ extension MemberDeclListSyntax {
         
         for m in self {
             if let varMember = m.decl as? VariableDeclSyntax {
-                if validateMember(varMember.modifiers, declType) {
+                if validateMember(varMember.modifiers, declType, processed: processed) {
                     let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
                     memberList.append(contentsOf: varMember.models(with: acl, declType: declType, processed: processed))
                     attrDesc = varMember.attributes?.trimmedDescription
                 }
             } else if let funcMember = m.decl as? FunctionDeclSyntax {
-                if validateMember(funcMember.modifiers, declType) {
+                if validateMember(funcMember.modifiers, declType, processed: processed) {
                     let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
                     memberList.append(funcMember.model(with: acl, declType: declType, processed: processed))
                     attrDesc = funcMember.attributes?.trimmedDescription
                 }
             } else if let subscriptMember = m.decl as? SubscriptDeclSyntax {
-                if validateMember(subscriptMember.modifiers, declType) {
+                if validateMember(subscriptMember.modifiers, declType, processed: processed) {
                     let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
                     memberList.append(subscriptMember.model(with: acl, declType: declType, processed: processed))
                     attrDesc = subscriptMember.attributes?.trimmedDescription
