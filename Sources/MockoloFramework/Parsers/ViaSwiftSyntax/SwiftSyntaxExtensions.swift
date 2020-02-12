@@ -107,8 +107,7 @@ extension TypeInheritanceClauseSyntax {
     }
 }
 
-extension MemberDeclListSyntax {
-    
+extension MemberDeclListItemSyntax {
     private func validateMember(_ modifiers: ModifierListSyntax?, _ declType: DeclType, processed: Bool) -> Bool {
         if let mods = modifiers {
             if !processed && mods.isPrivate || mods.isStatic && declType == .classType {
@@ -126,7 +125,6 @@ extension MemberDeclListSyntax {
         if processed {
             return isRequired
         }
-
         var isConvenience = false
         var isPrivate = false
         if let modifiers = initDecl.modifiers {
@@ -142,60 +140,98 @@ extension MemberDeclListSyntax {
     
     private func memberAcl(_ modifiers: ModifierListSyntax?, _ encloserAcl: String, _ declType: DeclType) -> String {
         if declType == .protocolType {
-             return encloserAcl
+            return encloserAcl
         }
-        
         return modifiers?.acl ?? ""
     }
+       
+    func transformToModel(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> (Model, String?, Bool)? {
+        if let varMember = self.decl as? VariableDeclSyntax {
+            if validateMember(varMember.modifiers, declType, processed: processed) {
+                let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
+                if let item = varMember.models(with: acl, declType: declType, processed: processed).first {
+                    return (item, varMember.attributes?.trimmedDescription, false)
+                }
+            }
+        } else if let funcMember = self.decl as? FunctionDeclSyntax {
+            if validateMember(funcMember.modifiers, declType, processed: processed) {
+                let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
+                let item = funcMember.model(with: acl, declType: declType, processed: processed)
+                return (item, funcMember.attributes?.trimmedDescription, false)
+            }
+        } else if let subscriptMember = self.decl as? SubscriptDeclSyntax {
+            if validateMember(subscriptMember.modifiers, declType, processed: processed) {
+                let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
+                let item = subscriptMember.model(with: acl, declType: declType, processed: processed)
+                return (item, subscriptMember.attributes?.trimmedDescription, false)
+            }
+        } else if let initMember = self.decl as? InitializerDeclSyntax {
+            if validateInit(initMember, declType, processed: processed) {
+                let acl = memberAcl(initMember.modifiers, encloserAcl, declType)
+                let item = initMember.model(with: acl, declType: declType, processed: processed)
+                return (item, initMember.attributes?.trimmedDescription, true)
+            }
+        } else if let patMember = self.decl as? AssociatedtypeDeclSyntax {
+            let acl = memberAcl(patMember.modifiers, encloserAcl, declType)
+            let item = patMember.model(with: acl, overrides: overrides, processed: processed)
+            return (item, patMember.attributes?.trimmedDescription, false)
+        } else if let taMember = self.decl as? TypealiasDeclSyntax {
+            let acl = memberAcl(taMember.modifiers, encloserAcl, declType)
+            let item = taMember.model(with: acl, overrides: overrides, processed: processed)
+            return (item, taMember.attributes?.trimmedDescription, false)
+        } else if let ifMacroMember = self.decl as? IfConfigDeclSyntax {
+            let (item, attr, flag) = ifMacroMember.model(with: encloserAcl, declType: declType, overrides: overrides, processed: processed)
+            return (item, attr, flag)
+        }
+        
+        return nil
+    }
+}
     
+extension MemberDeclListSyntax {
     func memberData(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> EntityNodeSubContainer {
         var attributeList = [String]()
         var memberList = [Model]()
         var hasInit = false
-        var attrDesc: String? = nil
         
         for m in self {
-            if let varMember = m.decl as? VariableDeclSyntax {
-                if validateMember(varMember.modifiers, declType, processed: processed) {
-                    let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
-                    memberList.append(contentsOf: varMember.models(with: acl, declType: declType, processed: processed))
-                    attrDesc = varMember.attributes?.trimmedDescription
+            if let (item, attr, flag) = m.transformToModel(with: encloserAcl, declType: declType, overrides: overrides, processed: processed) {
+                memberList.append(item)
+                if let attrDesc = attr {
+                    attributeList.append(attrDesc)
                 }
-            } else if let funcMember = m.decl as? FunctionDeclSyntax {
-                if validateMember(funcMember.modifiers, declType, processed: processed) {
-                    let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                    memberList.append(funcMember.model(with: acl, declType: declType, processed: processed))
-                    attrDesc = funcMember.attributes?.trimmedDescription
-                }
-            } else if let subscriptMember = m.decl as? SubscriptDeclSyntax {
-                if validateMember(subscriptMember.modifiers, declType, processed: processed) {
-                    let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
-                    memberList.append(subscriptMember.model(with: acl, declType: declType, processed: processed))
-                    attrDesc = subscriptMember.attributes?.trimmedDescription
-                }
-            } else if let initMember = m.decl as? InitializerDeclSyntax {
-                if validateInit(initMember, declType, processed: processed) {
-                    hasInit = true
-                    let acl = memberAcl(initMember.modifiers, encloserAcl, declType)
-                    memberList.append(initMember.model(with: acl, declType: declType, processed: processed))
-                    attrDesc = initMember.attributes?.trimmedDescription
-                }
-            } else if let patMember = m.decl as? AssociatedtypeDeclSyntax {
-                let acl = memberAcl(patMember.modifiers, encloserAcl, declType)
-                memberList.append(patMember.model(with: acl, overrides: overrides, processed: processed))
-                attrDesc = patMember.attributes?.trimmedDescription
-            } else if let taMember = m.decl as? TypealiasDeclSyntax {
-                let acl = memberAcl(taMember.modifiers, encloserAcl, declType)
-                memberList.append(taMember.model(with: acl, overrides: overrides, processed: processed))
-                attrDesc = taMember.attributes?.trimmedDescription
+                hasInit = hasInit || flag
             }
-            
-            if let attrDesc = attrDesc {
-                attributeList.append(attrDesc.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        return EntityNodeSubContainer(attributes: attributeList, members: memberList, hasInit: hasInit)
+    }
+}
+
+extension IfConfigDeclSyntax {
+    func model(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> (Model, String?, Bool) {
+        var subModels = [Model]()
+        var attrDesc: String?
+        var hasInit = false
+
+        var name = ""
+        for cl in self.clauses {
+            if let desc = cl.condition?.description, let list = cl.elements as? MemberDeclListSyntax {
+                name = desc
+
+                for element in list {
+                    if let (item, attr, flag) = element.transformToModel(with: encloserAcl, declType: declType, overrides: overrides, processed: processed) {
+                        subModels.append(item)
+                        if let attr = attr, attr.contains(String.available) {
+                            attrDesc = attr
+                        }
+                        hasInit = hasInit || flag
+                    }
+                }
             }
         }
         
-        return EntityNodeSubContainer(attributes: attributeList, members: memberList, hasInit: hasInit)
+        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: subModels)
+        return (macroModel, attrDesc, hasInit)
     }
 }
 
