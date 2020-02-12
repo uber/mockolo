@@ -17,7 +17,7 @@
 import Foundation
 
 public enum ModelType {
-    case variable, method, typeAlias, parameter, `class`
+    case variable, method, typeAlias, parameter, macro, `class`
 }
 
 /// Represents a model for an entity such as var, func, class, etc.
