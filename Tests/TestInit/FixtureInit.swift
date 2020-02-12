@@ -25,36 +25,17 @@ class KeywordClass: KClass {
 let keywordParamsMock = """
 
 class KeywordProtocolMock: KeywordProtocol {
-    
-        private var _doneInit = false
+    private var _doneInit = false
     private var `in`: Int!
     init() { _doneInit = true }
-    
-        required init(in: Int = 0) {
+    required init(in: Int = 0) {
         self.in = `in`
         _doneInit = true
     }
 }
 
 class KeywordClassMock: KeywordClass {
-    
-        private var _doneInit = false
-    
-    
-    init(k: Int = 0) {
-    self.k = k
-    _doneInit = true
-}
-        
-    var kSetCallCount = 0
-    var underlyingK: Int = 0
-    override var k: Int {
-        get { return underlyingK }
-        set {
-            underlyingK = newValue
-            if _doneInit { kSetCallCount += 1 }
-        }
-    }
+    private var _doneInit = false
     override init(in: Int = 0) {
         super.init(in: `in`)
         _doneInit = true
