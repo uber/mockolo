@@ -23,6 +23,7 @@ func write(candidates: [(String, Int64)],
            pathToContentMap: [(String, Data, Int64)],
            header: String?,
            macro: String?,
+           testableImports: [String]?,
            to outputFilePath: String) -> String {
     
     var importLines = [String]()
@@ -36,9 +37,27 @@ func write(candidates: [(String, Int64)],
         importLines.append(contentsOf: v)
         break
     }
-
-    let importsSet = Set(importLines.map{$0.trimmingCharacters(in: .whitespaces)})
-    let importLineStr = importsSet.sorted().joined(separator: "\n")
+    
+    var importLineStr = ""
+    
+    if let testableImports = testableImports {
+        var imports = importLines.compactMap { (importLine) -> String? in
+            return importLine.moduleName
+        }
+        imports.append(contentsOf: testableImports)
+        importLineStr = Set(imports)
+            .sorted()
+            .map { testableModuleName -> String in
+            guard testableImports.contains(testableModuleName) else {
+                return testableModuleName.asImport
+            }
+            return testableModuleName.asTestableImport
+        }
+        .joined(separator: "\n")
+    } else {
+        let importsSet = Set(importLines.map{$0.trimmingCharacters(in: .whitespaces)})
+        importLineStr = importsSet.sorted().joined(separator: "\n")
+    }
 
     let entities = candidates
         .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
