@@ -188,4 +188,3 @@ func findImportLines(data: Data, offset: Int64?) -> [String] {
     
     return []
 }
-
