@@ -54,7 +54,7 @@ class MockoloTestCase: XCTestCase {
         }
     }
     
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", concurrencyLimit: Int? = 1, useDefaultParser: Bool = false) {
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", testableImports: [String]? = [], concurrencyLimit: Int? = 1, useDefaultParser: Bool = false) {
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -62,10 +62,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, concurrencyLimit: concurrencyLimit, useDefaultParser: useDefaultParser)
+        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, testableImports: testableImports, concurrencyLimit: concurrencyLimit, useDefaultParser: useDefaultParser)
     }
     
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, concurrencyLimit: Int?, useDefaultParser: Bool) {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, testableImports: [String]?, concurrencyLimit: Int?, useDefaultParser: Bool) {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -118,6 +118,7 @@ class MockoloTestCase: XCTestCase {
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
+                      testableImports: testableImports ?? [],
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,

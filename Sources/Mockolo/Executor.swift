@@ -32,6 +32,7 @@ class Executor {
     private var exclusionSuffixes: OptionArgument<[String]>!
     private var header: OptionArgument<String>!
     private var macro: OptionArgument<String>!
+    private var testableImports: OptionArgument<[String]>!
     private var annotation: OptionArgument<String>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var useSourceKit: OptionArgument<Bool>!
@@ -97,6 +98,10 @@ class Executor {
                                 shortName: "-m",
                                 kind: String.self,
                                 usage: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
+        testableImports = parser.add(option: "--testable-imports",
+                                        shortName: "-i",
+                                        kind: [String].self,
+                                        usage: "If set, @testable import statments will be added for each module name in this list.")
         header = parser.add(option: "--header",
                                 shortName: "-h",
                                 kind: String.self,
@@ -158,6 +163,7 @@ class Executor {
         let header = arguments.get(self.header)
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
+        let testableImports = arguments.get(self.testableImports) ?? []
         let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
 
         do {
@@ -169,6 +175,7 @@ class Executor {
                          annotation: annotation,
                          header: header,
                          macro: macro,
+                         testableImports: testableImports,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,

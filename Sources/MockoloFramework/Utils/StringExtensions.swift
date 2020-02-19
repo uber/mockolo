@@ -129,4 +129,11 @@ extension StringProtocol {
         return ret.components(separatedBy: separatorsForDisplay)
     }
 
+    var asTestableImport: String {
+        return "@testable \(self.asImport)"
+    }
+
+    var asImport: String {
+        return "import \(self)"
+    }
 }

@@ -35,6 +35,7 @@ public func generate(sourceDirs: [String]?,
                      annotation: String,
                      header: String?,
                      macro: String?,
+                     testableImports: [String],
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
@@ -159,6 +160,7 @@ public func generate(sourceDirs: [String]?,
                        pathToContentMap: pathToContentMap,
                        header: header,
                        macro: macro,
+                       testableImports: testableImports,
                        to: outputFilePath)
     signpost_end(name: "Write results")
     let t5 = CFAbsoluteTimeGetCurrent()

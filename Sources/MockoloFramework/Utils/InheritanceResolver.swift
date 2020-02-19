@@ -187,3 +187,11 @@ func findImportLines(data: Data, offset: Int64?) -> [String] {
     return []
 }
 
+/// Returns the imported package name from an import line
+/// @param importLine The string importing a module
+/// @returns The name of the imported module as a String
+func extractModuleImport(importLine: String) -> String? {
+    guard importLine.hasPrefix(String.import) else { return nil }
+    return importLine.dropFirst(String.import.count).trimmingCharacters(in: CharacterSet.whitespaces)
+}
+

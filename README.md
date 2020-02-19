@@ -95,6 +95,7 @@ OPTIONS:
   --annotation, -a        A custom annotation string used to indicate if a type should be mocked (default = @mockable).
   --header, -h            A custom header documentation to be added to the beginning of a generated mock file.
   --macro, -m             If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
+  --testable-imports, -i  If set, @testable import statments will be added for each module name in this list.
   --concurrency-limit, -j Maximum number of threads to execute concurrently (default = number of cores on the running machine).
   --logging-level, -v     The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
   --use-sourcekit         If this argument is added, it will use SourceKit for parsing. By default it uses SwiftSyntax.
