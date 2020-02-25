@@ -103,7 +103,6 @@ class Executor {
                                         kind: [String].self,
                                         usage: "If set, @testable import statments will be added for each module name in this list.")
         header = parser.add(option: "--header",
-                                shortName: "-h",
                                 kind: String.self,
                                 usage: "A custom header documentation to be added to the beginning of a generated mock file.")
         concurrencyLimit = parser.add(option: "--concurrency-limit",
