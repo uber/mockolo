@@ -129,4 +129,16 @@ extension StringProtocol {
         return ret.components(separatedBy: separatorsForDisplay)
     }
 
+    var asTestableImport: String {
+        return "@testable \(self.asImport)"
+    }
+
+    var asImport: String {
+        return "import \(self)"
+    }
+    
+    var moduleName: String? {
+        guard self.hasPrefix(String.import) else { return nil }
+        return self.dropFirst(String.import.count).trimmingCharacters(in: CharacterSet.whitespaces)
+    }
 }
