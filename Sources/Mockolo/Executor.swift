@@ -163,7 +163,7 @@ class Executor {
         let header = arguments.get(self.header)
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
-        let testableImports = arguments.get(self.testableImports) ?? []
+        let testableImports = arguments.get(self.testableImports)
         let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
 
         do {

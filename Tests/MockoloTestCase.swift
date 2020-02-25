@@ -124,7 +124,7 @@ class MockoloTestCase: XCTestCase {
                       annotation: String.mockAnnotation,
                       header: header,
                       macro: "MOCK",
-                      testableImports: testableImports ?? [],
+                      testableImports: testableImports,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,

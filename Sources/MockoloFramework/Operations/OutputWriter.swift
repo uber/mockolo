@@ -47,11 +47,11 @@ func write(candidates: [(String, Int64)],
         imports.append(contentsOf: testableImports)
         importLineStr = Set(imports)
             .sorted()
-            .map { importString -> String in
-            guard testableImports.contains(importString) else {
-                return importString.asImport
+            .map { testableModuleName -> String in
+            guard testableImports.contains(testableModuleName) else {
+                return testableModuleName.asImport
             }
-            return importString.asTestableImport
+            return testableModuleName.asTestableImport
         }
         .joined(separator: "\n")
     } else {
