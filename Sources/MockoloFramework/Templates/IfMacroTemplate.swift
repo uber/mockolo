@@ -24,9 +24,9 @@ func applyMacroTemplate(name: String,
         .joined(separator: "\n")
     
     let template = """
-        #if \(name)
-        \(rendered)
-        #endif
+    \(String.spaces4)#if \(name)
+    \(rendered)
+    \(String.spaces4)#endif
     """
     return template
 }

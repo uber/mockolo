@@ -37,9 +37,6 @@ func applyParamTemplate(name: String,
 func applyVarTemplate(name: String,
                       type: Type) -> String {
     assert(!type.isUnknown)
-    let vardecl =
-    """
-    private var \(name.safeName): \(type.underlyingType)
-    """
+    let vardecl = "\(String.spaces4)private var \(name.safeName): \(type.underlyingType)"
     return vardecl
 }

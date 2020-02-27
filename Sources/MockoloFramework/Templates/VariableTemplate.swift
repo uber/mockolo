@@ -134,7 +134,6 @@ func applyRxVariableTemplate(name: String,
         let acl = accessControlLevelDescription.isEmpty ? "" : accessControlLevelDescription + " "
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         let setCallCountStmt = staticStr.isEmpty ? "if \(String.doneInit) { \(underlyingSetCallCount) += 1 }" : "\(underlyingSetCallCount) += 1"
-        
         let overrideStr = shouldOverride ? "\(String.override) " : ""
         
         let template = """
