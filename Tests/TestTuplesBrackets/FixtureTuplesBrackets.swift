@@ -86,7 +86,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
         if let updateObservableItemTypeOptionalHandler = updateObservableItemTypeOptionalHandler {
             return updateObservableItemTypeOptionalHandler()
         }
-        return nil
+        return Observable.empty()
     }
     
     var updateObservableSomeKeySomeTypeCallCount = 0

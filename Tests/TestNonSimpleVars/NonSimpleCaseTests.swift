@@ -14,12 +14,6 @@ class NonSimpleVarTests: MockoloTestCase {
                dstContent: nonSimpleVarsMock)
     }
     
-    func testRxVar() {
-        verify(srcContent: rxVar,
-               dstContent: rxVarMock,
-               concurrencyLimit: nil)
-    }
-    
     func testVariadicFuncs() {
         verify(srcContent: variadicFunc,
                dstContent: variadicFuncMock,
@@ -43,4 +37,30 @@ class NonSimpleVarTests: MockoloTestCase {
                dstContent: forArgClosureFuncMock,
                concurrencyLimit: nil)
     }
+    
+    func testRx() {
+        verify(srcContent: rx,
+               dstContent: rxMock,
+               concurrencyLimit: nil)
+    }
+
+    func testRxMultiParents() {
+           verify(srcContent: rxMultiParents,
+                  dstContent: rxMultiParentsMock,
+                  concurrencyLimit: nil)
+    }
+
+    func testRxVarInherited() {
+        verify(srcContent: rxVarInherited,
+               dstContent: rxVarInheritedMock,
+               concurrencyLimit: nil)
+    }
+
+    func testRxVarSubjects() {
+        verify(srcContent: rxVarSubjects,
+               dstContent: rxVarSubjectsMock,
+               concurrencyLimit: nil)
+    }
+    
+    
 }

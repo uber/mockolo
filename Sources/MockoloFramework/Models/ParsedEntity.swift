@@ -25,13 +25,50 @@ struct ResolvedEntity {
     let attributes: [String]
     let typealiasWhitelist: [String: [String]]?
     
+    var declaredInits: [MethodModel] {
+        return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
+    }
+    
+    var hasDeclaredEmptyInit: Bool {
+        return !declaredInits.filter { $0.params.isEmpty }.isEmpty
+    }
+    
+    var declaredInitParams: [ParamModel] {
+        return declaredInits.map { $0.params }.flatMap{$0}
+    }
+
+    var initParamCandidates: [Model] {
+        return sortedInitVars(in: uniqueModels.map{$0.1})
+    }
+
+    /// Returns models that can be used as parameters to an initializer
+    /// @param models The models (processed and unprocessed) of the current entity
+    /// @returns A list of init parameter models
+    private func sortedInitVars(`in` models: [Model]) -> [Model] {
+        let processed = models.filter {$0.processed && $0.canBeInitParam}
+        let unprocessed = models.filter {!$0.processed && $0.canBeInitParam}
+
+        // Named params in init should be unique. Add a duplicate param check to ensure it.
+        let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
+            
+        let curVarNames = curVarsSorted.map(path: \.name)
+        let parentVars = processed.filter {!curVarNames.contains($0.name)}
+        let parentVarsSorted = parentVars.sorted(path: \.offset, fallback: \.name)
+        let result = [curVarsSorted, parentVarsSorted].flatMap{$0}
+        return result
+    }
+
+    
     func model() -> Model {
         return ClassModel(identifier: key,
                           acl: entity.entityNode.acl,
                           declType: entity.entityNode.declType,
                           attributes: attributes,
                           offset: entity.entityNode.offset,
+                          overrides: entity.overrides,
                           typealiasWhitelist: typealiasWhitelist,
+                          initParamCandidates: initParamCandidates,
+                          declaredInits: declaredInits,
                           entities: uniqueModels)
     }
 }
@@ -49,6 +86,7 @@ protocol EntityNode {
     var declType: DeclType { get }
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
+    var hasBlankInit: Bool { get }
     func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
@@ -66,7 +104,7 @@ final class EntityNodeSubContainer {
 // Contains arguments to annotation
 // Ex. @mockable(typealias: T = Any; U = String; ...)
 struct AnnotationMetadata {
-    var typealiases: [String: String]?
+    var overrides: [String: String]?
 }
 
 
@@ -89,12 +127,12 @@ public final class Entity {
                      processed: Bool) -> Entity? {
         
         guard !isPrivate, !isFinal else {return nil}
-
+        
         let node = Entity(entityNode: entityNode,
                           filepath: filepath,
                           data: data,
                           isAnnotated: metadata != nil,
-                          overrides: metadata?.typealiases,
+                          overrides: metadata?.overrides,
                           isProcessed: processed)
         
         return node

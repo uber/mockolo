@@ -117,49 +117,32 @@ func talk(_ dismiss: Bool)
 }
 """
 
-let sameNameVarFuncMock =
+let sameNameVarFuncMock = """
 
-"""
 public class BarMock: Bar {
     
     private var _doneInit = false
+    
     public init() { _doneInit = true }
     public init(talk: Int = 0) {
         self.talk = talk
         _doneInit = true
     }
     public var talkSetCallCount = 0
-    var underlyingTalk: Int = 0
-    public var talk: Int {
-        get {
-            return underlyingTalk
-        }
-        set {
-            underlyingTalk = newValue
-            if _doneInit { talkSetCallCount += 1 }
-        }
-    }
+    public var talk: Int = 0 { didSet { talkSetCallCount += 1 } }
 }
 
 public class FooMock: Foo {
     
     private var _doneInit = false
+    
     public init() { _doneInit = true }
     public init(talk: Int = 0) {
         self.talk = talk
         _doneInit = true
     }
     public var talkSetCallCount = 0
-    var underlyingTalk: Int = 0
-    public var talk: Int {
-        get {
-            return underlyingTalk
-        }
-        set {
-            underlyingTalk = newValue
-            if _doneInit { talkSetCallCount += 1 }
-        }
-    }
+    public var talk: Int = 0 { didSet { talkSetCallCount += 1 } }
     public var talkDismissCallCount = 0
     public var talkDismissHandler: ((Bool) -> ())?
     public func talk(_ dismiss: Bool)  {

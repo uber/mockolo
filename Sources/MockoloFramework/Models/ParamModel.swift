@@ -31,6 +31,10 @@ final class ParamModel: Model {
         return .parameter
     }
 
+    var fullName: String {
+        return label + "_" + name
+    }
+
     init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool, offset: Int64, length: Int64) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))

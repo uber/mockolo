@@ -22,10 +22,13 @@ func applyClassTemplate(name: String,
                         accessControlLevelDescription: String,
                         attribute: String,
                         declType: DeclType,
+                        overrides: [String: String]?,
                         typealiasWhitelist: [String: [String]]?,
+                        initParamCandidates: [Model],
+                        declaredInits: [MethodModel],
                         entities: [(String, Model)]) -> String {
     
-    let extraInits = extraInitsIfNeeded(entities, accessControlLevelDescription: accessControlLevelDescription, declType: declType, typeKeys: typeKeys)
+    let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  accessControlLevelDescription: accessControlLevelDescription, declType: declType, overrides: overrides, typeKeys: typeKeys)
     
     let renderedEntities = entities
         .compactMap { (uniqueId: String, model: Model) -> (String, Int64)? in
@@ -33,7 +36,7 @@ func applyClassTemplate(name: String,
                 // this case will be handlded by typealiasWhitelist look up later
                 return nil
             }
-            if model.modelType == .variable, model.name == String.doneInit {
+            if model.modelType == .variable, (model.name == String.doneInit || model.name == String.hasBlankInit ){
                 return nil
             }
             if let ret = model.render(with: uniqueId, typeKeys: typeKeys) {
@@ -58,50 +61,58 @@ func applyClassTemplate(name: String,
         }.joined(separator: "\n")
     }
     
-    let template =
-    """
+    let template = """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
-        \(typealiasTemplate)
-        \(extraInits)
-        \(renderedEntities)
+    \(String.spaces4)\(typealiasTemplate)
+    \(extraInits)
+    \(renderedEntities)
     }
     """
     
     return template
 }
 
-
-private func extraInitsIfNeeded(_ entities: [(String, Model)],
-                              accessControlLevelDescription: String,
-                              declType: DeclType,
-                              typeKeys: [String: String]?) -> String {
+private func extraInitsIfNeeded(initParamCandidates: [Model],
+                                declaredInits: [MethodModel],
+                                accessControlLevelDescription: String,
+                                declType: DeclType,
+                                overrides: [String: String]?,
+                                typeKeys: [String: String]?) -> String {
     
-    let declaredInits = entities.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
     let declaredInitParamsPerInit = declaredInits.map { $0.params }
-    let hasBlankInit = !declaredInits.filter { $0.params.isEmpty }.isEmpty
     
-    let extraInitParamCandidates = sortedInitVars(in: entities.map{$0.1})
-
     var needParamedInit = false
     var needBlankInit = false
 
-    if declaredInits.isEmpty, extraInitParamCandidates.isEmpty {
+    if declaredInits.isEmpty, initParamCandidates.isEmpty {
         needBlankInit = true
         needParamedInit = false
     } else {
         if declType == .protocolType {
-            needBlankInit = !hasBlankInit
-            needParamedInit = declaredInitParamsPerInit.isEmpty && !extraInitParamCandidates.isEmpty
+            needParamedInit = !initParamCandidates.isEmpty
+
+            let buffer = initParamCandidates.sorted(path: \.fullName, fallback: \.name)
+            for paramList in declaredInitParamsPerInit {
+                let list = paramList.sorted(path: \.fullName, fallback: \.name)
+                if list.count == buffer.count {
+                    let dups = zip(list, buffer).filter {$0.0.fullName == $0.1.fullName}
+                    if !dups.isEmpty {
+                        needParamedInit = false
+                        break
+                    }
+                }
+            }
+            needBlankInit = true
         }
     }
 
     var initTemplate = ""
     if needParamedInit {
         var paramsAssign = ""
-        let params = extraInitParamCandidates
+        let params = initParamCandidates
             .map { (element: Model) -> String in
-                if let val =  element.type.defaultVal(with: typeKeys, isInitParam: true), !val.isEmpty {
+                if let val =  element.type.defaultVal(with: typeKeys, overrides: overrides, overrideKey: element.name, isInitParam: true) {
                     return "\(element.name): \(element.type.typeName) = \(val)"
                 }
                 var prefix = ""
@@ -114,22 +125,21 @@ private func extraInitsIfNeeded(_ entities: [(String, Model)],
         }
         .joined(separator: ", ")
         
-        paramsAssign = extraInitParamCandidates.map { p in
-            return """
-            self.\(p.name) = \(p.name.safeName)
-            """
+        paramsAssign = initParamCandidates.map { p in
+            return "\(String.spaces8)self.\(p.name) = \(p.name.safeName)"
+            
         }.joined(separator: "\n")
         
+        
         initTemplate = """
-        \(accessControlLevelDescription)init(\(params)) {
-            \(paramsAssign)
-            \(String.doneInit) = true
-        }
+        \(String.spaces4)\(accessControlLevelDescription)init(\(params)) {
+        \(paramsAssign)
+        \(String.spaces8)\(String.doneInit) = true
+        \(String.spaces4)}
         """
     }
     
-    
-    let extraInitParamNames = extraInitParamCandidates.map{$0.name}
+    let extraInitParamNames = initParamCandidates.map{$0.name}
     let extraVarsToDecl = declaredInitParamsPerInit.flatMap{$0}.compactMap { (p: ParamModel) -> String? in
         if !extraInitParamNames.contains(p.name) {
             return p.asVarDecl
@@ -147,29 +157,12 @@ private func extraInitsIfNeeded(_ entities: [(String, Model)],
 
     let initFlag =  "private var \(String.doneInit) = false"
     let template = """
-        \(initFlag)
-        \(extraVarsToDecl)
-        \(blankInit)
-        \(initTemplate)
+    \(String.spaces4)\(initFlag)
+    \(String.spaces4)\(extraVarsToDecl)
+    \(String.spaces4)\(blankInit)
+    \(initTemplate)
     """
- 
+
     return template
 }
 
-
-/// Returns models that can be used as parameters to an initializer
-/// @param models The models (processed and unprocessed) of the current entity
-/// @returns A list of init parameter models
-private func sortedInitVars(`in` models: [Model]) -> [Model] {
-    let processed = models.filter {$0.processed && $0.canBeInitParam}
-    let unprocessed = models.filter {!$0.processed && $0.canBeInitParam}
-
-    // Named params in init should be unique. Add a duplicate param check to ensure it.
-    let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
-        
-    let curVarNames = curVarsSorted.map(path: \.name)
-    let parentVars = processed.filter {!curVarNames.contains($0.name)}
-    let parentVarsSorted = parentVars.sorted(path: \.offset, fallback: \.name)
-    let result = [curVarsSorted, parentVarsSorted].flatMap{$0}
-    return result
-}

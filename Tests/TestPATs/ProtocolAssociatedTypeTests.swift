@@ -1,7 +1,7 @@
 import Foundation
 
 class ProtocolAssociatedTypeTests: MockoloTestCase {
-    
+
     func testPATDefaultType() {
         verify(srcContent: patDefaultType,
                dstContent: patDefaultTypeMock)
@@ -22,4 +22,8 @@ class ProtocolAssociatedTypeTests: MockoloTestCase {
                dstContent: patNameCollisionMock)
     }
     
+    func testTypealias() {
+        verify(srcContent: protocolWithTypealias,
+               dstContent: protocolWithTypealiasMock)
+    }
 }
