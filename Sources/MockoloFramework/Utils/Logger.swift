@@ -23,8 +23,8 @@ public var minLogLevel = 0
 
 /// Logs status and other messages depending on the level provided
 public enum LogLevel: Int {
-    case info
     case verbose
+    case info
     case warning
     case error
 }
@@ -44,13 +44,13 @@ public func log(_ arg: Any..., level: LogLevel = .info) {
 }
 
 public func signpost_begin(name: StaticString) {
-    if minLogLevel >= LogLevel.verbose.rawValue {
+    if minLogLevel == LogLevel.verbose.rawValue {
         os_signpost(.begin, log: perfLog, name: name)
     }
 }
 
 public func signpost_end(name: StaticString) {
-    if minLogLevel >= LogLevel.verbose.rawValue {
+    if minLogLevel == LogLevel.verbose.rawValue {
         os_signpost(.end, log: perfLog, name: name)
     }
 }
