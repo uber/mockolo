@@ -17,8 +17,8 @@
 import Foundation
 
 extension Data {
-    static public let `typealias` = "typealias:".data(using: String.Encoding.utf8)
-    static public let `rx` = "rx:".data(using: String.Encoding.utf8)
+    static public let typealiasColon = String.typealiasColon.data(using: String.Encoding.utf8)
+    static public let rxColon = String.rxColon.data(using: String.Encoding.utf8)
 
     public func sliced(offset: Int64, length: Int64) -> Data? {
         guard offset >= 0, length > 0 else { return nil }
@@ -32,6 +32,25 @@ extension Data {
     public func toString(offset: Int64, length: Int64) -> String {
         guard let subdata = sliced(offset: offset, length: length) else { return "" }
         return String(data: subdata, encoding: .utf8) ?? ""
+    }
+    
+    func parseAnnotationArguments(for keys: String...) -> [String: [String: String]]? {
+        let extracted = self
+        var ret = [String: [String: String]]()
+        for k in keys {
+            if let key = k.data(using: .utf8), let keyRange = extracted.range(of: key) {
+                let argsData = extracted[keyRange.endIndex...]
+                let argsStr = String(data: argsData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                if var mutableStr = argsStr {
+                    if mutableStr.hasSuffix(")") {
+                        mutableStr.removeLast()
+                    }
+                    let overrideArgs = mutableStr.arguments(with: String.annotationArgDelimiter)
+                    ret[k] = overrideArgs
+                }
+            }
+        }
+        return ret
     }
 }
 

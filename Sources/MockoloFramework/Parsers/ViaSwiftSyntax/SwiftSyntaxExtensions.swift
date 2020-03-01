@@ -145,11 +145,11 @@ extension MemberDeclListItemSyntax {
         return modifiers?.acl ?? ""
     }
     
-    func transformToModel(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> (Model, String?, Bool)? {
+    func transformToModel(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool)? {
         if let varMember = self.decl as? VariableDeclSyntax {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
-                if let item = varMember.models(with: acl, declType: declType, overrides: overrides, processed: processed).first {
+                if let item = varMember.models(with: acl, declType: declType, overrides: metadata?.varTypes, processed: processed).first {
                     return (item, varMember.attributes?.trimmedDescription, false)
                 }
             }
@@ -173,14 +173,14 @@ extension MemberDeclListItemSyntax {
             }
         } else if let patMember = self.decl as? AssociatedtypeDeclSyntax {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declType)
-            let item = patMember.model(with: acl, declType: declType, overrides: overrides, processed: processed)
+            let item = patMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
             return (item, patMember.attributes?.trimmedDescription, false)
         } else if let taMember = self.decl as? TypealiasDeclSyntax {
             let acl = memberAcl(taMember.modifiers, encloserAcl, declType)
-            let item = taMember.model(with: acl, declType: declType, overrides: overrides, processed: processed)
+            let item = taMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
             return (item, taMember.attributes?.trimmedDescription, false)
         } else if let ifMacroMember = self.decl as? IfConfigDeclSyntax {
-            let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declType: declType, overrides: overrides, processed: processed)
+            let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declType: declType, metadata: metadata, processed: processed)
             return (item, attr, initFlag)
         }
         
@@ -204,13 +204,13 @@ extension MemberDeclListSyntax {
         return false
     }
 
-    func memberData(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> EntityNodeSubContainer {
+    func memberData(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> EntityNodeSubContainer {
         var attributeList = [String]()
         var memberList = [Model]()
         var hasInit = false
 
         for m in self {
-            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declType: declType, overrides: overrides, processed: processed) {
+            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed) {
                 memberList.append(item)
                 if let attrDesc = attr {
                     attributeList.append(attrDesc)
@@ -223,7 +223,7 @@ extension MemberDeclListSyntax {
 }
 
 extension IfConfigDeclSyntax {
-    func model(with encloserAcl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> (Model, String?, Bool) {
+    func model(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
         var subModels = [Model]()
         var attrDesc: String?
         var hasInit = false
@@ -234,7 +234,7 @@ extension IfConfigDeclSyntax {
                 name = desc
                 
                 for element in list {
-                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, overrides: overrides, processed: processed) {
+                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed) {
                         subModels.append(item)
                         if let attr = attr, attr.contains(String.available) {
                             attrDesc = attr
@@ -287,8 +287,8 @@ extension ProtocolDeclSyntax: EntityNode {
         return false
     }
     
-    func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: acl, declType: declType, overrides: overrides, processed: isProcessed)
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        return self.members.members.memberData(with: acl, declType: declType, metadata: metadata, processed: isProcessed)
     }
 }
 
@@ -338,8 +338,8 @@ extension ClassDeclSyntax: EntityNode {
         return leadingTrivia?.annotationMetadata(with: annotation)
     }
     
-    func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: acl, declType: declType, overrides: nil, processed: isProcessed)
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        return self.members.members.memberData(with: acl, declType: declType, metadata: nil, processed: isProcessed)
     }
 }
 
@@ -613,44 +613,39 @@ extension Trivia {
     // of typealias decls for T and U.
     private func metadata(with annotation: String, in val: String) -> AnnotationMetadata? {
         if val.contains(annotation) {
-            var argsMap: [String: String]?
             let comps = val.components(separatedBy: annotation)
-            if var last = comps.last, !last.isEmpty {
-                if last.hasPrefix("(") {
-                    last.removeFirst()
+            var ret = AnnotationMetadata()
+            if var argsStr = comps.last, !argsStr.isEmpty {
+                if argsStr.hasPrefix("(") {
+                    argsStr.removeFirst()
                 }
-                if last.hasSuffix(")") {
-                    last.removeLast()
+                if argsStr.hasSuffix(")") {
+                    argsStr.removeLast()
                 }
-                if let args = last.components(separatedBy: String.typealiasColon).last, !args.isEmpty {
-                    let ret = parseAnnotationArguments(in: args)
-                    argsMap = ret
+                if argsStr.contains(String.typealiasColon), let subStr = argsStr.components(separatedBy: String.typealiasColon).last, !subStr.isEmpty {
+                    ret.typeAliases = subStr.arguments(with: .annotationArgDelimiter)
                 }
-                
-                if let args = last.components(separatedBy: String.rxColon).last, !args.isEmpty {
-                    let ret = parseAnnotationArguments(in: args)
-                    for (k, v) in ret {
-                        argsMap?[k] = v
+                if argsStr.contains(String.moduleColon), let subStr = argsStr.components(separatedBy: String.moduleColon).last, !subStr.isEmpty {
+                    let val = subStr.arguments(with: .annotationArgDelimiter)
+                    ret.module = val?[.name]
+                }
+                if argsStr.contains(String.rxColon), let subStr = argsStr.components(separatedBy: String.rxColon).last, !subStr.isEmpty {
+                    ret.varTypes = subStr.arguments(with: .annotationArgDelimiter)
+                }
+                if argsStr.contains(String.varColon), let subStr = argsStr.components(separatedBy: String.varColon).last, !subStr.isEmpty {
+                    if let val = subStr.arguments(with: .annotationArgDelimiter) {
+                        if ret.varTypes == nil {
+                            ret.varTypes = val
+                        } else {
+                            ret.varTypes?.merge(val, uniquingKeysWith: {$1})
+                        }
                     }
                 }
             }
-            return AnnotationMetadata(overrides: argsMap)
+            return ret
         }
         return nil
     }
-    
-    private func parseAnnotationArguments(in argstr: String) -> [String: String] {
-        let args = argstr.components(separatedBy: String.annotationArgDelimiter)
-        var argsMap = [String: String]()
-        args.forEach { (item: String) in
-            let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
-            if let k = keyVal.first, let v = keyVal.last {
-                argsMap[k] = v
-            }
-        }
-        return argsMap
-    }
-    
     
     // Looks up an annotation (e.g. /// @mockable) and its arguments if any.
     // See metadata(with:, in:) for more info on the annotation arguments.
@@ -677,3 +672,5 @@ extension Trivia {
         return nil
     }
 }
+
+

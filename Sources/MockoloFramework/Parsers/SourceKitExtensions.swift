@@ -33,45 +33,28 @@ extension Structure: EntityNode {
         guard let _ = extracted.range(of: annotation) else { return nil }
         var ret = AnnotationMetadata()
         
-        // Look up the typealias argument if any
-        var args = [String: String]()
-        if let arg = Data.typealias, let argMap = parseAnnotationArguments(key: arg, in: extracted) {
-            args = argMap
-        }
-        if let arg = Data.rx, let argMap = parseAnnotationArguments(key: arg, in: extracted) {
-            for (k, v) in argMap {
-                args[k] = v
+        // Look up override arguments if any
+        if let argsMap = extracted.parseAnnotationArguments(for: String.typealiasColon, String.moduleColon, String.rxColon, String.varColon) {
+            if let val = argsMap[.typealiasColon] {
+                ret.typeAliases = val
+            }
+            if let val = argsMap[.rxColon] {
+                ret.varTypes = val
+            }
+            if let val = argsMap[.varColon] {
+                if ret.varTypes == nil {
+                   ret.varTypes = val
+                } else {
+                    ret.varTypes?.merge(val, uniquingKeysWith: {$1})
+                }
+            }
+            if let val = argsMap[.moduleColon] {
+                ret.module = val[.name]
             }
         }
-        ret.overrides = args
-
         return ret
     }
     
-    private func parseAnnotationArguments(key: Data, in extracted: Data) -> [String: String]? {
-        if let keyRange = extracted.range(of: key) {
-            let args = extracted[keyRange.endIndex...]
-            let argsStr = String(data: args, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
-            
-            if var patValStr = argsStr {
-                if patValStr.hasSuffix(")") {
-                    patValStr.removeLast()
-                }
-                let aliases = patValStr.components(separatedBy: String.annotationArgDelimiter).filter { !$0.isEmpty }
-                var aliasMap = [String: String]()
-                
-                aliases.forEach { (item: String) in
-                    let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
-                    if let key = keyVal.first, let val = keyVal.last {
-                        aliasMap[key] = val
-                    }
-                }
-                
-                return aliasMap
-            }
-        }
-        return nil
-    }
     
     func extractAttributes(_ data: Data, filterOn: String? = nil) -> [String] {
         guard let attributeDict = attributes else {
@@ -115,16 +98,16 @@ extension Structure: EntityNode {
         return result
     }
     
-    func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        let memberList = members(with: path, encloserType: declType, data: data, overrides: overrides, processed: isProcessed)
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+        let memberList = members(with: path, encloserType: declType, data: data, metadata: metadata, processed: isProcessed)
         let subAttributes = memberAttributes(with: data)
         return EntityNodeSubContainer(attributes: subAttributes, members: memberList, hasInit: hasInitMember)
     }
     
-    func members(with path: String?, encloserType: DeclType, data: Data?, overrides: [String: String]?, processed: Bool) -> [Model] {
+    func members(with path: String?, encloserType: DeclType, data: Data?, metadata: AnnotationMetadata?, processed: Bool) -> [Model] {
         guard let path = path, let data = data else { return [] }
         return self.substructures.compactMap { (child: Structure) -> Model? in
-            return model(for: child, encloserType: encloserType, filepath: path, data: data, overrides: overrides, processed: processed)
+            return model(for: child, encloserType: encloserType, filepath: path, data: data, metadata: metadata, processed: processed)
         }
     }
     
@@ -160,10 +143,10 @@ extension Structure: EntityNode {
         return true
     }
     
-    func model(for element: Structure, encloserType: DeclType, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
+    func model(for element: Structure, encloserType: DeclType, filepath: String, data: Data, metadata: AnnotationMetadata?, processed: Bool = false) -> Model? {
         if element.isVariable {
             if validateMember(element, declType, processed: processed) {
-                return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
+                return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, overrideTypes: metadata?.varTypes, processed: processed)
             }
         } else if element.isMethod || element.isSubscript { // initializer is considered a method by sourcekit
             var validated = false
@@ -179,7 +162,7 @@ extension Structure: EntityNode {
             return nil
 
         } else if element.isAssociatedType || element.isTypealias {
-            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
+            return TypeAliasModel(element, filepath: filepath, data: data, overrideTypes: metadata?.typeAliases, processed: processed)
         }
         
         return nil
@@ -241,7 +224,7 @@ extension Structure: EntityNode {
     }
     
     var isInitializer: Bool {
-        return name.hasPrefix(.initializerPrefix) && isInstanceMethod
+        return name.hasPrefix(.initializerLeftParen) && isInstanceMethod
     }
 
     var hasBlankInit: Bool {

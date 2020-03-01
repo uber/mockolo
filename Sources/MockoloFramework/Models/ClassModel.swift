@@ -25,11 +25,10 @@ final class ClassModel: Model {
     let identifier: String
     let declType: DeclType
     let entities: [(String, Model)]
-    let typealiasWhitelist: [String: [String]]?
     let initParamCandidates: [Model]
     let declaredInits: [MethodModel]
-    let overrides: [String: String]?
-
+    let metadata: AnnotationMetadata?
+    
     var modelType: ModelType {
         return .class
     }
@@ -39,8 +38,7 @@ final class ClassModel: Model {
          declType: DeclType,
          attributes: [String],
          offset: Int64,
-         overrides: [String: String]?,
-         typealiasWhitelist: [String: [String]]?,
+         metadata: AnnotationMetadata?,
          initParamCandidates: [Model],
          declaredInits: [MethodModel],
          entities: [(String, Model)]) {
@@ -51,14 +49,13 @@ final class ClassModel: Model {
         self.entities = entities
         self.declaredInits = declaredInits
         self.initParamCandidates = initParamCandidates
-        self.overrides = overrides
+        self.metadata = metadata
         self.offset = offset
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessControlLevelDescription = acl.isEmpty ? "" : acl + " "
-        self.typealiasWhitelist = typealiasWhitelist
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, declType: declType, overrides: overrides, typealiasWhitelist: typealiasWhitelist, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
+        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, declType: declType, metadata: metadata, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
     }
 }

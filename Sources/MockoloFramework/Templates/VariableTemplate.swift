@@ -117,7 +117,7 @@ func applyRxVariableTemplate(name: String,
     }
     
     let typeName = type.typeName
-    if let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {
+    if let range = typeName.range(of: String.observableLeftAngleBracket), let lastIdx = typeName.lastIndex(of: ">") {
         let typeParamStr = typeName[range.upperBound..<lastIdx]
         
         let underlyingSubjectName = "\(name)\(String.subjectSuffix)"

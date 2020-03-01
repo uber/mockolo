@@ -23,7 +23,6 @@ struct ResolvedEntity {
     let entity: Entity
     let uniqueModels: [(String, Model)]
     let attributes: [String]
-    let typealiasWhitelist: [String: [String]]?
     
     var declaredInits: [MethodModel] {
         return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
@@ -66,8 +65,7 @@ struct ResolvedEntity {
                           declType: entity.entityNode.declType,
                           attributes: attributes,
                           offset: entity.entityNode.offset,
-                          overrides: entity.overrides,
-                          typealiasWhitelist: typealiasWhitelist,
+                          metadata: entity.metadata,
                           initParamCandidates: initParamCandidates,
                           declaredInits: declaredInits,
                           entities: uniqueModels)
@@ -88,7 +86,7 @@ protocol EntityNode {
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
-    func subContainer(overrides: [String: String]?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
 final class EntityNodeSubContainer {
@@ -102,10 +100,12 @@ final class EntityNodeSubContainer {
     }
 }
 
-// Contains arguments to annotation
-// Ex. @mockable(typealias: T = Any; U = String; ...)
+/// Contains arguments to annotation
+/// e.g. @mockable(module: name = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject)
 struct AnnotationMetadata {
-    var overrides: [String: String]?
+    var module: String?
+    var typeAliases: [String: String]?
+    var varTypes: [String: String]?
 }
 
 
@@ -113,12 +113,14 @@ struct AnnotationMetadata {
 public final class Entity {
     var filepath: String = ""
     var data: Data? = nil
-
-    let isAnnotated: Bool
-    let overrides: [String: String]?
     let entityNode: EntityNode
     let isProcessed: Bool
-    
+    let metadata: AnnotationMetadata?
+
+    var isAnnotated: Bool {
+        return metadata != nil
+    }
+
     static func node(with entityNode: EntityNode,
                      filepath: String = "",
                      data: Data? = nil,
@@ -132,8 +134,7 @@ public final class Entity {
         let node = Entity(entityNode: entityNode,
                           filepath: filepath,
                           data: data,
-                          isAnnotated: metadata != nil,
-                          overrides: metadata?.overrides,
+                          metadata: metadata,
                           isProcessed: processed)
         
         return node
@@ -142,14 +143,12 @@ public final class Entity {
     init(entityNode: EntityNode,
          filepath: String = "",
          data: Data? = nil,
-         isAnnotated: Bool,
-         overrides: [String: String]?,
+         metadata: AnnotationMetadata?,
          isProcessed: Bool) {
         self.entityNode = entityNode
         self.filepath = filepath
         self.data = data
-        self.isAnnotated = isAnnotated
-        self.overrides = overrides
+        self.metadata = metadata
         self.isProcessed = isProcessed
     }
 }

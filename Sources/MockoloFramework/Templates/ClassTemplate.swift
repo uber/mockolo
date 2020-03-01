@@ -22,17 +22,16 @@ func applyClassTemplate(name: String,
                         accessControlLevelDescription: String,
                         attribute: String,
                         declType: DeclType,
-                        overrides: [String: String]?,
-                        typealiasWhitelist: [String: [String]]?,
+                        metadata: AnnotationMetadata?,
                         initParamCandidates: [Model],
                         declaredInits: [MethodModel],
                         entities: [(String, Model)]) -> String {
     
-    let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  accessControlLevelDescription: accessControlLevelDescription, declType: declType, overrides: overrides, typeKeys: typeKeys)
-    
+    let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  accessControlLevelDescription: accessControlLevelDescription, declType: declType, overrides: metadata?.varTypes, typeKeys: typeKeys)
+    let typealiases = typealiasWhitelist(in: entities)
     let renderedEntities = entities
         .compactMap { (uniqueId: String, model: Model) -> (String, Int64)? in
-            if model.modelType == .typeAlias, let _ = typealiasWhitelist?[model.name] {
+            if model.modelType == .typeAlias, let _ = typealiases?[model.name] {
                 // this case will be handlded by typealiasWhitelist look up later
                 return nil
             }
@@ -54,16 +53,21 @@ func applyClassTemplate(name: String,
     .joined(separator: "\n")
     
     var typealiasTemplate = ""
-    if let typealiasWhitelist = typealiasWhitelist {
+    if let typealiasWhitelist = typealiases {
         typealiasTemplate = typealiasWhitelist.map { (arg: (key: String, value: [String])) -> String in
             let joinedType = arg.value.sorted().joined(separator: " & ")
             return  "\(String.typealias) \(arg.key) = \(joinedType)"
         }.joined(separator: "\n")
     }
-    
+
+    var moduleDot = ""
+    if let moduleName = metadata?.module, !moduleName.isEmpty {
+        moduleDot = moduleName + "."
+    }
+
     let template = """
     \(attribute)
-    \(accessControlLevelDescription)class \(name): \(identifier) {
+    \(accessControlLevelDescription)class \(moduleDot)\(name): \(moduleDot)\(identifier) {
     \(1.tab)\(typealiasTemplate)
     \(extraInits)
     \(renderedEntities)
@@ -166,3 +170,24 @@ private func extraInitsIfNeeded(initParamCandidates: [Model],
     return template
 }
 
+
+/// Returns a map of typealiases with conflicting types to be whitelisted
+/// @param models Potentially contains typealias models
+/// @returns A map of typealiases with multiple possible types
+func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
+    let typealiasModels = models.filter{$0.1.modelType == .typeAlias}
+    var aliasMap = [String: [String]]()
+    typealiasModels.forEach { (arg: (key: String, value: Model)) in
+        
+        let alias = arg.value
+        if aliasMap[alias.name] == nil {
+            aliasMap[alias.name] = [alias.type.typeName]
+        } else {
+            if let val = aliasMap[alias.name], !val.contains(alias.type.typeName) {
+                aliasMap[alias.name]?.append(alias.type.typeName)
+            }
+        }
+    }
+    let aliasDupes = aliasMap.filter {$0.value.count > 1}
+    return aliasDupes.isEmpty ? nil : aliasDupes
+}

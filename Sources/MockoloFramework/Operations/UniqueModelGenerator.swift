@@ -79,8 +79,7 @@ func generateUniqueModels(key: String,
 
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
     
-    let whitelist = typealiasWhitelist(in: uniqueModels)
-    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, typealiasWhitelist: whitelist)
+    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes)
     
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }

@@ -39,12 +39,13 @@ extension String {
     static let doneInit = "_doneInit"
     static let hasBlankInit = "_hasBlankInit"
     static let `static` = "static"
-    static let `import` = "import "
+    static let importSpace = "import "
     static public let `class` = "class"
     static public let `final` = "final"
     static let override = "override"
     static let mockType = "protocol"
     static let unknownVal = "Unknown"
+    static let name = "name"
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
@@ -52,29 +53,27 @@ extension String {
     static let `open` = "open"
     static let initializer = "init"
     static let handlerSuffix = "Handler"
-    static let observableVarPrefix = "Observable<"
-    static let rxObservableVarPrefix = "RxSwift.Observable<"
-    static let rxPublishSubject = "RxSwift.PublishSubject"
+    static let observableLeftAngleBracket = "Observable<"
+    static let rxObservableLeftAngleBracket = "RxSwift.Observable<"
     static let publishSubject = "PublishSubject"
     static let behaviorSubject = "BehaviorSubject"
     static let replaySubject = "ReplaySubject"
-    static let rx = "Rx"
     static let observableEmpty = "Observable.empty()"
     static let rxObservableEmpty = "RxSwift.Observable.empty()"
     static let `required` = "required"
     static let `convenience` = "convenience"
     static let closureArrow = "->"
+    static let moduleColon = "module:"
     static let typealiasColon = "typealias:"
     static let rxColon = "rx:"
+    static let varColon = "var:"
     static let `typealias` = "typealias"
     static let annotationArgDelimiter = ";"
-    static let rxReplaySubject = "RxSwift.ReplaySubject"
-    static let replaySubjectAllocSuffix = ".create(bufferSize: 1)"
     static let subjectSuffix = "Subject"
     static let underlyingVarPrefix = "underlying"
     static let setCallCountSuffix = "SetCallCount"
     static let callCountSuffix = "CallCount"
-    static let initializerPrefix = "init("
+    static let initializerLeftParen = "init("
     static let `escaping` = "@escaping"
     static let autoclosure = "@autoclosure"
     static public let mockAnnotation = "@mockable"
@@ -109,6 +108,26 @@ extension String {
               self.hasSuffix(.subjectSuffix) ||
               self.hasSuffix("SubjectKind") ||
               (self.hasSuffix(.handlerSuffix) && type.isOptional)
+    }
+    
+    func arguments(with delimiter: String) -> [String: String]? {
+        let argstr = self
+        let args = argstr.components(separatedBy: delimiter)
+        var argsMap = [String: String]()
+        for item in args {
+            let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
+            
+            if let k = keyVal.first {
+                if k.contains(":") {
+                    break
+                }
+                
+                if let v = keyVal.last {
+                    argsMap[k] = v
+                }
+            }
+        }
+        return !argsMap.isEmpty ? argsMap : nil
     }
 }
 
@@ -158,7 +177,7 @@ extension StringProtocol {
     }
     
     var moduleName: String? {
-        guard self.hasPrefix(String.import) else { return nil }
-        return self.dropFirst(String.import.count).trimmingCharacters(in: .whitespaces)
+        guard self.hasPrefix(String.importSpace) else { return nil }
+        return self.dropFirst(String.importSpace.count).trimmingCharacters(in: .whitespaces)
     }
 }
