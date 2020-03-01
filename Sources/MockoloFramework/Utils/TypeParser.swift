@@ -384,8 +384,7 @@ public struct Type {
 
         if !vals.isEmpty {
             var ret = vals.joined()
-            ret = ret.replacingOccurrences(of: ",", with: ", ")
-            ret = ret.replacingOccurrences(of: ",  ", with: ", ")
+            ret = ret.components(separatedBy: ",").filter{!$0.isEmpty}.joined(separator: ", ")
             return ret
         }
 

@@ -42,7 +42,8 @@ struct ResolvedEntity {
     }
 
     /// Returns models that can be used as parameters to an initializer
-    /// @param models The models (processed and unprocessed) of the current entity
+    /// @param models The models of the current entity including unprocessed (ones to generate) and
+    ///             processed (already mocked by a previous run if any) models.
     /// @returns A list of init parameter models
     private func sortedInitVars(`in` models: [Model]) -> [Model] {
         let processed = models.filter {$0.processed && $0.canBeInitParam}

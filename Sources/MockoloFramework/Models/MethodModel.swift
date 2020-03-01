@@ -172,7 +172,7 @@ final class MethodModel: Model {
         let suffixOffset = ast.nameOffset + ast.nameLength + 1
         let suffixLen = ast.offset + ast.length - suffixOffset
         if suffixLen > 0, suffixOffset > ast.bodyOffset - 1 {
-            let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: .whitespacesAndNewlines)
             if suffixPart.hasPrefix("\(String.SwiftKeywords.rethrows.rawValue)") {
                 self.suffix = String.SwiftKeywords.rethrows.rawValue
             } else if suffixPart.hasPrefix("\(String.SwiftKeywords.throws.rawValue)") {
@@ -211,7 +211,7 @@ final class MethodModel: Model {
                 }
             }
             
-            if let ret = modelDescription ?? self.data?.toString(offset: offset, length: length) {
+            if let ret = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines) ?? self.data?.toString(offset: offset, length: length) {
                 return prefix + ret
             }
             return nil

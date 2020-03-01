@@ -51,7 +51,7 @@ extension Structure: EntityNode {
     private func parseAnnotationArguments(key: Data, in extracted: Data) -> [String: String]? {
         if let keyRange = extracted.range(of: key) {
             let args = extracted[keyRange.endIndex...]
-            let argsStr = String(data: args, encoding: .utf8)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+            let argsStr = String(data: args, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
             
             if var patValStr = argsStr {
                 if patValStr.hasSuffix(")") {
@@ -61,7 +61,7 @@ extension Structure: EntityNode {
                 var aliasMap = [String: String]()
                 
                 aliases.forEach { (item: String) in
-                    let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: CharacterSet.whitespaces)}
+                    let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
                     if let key = keyVal.first, let val = keyVal.last {
                         aliasMap[key] = val
                     }

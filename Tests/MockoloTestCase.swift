@@ -130,9 +130,8 @@ class MockoloTestCase: XCTestCase {
                       concurrencyLimit: concurrencyLimit,
             onCompletion: { ret in
                 let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
-                let outputContents = output.components(separatedBy:  CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-                let fixtureContents = formattedDstContent.components(separatedBy: CharacterSet.whitespacesAndNewlines).filter{!$0.isEmpty}
-//                print(output)
+                let outputContents = output.components(separatedBy:  .whitespacesAndNewlines).filter{!$0.isEmpty}
+                let fixtureContents = formattedDstContent.components(separatedBy: .whitespacesAndNewlines).filter{!$0.isEmpty}
                 XCTAssert(fixtureContents == outputContents)
         })
     }

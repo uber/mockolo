@@ -50,20 +50,20 @@ func applyVariableTemplate(name: String,
         let staticStr = staticKind.isEmpty ? "" : "\(staticKind) "
         
         template = """
-        \(String.spaces4)\(acl)\(staticStr)var \(underlyingSetCallCount) = 0
-        \(String.spaces4)\(staticStr)var \(underlyingName): \(underlyingType) \(assignVal)
-        \(String.spaces4)\(acl)\(staticStr)\(overrideStr)var \(name): \(type.typeName) {
-        \(String.spaces8)get { return \(underlyingName) }
-        \(String.spaces8)set {
-        \(String.spaces12)\(underlyingName) = newValue
-        \(String.spaces12)\(setCallCountStmt)
-        \(String.spaces8)}
-        \(String.spaces4)}
+        \(1.tab)\(acl)\(staticStr)var \(underlyingSetCallCount) = 0
+        \(1.tab)\(staticStr)var \(underlyingName): \(underlyingType) \(assignVal)
+        \(1.tab)\(acl)\(staticStr)\(overrideStr)var \(name): \(type.typeName) {
+        \(2.tab)get { return \(underlyingName) }
+        \(2.tab)set {
+        \(3.tab)\(underlyingName) = newValue
+        \(3.tab)\(setCallCountStmt)
+        \(2.tab)}
+        \(1.tab)}
         """
     } else {
         template = """
-        \(String.spaces4)\(acl)var \(underlyingSetCallCount) = 0
-        \(String.spaces4)\(acl)\(overrideStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
+        \(1.tab)\(acl)var \(underlyingSetCallCount) = 0
+        \(1.tab)\(acl)\(overrideStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
         """
     }
     
@@ -103,13 +103,13 @@ func applyRxVariableTemplate(name: String,
             }
             
             let template = """
-            \(String.spaces4)\(acl)\(staticStr)var \(underlyingSetCallCount) = 0
-            \(String.spaces4)\(staticStr)var \(fallbackName): \(fallbackType)? { didSet { \(setCallCountStmt) } }
-            \(String.spaces4)\(acl)\(staticStr)var \(underlyingSubjectName)\(defaultValAssignStr) { didSet { \(setCallCountStmt) } }
-            \(String.spaces4)\(acl)\(staticStr)\(overrideStr)var \(name): \(type.typeName) {
-            \(String.spaces8)get { return \(fallbackName) ?? \(underlyingSubjectName) }
-            \(String.spaces8)set { if let val = newValue as? \(underlyingSubjectType) { \(underlyingSubjectName) = val } else { \(fallbackName) = newValue } }
-            \(String.spaces4)}
+            \(1.tab)\(acl)\(staticStr)var \(underlyingSetCallCount) = 0
+            \(1.tab)\(staticStr)var \(fallbackName): \(fallbackType)? { didSet { \(setCallCountStmt) } }
+            \(1.tab)\(acl)\(staticStr)var \(underlyingSubjectName)\(defaultValAssignStr) { didSet { \(setCallCountStmt) } }
+            \(1.tab)\(acl)\(staticStr)\(overrideStr)var \(name): \(type.typeName) {
+            \(2.tab)get { return \(fallbackName) ?? \(underlyingSubjectName) }
+            \(2.tab)set { if let val = newValue as? \(underlyingSubjectType) { \(underlyingSubjectName) = val } else { \(fallbackName) = newValue } }
+            \(1.tab)}
             """
             
             return template
@@ -137,26 +137,26 @@ func applyRxVariableTemplate(name: String,
         let overrideStr = shouldOverride ? "\(String.override) " : ""
         
         let template = """
-        \(String.spaces4)\(staticStr)private var \(whichSubject) = 0
-        \(String.spaces4)\(acl)\(staticStr)var \(underlyingSetCallCount) = 0
-        \(String.spaces4)\(acl)\(staticStr)var \(publishSubjectName) = \(publishSubjectType)() { didSet { \(setCallCountStmt) } }
-        \(String.spaces4)\(acl)\(staticStr)var \(replaySubjectName) = \(replaySubjectType).create(bufferSize: 1) { didSet { \(setCallCountStmt) } }
-        \(String.spaces4)\(acl)\(staticStr)var \(behaviorSubjectName): \(behaviorSubjectType)! { didSet { \(setCallCountStmt) } }
-        \(String.spaces4)\(acl)\(staticStr)var \(underlyingObservableName): \(underlyingObservableType)! { didSet { \(setCallCountStmt) } }
-        \(String.spaces4)\(acl)\(staticStr)\(overrideStr)var \(name): \(typeName) {
-        \(String.spaces8)get {
-        \(String.spaces12)if \(whichSubject) == 0 { return \(publishSubjectName) }
-        \(String.spaces12)else if \(whichSubject) == 1 { return \(behaviorSubjectName) }
-        \(String.spaces12)else if \(whichSubject) == 2 { return \(replaySubjectName) }
-        \(String.spaces12)else { return \(underlyingObservableName) }
-        \(String.spaces8)}
-        \(String.spaces8)set {
-        \(String.spaces12)if let val = newValue as? \(publishSubjectType) { \(whichSubject) = 0; \(publishSubjectName) = val }
-        \(String.spaces12)else if let val = newValue as? \(behaviorSubjectType) { \(whichSubject) = 1; \(behaviorSubjectName) = val }
-        \(String.spaces12)else if let val = newValue as? \(replaySubjectType) { \(whichSubject) = 2; \(replaySubjectName) = val }
-        \(String.spaces12)else { \(whichSubject) = 3; \(underlyingObservableName) = newValue }
-        \(String.spaces8)}
-        \(String.spaces4)}
+        \(1.tab)\(staticStr)private var \(whichSubject) = 0
+        \(1.tab)\(acl)\(staticStr)var \(underlyingSetCallCount) = 0
+        \(1.tab)\(acl)\(staticStr)var \(publishSubjectName) = \(publishSubjectType)() { didSet { \(setCallCountStmt) } }
+        \(1.tab)\(acl)\(staticStr)var \(replaySubjectName) = \(replaySubjectType).create(bufferSize: 1) { didSet { \(setCallCountStmt) } }
+        \(1.tab)\(acl)\(staticStr)var \(behaviorSubjectName): \(behaviorSubjectType)! { didSet { \(setCallCountStmt) } }
+        \(1.tab)\(acl)\(staticStr)var \(underlyingObservableName): \(underlyingObservableType)! { didSet { \(setCallCountStmt) } }
+        \(1.tab)\(acl)\(staticStr)\(overrideStr)var \(name): \(typeName) {
+        \(2.tab)get {
+        \(3.tab)if \(whichSubject) == 0 { return \(publishSubjectName) }
+        \(3.tab)else if \(whichSubject) == 1 { return \(behaviorSubjectName) }
+        \(3.tab)else if \(whichSubject) == 2 { return \(replaySubjectName) }
+        \(3.tab)else { return \(underlyingObservableName) }
+        \(2.tab)}
+        \(2.tab)set {
+        \(3.tab)if let val = newValue as? \(publishSubjectType) { \(whichSubject) = 0; \(publishSubjectName) = val }
+        \(3.tab)else if let val = newValue as? \(behaviorSubjectType) { \(whichSubject) = 1; \(behaviorSubjectName) = val }
+        \(3.tab)else if let val = newValue as? \(replaySubjectType) { \(whichSubject) = 2; \(replaySubjectName) = val }
+        \(3.tab)else { \(whichSubject) = 3; \(underlyingObservableName) = newValue }
+        \(2.tab)}
+        \(1.tab)}
         """
         return template
     }

@@ -16,6 +16,12 @@
 
 import Foundation
 
+extension Int {
+    var tab: String {
+        return String(repeating: "    ", count: self)
+    }
+}
+
 extension String {
     enum SwiftKeywords: String {
         case `throws` = "throws"
@@ -30,10 +36,6 @@ extension String {
         case `do` = "do"
         case `switch` = "switch"
     }
-    static let spaces4 = "    "
-    static let spaces8 = "        "
-    static let spaces12 = "            "
-    static let spaces16 = "                "
     static let doneInit = "_doneInit"
     static let hasBlankInit = "_hasBlankInit"
     static let `static` = "static"
@@ -157,6 +159,6 @@ extension StringProtocol {
     
     var moduleName: String? {
         guard self.hasPrefix(String.import) else { return nil }
-        return self.dropFirst(String.import.count).trimmingCharacters(in: CharacterSet.whitespaces)
+        return self.dropFirst(String.import.count).trimmingCharacters(in: .whitespaces)
     }
 }

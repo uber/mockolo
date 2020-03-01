@@ -643,7 +643,7 @@ extension Trivia {
         let args = argstr.components(separatedBy: String.annotationArgDelimiter)
         var argsMap = [String: String]()
         args.forEach { (item: String) in
-            let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: CharacterSet.whitespaces)}
+            let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
             if let k = keyVal.first, let v = keyVal.last {
                 argsMap[k] = v
             }

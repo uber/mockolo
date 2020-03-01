@@ -64,7 +64,7 @@ func applyClassTemplate(name: String,
     let template = """
     \(attribute)
     \(accessControlLevelDescription)class \(name): \(identifier) {
-    \(String.spaces4)\(typealiasTemplate)
+    \(1.tab)\(typealiasTemplate)
     \(extraInits)
     \(renderedEntities)
     }
@@ -126,16 +126,16 @@ private func extraInitsIfNeeded(initParamCandidates: [Model],
         .joined(separator: ", ")
         
         paramsAssign = initParamCandidates.map { p in
-            return "\(String.spaces8)self.\(p.name) = \(p.name.safeName)"
+            return "\(2.tab)self.\(p.name) = \(p.name.safeName)"
             
         }.joined(separator: "\n")
         
         
         initTemplate = """
-        \(String.spaces4)\(accessControlLevelDescription)init(\(params)) {
+        \(1.tab)\(accessControlLevelDescription)init(\(params)) {
         \(paramsAssign)
-        \(String.spaces8)\(String.doneInit) = true
-        \(String.spaces4)}
+        \(2.tab)\(String.doneInit) = true
+        \(1.tab)}
         """
     }
     
@@ -157,9 +157,9 @@ private func extraInitsIfNeeded(initParamCandidates: [Model],
 
     let initFlag =  "private var \(String.doneInit) = false"
     let template = """
-    \(String.spaces4)\(initFlag)
-    \(String.spaces4)\(extraVarsToDecl)
-    \(String.spaces4)\(blankInit)
+    \(1.tab)\(initFlag)
+    \(1.tab)\(extraVarsToDecl)
+    \(1.tab)\(blankInit)
     \(initTemplate)
     """
 

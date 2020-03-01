@@ -47,24 +47,24 @@ func applyMethodTemplate(name: String,
             }.joined(separator: ", ")
             
             template = """
-            \(String.spaces4)\(modifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-            \(String.spaces8)super.init(\(paramsList))
-            \(String.spaces8)\(String.doneInit) = true
-            \(String.spaces4)}
+            \(1.tab)\(modifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
+            \(2.tab)super.init(\(paramsList))
+            \(2.tab)\(String.doneInit) = true
+            \(1.tab)}
             """
         } else {
             
             let reqModifier = isRequired ? "\(String.required) " : ""
             
             let paramsAssign = params.map { param in
-                return "\(String.spaces8)self.\(param.name) = \(param.name.safeName)"
+                return "\(2.tab)self.\(param.name) = \(param.name.safeName)"
             }.joined(separator: "\n")
             
             template = """
-            \(String.spaces4)\(reqModifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
+            \(1.tab)\(reqModifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
             \(paramsAssign)
-            \(String.spaces8)\(String.doneInit) = true
-            \(String.spaces4)}
+            \(2.tab)\(String.doneInit) = true
+            \(1.tab)}
             """
         }
         
@@ -81,26 +81,26 @@ func applyMethodTemplate(name: String,
         let keyword = isSubscript ? "" : "func "
         let body =
         """
-        \(String.spaces8)\(callCount) += 1
+        \(2.tab)\(callCount) += 1
         \(handlerReturn)
         """
             
         let wrapped = !isSubscript ? body :
         """
-        \(String.spaces8)get {
+        \(2.tab)get {
         \(body)
-        \(String.spaces8)}
-        \(String.spaces8)set { }
+        \(2.tab)}
+        \(2.tab)set { }
         """
 
         let overrideStr = isOverride ? "\(String.override) " : ""
         template =
         """
-        \(String.spaces4)\(acl)\(staticStr)var \(callCount) = 0
-        \(String.spaces4)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-        \(String.spaces4)\(acl)\(staticStr)\(overrideStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
+        \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
+        \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
+        \(1.tab)\(acl)\(staticStr)\(overrideStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
         \(wrapped)
-        \(String.spaces4)}
+        \(1.tab)}
         """
     }
  

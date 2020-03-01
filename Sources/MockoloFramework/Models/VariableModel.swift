@@ -87,7 +87,7 @@ final class VariableModel: Model {
             if shouldOverride, !isGenerated(name, type: type) {
                 prefix = "\(String.override) "
             }
-            if let modelDescription = modelDescription, !modelDescription.isEmpty {
+            if let modelDescription = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines), !modelDescription.isEmpty {
                 return prefix + modelDescription
             }
             
