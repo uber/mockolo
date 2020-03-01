@@ -30,9 +30,7 @@ public enum LogLevel: Int {
 }
 
 public func log(_ arg: Any..., level: LogLevel = .info) {
-    
-    guard level.rawValue <= minLogLevel else { return }
-    
+    guard level.rawValue >= minLogLevel else { return }
     switch level {
     case .info, .verbose:
         print(arg)
