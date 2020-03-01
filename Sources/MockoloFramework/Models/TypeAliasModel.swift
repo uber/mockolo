@@ -28,14 +28,16 @@ final class TypeAliasModel: Model {
     var typeLength: Int64 = 0
     let accessControlLevelDescription: String
     let processed: Bool
+    var useDescription: Bool = false
     var modelDescription: String? = nil
     let overrideTypes: [String: String]?
+    var addAcl: Bool = false
     
     var modelType: ModelType {
         return .typeAlias
     }
 
-    init(name: String, typeName: String, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, processed: Bool) {
+    init(name: String, typeName: String, acl: String?, encloserType: DeclType, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
         self.name = name
         self.accessControlLevelDescription = acl ?? ""
         self.offset = offset
@@ -43,6 +45,8 @@ final class TypeAliasModel: Model {
         self.processed = processed
         self.modelDescription = modelDescription
         self.overrideTypes = overrideTypes
+        self.useDescription = useDescription
+        self.addAcl = encloserType == .protocolType
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
             self.type  = Type(val)
@@ -61,6 +65,7 @@ final class TypeAliasModel: Model {
         self.accessControlLevelDescription = ast.accessControlLevelDescription
         self.processed = processed
         self.overrideTypes = overrideTypes
+        self.modelDescription = ast.description
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
             self.type  = Type(val)
@@ -69,7 +74,8 @@ final class TypeAliasModel: Model {
             if typeLength < 0 {
                 self.type = Type(String.any)
             } else {
-                let typeArg = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: CharacterSet.whitespaces)
+                let charset = CharacterSet(arrayLiteral: "=", ":").union(.whitespaces)
+                let typeArg = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: charset)
                 self.type = Type(typeArg)
             }
         }
@@ -84,7 +90,10 @@ final class TypeAliasModel: Model {
     }
     
     func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        if processed, let modelDescription = modelDescription {
+        if processed || useDescription, let modelDescription = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines) {
+            if addAcl {
+                return accessControlLevelDescription + " " + modelDescription
+            }
             return modelDescription
         }
         

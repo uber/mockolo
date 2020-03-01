@@ -303,34 +303,102 @@ public struct Type {
     
     
     /// Parses a type string containing (nested) tuples or brackets and returns a default value for each type component
-    func defaultVal(with typeKeys: [String: String]? = nil, isInitParam: Bool = false) -> String? {
-        let arg = typeName
-        if let val = parseDefaultVal(isInitParam: isInitParam) {
+    func defaultVal(with typeKeys: [String: String]? = nil, overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
+        let (subjectType, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam)
+        if subjectType != nil {
+            return isInitParam ? subjectVal : (typeName.hasSuffix(String.rxObservableVarPrefix) ? String.rxObservableEmpty : String.observableEmpty)
+        }
+
+        if let val = parseDefaultVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
             return val
         }
         
-        if let val = typeKeys?[arg] {
+        if let val = typeKeys?[typeName] {
             return val
         }
         return nil
     }
+
+    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?) {
+        if typeName.hasPrefix(String.observableVarPrefix) || typeName.hasPrefix(String.rxObservableVarPrefix),
+            let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {
+            let typeParamStr = typeName[range.upperBound..<lastIdx]
+
+            var subjectKind = ""
+            var underlyingSubjectType = ""
+            if let overrideTypes = overrides {
+                if let val = overrideTypes[overrideKey], val.hasSuffix(String.subjectSuffix) {
+                    subjectKind = val
+                } else if let val = overrideTypes["all"], val.hasSuffix(String.subjectSuffix) {
+                    subjectKind = val
+                }
+            }
+
+            if subjectKind.isEmpty {
+                subjectKind = String.publishSubject
+            }
+            underlyingSubjectType = "\(subjectKind)<\(typeParamStr)>"
+
+            var underlyingSubjectTypeDefaultVal: String? = nil
+            if subjectKind == String.publishSubject {
+                underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)()"
+            } else if subjectKind == String.replaySubject {
+                underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType).create(bufferSize: 1)"
+            } else if subjectKind == String.behaviorSubject {
+                if let val = Type(String(typeParamStr)).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+                    underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
+                }
+            }
+            return (underlyingSubjectType, underlyingSubjectTypeDefaultVal)
+        }
+        return (nil, nil)
+    }
     
-    func defaultSingularVal(isInitParam: Bool = false) -> String? {
+    private func parseDefaultVal(isInitParam: Bool, overrides: [String: String]?, overrideKey: String = "") -> String? {
+        let arg = self
+        if let val = defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+            return val
+        }
+
+        if !arg.isSingular {
+            return nil
+        }
+
+        if arg.hasClosure {
+            return nil
+        }
+
+        let ret = arg.tupleComponents
+        var vals = [String]()
+        for sub in ret {
+            if sub == "," || sub == ":" || sub == "(" || sub == ")" || sub == "=" || sub == " " || sub == "" {
+                vals.append(sub)
+            } else {
+                if let val = Type(sub).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+                    vals.append(val)
+                } else {
+                    return nil
+                }
+            }
+        }
+
+        if !vals.isEmpty {
+            var ret = vals.joined()
+            ret = ret.components(separatedBy: ",").filter{!$0.isEmpty}.joined(separator: ", ")
+            return ret
+        }
+
+        return nil
+    }
+
+    func defaultSingularVal(isInitParam: Bool = false, overrides: [String: String]? = nil, overrideKey: String = "") -> String? {
         let arg = self
         
         if arg.isOptional {
             return "nil"
         }
-        
+
         if arg.isValidBracketed {
-            if arg.typeName.hasPrefix(String.observableVarPrefix) {
-                return isInitParam ? "\(String.publishSubject)()" : String.observableEmpty
-            }
-            
-            if arg.typeName.hasPrefix(String.rxObservableVarPrefix) {
-                return isInitParam ? "\(String.rxPublishSubject)()" : String.rxObservableEmpty
-            }
-            
             if let idx = arg.typeName.firstIndex(of: "<") {
                 let sub = String(arg.typeName[arg.typeName.startIndex..<idx])
                 if bracketPrefixTypes.contains(sub) {
@@ -348,7 +416,8 @@ public struct Type {
         return nil
     }
     
-    
+
+
     // Process substrings containing angled or square brackets by replacing a comma delimiter
     // with another delimiter (e.g. ;) to make it easier to parse tuples
     // @param arg The type string to be parsed
@@ -386,46 +455,7 @@ public struct Type {
         return mutableArg
     }
     
-    
-    func parseDefaultVal(isInitParam: Bool) -> String? {
-        let arg = self
-        
-        if let val = defaultSingularVal(isInitParam: isInitParam) {
-            return val
-        }
-        
-        if !arg.isSingular {
-            return nil
-        }
-        
-        if arg.hasClosure {
-            return nil
-        }
-        
-        let ret = arg.tupleComponents
-        var vals = [String]()
-        for sub in ret {
-            if sub == "," || sub == ":" || sub == "(" || sub == ")" || sub == "=" || sub == " " || sub == "" {
-                vals.append(sub)
-            } else {
-                if let val = Type(sub).defaultSingularVal(isInitParam: isInitParam) {
-                    vals.append(val)
-                } else {
-                    return nil
-                }
-            }
-        }
-        
-        if !vals.isEmpty {
-            var ret = vals.joined()
-            ret = ret.replacingOccurrences(of: ",", with: ", ")
-            ret = ret.replacingOccurrences(of: ",  ", with: ", ")
-            return ret
-        }
-        
-        return nil
-    }
-    
+
     static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type) -> Type {
         
         let displayableParamTypes = params.map { (subtype: Type) -> String in

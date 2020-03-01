@@ -34,28 +34,44 @@ extension Structure: EntityNode {
         var ret = AnnotationMetadata()
         
         // Look up the typealias argument if any
-        if let arg = Data.typealias,
-            let argRange = extracted.range(of: arg) {
-            let args = extracted[argRange.endIndex...]
-            let argsStr = String(data: args, encoding: .utf8)?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+        var args = [String: String]()
+        if let arg = Data.typealias, let argMap = parseAnnotationArguments(key: arg, in: extracted) {
+            args = argMap
+        }
+        if let arg = Data.rx, let argMap = parseAnnotationArguments(key: arg, in: extracted) {
+            for (k, v) in argMap {
+                args[k] = v
+            }
+        }
+        ret.overrides = args
 
+        return ret
+    }
+    
+    private func parseAnnotationArguments(key: Data, in extracted: Data) -> [String: String]? {
+        if let keyRange = extracted.range(of: key) {
+            let args = extracted[keyRange.endIndex...]
+            let argsStr = String(data: args, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines)
+            
             if var patValStr = argsStr {
-                patValStr.removeLast()
+                if patValStr.hasSuffix(")") {
+                    patValStr.removeLast()
+                }
                 let aliases = patValStr.components(separatedBy: String.annotationArgDelimiter).filter { !$0.isEmpty }
                 var aliasMap = [String: String]()
-
+                
                 aliases.forEach { (item: String) in
-                    let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: CharacterSet.whitespaces)}
+                    let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
                     if let key = keyVal.first, let val = keyVal.last {
                         aliasMap[key] = val
                     }
                 }
-                ret.typealiases = aliasMap
+                
+                return aliasMap
             }
         }
-        return ret
+        return nil
     }
-    
     
     func extractAttributes(_ data: Data, filterOn: String? = nil) -> [String] {
         guard let attributeDict = attributes else {
@@ -147,7 +163,7 @@ extension Structure: EntityNode {
     func model(for element: Structure, encloserType: DeclType, filepath: String, data: Data, overrides: [String: String]?, processed: Bool = false) -> Model? {
         if element.isVariable {
             if validateMember(element, declType, processed: processed) {
-                return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+                return VariableModel(element, encloserType: encloserType, filepath: filepath, data: data, overrideTypes: overrides, processed: processed)
             }
         } else if element.isMethod || element.isSubscript { // initializer is considered a method by sourcekit
             var validated = false
@@ -226,6 +242,10 @@ extension Structure: EntityNode {
     
     var isInitializer: Bool {
         return name.hasPrefix(.initializerPrefix) && isInstanceMethod
+    }
+
+    var hasBlankInit: Bool {
+        return !substructures.filter{$0.name == .hasBlankInit}.isEmpty
     }
     
     var isSubscript: Bool {
@@ -308,13 +328,7 @@ extension Structure: EntityNode {
     }
     
     var canBeInitParam: Bool {
-        return isInstanceVariable &&
-            isTypeNonOptional &&
-            !name.hasPrefix(.underlyingVarPrefix) &&
-            !name.hasSuffix(.closureVarSuffix) &&
-            !name.hasSuffix(.callCountSuffix) &&
-            !name.hasSuffix(.subjectSuffix) &&
-            typeName != .unknownVal
+        return name.canBeInitParam(type: typeName, isStatic: !isInstanceVariable)
     }
     
     var inheritedTypes: [String] {
@@ -393,4 +407,3 @@ extension Structure: EntityNode {
     }
     
 }
-

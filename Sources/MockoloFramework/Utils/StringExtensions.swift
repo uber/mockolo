@@ -16,6 +16,12 @@
 
 import Foundation
 
+extension Int {
+    var tab: String {
+        return String(repeating: "    ", count: self)
+    }
+}
+
 extension String {
     enum SwiftKeywords: String {
         case `throws` = "throws"
@@ -31,6 +37,7 @@ extension String {
         case `switch` = "switch"
     }
     static let doneInit = "_doneInit"
+    static let hasBlankInit = "_hasBlankInit"
     static let `static` = "static"
     static let `import` = "import "
     static public let `class` = "class"
@@ -58,6 +65,7 @@ extension String {
     static let `convenience` = "convenience"
     static let closureArrow = "->"
     static let typealiasColon = "typealias:"
+    static let rxColon = "rx:"
     static let `typealias` = "typealias"
     static let annotationArgDelimiter = ";"
     static let rxReplaySubject = "RxSwift.ReplaySubject"
@@ -66,7 +74,6 @@ extension String {
     static let underlyingVarPrefix = "underlying"
     static let setCallCountSuffix = "SetCallCount"
     static let callCountSuffix = "CallCount"
-    static let closureVarSuffix = "Handler"
     static let initializerPrefix = "init("
     static let `escaping` = "@escaping"
     static let autoclosure = "@autoclosure"
@@ -89,6 +96,19 @@ extension String {
             return "`\(self)`"
         }
         return self
+    }
+    
+    func canBeInitParam(type: String, isStatic: Bool) -> Bool {
+        return !(isStatic || type == .unknownVal || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))
+    }
+    
+    func isGenerated(type: Type) -> Bool {
+          return self.hasPrefix(.underlyingVarPrefix) ||
+              self.hasSuffix(.setCallCountSuffix) ||
+              self.hasSuffix(.callCountSuffix) ||
+              self.hasSuffix(.subjectSuffix) ||
+              self.hasSuffix("SubjectKind") ||
+              (self.hasSuffix(.handlerSuffix) && type.isOptional)
     }
 }
 
@@ -139,6 +159,6 @@ extension StringProtocol {
     
     var moduleName: String? {
         guard self.hasPrefix(String.import) else { return nil }
-        return self.dropFirst(String.import.count).trimmingCharacters(in: CharacterSet.whitespaces)
+        return self.dropFirst(String.import.count).trimmingCharacters(in: .whitespaces)
     }
 }

@@ -103,21 +103,11 @@ public class HighMock: High {
 
 """
 
-let klassMock =
-"""
+let klassMock = """
 public class LowMock: Low {
-    
     private var _doneInit = false
-   
     var nameSetCallCount = 0
-    var underlyingName: String = ""
-    override var name: String {
-        get { return underlyingName }
-        set {
-            underlyingName = newValue
-            if _doneInit { nameSetCallCount += 1 }
-        }
-    }
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
     required init(arg: String = "") {
         super.init(arg: arg)
         _doneInit = true
@@ -130,21 +120,12 @@ public class LowMock: Low {
         super.init(i: i)
         _doneInit = true
     }
-    
     var whatSetCallCount = 0
-    var underlyingWhat: Float = 0.0
-    override var what: Float {
-        get { return underlyingWhat }
-        set {
-            underlyingWhat = newValue
-            if _doneInit { whatSetCallCount += 1 }
-        }
-    }
+    override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
     var barCallCount = 0
     var barHandler: (() -> ())?
     override func bar()  {
         barCallCount += 1
-        
         if let barHandler = barHandler {
             barHandler()
         }
@@ -154,7 +135,6 @@ public class LowMock: Low {
     var fooHandler: (() -> (Int))?
     override func foo() -> Int {
         fooCallCount += 1
-        
         if let fooHandler = fooHandler {
             return fooHandler()
         }
@@ -163,20 +143,12 @@ public class LowMock: Low {
 }
 """
 
-let klassLongerMock =
-"""
-
+let klassLongerMock = """
 public class LowMock: Low {
+    
     private var _doneInit = false
     var nameSetCallCount = 0
-    var underlyingName: String = ""
-    override var name: String {
-        get { return underlyingName }
-        set {
-            underlyingName = newValue
-            if _doneInit { nameSetCallCount += 1 }
-        }
-    }
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
     required init(arg: String = "") {
         super.init(arg: arg)
         _doneInit = true
@@ -189,21 +161,12 @@ public class LowMock: Low {
         super.init(i: i)
         _doneInit = true
     }
-    
     var whatSetCallCount = 0
-    var underlyingWhat: Float = 0.0
-    override var what: Float {
-        get { return underlyingWhat }
-        set {
-            underlyingWhat = newValue
-            if _doneInit { whatSetCallCount += 1 }
-        }
-    }
+    override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
     var barCallCount = 0
     var barHandler: (() -> ())?
     override func bar()  {
         barCallCount += 1
-
         if let barHandler = barHandler {
             barHandler()
         }
@@ -213,11 +176,11 @@ public class LowMock: Low {
     var fooHandler: (() -> (Int))?
     override func foo() -> Int {
         fooCallCount += 1
-
         if let fooHandler = fooHandler {
             return fooHandler()
         }
         return 0
     }
 }
+
 """

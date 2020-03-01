@@ -1,5 +1,11 @@
 import MockoloFramework
 
+let o = """
+/// \(String.mockAnnotation)
+protocol Foo {
+    func update(arg: Int) -> (String) -> Observable<Double>
+}
+"""
 
 let overload4 = """
 /// \(String.mockAnnotation)

@@ -24,8 +24,6 @@ func applyTypealiasTemplate(name: String,
             aclStr = aclStr + " "
         }
         
-        let ret = """
-            \(aclStr)\(String.typealias) \(name) = \(type.typeName)
-        """
+        let ret = "\(1.tab)\(aclStr)\(String.typealias) \(name) = \(type.typeName)"
         return ret
 }

@@ -43,32 +43,28 @@ func applyMethodTemplate(name: String,
         if isOverride {
             let modifier = isRequired ? "\(String.required) " : (isOverride ? "\(String.override) " : "") 
             let paramsList = params.map { param in
-                return """
-                \(param.name): \(param.name.safeName)
-                """
+                return "\(param.name): \(param.name.safeName)"
             }.joined(separator: ", ")
             
             template = """
-                \(modifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-                    super.init(\(paramsList))
-                    \(String.doneInit) = true
-                }
+            \(1.tab)\(modifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
+            \(2.tab)super.init(\(paramsList))
+            \(2.tab)\(String.doneInit) = true
+            \(1.tab)}
             """
         } else {
             
             let reqModifier = isRequired ? "\(String.required) " : ""
             
             let paramsAssign = params.map { param in
-                return """
-                self.\(param.name) = \(param.name.safeName)
-                """
+                return "\(2.tab)self.\(param.name) = \(param.name.safeName)"
             }.joined(separator: "\n")
             
             template = """
-                \(reqModifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-                    \(paramsAssign)
-                    \(String.doneInit) = true
-                }
+            \(1.tab)\(reqModifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
+            \(paramsAssign)
+            \(2.tab)\(String.doneInit) = true
+            \(1.tab)}
             """
         }
         
@@ -85,27 +81,26 @@ func applyMethodTemplate(name: String,
         let keyword = isSubscript ? "" : "func "
         let body =
         """
-        \(callCount) += 1
+        \(2.tab)\(callCount) += 1
         \(handlerReturn)
         """
             
         let wrapped = !isSubscript ? body :
         """
-        
-                get {
-                    \(body)
-                }
-                set { }
+        \(2.tab)get {
+        \(body)
+        \(2.tab)}
+        \(2.tab)set { }
         """
 
         let overrideStr = isOverride ? "\(String.override) " : ""
         template =
         """
-            \(acl)\(staticStr)var \(callCount) = 0
-            \(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-            \(acl)\(staticStr)\(overrideStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
-                \(wrapped)
-            }
+        \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
+        \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
+        \(1.tab)\(acl)\(staticStr)\(overrideStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
+        \(wrapped)
+        \(1.tab)}
         """
     }
  

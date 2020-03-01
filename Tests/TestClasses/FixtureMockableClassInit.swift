@@ -67,55 +67,14 @@ public class HighMock: High {
 
 """
 
-let klassInitMock =
-    
-"""
+let klassInitMock = """
+
 public class LowMock: Low {
     
     private var _doneInit = false
-    
+
     var nameSetCallCount = 0
-    var underlyingName: String = ""
-    override var name: String {
-        get { return underlyingName }
-        set {
-            underlyingName = newValue
-            if _doneInit { nameSetCallCount += 1 }
-        }
-    }
-    required public init(arg: String = "") {
-        super.init(arg: arg)
-        _doneInit = true
-    }
-
-    required public init(orderId: Int = 0) {
-        super.init(orderId: orderId)
-        _doneInit = true
-    }
-
-    override public init(m: Int = 0) {
-        super.init(m: m)
-        _doneInit = true
-    }
-}
-"""
-
-
-let klassInitLongerMock =
-"""
-public class LowMock: Low {
-    
-    private var _doneInit = false
-    
-    var nameSetCallCount = 0
-    var underlyingName: String = ""
-    override var name: String {
-        get { return underlyingName }
-        set {
-            underlyingName = newValue
-            if _doneInit { nameSetCallCount += 1 }
-        }
-    }
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
     required public init(arg: String = "") {
         super.init(arg: arg)
         _doneInit = true
@@ -129,5 +88,27 @@ public class LowMock: Low {
         _doneInit = true
     }
 }
+"""
 
+
+let klassInitLongerMock = """
+
+public class LowMock: Low {
+    
+    private var _doneInit = false
+    var nameSetCallCount = 0
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
+    required public init(arg: String = "") {
+        super.init(arg: arg)
+        _doneInit = true
+    }
+    required public init(orderId: Int = 0) {
+        super.init(orderId: orderId)
+        _doneInit = true
+    }
+    override public init(m: Int = 0) {
+        super.init(m: m)
+        _doneInit = true
+    }
+}
 """

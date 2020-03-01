@@ -113,9 +113,41 @@ class FooMock: Foo {
         fatalError("updateHandler returns can't have a default value thus its handler must be set")
     }
 }
-
 """
 
+let protocolWithTypealias =
+"""
+/// \(String.mockAnnotation)
+public protocol SomeType {
+    typealias Key = String
+    var key: Key { get }
+}
+"""
+
+let protocolWithTypealiasMock = """
+public class SomeTypeMock: SomeType {
+    
+    private var _doneInit = false
+    
+    public init() { _doneInit = true }
+    public init(key: Key) {
+        self.key = key
+        _doneInit = true
+    }
+    public typealias Key = String
+    public var keySetCallCount = 0
+    var underlyingKey: Key!
+    public var key: Key {
+        get { return underlyingKey }
+        set {
+            underlyingKey = newValue
+            if _doneInit { keySetCallCount += 1 }
+        }
+    }
+}
+
+
+"""
 
 let patDefaultType =
 """
