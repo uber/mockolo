@@ -67,7 +67,7 @@ func applyClassTemplate(name: String,
 
     let template = """
     \(attribute)
-    \(accessControlLevelDescription)class \(moduleDot)\(name): \(moduleDot)\(identifier) {
+    \(accessControlLevelDescription)class \(name): \(moduleDot)\(identifier) {
     \(1.tab)\(typealiasTemplate)
     \(extraInits)
     \(renderedEntities)

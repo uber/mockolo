@@ -12,7 +12,7 @@ protocol TaskRouting: BaseRouting {
 
 let moduleOverrideMock = """
 
-class Foo.TaskRoutingMock: Foo.TaskRouting {
+class TaskRoutingMock: Foo.TaskRouting {
     
     private var _doneInit = false
     
