@@ -49,7 +49,7 @@ extension Structure: EntityNode {
                 }
             }
             if let val = argsMap[.moduleColon] {
-                ret.module = val[.name]
+                ret.module = val[.prefix]
             }
         }
         return ret

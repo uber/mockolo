@@ -2,7 +2,7 @@ import MockoloFramework
 
 
 let moduleOverride = """
-/// \(String.mockAnnotation)(module: name = Foo)
+/// \(String.mockAnnotation)(module: prefix = Foo)
 protocol TaskRouting: BaseRouting {
     var bar: String { get }
     func baz() -> Double

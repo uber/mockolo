@@ -45,7 +45,7 @@ extension String {
     static let override = "override"
     static let mockType = "protocol"
     static let unknownVal = "Unknown"
-    static let name = "name"
+    static let prefix = "prefix"
     static let any = "Any"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"

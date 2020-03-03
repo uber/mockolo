@@ -101,7 +101,7 @@ final class EntityNodeSubContainer {
 }
 
 /// Contains arguments to annotation
-/// e.g. @mockable(module: name = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject)
+/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject)
 struct AnnotationMetadata {
     var module: String?
     var typeAliases: [String: String]?
