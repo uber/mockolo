@@ -306,7 +306,7 @@ public struct Type {
     func defaultVal(with typeKeys: [String: String]? = nil, overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
         let (subjectType, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam)
         if subjectType != nil {
-            return isInitParam ? subjectVal : (typeName.hasSuffix(String.rxObservableVarPrefix) ? String.rxObservableEmpty : String.observableEmpty)
+            return isInitParam ? subjectVal : (typeName.hasSuffix(String.rxObservableLeftAngleBracket) ? String.rxObservableEmpty : String.observableEmpty)
         }
 
         if let val = parseDefaultVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
@@ -320,8 +320,8 @@ public struct Type {
     }
 
     func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?) {
-        if typeName.hasPrefix(String.observableVarPrefix) || typeName.hasPrefix(String.rxObservableVarPrefix),
-            let range = typeName.range(of: String.observableVarPrefix), let lastIdx = typeName.lastIndex(of: ">") {
+        if typeName.hasPrefix(String.observableLeftAngleBracket) || typeName.hasPrefix(String.rxObservableLeftAngleBracket),
+            let range = typeName.range(of: String.observableLeftAngleBracket), let lastIdx = typeName.lastIndex(of: ">") {
             let typeParamStr = typeName[range.upperBound..<lastIdx]
 
             var subjectKind = ""

@@ -42,7 +42,7 @@ func lookupEntities(key: String,
 
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
-        let sub = current.entityNode.subContainer(overrides: current.overrides, declType: declType, path: current.filepath, data: current.data, isProcessed: current.isProcessed)
+        let sub = current.entityNode.subContainer(metadata: current.metadata, declType: declType, path: current.filepath, data: current.data, isProcessed: current.isProcessed)
         models.append(contentsOf: sub.members)
         if !current.isProcessed {
             attributes.append(contentsOf: sub.attributes)
@@ -68,7 +68,7 @@ func lookupEntities(key: String,
         }
     } else if let parentMock = inheritanceMap["\(key)Mock"], declType == .protocolType {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        let sub = parentMock.entityNode.subContainer(overrides: parentMock.overrides, declType: declType, path: parentMock.filepath, data: parentMock.data, isProcessed: parentMock.isProcessed)
+        let sub = parentMock.entityNode.subContainer(metadata: parentMock.metadata, declType: declType, path: parentMock.filepath, data: parentMock.data, isProcessed: parentMock.isProcessed)
         processedModels.append(contentsOf: sub.members)
         if !parentMock.isProcessed {
             attributes.append(contentsOf: sub.attributes)
@@ -152,27 +152,6 @@ func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [
 }
 
 
-/// Returns a map of typealiases with conflicting types to be whitelisted
-/// @param models Potentially contains typealias models
-/// @returns A map of typealiases with multiple possible types
-func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
-    let typealiasModels = models.filter{$0.1.modelType == .typeAlias}
-    var aliasMap = [String: [String]]()
-    typealiasModels.forEach { (arg: (key: String, value: Model)) in
-        
-        let alias = arg.value
-        if aliasMap[alias.name] == nil {
-            aliasMap[alias.name] = [alias.type.typeName]
-        } else {
-            if let val = aliasMap[alias.name], !val.contains(alias.type.typeName) {
-                aliasMap[alias.name]?.append(alias.type.typeName)
-            }
-        }
-    }
-    let aliasDupes = aliasMap.filter {$0.value.count > 1}
-    return aliasDupes.isEmpty ? nil : aliasDupes
-}
-
 
 /// Returns import lines of a file
 /// @param content The source file content
@@ -182,7 +161,7 @@ func findImportLines(data: Data, offset: Int64?) -> [String] {
     if let offset = offset, offset > 0 {
         let part = data.toString(offset: 0, length: offset)
         let lines = part.components(separatedBy: "\n")
-        let importlines = lines.filter {$0.trimmingCharacters(in: .whitespaces).hasPrefix(String.import)}
+        let importlines = lines.filter {$0.trimmingCharacters(in: .whitespaces).hasPrefix(String.importSpace)}
         return importlines
     }
     

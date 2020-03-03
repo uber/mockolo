@@ -196,7 +196,26 @@ func testMock() {
 }
 ```
 
-An override argument, e.g. for a typealias, can be passed into the annotation (default or custom) delimited by a semi-colon. 
+A list of override arguments can be passed in (delimited by a semicolon) to the annotation to set var types, typealiases, module names, etc. 
+
+For a module name:
+
+```swift
+/// @mockable(module: prefix = Bar)
+public protocol Foo {
+    ...
+}
+```
+
+This will generate: 
+
+```swift
+public class FooMock: Bar.Foo {
+    ...
+}
+```
+
+For a typealias:
 
 ```swift
 /// @mockable(typealias: T = AnyObject; U = StringProtocol)
@@ -218,6 +237,29 @@ public class FooMock: Foo {
     ...
 }
 ```
+
+
+For a var type such as an RxSwift observable:
+
+```swift
+/// @mockable(rx: intStream = ReplaySubject; doubleStream = BehaviorSubject)
+public protocol Foo {
+    var intStream: Observable<Int> { get }
+    var doubleStream: Observable<Double> { get }
+}
+```
+
+This will generate: 
+
+```swift
+public class FooMock: Foo {
+    var intStreamSubject = ReplaySubject<Int>.create(bufferSize: 1)
+    var intStream: Observable<Int> { /* use intStreamSubject */ }
+    var doubleStreamSubject = BehaviorSubject<Int>(value: 0)
+    var doubleStream: Observable<Int> { /* use doubleStreamSubject */ }
+}
+```
+
 
 
 ## Used libraries
