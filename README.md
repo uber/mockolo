@@ -65,6 +65,10 @@ Or use Xcode, via following.
 $ swift package generate-xcodeproj
 ```
 
+### Homebrew
+
+`$ brew install mockolo`
+
 ## Run
 
 `Mockolo` is a commandline executable. To run it, pass in a list of the source file directories or file paths of a build target, and the destination filepath for the mock output. To see other arguments to the commandline, run `mockolo --help`.
