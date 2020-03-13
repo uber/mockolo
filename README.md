@@ -43,6 +43,12 @@ $ git clone https://github.com/uber/mockolo.git
 $ cd mockolo
 ```
 
+Option 3: [Homebrew](https://brew.sh/)
+
+```
+$ brew install mockolo
+```
+
 Optionally, see a list of released versions of `Mockolo`, and check one out by running the following.
 
 ```
