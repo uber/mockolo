@@ -69,7 +69,11 @@ public class ParserViaSwiftSyntax: SourceParsing {
         do {
             var results = [Entity]()
             let node = try SyntaxParser.parse(path)
+            #if swift(>=5.2)
+            treeVisitor.walk(node)
+            #else
             node.walk(&treeVisitor)
+            #endif
             let ret = treeVisitor.entities
             for ent in ret {
                 ent.filepath = path
