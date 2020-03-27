@@ -27,7 +27,8 @@ extension SyntaxParser {
     }
 }
 
-extension Syntax {
+#if swift(>=5.2)
+extension SyntaxProtocol {
     var offset: Int64 {
         return Int64(self.position.utf8Offset)
     }
@@ -36,6 +37,17 @@ extension Syntax {
         return Int64(self.totalLength.utf8Length)
     }
 }
+#else
+extension Syntax {
+    var offset: Int64 {
+        return Int64(self.position.utf8Offset)
+    }
+
+    var length: Int64 {
+        return Int64(self.totalLength.utf8Length)
+    }
+}
+#endif
 
 extension AttributeListSyntax {
     var trimmedDescription: String? {
