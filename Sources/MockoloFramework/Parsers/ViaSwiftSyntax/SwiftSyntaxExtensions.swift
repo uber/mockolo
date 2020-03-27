@@ -158,40 +158,40 @@ extension MemberDeclListItemSyntax {
     }
     
     func transformToModel(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool)? {
-        if let varMember = self.decl as? VariableDeclSyntax {
+        if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
                 if let item = varMember.models(with: acl, declType: declType, overrides: metadata?.varTypes, processed: processed).first {
                     return (item, varMember.attributes?.trimmedDescription, false)
                 }
             }
-        } else if let funcMember = self.decl as? FunctionDeclSyntax {
+        } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
                 let item = funcMember.model(with: acl, declType: declType, processed: processed)
                 return (item, funcMember.attributes?.trimmedDescription, false)
             }
-        } else if let subscriptMember = self.decl as? SubscriptDeclSyntax {
+        } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
             if validateMember(subscriptMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
                 let item = subscriptMember.model(with: acl, declType: declType, processed: processed)
                 return (item, subscriptMember.attributes?.trimmedDescription, false)
             }
-        } else if let initMember = self.decl as? InitializerDeclSyntax {
+        } else if let initMember = self.decl.as(InitializerDeclSyntax.self) {
             if validateInit(initMember, declType, processed: processed) {
                 let acl = memberAcl(initMember.modifiers, encloserAcl, declType)
                 let item = initMember.model(with: acl, declType: declType, processed: processed)
                 return (item, initMember.attributes?.trimmedDescription, true)
             }
-        } else if let patMember = self.decl as? AssociatedtypeDeclSyntax {
+        } else if let patMember = self.decl.as(AssociatedtypeDeclSyntax.self) {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declType)
             let item = patMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
             return (item, patMember.attributes?.trimmedDescription, false)
-        } else if let taMember = self.decl as? TypealiasDeclSyntax {
+        } else if let taMember = self.decl.as(TypealiasDeclSyntax.self) {
             let acl = memberAcl(taMember.modifiers, encloserAcl, declType)
             let item = taMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
             return (item, taMember.attributes?.trimmedDescription, false)
-        } else if let ifMacroMember = self.decl as? IfConfigDeclSyntax {
+        } else if let ifMacroMember = self.decl.as(IfConfigDeclSyntax.self) {
             let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declType: declType, metadata: metadata, processed: processed)
             return (item, attr, initFlag)
         }
@@ -203,7 +203,7 @@ extension MemberDeclListItemSyntax {
 extension MemberDeclListSyntax {
     var hasBlankInit: Bool {
         for member in self {
-            if let varMember = member.decl as? VariableDeclSyntax {
+            if let varMember = member.decl.as(VariableDeclSyntax.self) {
                 for v in varMember.bindings {
                     if let name = v.pattern.firstToken?.text {
                         if name == String.hasBlankInit {
@@ -242,7 +242,7 @@ extension IfConfigDeclSyntax {
 
         var name = ""
         for cl in self.clauses {
-            if let desc = cl.condition?.description, let list = cl.elements as? MemberDeclListSyntax {
+            if let desc = cl.condition?.description, let list = cl.elements.as(MemberDeclListSyntax.self) {
                 name = desc
                 
                 for element in list {
@@ -685,4 +685,13 @@ extension Trivia {
     }
 }
 
-
+#if swift(<5.2)
+private extension Syntax {
+    /// A shim function for source compatibility between SwiftSyntax
+    /// 0.50100.0 and 0.50200.0.
+    /// - See Also: https://github.com/apple/swift-syntax/blob/master/Changelog.md#swift-52
+    func `as`<S: Syntax>(_ syntaxType: S.Type) -> S? {
+        return self as? S
+    }
+}
+#endif
