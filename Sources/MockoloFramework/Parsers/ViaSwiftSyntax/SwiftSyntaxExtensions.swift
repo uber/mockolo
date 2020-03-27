@@ -584,8 +584,14 @@ final class EntityVisitor: SyntaxVisitor {
         entities = []
         imports = []
     }
-    
-    func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+
+    #if swift(>=5.2)
+    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    #else
+    func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    #endif
+
+    private func visitImpl(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
         if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
             entities.append(ent)
@@ -593,7 +599,13 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
     
-    func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+    #if swift(>=5.2)
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    #else
+    func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    #endif
+
+    private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.name.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
             if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
@@ -607,8 +619,14 @@ final class EntityVisitor: SyntaxVisitor {
         }
         return .skipChildren
     }
-    
-    func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
+
+    #if swift(>=5.2)
+    override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    #else
+    func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    #endif
+
+    private func visitImpl(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         if let ret = node.path.firstToken?.text {
             let desc = node.importTok.text + " " + ret
             imports.append(desc)
