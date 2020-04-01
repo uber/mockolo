@@ -70,7 +70,11 @@ public class ParserViaSwiftSyntax: SourceParsing {
             var results = [Entity]()
             let node = try SyntaxParser.parse(path)
             var treeVisitor = EntityVisitor(path, annotation: annotation, declType: declType)
+            #if swift(>=5.2)
+            treeVisitor.walk(node)
+            #else
             node.walk(&treeVisitor)
+            #endif
             let ret = treeVisitor.entities
             results.append(contentsOf: ret)
             let imports = treeVisitor.imports
