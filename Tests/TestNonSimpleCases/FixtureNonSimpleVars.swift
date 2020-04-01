@@ -19,28 +19,21 @@ import Foundation
 
 @available(iOS 10.0, *)
 public class NonSimpleVarsMock: NonSimpleVars {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(dict: Dictionary<String, Int> = Dictionary<String, Int>(), voidHandler: @escaping (() -> ()), hasDot: ModuleX.SomeType? = nil) {
         self.dict = dict
-        self.voidHandler = voidHandler
+        self._voidHandler = voidHandler
         self.hasDot = hasDot
-        _doneInit = true
     }
     public var dictSetCallCount = 0
     public var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
     public var closureVarSetCallCount = 0
     public var closureVar: ((_ arg: String) -> Void)? = nil { didSet { closureVarSetCallCount += 1 } }
     public var voidHandlerSetCallCount = 0
-    var underlyingVoidHandler: ((() -> ()))!
+    private var _voidHandler: ((() -> ()))!  { didSet { voidHandlerSetCallCount += 1 } }
     public var voidHandler: (() -> ()) {
-        get { return underlyingVoidHandler }
-        set {
-            underlyingVoidHandler = newValue
-            if _doneInit { voidHandlerSetCallCount += 1 }
-        }
+        get { return _voidHandler }
+        set { _voidHandler = newValue }
     }
     public var hasDotSetCallCount = 0
     public var hasDot: ModuleX.SomeType? = nil { didSet { hasDotSetCallCount += 1 } }

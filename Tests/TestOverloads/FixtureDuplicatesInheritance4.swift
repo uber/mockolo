@@ -22,11 +22,11 @@ let duplicateSigInheritanceMock4 =
 
 class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var updateCallCount = 0
@@ -43,11 +43,11 @@ class FooMock: Foo {
 
 class BarMock: Bar {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var updateCallCount = 0
@@ -64,11 +64,11 @@ class BarMock: Bar {
 
 class BazMock: Baz {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var updateCallCount = 0

@@ -17,11 +17,11 @@ let overloadMock9 =
 
 class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var updateCallCount = 0
@@ -38,11 +38,11 @@ class FooMock: Foo {
 
 class BarMock: Bar {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var updateCallCount = 0

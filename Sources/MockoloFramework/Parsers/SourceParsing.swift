@@ -18,23 +18,20 @@
 import Foundation
 
 public enum DeclType {
-    case protocolType, classType, other
+    case protocolType, classType, other, all
 }
 
 public protocol SourceParsing {
     
     /// Parses processed decls (mock classes) and calls a completion block
     func parseProcessedDecls(_ paths: [String],
-                             semaphore: DispatchSemaphore?,
-                             queue: DispatchQueue?,
                              completion: @escaping ([Entity], [String: [String]]?) -> ())
     
-    /// Parses decls (protocol, class) with annotation (/// @mockable) and calls a completion block
+    /// Parses decls (protocol, class) with annotations (/// @mockable) and calls a completion block
     func parseDecls(_ paths: [String]?,
                     isDirs: Bool,
                     exclusionSuffixes: [String]?,
                     annotation: String,
-                    semaphore: DispatchSemaphore?,
-                    queue: DispatchQueue?,
+                    declType: DeclType,
                     completion: @escaping ([Entity], [String: [String]]?) -> ())
 }

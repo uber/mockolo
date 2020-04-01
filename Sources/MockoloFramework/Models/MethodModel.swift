@@ -30,13 +30,13 @@ final class MethodModel: Model {
     var type: Type
     var offset: Int64
     let length: Int64
-    let accessControlLevelDescription: String
+    let accessLevel: String
     var attributes: [String]? = nil
     let genericTypeParams: [ParamModel]
     let params: [ParamModel]
     let processed: Bool
     var modelDescription: String? = nil
-    let isStatic: Bool
+    var isStatic: Bool
     let shouldOverride: Bool
     let suffix: String
     let kind: MethodKind
@@ -44,7 +44,7 @@ final class MethodModel: Model {
         return .method
     }
     
-    var staticKind: String {
+    private var staticKind: String {
         return isStatic ? .static : ""
     }
     
@@ -94,8 +94,7 @@ final class MethodModel: Model {
                                paramNames: paramNames,
                                paramTypes: paramTypes,
                                suffix: suffix,
-                               returnType: type,
-                               staticKind: staticKind)
+                               returnType: type)
         
         return ret
     }()
@@ -126,7 +125,7 @@ final class MethodModel: Model {
         self.genericTypeParams = genericTypeParams
         self.processed = processed
         self.modelDescription = modelDescription
-        self.accessControlLevelDescription = acl
+        self.accessLevel = acl
     }
     
     init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, processed: Bool) {
@@ -184,7 +183,7 @@ final class MethodModel: Model {
             self.suffix = ""
         }
         
-        self.accessControlLevelDescription = ast.accessControlLevelDescription
+        self.accessLevel = ast.accessLevel
         self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
     }
 
@@ -201,7 +200,7 @@ final class MethodModel: Model {
         return name(by: level - 1) + postfix
     }
     
-    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool) -> String? {
         if processed {
             var prefix = shouldOverride  ? "\(String.override) " : ""
 
@@ -211,7 +210,7 @@ final class MethodModel: Model {
                 }
             }
             
-            if let ret = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines) ?? self.data?.toString(offset: offset, length: length) {
+            if let ret = modelDescription?.trimmingCharacters(in: .newlines) ?? self.data?.toString(offset: offset, length: length) {
                 return prefix + ret
             }
             return nil
@@ -220,15 +219,15 @@ final class MethodModel: Model {
         let result = applyMethodTemplate(name: name,
                                          identifier: identifier,
                                          kind: kind,
+                                         useTemplateFunc: useTemplateFunc,
+                                         isStatic: isStatic,
                                          isOverride: shouldOverride,
                                          genericTypeParams: genericTypeParams,
                                          params: params,
                                          returnType: type,
-                                         staticKind: staticKind,
-                                         accessControlLevelDescription: accessControlLevelDescription,
+                                         accessLevel: accessLevel,
                                          suffix: suffix,
-                                         handler: handler,
-                                         typeKeys: typeKeys)
+                                         handler: handler)
         return result
     }
 }

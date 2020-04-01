@@ -38,8 +38,7 @@ class OverloadTests: MockoloTestCase {
     
     func testOverloadExtendedParams() {
         verify(srcContent: overload7,
-               dstContent: overloadMock7,
-               concurrencyLimit: 1)
+               dstContent: overloadMock7)
     }
     
     func testVarFuncWithSameName() {
@@ -49,14 +48,12 @@ class OverloadTests: MockoloTestCase {
     
     func testOverloadExtendedParamsInParentAndChild() {
         verify(srcContent: overload8,
-               dstContent: overloadMock8,
-               concurrencyLimit: 1)
+               dstContent: overloadMock8)
     }
     
     func testOverloadSameSigInParentAndChild() {
         verify(srcContent: overload9,
-               dstContent: overloadMock9,
-               concurrencyLimit: 1)
+               dstContent: overloadMock9)
     }
     
     func testOverloadSameSigInMultiParents() {

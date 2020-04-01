@@ -33,11 +33,11 @@ import Foundation
 
 class FuncThrowMock: FuncThrow {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var f1CallCount = 0

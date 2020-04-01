@@ -24,19 +24,22 @@ class Executor {
     // MARK: - Private
     private var loggingLevel: OptionArgument<Int>!
     private var outputFilePath: OptionArgument<String>!
+    private var mockFileList: OptionArgument<String>!
     private var mockFilePaths: OptionArgument<[String]>!
     private var sourceDirs: OptionArgument<[String]>!
     private var sourceFiles: OptionArgument<[String]>!
     private var sourceFileList: OptionArgument<String>!
-    private var depFileList: OptionArgument<String>!
     private var exclusionSuffixes: OptionArgument<[String]>!
     private var header: OptionArgument<String>!
     private var macro: OptionArgument<String>!
     private var testableImports: OptionArgument<[String]>!
+    private var customImports: OptionArgument<[String]>!
     private var annotation: OptionArgument<String>!
+    private var useTemplateFunc: OptionArgument<Bool>!
+    private var mockAll: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var useSourceKit: OptionArgument<Bool>!
-    
+
     /// Initializer.
     ///
     /// - parameter name: The name used to check if this command should
@@ -70,15 +73,14 @@ class Executor {
                                 kind: [String].self,
                                 usage: "Paths to the directories containing source files to generate mocks for. If the --filelist or --sourcefiles values exist, they will be ignored. ",
                                 completion: .filename)
-        depFileList = parser.add(option: "--depfilelist",
-                                   shortName: "-deplist",
+        mockFileList = parser.add(option: "--mock-filelist",
                                    kind: String.self,
-                                   usage: "Path to a file containing a list of dependent files (separated by a new line) from modules this target depends on. ",
+                                   usage: "Path to a file containing a list of dependent files (separated by a new line) of modules this target depends on.",
                                    completion: .filename)
         mockFilePaths = parser.add(option: "--mockfiles",
                                    shortName: "-mocks",
                                    kind: [String].self,
-                                   usage: "List of mock files (separated by a comma or a space) from modules this target depends on. If the --depfilelist value exists, this will be ignored.",
+                                   usage: "List of mock files (separated by a comma or a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.",
                                    completion: .filename)
         outputFilePath = parser.add(option: "--destination",
                                     shortName: "-d",
@@ -102,9 +104,19 @@ class Executor {
                                         shortName: "-i",
                                         kind: [String].self,
                                         usage: "If set, @testable import statments will be added for each module name in this list.")
+        customImports = parser.add(option: "--custom-imports",
+                                        shortName: "-c",
+                                        kind: [String].self,
+                                        usage: "If set, custom module imports will be added to the final import statement list.")
         header = parser.add(option: "--header",
                                 kind: String.self,
                                 usage: "A custom header documentation to be added to the beginning of a generated mock file.")
+        useTemplateFunc = parser.add(option: "--use-template-func",
+                                 kind: Bool.self,
+                                 usage: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
+        mockAll = parser.add(option: "--mock-all",
+                                 kind: Bool.self,
+                                 usage: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
         concurrencyLimit = parser.add(option: "--concurrency-limit",
                                       shortName: "-j",
                                       kind: Int.self,
@@ -129,7 +141,6 @@ class Executor {
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
     func execute(with arguments: ArgumentParser.Result) {
-      
         guard let outputArg = arguments.get(outputFilePath) else { fatalError("Missing destination file path") }
         let outputFilePath = fullPath(outputArg)
 
@@ -148,14 +159,15 @@ class Executor {
         }
         
         var mockFilePaths: [String]?
-        // If dep file list exists, mock filepaths value will be overriden (see the usage in setupArguments above)
-        if let depList = arguments.get(self.depFileList) {
-            let text = try? String(contentsOfFile: depList, encoding: String.Encoding.utf8)
+        // First see if a list of mock files are stored in a file
+        if let mockList = arguments.get(self.mockFileList) {
+            let text = try? String(contentsOfFile: mockList, encoding: String.Encoding.utf8)
             mockFilePaths = text?.components(separatedBy: "\n").filter{!$0.isEmpty}.map(fullPath)
         } else {
-             mockFilePaths = arguments.get(self.mockFilePaths)?.map(fullPath)
+            // If not, see if a list of mock files are directly passed in
+            mockFilePaths = arguments.get(self.mockFilePaths)?.map(fullPath)
         }
-
+        
         let concurrencyLimit = arguments.get(self.concurrencyLimit)
         let exclusionSuffixes = arguments.get(self.exclusionSuffixes) ?? []
         let annotation = arguments.get(self.annotation) ?? String.mockAnnotation
@@ -163,7 +175,10 @@ class Executor {
         let loggingLevel = arguments.get(self.loggingLevel) ?? 0
         let macro = arguments.get(self.macro)
         let testableImports = arguments.get(self.testableImports)
+        let customImports = arguments.get(self.customImports)
         let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
+        let shouldUseTemplateFunc = arguments.get(useTemplateFunc) ?? false
+        let shouldMockAll = arguments.get(mockAll) ?? false
 
         do {
             try generate(sourceDirs: srcDirs,
@@ -174,7 +189,10 @@ class Executor {
                          annotation: annotation,
                          header: header,
                          macro: macro,
+                         declType: shouldMockAll ? .all : .protocolType,
+                         useTemplateFunc: shouldUseTemplateFunc,
                          testableImports: testableImports,
+                         customImports: customImports,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,

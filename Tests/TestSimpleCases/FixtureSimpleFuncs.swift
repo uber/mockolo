@@ -9,20 +9,10 @@ protocol SimpleFunc {
 }
 """
 
-let simpleFuncsMock =
-"""
-
+let simpleFuncsMock = """
 import Foundation
-
-
 class SimpleFuncMock: SimpleFunc {
-    
-    private var _doneInit = false
-    
-    init() {
-        
-        _doneInit = true
-    }
+    init() { }
     
     var updateCallCount = 0
     var updateHandler: ((Int) -> (String))?
@@ -33,6 +23,20 @@ class SimpleFuncMock: SimpleFunc {
             return updateHandler(arg)
         }
         return ""
+    }
+}
+"""
+
+let simpleMockFuncMock = """
+import Foundation
+
+class SimpleFuncMock: SimpleFunc {
+    init() { }
+
+    var updateCallCount = 0
+    var updateHandler: ((Int) -> (String))?
+    func update(arg: Int) -> String {
+        mockFunc(&updateCallCount)("update", updateHandler?(arg), .val(""))
     }
 }
 """

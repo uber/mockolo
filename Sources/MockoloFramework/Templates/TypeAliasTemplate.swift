@@ -16,14 +16,16 @@
 
 import Foundation
 
-func applyTypealiasTemplate(name: String,
-                            type: Type,
-                            acl: String) -> String {
-    var aclStr = acl
+extension TypeAliasModel {
+    func applyTypealiasTemplate(name: String,
+                                type: Type,
+                                acl: String) -> String {
+        var aclStr = acl
         if !aclStr.isEmpty {
             aclStr = aclStr + " "
         }
         
         let ret = "\(1.tab)\(aclStr)\(String.typealias) \(name) = \(type.typeName)"
         return ret
+    }
 }

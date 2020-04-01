@@ -63,7 +63,7 @@ echo "DESTINATION DIR = ${DESTDIR}"
 echo "OUTPUT FILE = ${OUTFILE}"
 
 cd "$SRCDIR"
-rm -rf .build
+#rm -rf .build
 swift build -c release 
 
 cd .build/release

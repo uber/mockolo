@@ -36,17 +36,20 @@ public func generate(sourceDirs: [String]?,
                      annotation: String,
                      header: String?,
                      macro: String?,
+                     declType: DeclType,
+                     useTemplateFunc: Bool,
                      testableImports: [String]?,
+                     customImports: [String]?,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
                      onCompletion: @escaping (String) -> ()) throws {
-    
     guard sourceDirs != nil || sourceFiles != nil else {
         log("Source files or directories do not exist", level: .error)
         throw InputError.sourceFilesError
     }
     
+    scanConcurrencyLimit = concurrencyLimit
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
     var parentMocks = [String: Entity]()
@@ -56,18 +59,12 @@ public func generate(sourceDirs: [String]?,
     var pathToImportsMap = [String: [String]]()
     var relevantPaths = [String]()
     var resolvedEntities = [ResolvedEntity]()
-    
-    let maxConcurrentThreads = concurrencyLimit ?? 0
-    let sema = maxConcurrentThreads <= 1 ? nil: DispatchSemaphore(value: maxConcurrentThreads)
-    let mockgenQueue = maxConcurrentThreads == 1 ? nil: DispatchQueue(label: "mockgen-q", qos: DispatchQoS.userInteractive, attributes: DispatchQueue.Attributes.concurrent)
-    
+
     signpost_begin(name: "Process input")
     let t0 = CFAbsoluteTimeGetCurrent()
     log("Process input mock files...", level: .info)
     if let mockFilePaths = mockFilePaths, !mockFilePaths.isEmpty {
-        parser.parseProcessedDecls(mockFilePaths,
-                                   semaphore: sema,
-                                   queue: mockgenQueue) { (elements, imports) in
+        parser.parseProcessedDecls(mockFilePaths) { (elements, imports) in
                                     elements.forEach { element in
                                         parentMocks[element.entityNode.name] = element
                                     }
@@ -95,8 +92,7 @@ public func generate(sourceDirs: [String]?,
                       isDirs: isDirs,
                       exclusionSuffixes: exclusionSuffixes,
                       annotation: annotation,
-                      semaphore: sema,
-                      queue: mockgenQueue) { (elements, imports) in
+                      declType: declType) { (elements, imports) in
                         elements.forEach { element in
                             protocolMap[element.entityNode.name] = element
                             if element.isAnnotated {
@@ -128,9 +124,6 @@ public func generate(sourceDirs: [String]?,
     generateUniqueModels(protocolMap: protocolMap,
                          annotatedProtocolMap: annotatedProtocolMap,
                          inheritanceMap: parentMocks,
-                         typeKeys: typeKeys,
-                         semaphore: sema,
-                         queue: mockgenQueue,
                          completion: { container in
                             pathToContentMap.append(contentsOf: container.imports)
                             relevantPaths.append(contentsOf: container.paths)
@@ -143,12 +136,9 @@ public func generate(sourceDirs: [String]?,
     signpost_begin(name: "Render models")
     log("Render models with templates...", level: .info)
     renderTemplates(entities: resolvedEntities,
-                    typeKeys: typeKeys,
-                    semaphore: sema,
-                    queue: mockgenQueue,
-                    completion: { (mockString: String, offset: Int64) in
+                    useTemplateFunc: useTemplateFunc) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
-    })
+    }
     signpost_end(name: "Render models")
     let t4 = CFAbsoluteTimeGetCurrent()
     log("Took", t4-t3, level: .verbose)
@@ -162,6 +152,7 @@ public func generate(sourceDirs: [String]?,
                        header: header,
                        macro: macro,
                        testableImports: testableImports,
+                       customImports: customImports,
                        to: outputFilePath)
     signpost_end(name: "Write results")
     let t5 = CFAbsoluteTimeGetCurrent()

@@ -61,7 +61,7 @@ struct ResolvedEntity {
     
     func model() -> Model {
         return ClassModel(identifier: key,
-                          acl: entity.entityNode.acl,
+                          acl: entity.entityNode.accessLevel,
                           declType: entity.entityNode.declType,
                           attributes: attributes,
                           offset: entity.entityNode.offset,
@@ -80,7 +80,7 @@ struct ResolvedEntityContainer {
 
 protocol EntityNode {
     var name: String { get }
-    var acl: String { get }
+    var accessLevel: String { get }
     var attributesDescription: String { get }
     var declType: DeclType { get }
     var inheritedTypes: [String] { get }
@@ -122,7 +122,7 @@ public final class Entity {
     }
 
     static func node(with entityNode: EntityNode,
-                     filepath: String = "",
+                     filepath: String,
                      data: Data? = nil,
                      isPrivate: Bool,
                      isFinal: Bool,

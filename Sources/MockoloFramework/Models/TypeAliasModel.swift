@@ -26,7 +26,7 @@ final class TypeAliasModel: Model {
     var length: Int64
     var typeOffset: Int64 = 0
     var typeLength: Int64 = 0
-    let accessControlLevelDescription: String
+    let accessLevel: String
     let processed: Bool
     var useDescription: Bool = false
     var modelDescription: String? = nil
@@ -39,7 +39,7 @@ final class TypeAliasModel: Model {
 
     init(name: String, typeName: String, acl: String?, encloserType: DeclType, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
         self.name = name
-        self.accessControlLevelDescription = acl ?? ""
+        self.accessLevel = acl ?? ""
         self.offset = offset
         self.length = length
         self.processed = processed
@@ -62,7 +62,7 @@ final class TypeAliasModel: Model {
         self.length = ast.length
         self.typeOffset = ast.nameOffset + ast.nameLength + 1
         self.typeLength = ast.offset + ast.length - typeOffset
-        self.accessControlLevelDescription = ast.accessControlLevelDescription
+        self.accessLevel = ast.accessLevel
         self.processed = processed
         self.overrideTypes = overrideTypes
         self.modelDescription = ast.description
@@ -89,14 +89,14 @@ final class TypeAliasModel: Model {
         return fullName
     }
     
-    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false) -> String? {
         if processed || useDescription, let modelDescription = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines) {
             if addAcl {
-                return accessControlLevelDescription + " " + modelDescription
+                return "\(1.tab)\(accessLevel) \(modelDescription)"
             }
-            return modelDescription
+            return "\(1.tab)\(modelDescription)"
         }
         
-        return applyTypealiasTemplate(name: name, type: type, acl: accessControlLevelDescription)
+        return applyTypealiasTemplate(name: name, type: type, acl: accessLevel)
     }
 }

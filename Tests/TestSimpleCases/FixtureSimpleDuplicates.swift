@@ -20,11 +20,11 @@ let simpleDuplicatesMock =
 
 public class SimpleDuplicateMock: SimpleDuplicate {
     
-    private var _doneInit = false
+    
     
     public init() {
         
-        _doneInit = true
+        
     }
     public var removeCallCount = 0
     public var removeHandler: ((Int) -> ())?

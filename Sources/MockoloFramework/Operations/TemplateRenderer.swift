@@ -19,39 +19,15 @@ import Foundation
 /// Renders models with temeplates for output
 
 func renderTemplates(entities: [ResolvedEntity],
-                     typeKeys: [String: String]?,
-                     semaphore: DispatchSemaphore?,
-                     queue: DispatchQueue?,
+                     useTemplateFunc: Bool,
                      completion: @escaping (String, Int64) -> ()) {
-    if let queue = queue {
-        let lock = NSLock()
-        for element in entities {
-            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
-            queue.async {
-                _ = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: lock, completion: completion)
-                semaphore?.signal()
-            }
-        }
-        queue.sync(flags: .barrier) { }
-    } else {
-        for element in entities {
-            _ = renderTemplates(resolvedEntity: element, typeKeys: typeKeys, lock: nil, completion: completion)
+    scan(entities) { (resolvedEntity, lock) in
+        let mockModel = resolvedEntity.model()
+        if let mockString = mockModel.render(with: resolvedEntity.key, encloser: mockModel.name, useTemplateFunc: useTemplateFunc), !mockString.isEmpty {
+            lock?.lock()
+            completion(mockString, mockModel.offset)
+            lock?.unlock()
         }
     }
-}
-
-private func renderTemplates(resolvedEntity: ResolvedEntity,
-                             typeKeys: [String: String]?,
-                             lock: NSLock? = nil,
-                             completion: @escaping (String, Int64) -> ()) -> Bool {
-    
-    let mockModel = resolvedEntity.model()
-    if let mockString = mockModel.render(with: resolvedEntity.key, typeKeys: typeKeys), !mockString.isEmpty {
-        lock?.lock()
-        completion(mockString, mockModel.offset)
-        lock?.unlock()
-        return true
-    }
-    return false
 }
 

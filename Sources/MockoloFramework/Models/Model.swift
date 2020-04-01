@@ -28,6 +28,8 @@ public protocol Model {
     /// Fully qualified identifier
     var fullName: String { get }
 
+    var underlyingName: String { get }
+    
     /// Type of this model
     var modelType: ModelType { get }
     
@@ -40,6 +42,8 @@ public protocol Model {
     /// Indicates whether this model maps to an init method
     var isInitializer: Bool { get }
 
+    var isStatic: Bool { get } 
+
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: Type { get set }
 
@@ -47,12 +51,13 @@ public protocol Model {
     var offset: Int64 { get set }
 
     /// Applies a corresponding template to this model to output mocks
-    func render(with identifier: String, typeKeys: [String: String]?) -> String?
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool) -> String?
 
     /// Used to differentiate multiple entities with the same name
     /// @param level The verbosity level
     /// @returns a unique name given the verbosity (default is name)
     func name(by level: Int) -> String
+
     
     func isEqual(_ other: Model) -> Bool
 
@@ -81,6 +86,20 @@ extension Model {
         return name
     }
     
+    var underlyingName: String {
+        if isStatic {
+            return "_\(name)"
+        }
+        if !(type.isRxObservable || type.defaultVal() != nil) {
+            return "_\(name)"
+        }
+        return name.safeName
+    }
+    
+    var isStatic: Bool {
+        return false
+    }
+    
     var processed: Bool {
         return false
     }
@@ -93,3 +112,4 @@ extension Model {
         return false
     }
 }
+

@@ -39,7 +39,7 @@ final class IfMacroModel: Model {
         self.type = Type(name)
     }
     
-    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyMacroTemplate(name: name, typeKeys: typeKeys, entities: entities)
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool) -> String? {
+        return applyMacroTemplate(name: name, useTemplateFunc: useTemplateFunc, entities: entities)
     }
 }

@@ -1,6 +1,5 @@
 import MockoloFramework
 
-
 let keywordParams = """
 /// \(String.mockAnnotation)
 protocol KeywordProtocol {
@@ -24,21 +23,13 @@ class KeywordClass: KClass {
 
 let keywordParamsMock = """
 
-class KeywordProtocolMock: KeywordProtocol {
-    private var _doneInit = false
-    private var `in`: Int!
-    init() { _doneInit = true }
-    required init(in: Int = 0) {
-        self.in = `in`
-        _doneInit = true
-    }
-}
 
-class KeywordClassMock: KeywordClass {
-    private var _doneInit = false
-    override init(in: Int = 0) {
-        super.init(in: `in`)
-        _doneInit = true
+class KeywordProtocolMock: KeywordProtocol {
+    private var `in`: Int!
+    init() { }
+
+    required init(in: Int = 0) {
+        self.`in` = `in`
     }
 }
 
@@ -60,50 +51,35 @@ let protocolWithInitParentMock = """
 public protocol HasInitParent {
 }
 public class HasInitParentMock: HasInitParent {
-    private var _doneInit = false
-    public init() {_doneInit = true}
+    
+    public init() {}
     required public init(order: Int) {
-        self.order = order
-        _doneInit = true
+        self._order = order
+        
     }
     public init(num: Int, rate: Double) {
-        self.rate = rate
-        _doneInit = true
+        self._rate = rate
+        
     }
     public var orderSetCallCount = 0
-    var underlyingOrder: Int = 0
+    private var _order: Int = 0 { didSet { orderSetCallCount += 1 } }
     public var order: Int {
-        get {
-            return underlyingOrder
-        }
-        set {
-            underlyingOrder = newValue
-            if _doneInit { orderSetCallCount += 1 }
-        }
+        get { return _order }
+        set { _order = newValue }
     }
 
     public var numSetCallCount = 0
-    var underlyingNum: Int = 0
+    private var _num: Int = 0 { didSet { numSetCallCount += 1 } }
     public var num: Int {
-        get {
-            return underlyingNum
-        }
-        set {
-            underlyingNum = newValue
-            if _doneInit { numSetCallCount += 1 }
-        }
+        get { return _num }
+        set { _num = newValue }
     }
     
     public var rateSetCallCount = 0
-    var underlyingRate: Double = 0.0
+    private var _rate: Double = 0.0 { didSet { rateSetCallCount += 1 } }
     public var rate: Double {
-        get {
-            return underlyingRate
-        }
-        set {
-            underlyingRate = newValue
-            if _doneInit { rateSetCallCount += 1 }
-        }
+        get { return _rate }
+        set { _rate = newValue }
     }
 }
 """
@@ -111,70 +87,41 @@ public class HasInitParentMock: HasInitParent {
 let protocolWithInitResultMock = """
 
 public class HasInitMock: HasInit {
-    
-    private var _doneInit = false
     private var arg: String!
-    public init() { _doneInit = true }
+    public init() { }
     public init(order: Int = 0, num: Int = 0, rate: Double = 0.0) {
         self.order = order
         self.num = num
         self.rate = rate
-        _doneInit = true
     }
     required public init(arg: String = "") {
         self.arg = arg
-        _doneInit = true
     }
-
     required public init(order: Int) {
-        self.order = order
-        _doneInit = true
-    }
+        self._order = order
 
+    }
     public var orderSetCallCount = 0
-
-    var underlyingOrder: Int = 0
-
+    private var _order: Int = 0 { didSet { orderSetCallCount += 1 } }
     public var order: Int {
-        get {
-            return underlyingOrder
-        }
-        set {
-            underlyingOrder = newValue
-            if _doneInit { orderSetCallCount += 1 }
-        }
+        get { return _order }
+        set { _order = newValue }
     }
-
-
     public var numSetCallCount = 0
-
-    var underlyingNum: Int = 0
-
+    private var _num: Int = 0 { didSet { numSetCallCount += 1 } }
     public var num: Int {
-        get {
-            return underlyingNum
-        }
-        set {
-            underlyingNum = newValue
-            if _doneInit { numSetCallCount += 1 }
-        }
+        get { return _num }
+        set { _num = newValue }
     }
 
-    
     public var rateSetCallCount = 0
-
-    var underlyingRate: Double = 0.0
-
+    private var _rate: Double = 0.0 { didSet { rateSetCallCount += 1 } }
     public var rate: Double {
-        get {
-            return underlyingRate
-        }
-        set {
-            underlyingRate = newValue
-            if _doneInit { rateSetCallCount += 1 }
-        }
+        get { return _rate }
+        set { _rate = newValue }
     }
 }
+
 """
 
 
@@ -192,37 +139,26 @@ public protocol Current: Parent {
 
 let simpleInitParentMock = """
 public class ParentMock: Parent {
-    private var _doneInit = false
-    public init() {_doneInit = true}
+    
+    public init() {}
     public init(num: Int, rate: Double) {
-        self.num = arg
-        self.rate = rate
-        _doneInit = true
+        self._num = arg
+        self._rate = rate
     }
     
-    public var numSetCallCount = 0
-    var underlyingNum: Int = 0
-    public var num: Int {
-        get {
-            return underlyingNum
-        }
-        set {
-            underlyingNum = newValue
-            if _doneInit { numSetCallCount += 1 }
-        }
-    }
-    
-    public var rateSetCallCount = 0
-    var underlyingRate: Double = 0.0
-    public var rate: Double {
-        get {
-            return underlyingRate
-        }
-        set {
-            underlyingRate = newValue
-            if _doneInit { rateSetCallCount += 1 }
-        }
-    }
+     public var numSetCallCount = 0
+       private var _num: Int = 0 { didSet { numSetCallCount += 1 } }
+       public var num: Int {
+           get { return _num }
+           set { _num = newValue }
+       }
+
+       public var rateSetCallCount = 0
+       private var _rate: Double = 0.0 { didSet { rateSetCallCount += 1 } }
+       public var rate: Double {
+           get { return _rate }
+           set { _rate = newValue }
+       }
 }
 
 """
@@ -232,47 +168,32 @@ let simpleInitResultMock = """
 
     public class CurrentMock: Current {
         
-        private var _doneInit = false
         
-        public init() { _doneInit = true }
+        
+        public init() {  }
         public init(title: String = "", num: Int = 0, rate: Double = 0.0) {
             self.title = title
             self.num = num
             self.rate = rate
-            _doneInit = true
+            
         }
         public var titleSetCallCount = 0
         public var title: String = "" { didSet { titleSetCallCount += 1 } }
 
         
         public var numSetCallCount = 0
+           private var _num: Int = 0 { didSet { numSetCallCount += 1 } }
+           public var num: Int {
+               get { return _num }
+               set { _num = newValue }
+           }
 
-        var underlyingNum: Int = 0
-
-        public var num: Int {
-            get {
-                return underlyingNum
-            }
-            set {
-                underlyingNum = newValue
-                if _doneInit { numSetCallCount += 1 }
-            }
-        }
-
-        
-        public var rateSetCallCount = 0
-
-        var underlyingRate: Double = 0.0
-
-        public var rate: Double {
-            get {
-                return underlyingRate
-            }
-            set {
-                underlyingRate = newValue
-                if _doneInit { rateSetCallCount += 1 }
-            }
-        }
+           public var rateSetCallCount = 0
+           private var _rate: Double = 0.0 { didSet { rateSetCallCount += 1 } }
+           public var rate: Double {
+               get { return _rate }
+               set { _rate = newValue }
+           }
     }
 """
 
@@ -291,50 +212,44 @@ public typealias ForcastCheckBlock = () -> ForcastUpdateConfig?
 """
 
 
-let nonSimpleInitVarsMock =
-"""
+let nonSimpleInitVarsMock = """
+
 public class ForcastUpdatingMock: ForcastUpdating {
+    private var _checkBlock: ForcastCheckBlock!
+    private var _dataStream: DataStream!
+    public init() { }
 
-    private var _doneInit = false
-    private var checkBlock: ForcastCheckBlock!
-    private var dataStream: DataStream!
-    public init() { _doneInit = true }
     required public init(checkBlock: @escaping ForcastCheckBlock, dataStream: DataStream) {
-        self.checkBlock = checkBlock
-        self.dataStream = dataStream
-        _doneInit = true
+        self._checkBlock = checkBlock
+        self._dataStream = dataStream
     }
-
     public var enabledCallCount = 0
     public var enabledHandler: (() -> (Bool))?
     public func enabled() -> Bool {
-            enabledCallCount += 1
-    
-            if let enabledHandler = enabledHandler {
-                return enabledHandler()
-            }
-            return false
+        enabledCallCount += 1
+        if let enabledHandler = enabledHandler {
+            return enabledHandler()
+        }
+        return false
     }
     public var forcastLoaderCallCount = 0
     public var forcastLoaderHandler: (() -> (ForcastLoading?))?
     public func forcastLoader() -> ForcastLoading? {
-            forcastLoaderCallCount += 1
-    
-            if let forcastLoaderHandler = forcastLoaderHandler {
-                return forcastLoaderHandler()
-            }
-            return nil
+        forcastLoaderCallCount += 1
+        if let forcastLoaderHandler = forcastLoaderHandler {
+            return forcastLoaderHandler()
+        }
+        return nil
     }
     public var fetchInfoCallCount = 0
     public var fetchInfoHandler: ((URL, @escaping (String?, URL?) -> ()) -> ())?
     public func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ())  {
-            fetchInfoCallCount += 1
-    
-            if let fetchInfoHandler = fetchInfoHandler {
-                fetchInfoHandler(itmsURL, completionHandler)
-            }
+        fetchInfoCallCount += 1
+        if let fetchInfoHandler = fetchInfoHandler {
+            fetchInfoHandler(itmsURL, completionHandler)
+        }
+
     }
 }
-
 """
 

@@ -23,13 +23,13 @@ import Foundation
 
 public class SimpleChildMock: SimpleChild {
     
-    private var _doneInit = false
     
-    public init() { _doneInit = true }
+    
+    public init() {  }
     public init(name: String = "", number: Int = 0) {
         self.name = name
         self.number = number
-        _doneInit = true
+        
     }
     public var nameSetCallCount = 0
     public var name: String = "" { didSet { nameSetCallCount += 1 } }
@@ -57,12 +57,12 @@ public class SimpleChildMock: SimpleChild {
 
 public class SimpleParentMock: SimpleParent {
     
-    private var _doneInit = false
     
-    public init() { _doneInit = true }
+    
+    public init() {  }
     public init(number: Int = 0) {
         self.number = number
-        _doneInit = true
+        
     }
     public var numberSetCallCount = 0
     public var number: Int = 0 { didSet { numberSetCallCount += 1 } }

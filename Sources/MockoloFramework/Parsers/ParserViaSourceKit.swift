@@ -18,29 +18,12 @@ import Foundation
 import SourceKittenFramework
 
 public class ParserViaSourceKit: SourceParsing {
-    
     public init() {}
     
     public func parseProcessedDecls(_ paths: [String],
-                                    semaphore: DispatchSemaphore?,
-                                    queue: DispatchQueue?,
                                     completion: @escaping ([Entity], [String: [String]]?) -> ()) {
-        
-        if let queue = queue {
-            let lock = NSLock()
-            for filePath in paths {
-                _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
-                queue.async {
-                    self.generateProcessedASTs(filePath, lock: lock, completion: completion)
-                    semaphore?.signal()
-                }
-            }
-            // Wait for queue to drain
-            queue.sync(flags: .barrier) {}
-        } else {
-            for filePath in paths {
-                generateProcessedASTs(filePath, lock: nil, completion: completion)
-            }
+         scan(paths) { (filePath, lock) in
+            self.generateProcessedASTs(filePath, lock: lock, completion: completion)
         }
     }
     
@@ -48,96 +31,60 @@ public class ParserViaSourceKit: SourceParsing {
                            isDirs: Bool,
                            exclusionSuffixes: [String]? = nil,
                            annotation: String,
-                           semaphore: DispatchSemaphore?,
-                           queue: DispatchQueue?,
+                           declType: DeclType,
                            completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         guard !annotation.isEmpty else { return }
         guard let paths = paths else { return }
         if isDirs {
-            generateASTs(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
+            generateASTs(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, declType: declType, completion: completion)
         } else {
-            generateASTs(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, semaphore: semaphore, queue: queue, completion: completion)
+            generateASTs(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, declType: declType, completion: completion)
         }
     }
     
     private func generateASTs(dirs: [String],
                                   exclusionSuffixes: [String]? = nil,
                                   annotation: String,
-                                  semaphore: DispatchSemaphore?,
-                                  queue: DispatchQueue?,
+                                  declType: DeclType,
                                   completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard let annotationData = annotation.data(using: .utf8) else {
             fatalError("Annotation is invalid: \(annotation)")
         }
-        if let queue = queue {
-            let lock = NSLock()
-            
-            scanPaths(dirs) { filePath in
-                _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
-                queue.async {
-                    self.generateASTs(filePath,
-                                          exclusionSuffixes: exclusionSuffixes,
-                                          annotationData: annotationData,
-                                          lock: lock,
-                                          completion: completion)
-                    semaphore?.signal()
-                }
-            }
-            
-            // Wait for queue to drain
-            queue.sync(flags: .barrier) {}
-        } else {
-            scanPaths(dirs) { filePath in
-                generateASTs(filePath,
-                                 exclusionSuffixes: exclusionSuffixes,
-                                 annotationData: annotationData,
-                                 lock: nil,
-                                 completion: completion)
-            }
+
+        scan(dirs: dirs) { (path, lock) in
+            self.generateASTs(path,
+                              exclusionSuffixes: exclusionSuffixes,
+                              annotationData: annotationData,
+                              declType: declType,
+                              lock: lock,
+                              completion: completion)
         }
     }
     
     private func generateASTs(files: [String],
-                                  exclusionSuffixes: [String]? = nil,
-                                  annotation: String,
-                                  semaphore: DispatchSemaphore?,
-                                  queue: DispatchQueue?,
-                                  completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                              exclusionSuffixes: [String]? = nil,
+                              annotation: String,
+                              declType: DeclType,
+                              completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         guard let annotationData = annotation.data(using: .utf8) else {
             fatalError("Annotation is invalid: \(annotation)")
         }
-        
-        if let queue = queue {
-            let lock = NSLock()
-            for filePath in files {
-                _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
-                queue.async {
-                    self.generateASTs(filePath,
-                                          exclusionSuffixes: exclusionSuffixes,
-                                          annotationData: annotationData,
-                                          lock: lock,
-                                          completion: completion)
-                    semaphore?.signal()
-                }
-            }
-            // Wait for queue to drain
-            queue.sync(flags: .barrier) {}
-            
-        } else {
-            for filePath in files {
-                generateASTs(filePath,
-                                 exclusionSuffixes: exclusionSuffixes,
-                                 annotationData: annotationData,
-                                 lock: nil,
-                                 completion: completion)
-            }
+
+        scan(files) { (path, lock) in
+            self.generateASTs(path,
+                              exclusionSuffixes: exclusionSuffixes,
+                              annotationData: annotationData,
+                              declType: declType,
+                              lock: lock,
+                              completion: completion)
         }
     }
     
     private func generateASTs(_ path: String,
                                   exclusionSuffixes: [String]? = nil,
                                   annotationData: Data,
+                                  declType: DeclType,
                                   lock: NSLock?,
                                   completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
@@ -150,6 +97,19 @@ public class ParserViaSourceKit: SourceParsing {
             var results = [Entity]()
             let topstructure = try Structure(path: path)
             for current in topstructure.substructures {
+                var parseCurrent = false
+                switch declType {
+                case .protocolType:
+                    parseCurrent = current.isProtocol
+                case .classType:
+                    parseCurrent = current.isClass
+                case .other:
+                    parseCurrent = false
+                case .all:
+                    parseCurrent = true
+                }
+
+                guard parseCurrent else { continue }
                 let metadata = current.annotationMetadata(with: annotationData, in: content)
                 if let node = Entity.node(with: current, filepath: path, data: content, isPrivate: current.isPrivate, isFinal: current.isFinal, metadata: metadata, processed: false) {
                     results.append(node)

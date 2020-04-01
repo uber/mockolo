@@ -1,5 +1,40 @@
 import MockoloFramework
 
+let inoutParams = """
+/// \(String.mockAnnotation)
+public protocol Foo {
+    func hash(into hasher: inout Hasher)
+    func bar(lhs: inout String, rhs: inout Int)
+}
+"""
+
+let inoutParamsMock = """
+public class FooMock: Foo {
+    public init() { }
+
+    public var hashCallCount = 0
+    public var hashHandler: ((inout Hasher) -> ())?
+    public func hash(into hasher: inout Hasher)  {
+        hashCallCount += 1
+        if let hashHandler = hashHandler {
+            hashHandler(&hasher)
+        }
+
+    }
+
+    public var barCallCount = 0
+    public var barHandler: ((inout String, inout Int) -> ())?
+    public func bar(lhs: inout String, rhs: inout Int)  {
+        barCallCount += 1
+        if let barHandler = barHandler {
+            barHandler(&lhs, &rhs)
+        }
+
+    }
+}
+
+"""
+
 let subscripts = """
 
 /// \(String.mockAnnotation)
@@ -41,16 +76,11 @@ public protocol KeyValueSubscripting {
 
 let subscriptsMocks = """
 
-
 class SubscriptProtocolMock: SubscriptProtocol {
-
-    private var _doneInit = false
-    
     init() {
-
-        _doneInit = true
     }
-        typealias T = Any
+
+    typealias T = Any
     typealias Value = Any
     static var subscriptCallCount = 0
     static var subscriptHandler: ((Int) -> (AnyObject?))?
@@ -264,11 +294,11 @@ class SubscriptProtocolMock: SubscriptProtocol {
 
 public class KeyValueSubscriptingMock: KeyValueSubscripting {
 
-    private var _doneInit = false
+    
     
     public init() {
 
-        _doneInit = true
+        
     }
         public typealias Key = Any
     public typealias Value = Any
@@ -316,9 +346,9 @@ let variadicFuncMock =
 import Foundation
 
 class NonSimpleFuncsMock: NonSimpleFuncs {
-    private var _doneInit = false
+    
     init() {
-        _doneInit = true
+        
     }
     
     var barCallCount = 0
@@ -351,11 +381,11 @@ import Foundation
 
 class NonSimpleFuncsMock: NonSimpleFuncs {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
     var passCallCount = 0
@@ -388,9 +418,9 @@ let closureArgFuncMock = """
 
 import Foundation
 class NonSimpleFuncsMock: NonSimpleFuncs {
-    private var _doneInit = false
+    
     init() {
-        _doneInit = true
+        
     }
     
     var catCallCount = 0
@@ -436,11 +466,11 @@ import Foundation
 
 class NonSimpleFuncsMock: NonSimpleFuncs {
 
-    private var _doneInit = false
+    
 
     init() {
 
-        _doneInit = true
+        
     }
         var maxCallCount = 0
     var maxHandler: ((Int) -> ((() -> Void)?))?

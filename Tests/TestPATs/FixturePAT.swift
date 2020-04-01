@@ -30,44 +30,44 @@ let patNameCollisionMock =
 
 class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     typealias T = Any
 }
 
 class BarMock: Bar {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     typealias T = String
 }
 
 class CatMock: Cat {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     typealias T = Hashable & Codable
 }
 
 class BazMock: Baz {
     typealias T = Any & Hashable & Codable & String
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     
 }
@@ -91,11 +91,11 @@ let patOverrideMock =
 
 class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     typealias T = Any
     typealias U = Bar
@@ -125,27 +125,20 @@ public protocol SomeType {
 """
 
 let protocolWithTypealiasMock = """
+
 public class SomeTypeMock: SomeType {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(key: Key) {
-        self.key = key
-        _doneInit = true
+        self._key = key
     }
     public typealias Key = String
     public var keySetCallCount = 0
-    var underlyingKey: Key!
+    private var _key: Key!  { didSet { keySetCallCount += 1 } }
     public var key: Key {
-        get { return underlyingKey }
-        set {
-            underlyingKey = newValue
-            if _doneInit { keySetCallCount += 1 }
-        }
+        get { return _key }
+        set { _key = newValue }
     }
 }
-
 
 """
 
@@ -162,11 +155,11 @@ let patDefaultTypeMock =
 """
 class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     typealias T = Any
     typealias U = Collection where U.Element == T
@@ -189,11 +182,11 @@ let patPartialOverrideMock =
 """
 class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     init() {
         
-        _doneInit = true
+        
     }
     typealias T = Any
     typealias U = AnyObject

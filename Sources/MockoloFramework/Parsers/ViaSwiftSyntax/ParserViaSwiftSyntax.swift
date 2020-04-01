@@ -18,16 +18,12 @@ import Foundation
 import SwiftSyntax
 
 public class ParserViaSwiftSyntax: SourceParsing {
-    
     public init() {}
     
     public func parseProcessedDecls(_ paths: [String],
-                                    semaphore: DispatchSemaphore?,
-                                    queue: DispatchQueue?,
                                     completion: @escaping ([Entity], [String: [String]]?) -> ()) {
-        var treeVisitor = EntityVisitor()
-        for filePath in paths {
-            generateASTs(filePath, annotation: "", treeVisitor: &treeVisitor, completion: completion)
+        scan(paths) { (path, lock) in
+            self.generateASTs(path, annotation: "", declType: .classType, lock: lock, completion: completion)
         }
     }
     
@@ -35,52 +31,64 @@ public class ParserViaSwiftSyntax: SourceParsing {
                            isDirs: Bool,
                            exclusionSuffixes: [String]? = nil,
                            annotation: String,
-                           semaphore: DispatchSemaphore?,
-                           queue: DispatchQueue?,
+                           declType: DeclType,
                            completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard let paths = paths else { return }
-        
-        var treeVisitor = EntityVisitor(annotation: annotation)
-        
-        if isDirs {
-            scanPaths(paths) { filePath in
-                generateASTs(filePath,
-                             exclusionSuffixes: exclusionSuffixes,
-                             annotation: annotation,
-                             treeVisitor: &treeVisitor,
-                             completion: completion)
-            }
-        } else {
-            for filePath in paths {
-                generateASTs(filePath, exclusionSuffixes: exclusionSuffixes, annotation: annotation, treeVisitor: &treeVisitor, completion: completion)
-            }
-            
+        scan(paths, isDirectory: isDirs) { (path, lock) in
+            self.generateASTs(path,
+                              exclusionSuffixes: exclusionSuffixes,
+                              annotation: annotation,
+                              declType: declType,
+                              lock: lock,
+                              completion: completion)
         }
     }
-    
+
     private func generateASTs(_ path: String,
                               exclusionSuffixes: [String]? = nil,
                               annotation: String,
-                              treeVisitor: inout EntityVisitor,
+                              declType: DeclType,
+                              lock: NSLock?,
                               completion: @escaping ([Entity], [String: [String]]?) -> ()) {
         
         guard path.shouldParse(with: exclusionSuffixes) else { return }
+
+        if !annotation.isEmpty {
+            if declType == .protocolType, !containsDecl(String.protocolDecl, in: path) {
+                return
+            }
+            if declType == .classType, !containsDecl(String.classDecl, in: path) {
+                return
+            }
+            if declType == .all, !containsDecl(String.protocolDecl, in: path), !containsDecl(String.classDecl, in: path) {
+                return
+            }
+        }
+
         do {
             var results = [Entity]()
             let node = try SyntaxParser.parse(path)
+            var treeVisitor = EntityVisitor(path, annotation: annotation, declType: declType)
             node.walk(&treeVisitor)
             let ret = treeVisitor.entities
-            for ent in ret {
-                ent.filepath = path
-            }
             results.append(contentsOf: ret)
             let imports = treeVisitor.imports
             treeVisitor.reset()
-            
+
+            lock?.lock()
+            defer {lock?.unlock()}
             completion(results, [path: imports])
         } catch {
             fatalError(error.localizedDescription)
         }
+    }
+
+    private func containsDecl(_ decl: Data?, in path: String) -> Bool {
+        guard let decl = decl else { return false }
+        guard let content = FileManager.default.contents(atPath: path) else {
+            fatalError("Retrieving contents of \(path) failed")
+        }
+        return content.range(of: decl) != nil
     }
 }

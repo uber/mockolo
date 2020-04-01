@@ -22,18 +22,32 @@ fileprivate var validIdentifierChars: CharacterSet = {
     return valid
 }()
 
-public struct Type {
+public final class Type {
     let typeName: String
     let cast: String?
+    var cachedDefaultVal: String?
+
     init(_ type: String, cast: String? = nil){
         self.typeName = type == .unknownVal ? "" : type
         self.cast = cast
     }
-    
+
+    var isInOut: Bool {
+        return typeName.hasPrefix(String.inout)
+    }
+
+    var isAutoclosure: Bool {
+        return typeName.hasPrefix(String.autoclosure)
+    }
+
+    var isRxObservable: Bool {
+        return typeName.hasPrefix(.rxObservableLeftAngleBracket) || typeName.hasPrefix(.observableLeftAngleBracket)
+    }
+
     var isUnknown: Bool {
         return typeName.isEmpty || typeName == String.unknownVal
     }
-    
+
     var isOptional: Bool {
         if !typeName.hasSuffix("?") {
             return false
@@ -43,7 +57,7 @@ public struct Type {
         let sub = Type(String(slice))
         return sub.isSingular
     }
-    
+
     /// Returns true if this type is Implicitly Unwrapped Optional
     var isIUO: Bool {
         if !typeName.hasSuffix("!") {
@@ -54,7 +68,14 @@ public struct Type {
         let sub = Type(String(slice))
         return sub.isSingular
     }
-    
+
+    var base: String {
+        if isOptional || isIUO {
+            return String(typeName.dropLast(1))
+        }
+        return typeName
+    }
+
     var underlyingType: String {
         var ret = typeName
 
@@ -74,10 +95,14 @@ public struct Type {
                 ret.append("!")
             }
         }
-        
+
         return ret
     }
-    
+
+    // TODO: correct this
+    var isTuple: Bool {
+        return typeName.contains(",")
+    }
     /// Returns true if this type is a single atomic type (e.g. an identifier, a tuple, etc).
     /// If it can be split into an input / output, e.g. T -> U, it will return false.
     /// Note that (T -> U) will be considered atomic, but T -> U won't.
@@ -85,21 +110,21 @@ public struct Type {
         if typeName.hasPrefix("@") {
             return false
         }
-        
+
         if isIdentifier {
             return true
         }
-        
+
         if hasClosure {
             if splitByClosure {
                 return false
             }
             return true
         }
-        
+
         return isValidBracketed || isValidParened
     }
-    
+
     var hasClosure: Bool {
         return typeName.range(of: String.closureArrow) != nil
     }
@@ -113,36 +138,36 @@ public struct Type {
         if let closureOpRange = arg.range(of: String.closureArrow) {
             let leftHalf = String(arg[arg.startIndex..<closureOpRange.lowerBound])
             let rightHalf = String(arg[arg.index(after: closureOpRange.upperBound)..<arg.endIndex])
-            
+
             let l = Type(leftHalf)
             let r = Type(rightHalf)
-            
+
             if l.isSingular || r.isSingular {
                 return true
             }
         }
         return false
     }
-    
+
     var isParened: Bool {
         return typeName.hasPrefix("(") && typeName.hasSuffix(")")
     }
-    
+
     var isBracketed: Bool {
         return typeName.hasSuffix(">") || typeName.hasSuffix("]")
     }
-    
+
     var isValidBracketed: Bool {
         return isBracketed && hasValidBrackets
     }
     var isValidParened: Bool {
         return isParened && hasValidParens
     }
-    
+
     var displayName: String {
         return typeName.displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
     }
-    
+
     var isIdentifier: Bool {
         if isUnknown {
             return false
@@ -156,10 +181,10 @@ public struct Type {
                 return false
             }
         }
-        
+
         return true
     }
-    
+
     var hasValidBrackets: Bool {
         let arg = typeName
         if let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "<", "["), options: [], range: nil) {
@@ -187,15 +212,15 @@ public struct Type {
                     }
                 }
             }
-            
+
             if squareBracketCount == 0, angleBracketCount == 0, suffix == ">" || suffix == "]" {
                 return true
             }
         }
-        
+
         return false
     }
-    
+
     var hasValidParens: Bool {
         let arg = typeName
         if  let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "("), options: [], range: nil) {
@@ -210,7 +235,7 @@ public struct Type {
                 if s == suffix, s != ")" {
                     return false
                 }
-                
+
                 if s == "(" {
                     count += 1
                 }
@@ -221,15 +246,15 @@ public struct Type {
                     }
                 }
             }
-            
+
             if count == 0 {
                 return true
             }
         }
         return false
     }
-    
-    
+
+
     var tupleComponents: [String] {
         let arg = typeName
         let scalars = arg.unicodeScalars
@@ -300,26 +325,44 @@ public struct Type {
 
         return components
     }
-    
-    
-    /// Parses a type string containing (nested) tuples or brackets and returns a default value for each type component
-    func defaultVal(with typeKeys: [String: String]? = nil, overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
-        let (subjectType, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam)
-        if subjectType != nil {
-            return isInitParam ? subjectVal : (typeName.hasSuffix(String.rxObservableLeftAngleBracket) ? String.rxObservableEmpty : String.observableEmpty)
-        }
 
-        if let val = parseDefaultVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+
+    /// Parses a type string containing (nested) tuples or brackets and returns a default value for each type component
+    ///
+    ///  if nil, no default val available
+    ///  if "nil", type is optional
+    ///  if "non-nil", type is non-optional
+    ///  if "", type is String, with an empty string value
+    func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
+
+        if let val = cachedDefaultVal {
             return val
         }
-        
-        if let val = typeKeys?[typeName] {
+
+        let (subjectType, typeParam, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam)
+        if subjectType != nil {
+            let prefix = typeName.hasPrefix(String.rxObservableLeftAngleBracket) ? String.rxObservableLeftAngleBracket : String.observableLeftAngleBracket
+            var rxEmpty = String.observableEmpty
+            if let t = typeParam {
+                rxEmpty = "\(prefix)\(t)>.empty()"
+            }
+            cachedDefaultVal = isInitParam ? subjectVal : rxEmpty
+            return cachedDefaultVal
+        }
+
+        if let val = parseDefaultVal(isInitParam: isInitParam) {
+            cachedDefaultVal = val
+            return cachedDefaultVal
+        }
+
+        if let val = Type.customTypeMap[typeName] {
+            cachedDefaultVal = val
             return val
         }
         return nil
     }
 
-    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?) {
+    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?, String?) {
         if typeName.hasPrefix(String.observableLeftAngleBracket) || typeName.hasPrefix(String.rxObservableLeftAngleBracket),
             let range = typeName.range(of: String.observableLeftAngleBracket), let lastIdx = typeName.lastIndex(of: ">") {
             let typeParamStr = typeName[range.upperBound..<lastIdx]
@@ -349,22 +392,23 @@ public struct Type {
                     underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
                 }
             }
-            return (underlyingSubjectType, underlyingSubjectTypeDefaultVal)
+            return (underlyingSubjectType, String(typeParamStr), underlyingSubjectTypeDefaultVal)
         }
-        return (nil, nil)
+        return (nil, nil, nil)
     }
-    
-    private func parseDefaultVal(isInitParam: Bool, overrides: [String: String]?, overrideKey: String = "") -> String? {
+
+    private func parseDefaultVal(isInitParam: Bool) -> String? {
         let arg = self
-        if let val = defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+
+        if let val = defaultSingularVal(isInitParam: isInitParam) {
             return val
         }
 
-        if !arg.isSingular {
+        if hasClosure {
             return nil
         }
 
-        if arg.hasClosure {
+        if !arg.isSingular {
             return nil
         }
 
@@ -374,7 +418,7 @@ public struct Type {
             if sub == "," || sub == ":" || sub == "(" || sub == ")" || sub == "=" || sub == " " || sub == "" {
                 vals.append(sub)
             } else {
-                if let val = Type(sub).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+                if let val = Type(sub).defaultSingularVal(isInitParam: isInitParam) {
                     vals.append(val)
                 } else {
                     return nil
@@ -384,16 +428,17 @@ public struct Type {
 
         if !vals.isEmpty {
             var ret = vals.joined()
-            ret = ret.components(separatedBy: ",").filter{!$0.isEmpty}.joined(separator: ", ")
+            ret = ret.replacingOccurrences(of: ",", with: ", ")
+            ret = ret.replacingOccurrences(of: ",  ", with: ", ")
             return ret
         }
 
         return nil
     }
 
-    func defaultSingularVal(isInitParam: Bool = false, overrides: [String: String]? = nil, overrideKey: String = "") -> String? {
+    private func defaultSingularVal(isInitParam: Bool = false, overrides: [String: String]? = nil, overrideKey: String = "") -> String? {
         let arg = self
-        
+
         if arg.isOptional {
             return "nil"
         }
@@ -409,13 +454,13 @@ public struct Type {
             }
             return "\(arg.typeName)()"
         }
-        
-        if let val = defaultTypeValueMap[arg.typeName] {
+
+        if let val = Type.defaultTypeValueMap[arg.typeName] {
             return val
         }
         return nil
     }
-    
+
 
 
     // Process substrings containing angled or square brackets by replacing a comma delimiter
@@ -435,7 +480,7 @@ public struct Type {
             left = "["
             right = "]"
         }
-        
+
         var mutableArg = arg
         var nextRange: Range<String.Index>? = nil
         while let leftRange = mutableArg.range(of: left, options: .caseInsensitive, range: nextRange, locale: nil),
@@ -444,34 +489,32 @@ public struct Type {
                 let sub = mutableArg[bound]
                 let newsub = sub.replacingOccurrences(of: ",", with: ";")
                 mutableArg = mutableArg.replacingOccurrences(of: sub, with: newsub)
-                
+
                 if let nextIdx = mutableArg.index(rightRange.upperBound, offsetBy: 1, limitedBy: mutableArg.endIndex) {
                     nextRange = nextIdx..<mutableArg.endIndex
                 } else {
                     break
                 }
         }
-        
+
         return mutableArg
     }
-    
+
 
     static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type) -> Type {
-        
+
         let displayableParamTypes = params.map { (subtype: Type) -> String in
             return subtype.processTypeParams(with: typeParams)
         }
-        
+
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
-        
         var displayableReturnType = returnType.typeName
-        
-        let returnComps = displayableReturnType.displayableComponents
-        
+        let returnComps = displayableReturnType.literalComponents
+
         var returnAsStr = ""
         var asSuffix = "!"
         var returnTypeCast = ""
-        if !typeParams.filter({returnComps.contains($0)}).isEmpty {
+        if !typeParams.filter({ returnComps.contains($0)}).isEmpty {
             returnAsStr = returnType.typeName
             if returnType.isOptional {
                 displayableReturnType = .any + "?"
@@ -483,30 +526,30 @@ public struct Type {
             } else {
                 displayableReturnType = .any
             }
-            
+
             if !returnAsStr.isEmpty {
                 returnTypeCast = " as\(asSuffix) " + returnAsStr
             }
         }
-        
+
         let isSimpleTuple = displayableReturnType.hasPrefix("(") && displayableReturnType.hasSuffix(")") &&
             displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
-        
+
         if !isSimpleTuple {
             displayableReturnType = "(\(displayableReturnType))"
         }
-        
+
         let suffixStr = suffix.isThrowsOrRethrows ? String.SwiftKeywords.throws.rawValue + " " : ""
-        
+
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
         return Type(typeStr, cast: returnTypeCast)
     }
-    
-    
+
+
     func processTypeParams(with typeParamList: [String]) -> String {
         let closureRng = typeName.range(of: String.closureArrow)
         let isEscaping = typeName.hasPrefix(String.escaping)
-        
+
         let isTypeOptional = isOptional
         var ret = typeName
         if let closureRng = closureRng {
@@ -520,7 +563,7 @@ public struct Type {
                     return ret
                 }
             }
-            
+
             for item in typeParamList {
                 if ret.literalComponents.contains(item) {
                     ret = ret.replacingOccurrences(of: item, with: String.any)
@@ -531,7 +574,7 @@ public struct Type {
             let hasGenericType = typeParamList.filter{ (item: String) -> Bool in
                 ret.literalComponents.contains(item)
             }
-            
+
             if !hasGenericType.isEmpty {
                 ret = .any
                 if isTypeOptional {
@@ -541,56 +584,57 @@ public struct Type {
             return ret
         }
     }
+
+    public static var customTypeMap = [String: String]()
+
+    private let bracketPrefixTypes = ["Array", "Set", "Dictionary", "PublishSubject", "ReplaySubject", "BehaviorSubject"]
+
+
+    enum BracketType {
+        case angle
+        case square
+    }
+
+
+    private static let defaultTypeValueMap =
+        ["Int": "0",
+         "Int8": "0",
+         "Int16": "0",
+         "Int32": "0",
+         "Int64": "0",
+         "UInt": "0",
+         "UInt8": "0",
+         "UInt16": "0",
+         "UInt32": "0",
+         "UInt64": "0",
+         "CGFloat": "0.0",
+         "Float": "0.0",
+         "Double": "0.0",
+         "Bool": "false",
+         "String": "\"\"",
+         "Character": "\"\"",
+         "TimeInterval": "0.0",
+         "NSTimeInterval": "0.0",
+         "PublishSubject": "PublishSubject()",
+         "Date": "Date()",
+         "NSDate": "NSDate()",
+         "CGRect": ".zero",
+         "CGSize": ".zero",
+         "CGPoint": ".zero",
+         "UIEdgeInsets": ".zero",
+         "UIColor": ".black",
+         "UIFont": ".systemFont(ofSize: 12)",
+         "UIImage": "UIImage()",
+         "UIView": "UIView(frame: .zero)",
+         "UIViewController": "UIViewController()",
+         "UICollectionView": "UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())",
+         "UICollectionViewLayout": "UICollectionViewLayout()",
+         "UIScrollView": "UIScrollView()",
+         "UIScrollViewKeyboardDismissMode": ".interactive",
+         "UIAccessibilityTraits": ".none",
+         "Void": "Void",
+         "URL": "URL(fileURLWithPath: \"\")",
+         "NSURL": "NSURL(fileURLWithPath: \"\")",
+         "UUID": "UUID()",
+    ];
 }
-
-
-private let defaultTypeValueMap =
-    ["Int": "0",
-     "Int8": "0",
-     "Int16": "0",
-     "Int32": "0",
-     "Int64": "0",
-     "UInt": "0",
-     "UInt8": "0",
-     "UInt16": "0",
-     "UInt32": "0",
-     "UInt64": "0",
-     "CGFloat": "0.0",
-     "Float": "0.0",
-     "Double": "0.0",
-     "Bool": "false",
-     "String": "\"\"",
-     "Character": "\"\"",
-     "TimeInterval": "0.0",
-     "NSTimeInterval": "0.0",
-     "PublishSubject": "PublishSubject()",
-     "Date": "Date()",
-     "NSDate": "NSDate()",
-     "CGRect": ".zero",
-     "CGSize": ".zero",
-     "CGPoint": ".zero",
-     "UIEdgeInsets": ".zero",
-     "UIColor": ".black",
-     "UIFont": ".systemFont(ofSize: 12)",
-     "UIImage": "UIImage()",
-     "UIView": "UIView(frame: .zero)",
-     "UIViewController": "UIViewController()",
-     "UICollectionView": "UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())",
-     "UICollectionViewLayout": "UICollectionViewLayout()",
-     "UIScrollView": "UIScrollView()",
-     "UIScrollViewKeyboardDismissMode": ".interactive",
-     "UIAccessibilityTraits": ".none",
-     "Void": "Void",
-     "URL": "URL(fileURLWithPath: \"\")",
-     "NSURL": "NSURL(fileURLWithPath: \"\")",
-     "UUID": "UUID()",
-];
-
-
-enum BracketType {
-    case angle
-    case square
-}
-
-private let bracketPrefixTypes = ["Array", "Set", "Dictionary", "PublishSubject"]
-

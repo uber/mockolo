@@ -22,9 +22,9 @@ let overloadMock8 =
 import Foundation
 public class ParentMock: Parent {
     
-    private var _doneInit = false
+    
     public init() {
-        _doneInit = true
+        
     }
     
     public var updateStateCallCount = 0
@@ -41,11 +41,11 @@ public class ParentMock: Parent {
 
 public class ChildMock: Child {
     
-    private var _doneInit = false
+    
     
     public init() {
         
-        _doneInit = true
+        
     }
     
     public var updateStateIntCallCount = 0

@@ -12,20 +12,19 @@ protocol TaskRouting: BaseRouting {
 
 let rxMock = """
 
+
+
 class TaskRoutingMock: TaskRouting {
-    private var _doneInit = false
-    
-    init() { _doneInit = true }
+    init() { }
     init(attachedRouter: Observable<Bool> = BehaviorSubject<Bool>(value: false)) {
         self.attachedRouter = attachedRouter
-        _doneInit = true
     }
     var attachedRouterSubjectSetCallCount = 0
-    var underlyingAttachedRouter: Observable<Bool>? { didSet { if _doneInit { attachedRouterSubjectSetCallCount += 1 } } }
-    var attachedRouterSubject = BehaviorSubject<Bool>(value: false) { didSet { if _doneInit { attachedRouterSubjectSetCallCount += 1 } } }
+    var _attachedRouter: Observable<Bool>? { didSet { attachedRouterSubjectSetCallCount += 1 } }
+    var attachedRouterSubject = BehaviorSubject<Bool>(value: false) { didSet { attachedRouterSubjectSetCallCount += 1 } }
     var attachedRouter: Observable<Bool> {
-        get { return underlyingAttachedRouter ?? attachedRouterSubject }
-        set { if let val = newValue as? BehaviorSubject<Bool> { attachedRouterSubject = val } else { underlyingAttachedRouter = newValue } }
+        get { return _attachedRouter ?? attachedRouterSubject }
+        set { if let val = newValue as? BehaviorSubject<Bool> { attachedRouterSubject = val } else { _attachedRouter = newValue } }
     }
     var routeToFooCallCount = 0
     var routeToFooHandler: (() -> (Observable<()>))?
@@ -34,9 +33,10 @@ class TaskRoutingMock: TaskRouting {
         if let routeToFooHandler = routeToFooHandler {
             return routeToFooHandler()
         }
-        return Observable.empty()
+        return Observable<()>.empty()
     }
 }
+
 """
 
 
@@ -52,38 +52,35 @@ protocol RxVar {
 let rxVarSubjectsMock = """
 
 class RxVarMock: RxVar {
-    
-    private var _doneInit = false
-    
-    init() { _doneInit = true }
+    init() { }
     init(isEnabled: Observable<Bool> = PublishSubject<Bool>(), nameStream: Observable<[EMobilitySearchVehicle]> = BehaviorSubject<[EMobilitySearchVehicle]>(value: [EMobilitySearchVehicle]()), integerStream: Observable<Int> = ReplaySubject<Int>.create(bufferSize: 1)) {
         self.isEnabled = isEnabled
         self.nameStream = nameStream
         self.integerStream = integerStream
-        _doneInit = true
     }
     var isEnabledSubjectSetCallCount = 0
-    var underlyingIsEnabled: Observable<Bool>? { didSet { if _doneInit { isEnabledSubjectSetCallCount += 1 } } }
-    var isEnabledSubject = PublishSubject<Bool>() { didSet { if _doneInit { isEnabledSubjectSetCallCount += 1 } } }
+    var _isEnabled: Observable<Bool>? { didSet { isEnabledSubjectSetCallCount += 1 } }
+    var isEnabledSubject = PublishSubject<Bool>() { didSet { isEnabledSubjectSetCallCount += 1 } }
     var isEnabled: Observable<Bool> {
-        get { return underlyingIsEnabled ?? isEnabledSubject }
-        set { if let val = newValue as? PublishSubject<Bool> { isEnabledSubject = val } else { underlyingIsEnabled = newValue } }
+        get { return _isEnabled ?? isEnabledSubject }
+        set { if let val = newValue as? PublishSubject<Bool> { isEnabledSubject = val } else { _isEnabled = newValue } }
     }
     var nameStreamSubjectSetCallCount = 0
-    var underlyingNameStream: Observable<[EMobilitySearchVehicle]>? { didSet { if _doneInit { nameStreamSubjectSetCallCount += 1 } } }
-    var nameStreamSubject = BehaviorSubject<[EMobilitySearchVehicle]>(value: [EMobilitySearchVehicle]()) { didSet { if _doneInit { nameStreamSubjectSetCallCount += 1 } } }
+    var _nameStream: Observable<[EMobilitySearchVehicle]>? { didSet { nameStreamSubjectSetCallCount += 1 } }
+    var nameStreamSubject = BehaviorSubject<[EMobilitySearchVehicle]>(value: [EMobilitySearchVehicle]()) { didSet { nameStreamSubjectSetCallCount += 1 } }
     var nameStream: Observable<[EMobilitySearchVehicle]> {
-        get { return underlyingNameStream ?? nameStreamSubject }
-        set { if let val = newValue as? BehaviorSubject<[EMobilitySearchVehicle]> { nameStreamSubject = val } else { underlyingNameStream = newValue } }
+        get { return _nameStream ?? nameStreamSubject }
+        set { if let val = newValue as? BehaviorSubject<[EMobilitySearchVehicle]> { nameStreamSubject = val } else { _nameStream = newValue } }
     }
     var integerStreamSubjectSetCallCount = 0
-    var underlyingIntegerStream: Observable<Int>? { didSet { if _doneInit { integerStreamSubjectSetCallCount += 1 } } }
-    var integerStreamSubject = ReplaySubject<Int>.create(bufferSize: 1) { didSet { if _doneInit { integerStreamSubjectSetCallCount += 1 } } }
+    var _integerStream: Observable<Int>? { didSet { integerStreamSubjectSetCallCount += 1 } }
+    var integerStreamSubject = ReplaySubject<Int>.create(bufferSize: 1) { didSet { integerStreamSubjectSetCallCount += 1 } }
     var integerStream: Observable<Int> {
-        get { return underlyingIntegerStream ?? integerStreamSubject }
-        set { if let val = newValue as? ReplaySubject<Int> { integerStreamSubject = val } else { underlyingIntegerStream = newValue } }
+        get { return _integerStream ?? integerStreamSubject }
+        set { if let val = newValue as? ReplaySubject<Int> { integerStreamSubject = val } else { _integerStream = newValue } }
     }
 }
+
 
 """
 
@@ -101,39 +98,33 @@ public protocol Y: X {
 """
 
 let rxVarInheritedMock = """
+
+
 public class XMock: X {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(myKey: Observable<SomeKey?> = BehaviorSubject<SomeKey?>(value: nil)) {
         self.myKey = myKey
-        _doneInit = true
     }
     public var myKeySubjectSetCallCount = 0
-    var underlyingMyKey: Observable<SomeKey?>? { didSet { if _doneInit { myKeySubjectSetCallCount += 1 } } }
-    public var myKeySubject = BehaviorSubject<SomeKey?>(value: nil) { didSet { if _doneInit { myKeySubjectSetCallCount += 1 } } }
+    var _myKey: Observable<SomeKey?>? { didSet { myKeySubjectSetCallCount += 1 } }
+    public var myKeySubject = BehaviorSubject<SomeKey?>(value: nil) { didSet { myKeySubjectSetCallCount += 1 } }
     public var myKey: Observable<SomeKey?> {
-        get { return underlyingMyKey ?? myKeySubject }
-        set { if let val = newValue as? BehaviorSubject<SomeKey?> { myKeySubject = val } else { underlyingMyKey = newValue } }
+        get { return _myKey ?? myKeySubject }
+        set { if let val = newValue as? BehaviorSubject<SomeKey?> { myKeySubject = val } else { _myKey = newValue } }
     }
 }
 
 public class YMock: Y {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(myKey: Observable<SomeKey?> = PublishSubject<SomeKey?>()) {
         self.myKey = myKey
-        _doneInit = true
     }
     public var myKeySubjectSetCallCount = 0
-    var underlyingMyKey: Observable<SomeKey?>? { didSet { if _doneInit { myKeySubjectSetCallCount += 1 } } }
-    public var myKeySubject = BehaviorSubject<SomeKey?>(value: nil) { didSet { if _doneInit { myKeySubjectSetCallCount += 1 } } }
+    var _myKey: Observable<SomeKey?>? { didSet { myKeySubjectSetCallCount += 1 } }
+    public var myKeySubject = BehaviorSubject<SomeKey?>(value: nil) { didSet { myKeySubjectSetCallCount += 1 } }
     public var myKey: Observable<SomeKey?> {
-        get { return underlyingMyKey ?? myKeySubject }
-        set { if let val = newValue as? BehaviorSubject<SomeKey?> { myKeySubject = val } else { underlyingMyKey = newValue } }
+        get { return _myKey ?? myKeySubject }
+        set { if let val = newValue as? BehaviorSubject<SomeKey?> { myKeySubject = val } else { _myKey = newValue } }
     }
     public var updateCallCount = 0
     public var updateHandler: ((SomeKey) -> ())?
@@ -142,9 +133,10 @@ public class YMock: Y {
         if let updateHandler = updateHandler {
             updateHandler(key)
         }
-        
+
     }
 }
+
 
 """
 
@@ -195,10 +187,7 @@ public protocol CompletionTasksStream: AnyObject {
 let rxMultiParentsMock = """
 
 public class TasksStreamMock: TasksStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(tasks: Observable<Tasks> = PublishSubject<Tasks>(), taskScopes: Observable<[TaskScope]> = PublishSubject<[TaskScope]>(), workTaskScopes: Observable<[TaskScope]> = PublishSubject<[TaskScope]>(), online: Observable<Bool> = PublishSubject<Bool>(), state: Observable<State> = PublishSubject<State>(), isOnJob: Observable<Bool> = PublishSubject<Bool>(), completionTasks: Observable<[CompletionTask]> = PublishSubject<[CompletionTask]>()) {
         self.tasks = tasks
         self.taskScopes = taskScopes
@@ -207,7 +196,6 @@ public class TasksStreamMock: TasksStream {
         self.state = state
         self.isOnJob = isOnJob
         self.completionTasks = completionTasks
-        _doneInit = true
     }
     public var updateCallCount = 0
     public var updateHandler: ((Tasks) -> ())?
@@ -216,230 +204,132 @@ public class TasksStreamMock: TasksStream {
         if let updateHandler = updateHandler {
             updateHandler(tasks)
         }
-        
+
     }
-    private var tasksSubjectKind = 0
-    public var tasksSubjectSetCallCount = 0
-    public var tasksSubject = PublishSubject<Tasks>() { didSet { if _doneInit { tasksSubjectSetCallCount += 1 } } }
-    public var tasksReplaySubject = ReplaySubject<Tasks>.create(bufferSize: 1) { didSet { if _doneInit { tasksSubjectSetCallCount += 1 } } }
-    public var tasksBehaviorSubject: BehaviorSubject<Tasks>! { didSet { if _doneInit { tasksSubjectSetCallCount += 1 } } }
-    public var underlyingTasks: Observable<Tasks>! { didSet { if _doneInit { tasksSubjectSetCallCount += 1 } } }
-    public var tasks: Observable<Tasks> {
-        get {
-            if tasksSubjectKind == 0 { return tasksSubject }
-            else if tasksSubjectKind == 1 { return tasksBehaviorSubject }
-            else if tasksSubjectKind == 2 { return tasksReplaySubject }
-            else { return underlyingTasks }
-        }
-        set {
-            if let val = newValue as? PublishSubject<Tasks> { tasksSubjectKind = 0; tasksSubject = val }
-            else if let val = newValue as? BehaviorSubject<Tasks> { tasksSubjectKind = 1; tasksBehaviorSubject = val }
-            else if let val = newValue as? ReplaySubject<Tasks> { tasksSubjectKind = 2; tasksReplaySubject = val }
-            else { tasksSubjectKind = 3; underlyingTasks = newValue }
-        }
-    }
+    public var tasksSubjectSetCallCount: Int { return self._tasks.callCount }
+    public var tasksSubject: PublishSubject<Tasks> { return self._tasks.publishSubject }
+    public var tasksReplaySubject: ReplaySubject<Tasks> { return self._tasks.replaySubject }
+    public var tasksBehaviorSubject: BehaviorSubject<Tasks> { return self._tasks.behaviorSubject }
+    @MockObservable(unwrapped: Observable<Tasks>.empty()) public var tasks: Observable<Tasks>
     public var taskScopesSubjectSetCallCount = 0
-    var underlyingTaskScopes: Observable<[TaskScope]>? { didSet { if _doneInit { taskScopesSubjectSetCallCount += 1 } } }
-    public var taskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { if _doneInit { taskScopesSubjectSetCallCount += 1 } } }
+    var _taskScopes: Observable<[TaskScope]>? { didSet { taskScopesSubjectSetCallCount += 1 } }
+    public var taskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { taskScopesSubjectSetCallCount += 1 } }
     public var taskScopes: Observable<[TaskScope]> {
-        get { return underlyingTaskScopes ?? taskScopesSubject }
-        set { if let val = newValue as? ReplaySubject<[TaskScope]> { taskScopesSubject = val } else { underlyingTaskScopes = newValue } }
+        get { return _taskScopes ?? taskScopesSubject }
+        set { if let val = newValue as? ReplaySubject<[TaskScope]> { taskScopesSubject = val } else { _taskScopes = newValue } }
     }
     public var workTaskScopesSubjectSetCallCount = 0
-    var underlyingWorkTaskScopes: Observable<[TaskScope]>? { didSet { if _doneInit { workTaskScopesSubjectSetCallCount += 1 } } }
-    public var workTaskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { if _doneInit { workTaskScopesSubjectSetCallCount += 1 } } }
+    var _workTaskScopes: Observable<[TaskScope]>? { didSet { workTaskScopesSubjectSetCallCount += 1 } }
+    public var workTaskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { workTaskScopesSubjectSetCallCount += 1 } }
     public var workTaskScopes: Observable<[TaskScope]> {
-        get { return underlyingWorkTaskScopes ?? workTaskScopesSubject }
-        set { if let val = newValue as? ReplaySubject<[TaskScope]> { workTaskScopesSubject = val } else { underlyingWorkTaskScopes = newValue } }
+        get { return _workTaskScopes ?? workTaskScopesSubject }
+        set { if let val = newValue as? ReplaySubject<[TaskScope]> { workTaskScopesSubject = val } else { _workTaskScopes = newValue } }
     }
-    private var onlineSubjectKind = 0
-    public var onlineSubjectSetCallCount = 0
-    public var onlineSubject = PublishSubject<Bool>() { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var onlineReplaySubject = ReplaySubject<Bool>.create(bufferSize: 1) { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var onlineBehaviorSubject: BehaviorSubject<Bool>! { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var underlyingOnline: Observable<Bool>! { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var online: Observable<Bool> {
-        get {
-            if onlineSubjectKind == 0 { return onlineSubject }
-            else if onlineSubjectKind == 1 { return onlineBehaviorSubject }
-            else if onlineSubjectKind == 2 { return onlineReplaySubject }
-            else { return underlyingOnline }
-        }
-        set {
-            if let val = newValue as? PublishSubject<Bool> { onlineSubjectKind = 0; onlineSubject = val }
-            else if let val = newValue as? BehaviorSubject<Bool> { onlineSubjectKind = 1; onlineBehaviorSubject = val }
-            else if let val = newValue as? ReplaySubject<Bool> { onlineSubjectKind = 2; onlineReplaySubject = val }
-            else { onlineSubjectKind = 3; underlyingOnline = newValue }
-        }
-    }
-    private var stateSubjectKind = 0
-    public var stateSubjectSetCallCount = 0
-    public var stateSubject = PublishSubject<State>() { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var stateReplaySubject = ReplaySubject<State>.create(bufferSize: 1) { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var stateBehaviorSubject: BehaviorSubject<State>! { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var underlyingState: Observable<State>! { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var state: Observable<State> {
-        get {
-            if stateSubjectKind == 0 { return stateSubject }
-            else if stateSubjectKind == 1 { return stateBehaviorSubject }
-            else if stateSubjectKind == 2 { return stateReplaySubject }
-            else { return underlyingState }
-        }
-        set {
-            if let val = newValue as? PublishSubject<State> { stateSubjectKind = 0; stateSubject = val }
-            else if let val = newValue as? BehaviorSubject<State> { stateSubjectKind = 1; stateBehaviorSubject = val }
-            else if let val = newValue as? ReplaySubject<State> { stateSubjectKind = 2; stateReplaySubject = val }
-            else { stateSubjectKind = 3; underlyingState = newValue }
-        }
-    }
+    public var onlineSubjectSetCallCount: Int { return self._online.callCount }
+    public var onlineSubject: PublishSubject<Bool> { return self._online.publishSubject }
+    public var onlineReplaySubject: ReplaySubject<Bool> { return self._online.replaySubject }
+    public var onlineBehaviorSubject: BehaviorSubject<Bool> { return self._online.behaviorSubject }
+    @MockObservable(unwrapped: Observable<Bool>.empty()) public var online: Observable<Bool>
+    public var stateSubjectSetCallCount: Int { return self._state.callCount }
+    public var stateSubject: PublishSubject<State> { return self._state.publishSubject }
+    public var stateReplaySubject: ReplaySubject<State> { return self._state.replaySubject }
+    public var stateBehaviorSubject: BehaviorSubject<State> { return self._state.behaviorSubject }
+    @MockObservable(unwrapped: Observable<State>.empty()) public var state: Observable<State>
     public var isOnJobSubjectSetCallCount = 0
-    var underlyingIsOnJob: Observable<Bool>? { didSet { if _doneInit { isOnJobSubjectSetCallCount += 1 } } }
-    public var isOnJobSubject = BehaviorSubject<Bool>(value: false) { didSet { if _doneInit { isOnJobSubjectSetCallCount += 1 } } }
+    var _isOnJob: Observable<Bool>? { didSet { isOnJobSubjectSetCallCount += 1 } }
+    public var isOnJobSubject = BehaviorSubject<Bool>(value: false) { didSet { isOnJobSubjectSetCallCount += 1 } }
     public var isOnJob: Observable<Bool> {
-        get { return underlyingIsOnJob ?? isOnJobSubject }
-        set { if let val = newValue as? BehaviorSubject<Bool> { isOnJobSubject = val } else { underlyingIsOnJob = newValue } }
+        get { return _isOnJob ?? isOnJobSubject }
+        set { if let val = newValue as? BehaviorSubject<Bool> { isOnJobSubject = val } else { _isOnJob = newValue } }
     }
     public var completionTasksSubjectSetCallCount = 0
-    var underlyingCompletionTasks: Observable<[CompletionTask]>? { didSet { if _doneInit { completionTasksSubjectSetCallCount += 1 } } }
-    public var completionTasksSubject = BehaviorSubject<[CompletionTask]>(value: [CompletionTask]()) { didSet { if _doneInit { completionTasksSubjectSetCallCount += 1 } } }
+    var _completionTasks: Observable<[CompletionTask]>? { didSet { completionTasksSubjectSetCallCount += 1 } }
+    public var completionTasksSubject = BehaviorSubject<[CompletionTask]>(value: [CompletionTask]()) { didSet { completionTasksSubjectSetCallCount += 1 } }
     public var completionTasks: Observable<[CompletionTask]> {
-        get { return underlyingCompletionTasks ?? completionTasksSubject }
-        set { if let val = newValue as? BehaviorSubject<[CompletionTask]> { completionTasksSubject = val } else { underlyingCompletionTasks = newValue } }
+        get { return _completionTasks ?? completionTasksSubject }
+        set { if let val = newValue as? BehaviorSubject<[CompletionTask]> { completionTasksSubject = val } else { _completionTasks = newValue } }
     }
 }
 
 public class BaseTaskScopeListStreamMock: BaseTaskScopeListStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(taskScopes: Observable<[TaskScope]> = ReplaySubject<[TaskScope]>.create(bufferSize: 1)) {
         self.taskScopes = taskScopes
-        _doneInit = true
     }
     public var taskScopesSubjectSetCallCount = 0
-    var underlyingTaskScopes: Observable<[TaskScope]>? { didSet { if _doneInit { taskScopesSubjectSetCallCount += 1 } } }
-    public var taskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { if _doneInit { taskScopesSubjectSetCallCount += 1 } } }
+    var _taskScopes: Observable<[TaskScope]>? { didSet { taskScopesSubjectSetCallCount += 1 } }
+    public var taskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { taskScopesSubjectSetCallCount += 1 } }
     public var taskScopes: Observable<[TaskScope]> {
-        get { return underlyingTaskScopes ?? taskScopesSubject }
-        set { if let val = newValue as? ReplaySubject<[TaskScope]> { taskScopesSubject = val } else { underlyingTaskScopes = newValue } }
+        get { return _taskScopes ?? taskScopesSubject }
+        set { if let val = newValue as? ReplaySubject<[TaskScope]> { taskScopesSubject = val } else { _taskScopes = newValue } }
     }
 }
 
 public class WorkTaskScopeListStreamMock: WorkTaskScopeListStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(workTaskScopes: Observable<[TaskScope]> = ReplaySubject<[TaskScope]>.create(bufferSize: 1)) {
         self.workTaskScopes = workTaskScopes
-        _doneInit = true
     }
     public var workTaskScopesSubjectSetCallCount = 0
-    var underlyingWorkTaskScopes: Observable<[TaskScope]>? { didSet { if _doneInit { workTaskScopesSubjectSetCallCount += 1 } } }
-    public var workTaskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { if _doneInit { workTaskScopesSubjectSetCallCount += 1 } } }
+    var _workTaskScopes: Observable<[TaskScope]>? { didSet { workTaskScopesSubjectSetCallCount += 1 } }
+    public var workTaskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { workTaskScopesSubjectSetCallCount += 1 } }
     public var workTaskScopes: Observable<[TaskScope]> {
-        get { return underlyingWorkTaskScopes ?? workTaskScopesSubject }
-        set { if let val = newValue as? ReplaySubject<[TaskScope]> { workTaskScopesSubject = val } else { underlyingWorkTaskScopes = newValue } }
+        get { return _workTaskScopes ?? workTaskScopesSubject }
+        set { if let val = newValue as? ReplaySubject<[TaskScope]> { workTaskScopesSubject = val } else { _workTaskScopes = newValue } }
     }
 }
 
 public class OnlineStreamMock: OnlineStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(online: Observable<Bool> = PublishSubject<Bool>()) {
         self.online = online
-        _doneInit = true
     }
-    private var onlineSubjectKind = 0
-    public var onlineSubjectSetCallCount = 0
-    public var onlineSubject = PublishSubject<Bool>() { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var onlineReplaySubject = ReplaySubject<Bool>.create(bufferSize: 1) { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var onlineBehaviorSubject: BehaviorSubject<Bool>! { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var underlyingOnline: Observable<Bool>! { didSet { if _doneInit { onlineSubjectSetCallCount += 1 } } }
-    public var online: Observable<Bool> {
-        get {
-            if onlineSubjectKind == 0 { return onlineSubject }
-            else if onlineSubjectKind == 1 { return onlineBehaviorSubject }
-            else if onlineSubjectKind == 2 { return onlineReplaySubject }
-            else { return underlyingOnline }
-        }
-        set {
-            if let val = newValue as? PublishSubject<Bool> { onlineSubjectKind = 0; onlineSubject = val }
-            else if let val = newValue as? BehaviorSubject<Bool> { onlineSubjectKind = 1; onlineBehaviorSubject = val }
-            else if let val = newValue as? ReplaySubject<Bool> { onlineSubjectKind = 2; onlineReplaySubject = val }
-            else { onlineSubjectKind = 3; underlyingOnline = newValue }
-        }
-    }
+    public var onlineSubjectSetCallCount: Int { return self._online.callCount }
+    public var onlineSubject: PublishSubject<Bool> { return self._online.publishSubject }
+    public var onlineReplaySubject: ReplaySubject<Bool> { return self._online.replaySubject }
+    public var onlineBehaviorSubject: BehaviorSubject<Bool> { return self._online.behaviorSubject }
+    @MockObservable(unwrapped: Observable<Bool>.empty()) public var online: Observable<Bool>
 }
 
 public class StateStreamMock: StateStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(state: Observable<State> = PublishSubject<State>()) {
         self.state = state
-        _doneInit = true
     }
-    private var stateSubjectKind = 0
-    public var stateSubjectSetCallCount = 0
-    public var stateSubject = PublishSubject<State>() { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var stateReplaySubject = ReplaySubject<State>.create(bufferSize: 1) { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var stateBehaviorSubject: BehaviorSubject<State>! { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var underlyingState: Observable<State>! { didSet { if _doneInit { stateSubjectSetCallCount += 1 } } }
-    public var state: Observable<State> {
-        get {
-            if stateSubjectKind == 0 { return stateSubject }
-            else if stateSubjectKind == 1 { return stateBehaviorSubject }
-            else if stateSubjectKind == 2 { return stateReplaySubject }
-            else { return underlyingState }
-        }
-        set {
-            if let val = newValue as? PublishSubject<State> { stateSubjectKind = 0; stateSubject = val }
-            else if let val = newValue as? BehaviorSubject<State> { stateSubjectKind = 1; stateBehaviorSubject = val }
-            else if let val = newValue as? ReplaySubject<State> { stateSubjectKind = 2; stateReplaySubject = val }
-            else { stateSubjectKind = 3; underlyingState = newValue }
-        }
-    }
+    public var stateSubjectSetCallCount: Int { return self._state.callCount }
+    public var stateSubject: PublishSubject<State> { return self._state.publishSubject }
+    public var stateReplaySubject: ReplaySubject<State> { return self._state.replaySubject }
+    public var stateBehaviorSubject: BehaviorSubject<State> { return self._state.behaviorSubject }
+    @MockObservable(unwrapped: Observable<State>.empty()) public var state: Observable<State>
 }
 
 public class WorkStateStreamMock: WorkStateStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(isOnJob: Observable<Bool> = BehaviorSubject<Bool>(value: false)) {
         self.isOnJob = isOnJob
-        _doneInit = true
     }
     public var isOnJobSubjectSetCallCount = 0
-    var underlyingIsOnJob: Observable<Bool>? { didSet { if _doneInit { isOnJobSubjectSetCallCount += 1 } } }
-    public var isOnJobSubject = BehaviorSubject<Bool>(value: false) { didSet { if _doneInit { isOnJobSubjectSetCallCount += 1 } } }
+    var _isOnJob: Observable<Bool>? { didSet { isOnJobSubjectSetCallCount += 1 } }
+    public var isOnJobSubject = BehaviorSubject<Bool>(value: false) { didSet { isOnJobSubjectSetCallCount += 1 } }
     public var isOnJob: Observable<Bool> {
-        get { return underlyingIsOnJob ?? isOnJobSubject }
-        set { if let val = newValue as? BehaviorSubject<Bool> { isOnJobSubject = val } else { underlyingIsOnJob = newValue } }
+        get { return _isOnJob ?? isOnJobSubject }
+        set { if let val = newValue as? BehaviorSubject<Bool> { isOnJobSubject = val } else { _isOnJob = newValue } }
     }
 }
 
 public class CompletionTasksStreamMock: CompletionTasksStream {
-    
-    private var _doneInit = false
-    
-    public init() { _doneInit = true }
+    public init() { }
     public init(completionTasks: Observable<[CompletionTask]> = BehaviorSubject<[CompletionTask]>(value: [CompletionTask]())) {
         self.completionTasks = completionTasks
-        _doneInit = true
     }
     public var completionTasksSubjectSetCallCount = 0
-    var underlyingCompletionTasks: Observable<[CompletionTask]>? { didSet { if _doneInit { completionTasksSubjectSetCallCount += 1 } } }
-    public var completionTasksSubject = BehaviorSubject<[CompletionTask]>(value: [CompletionTask]()) { didSet { if _doneInit { completionTasksSubjectSetCallCount += 1 } } }
+    var _completionTasks: Observable<[CompletionTask]>? { didSet { completionTasksSubjectSetCallCount += 1 } }
+    public var completionTasksSubject = BehaviorSubject<[CompletionTask]>(value: [CompletionTask]()) { didSet { completionTasksSubjectSetCallCount += 1 } }
     public var completionTasks: Observable<[CompletionTask]> {
-        get { return underlyingCompletionTasks ?? completionTasksSubject }
-        set { if let val = newValue as? BehaviorSubject<[CompletionTask]> { completionTasksSubject = val } else { underlyingCompletionTasks = newValue } }
+        get { return _completionTasks ?? completionTasksSubject }
+        set { if let val = newValue as? BehaviorSubject<[CompletionTask]> { completionTasksSubject = val } else { _completionTasks = newValue } }
     }
 }
+
 """
 

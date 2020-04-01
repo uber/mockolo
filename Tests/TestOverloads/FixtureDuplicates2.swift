@@ -22,12 +22,8 @@ let overloadMock4 =
 """
 
 class FooMock: Foo {
-    
-    private var _doneInit = false
+    init() { }
 
-    init() {
-        _doneInit = true
-    }
     var updateCallCount = 0
     var updateHandler: ((Int, Float) -> ())?
     func update(arg: Int, some: Float)  {
@@ -35,7 +31,7 @@ class FooMock: Foo {
         if let updateHandler = updateHandler {
             updateHandler(arg, some)
         }
-        
+
     }
     var updateArgCallCount = 0
     var updateArgHandler: ((Int, Float) -> (Int))?
@@ -53,7 +49,7 @@ class FooMock: Foo {
         if let updateArgSomeHandler = updateArgSomeHandler {
             return updateArgSomeHandler(arg, some)
         }
-        return Observable.empty()
+        return Observable<Int>.empty()
     }
     var updateArgSomeIntCallCount = 0
     var updateArgSomeIntHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
@@ -74,5 +70,4 @@ class FooMock: Foo {
         return Array<String, Float>()
     }
 }
-
 """
