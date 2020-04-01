@@ -11,9 +11,9 @@ public protocol Foo: Bar {
 let overloadParent2 = """
 public class BarMock: Bar {
     
-    private var _doneInit = false
+    
     public init() {
-        _doneInit = true
+        
     }
     
     public var tellCallCount = 0
@@ -46,11 +46,11 @@ let overloadMock2 =
 
 public class FooMock: Foo {
     
-    private var _doneInit = false
+    
     
     public init() {
         
-        _doneInit = true
+        
     }
     
     public var tellStatusCallCount = 0

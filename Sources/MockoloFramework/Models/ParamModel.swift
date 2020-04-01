@@ -26,6 +26,10 @@ final class ParamModel: Model {
     let isGeneric: Bool
     let inInit: Bool
     let needVarDecl: Bool
+
+    var isStatic: Bool {
+        return false
+    }
     
     var modelType: ModelType {
         return .parameter
@@ -34,6 +38,14 @@ final class ParamModel: Model {
     var fullName: String {
         return label + "_" + name
     }
+    
+    func underlyingName(with defaultTypeValue: String?) -> String {
+        if let _ = defaultTypeValue, !type.isRxObservable {
+            return "_\(name)"
+        }
+        return name
+    }
+
 
     init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool, offset: Int64, length: Int64) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -69,7 +81,7 @@ final class ParamModel: Model {
         return nil
     }
     
-    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false) -> String? {
         return applyParamTemplate(name: name, label: label, type: type, inInit: inInit)
     }
 }

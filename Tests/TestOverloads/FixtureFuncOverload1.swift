@@ -13,9 +13,9 @@ import Foundation
 import CoreLocation
 
 public class P0Mock: P0 {
-    private var _doneInit = false
+    
     init() {
-        _doneInit = true
+        
     }
     var updateCallCount = 0
     var updateHandler: (([String], Bool, @escaping () -> ()) -> ())?
@@ -46,10 +46,10 @@ import Foundation
 
 class P1Mock: P1 {
     
-    private var _doneInit = false
+    
     
     init() {        
-        _doneInit = true
+        
     }
     var updateCallCount = 0
     var updateHandler: (([String], Bool, @escaping () -> ()) -> ())?

@@ -13,10 +13,10 @@ let overloadMock6 =
 """
 class SomeVCMock: SomeVC {
     
-    private var _doneInit = false
+    
 
     init() {
-        _doneInit = true
+        
     }
     var popViewControllerCallCount = 0
     var popViewControllerHandler: ((UIViewController) -> ())?
@@ -69,10 +69,10 @@ let overloadMock7 =
 """
 public class FooMock: Foo {
     
-    private var _doneInit = false
+    
 
     public init() {
-        _doneInit = true
+        
     }
     public var customizeCallCount = 0
     public var customizeHandler: ((String?) -> ())?
@@ -121,12 +121,12 @@ let sameNameVarFuncMock = """
 
 public class BarMock: Bar {
     
-    private var _doneInit = false
     
-    public init() { _doneInit = true }
+    
+    public init() {  }
     public init(talk: Int = 0) {
         self.talk = talk
-        _doneInit = true
+        
     }
     public var talkSetCallCount = 0
     public var talk: Int = 0 { didSet { talkSetCallCount += 1 } }
@@ -134,12 +134,12 @@ public class BarMock: Bar {
 
 public class FooMock: Foo {
     
-    private var _doneInit = false
     
-    public init() { _doneInit = true }
+    
+    public init() {  }
     public init(talk: Int = 0) {
         self.talk = talk
-        _doneInit = true
+        
     }
     public var talkSetCallCount = 0
     public var talk: Int = 0 { didSet { talkSetCallCount += 1 } }

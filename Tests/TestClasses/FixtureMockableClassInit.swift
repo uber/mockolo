@@ -47,11 +47,11 @@ public class High {
 let klassInitParentMock =
 """
 public class HighMock: High {
-    private var _doneInit = false
+    
 
     public required init(orderId: Int) {
         super.init(orderId: orderId)
-        _doneInit = true
+        
     }
 
     public var orderSetCallCount = 0
@@ -71,21 +71,21 @@ let klassInitMock = """
 
 public class LowMock: Low {
     
-    private var _doneInit = false
+    
 
     var nameSetCallCount = 0
     override var name: String = "" { didSet { nameSetCallCount += 1 } }
     required public init(arg: String = "") {
         super.init(arg: arg)
-        _doneInit = true
+        
     }
     required public init(orderId: Int = 0) {
         super.init(orderId: orderId)
-        _doneInit = true
+        
     }
     override public init(m: Int = 0) {
         super.init(m: m)
-        _doneInit = true
+        
     }
 }
 """
@@ -95,20 +95,20 @@ let klassInitLongerMock = """
 
 public class LowMock: Low {
     
-    private var _doneInit = false
+    
     var nameSetCallCount = 0
     override var name: String = "" { didSet { nameSetCallCount += 1 } }
     required public init(arg: String = "") {
         super.init(arg: arg)
-        _doneInit = true
+        
     }
     required public init(orderId: Int = 0) {
         super.init(orderId: orderId)
-        _doneInit = true
+        
     }
     override public init(m: Int = 0) {
         super.init(m: m)
-        _doneInit = true
+        
     }
 }
 """

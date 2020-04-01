@@ -21,7 +21,7 @@ final class ClassModel: Model {
     var offset: Int64
     var type: Type
     let attribute: String
-    let accessControlLevelDescription: String
+    let accessLevel: String
     let identifier: String
     let declType: DeclType
     let entities: [(String, Model)]
@@ -52,10 +52,10 @@ final class ClassModel: Model {
         self.metadata = metadata
         self.offset = offset
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
-        self.accessControlLevelDescription = acl.isEmpty ? "" : acl + " "
+        self.accessLevel = acl
     }
     
-    func render(with identifier: String, typeKeys: [String: String]? = nil) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, typeKeys: typeKeys, accessControlLevelDescription: accessControlLevelDescription, attribute: attribute, declType: declType, metadata: metadata, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool) -> String? {
+        return applyClassTemplate(name: name, identifier: self.identifier, accessLevel: accessLevel, attribute: attribute, declType: declType, metadata: metadata, useTemplateFunc: useTemplateFunc, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
     }
 }

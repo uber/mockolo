@@ -20,9 +20,9 @@ let overloadMock3 =
 """
 import UIKit
 class FooMock: Foo {
-    private var _doneInit = false
+    
     init() {
-        _doneInit = true
+        
     }
     var displayCallCount = 0
     var displayHandler: (() -> ())?

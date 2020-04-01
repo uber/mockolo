@@ -16,12 +16,12 @@ import Foundation
 
 class SimpleVarMock: SimpleVar {
     
-    private var _doneInit = false
     
-    init() { _doneInit = true }
+    
+    init() {  }
     init(name: Int = 0) {
         self.name = name
-        _doneInit = true
+        
     }
     var nameSetCallCount = 0
     var name: Int = 0 { didSet { nameSetCallCount += 1 } }

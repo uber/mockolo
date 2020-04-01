@@ -12,14 +12,11 @@ protocol TaskRouting: BaseRouting {
 
 let moduleOverrideMock = """
 
-class TaskRoutingMock: Foo.TaskRouting {
-    
-    private var _doneInit = false
-    
-    init() { _doneInit = true }
+
+class Foo.TaskRoutingMock: Foo.TaskRouting {
+    init() { }
     init(bar: String = "") {
         self.bar = bar
-        _doneInit = true
     }
     var barSetCallCount = 0
     var bar: String = "" { didSet { barSetCallCount += 1 } }

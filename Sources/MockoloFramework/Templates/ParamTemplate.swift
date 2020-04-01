@@ -16,27 +16,29 @@
 
 import Foundation
 
-func applyParamTemplate(name: String,
-                        label: String,
-                        type: Type,
-                        inInit: Bool) -> String {
-    var result = name
-    if !label.isEmpty {
-        result = "\(label) \(name)"
-    }
-    if !type.isUnknown {
-        result = "\(result): \(type.typeName)"
+extension ParamModel {
+    func applyParamTemplate(name: String,
+                            label: String,
+                            type: Type,
+                            inInit: Bool) -> String {
+        var result = name
+        if !label.isEmpty {
+            result = "\(label) \(name)"
+        }
+        if !type.isUnknown {
+            result = "\(result): \(type.typeName)"
+        }
+        
+        if inInit, let defaultVal = type.defaultVal() {
+            result = "\(result) = \(defaultVal)"
+        }
+        return result
     }
     
-    if inInit, let defaultVal = type.defaultVal() {
-        result = "\(result) = \(defaultVal)"
+    func applyVarTemplate(name: String,
+                          type: Type) -> String {
+        assert(!type.isUnknown)
+        let vardecl = "\(1.tab)private var \(underlyingName): \(type.underlyingType)"
+        return vardecl
     }
-    return result
-}
-
-func applyVarTemplate(name: String,
-                      type: Type) -> String {
-    assert(!type.isUnknown)
-    let vardecl = "\(1.tab)private var \(name.safeName): \(type.underlyingType)"
-    return vardecl
 }

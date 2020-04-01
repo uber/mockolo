@@ -16,17 +16,19 @@
 
 import Foundation
 
-func applyMacroTemplate(name: String,
-                        typeKeys: [String: String]?,
-                        entities: [Model]) -> String {
-    let rendered = entities
-        .compactMap {$0.render(with: $0.name, typeKeys: typeKeys) }
-        .joined(separator: "\n")
-    
-    let template = """
-    \(1.tab)#if \(name)
-    \(rendered)
-    \(1.tab)#endif
-    """
-    return template
+extension IfMacroModel {
+    func applyMacroTemplate(name: String,
+                            useTemplateFunc: Bool,
+                            entities: [Model]) -> String {
+        let rendered = entities
+            .compactMap {$0.render(with: $0.name, encloser: "", useTemplateFunc: useTemplateFunc) }
+            .joined(separator: "\n")
+        
+        let template = """
+        \(1.tab)#if \(name)
+        \(rendered)
+        \(1.tab)#endif
+        """
+        return template
+    }
 }

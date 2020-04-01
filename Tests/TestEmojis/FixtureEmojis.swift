@@ -15,73 +15,45 @@ let emojiParentMock =
 import Foundation
 
 public class EmojiParentMock: EmojiParent {
-    private var _doneInit = false
     init(👌😳👍: Emoji, dict: Dictionary<String, Int> = Dictionary<String, Int>()) {
         self.dict = dict
-        self.👌😳👍 = 👌😳👍
-        _doneInit = true
+        self._👌😳👍 = 👌😳👍
     }
 
     var dictSetCallCount = 0
-    var underlyingDict: Dictionary<String, Int>!
-    var dict: Dictionary<String, Int> {
-        get {
-            return underlyingDict
-        }
-        set {
-            underlyingDict = newValue
-            if _doneInit { dictSetCallCount += 1 }
-        }
-    }
-    
+    var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
+
     var 👍SetCallCount = 0
-    var underlying👍: Emoji!
+    private var _👍: Emoji!  { didSet { 👍SetCallCount += 1 } }
     var 👍: Emoji {
-        get {
-            return underlying👍
-        }
-        set {
-            underlying👍 = newValue
-            if _doneInit { 👍SetCallCount += 1 }
-        }
+        get { return _👍 }
+        set { _👍 = newValue }
     }
     
     var 👌😳👍SetCallCount = 0
-    var underlying👌😳👍: Emoji!
+    var _👌😳👍: Emoji! { didSet { 👌😳👍SetCallCount += 1 } }
     var 👌😳👍: Emoji {
-        get {
-            return underlying👌😳👍
-        }
-        set {
-            underlying👌😳👍 = newValue
-            if _doneInit { 👌😳👍SetCallCount += 1 }
-        }
+        get { return _👌😳👍 }
+        set { _👌😳👍 = newValue }
     }
 }
 
 """
 
 
-let emojiVarsMock =
-"""
+let emojiVarsMock = """
     @available(iOS 10.0, *)
     class EmojiVarsMock: EmojiVars {
-
-        private var _doneInit = false
-        init() { _doneInit = true }
+        init() {  }
         init(😂: Emoji) {
-            self.😂 = 😂
-            _doneInit = true
+            self._😂 = 😂
         }
             
         var 😂SetCallCount = 0
-        var underlying😂: Emoji!
+        private var _😂: Emoji!  { didSet { 😂SetCallCount += 1 } }
         var 😂: Emoji {
-            get { return underlying😂 }
-            set {
-                underlying😂 = newValue
-                if _doneInit { 😂SetCallCount += 1 }
-            }
+            get { return _😂 }
+            set { _😂 = newValue }
         }
     }
 """
@@ -90,66 +62,41 @@ let emojiVarsMock =
 let emojiCombMock = """
 import Foundation
 
+
 @available(iOS 10.0, *)
 class EmojiVarsMock: EmojiVars {
+    init() { }
+    init(😂: Emoji, dict: Dictionary<String, Int> = Dictionary<String, Int>(), 👍: Emoji, 👌😳👍: Emoji) {
+        self._😂 = 😂
+        self.dict = dict
+        self._👍 = 👍
+        self._👌😳👍 = 👌😳👍
+    }
 
-        private var _doneInit = false
-            init() { _doneInit = true }
-        init(😂: Emoji, dict: Dictionary<String, Int> = Dictionary<String, Int>(), 👍: Emoji, 👌😳👍: Emoji) {
-            self.😂 = 😂
-            self.dict = dict
-            self.👍 = 👍
-            self.👌😳👍 = 👌😳👍
-            _doneInit = true
-        }
-            
-        var 😂SetCallCount = 0
-        var underlying😂: Emoji!
-        var 😂: Emoji {
-            get { return underlying😂 }
-            set {
-                underlying😂 = newValue
-                if _doneInit { 😂SetCallCount += 1 }
-            }
-        }
+    var 😂SetCallCount = 0
+    private var _😂: Emoji!  { didSet { 😂SetCallCount += 1 } }
+    var 😂: Emoji {
+        get { return _😂 }
+        set { _😂 = newValue }
+    }
 
     var dictSetCallCount = 0
-    var underlyingDict: Dictionary<String, Int>!
-
-    var dict: Dictionary<String, Int> {
-        get {
-            return underlyingDict
-        }
-        set {
-            underlyingDict = newValue
-            if _doneInit { dictSetCallCount += 1 }
-        }
-    }
+    var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
 
     var 👍SetCallCount = 0
-    var underlying👍: Emoji!
+    private var _👍: Emoji!  { didSet { 👍SetCallCount += 1 } }
     var 👍: Emoji {
-            get {
-                return underlying👍
-            }
-            set {
-                underlying👍 = newValue
-                if _doneInit { 👍SetCallCount += 1 }
-            }
+        get { return _👍 }
+        set { _👍 = newValue }
     }
+
     var 👌😳👍SetCallCount = 0
-    var underlying👌😳👍: Emoji!
+    var _👌😳👍: Emoji! { didSet { 👌😳👍SetCallCount += 1 } }
     var 👌😳👍: Emoji {
-            get {
-                return underlying👌😳👍
-            }
-            set {
-                underlying👌😳👍 = newValue
-                if _doneInit { 👌😳👍SetCallCount += 1 }
-            }
+        get { return _👌😳👍 }
+        set { _👌😳👍 = newValue }
     }
 }
-
 
 """
 
@@ -166,19 +113,14 @@ let familyEmojiParentMock =
 class FamilyEmojiMock: FamilyEmoji {
     init() {}
     init(👪🏽: Int = 0) {
-        self.👪🏽 = 👪🏽
+        self._👪🏽 = 👪🏽
     }
     
     var 👪🏽SetCallCount = 0
-    var underlying👪🏽: Int = 0
+    private var _👪🏽: Int = 0
     var 👪🏽: Int {
-        get {
-            return underlying👪🏽
-        }
-        set {
-            underlying👪🏽 = newValue
-            👪🏽SetCallCount += 1
-        }
+        get { return _👪🏽 }
+        set { _👪🏽 = newValue }
     }
 }
 """
@@ -231,19 +173,14 @@ let krJpParentMock =
 class HiMock: Hi {
     init() {}
     init(연락하기: Int = 0) {
-        self.연락하기 = 연락하기
+        self._연락하기 = 연락하기
     }
 
     var 연락하기SetCallCount = 0
-    var underlying연락하기: Int = 0
+    private var _연락하기: Int = 0
     var 연락하기: Int {
-        get {
-            return underlying연락하기
-        }
-        set {
-            underlying연락하기 = newValue
-            연락하기SetCallCount += 1
-        }
+        get { return _연락하기 }
+        set { _연락하기 = newValue }
     }
 }
 """

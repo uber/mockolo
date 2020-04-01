@@ -1,6 +1,4 @@
 
-
-
 let docComment1 = """
 //
 //  Copyright © Some Co, Inc. All rights reserved.
@@ -62,34 +60,24 @@ let docCommentMock =
     import Foundation
 
     public class DocProtocolMock: DocProtocol {
+        public init() { }
 
-        private var _doneInit = false
-        
-        public init() {
-
-            _doneInit = true
-        }
-            
         public var fooCallCount = 0
         public var fooHandler: ((Bool, Int) -> ())?
         public func foo(arg: Bool, tag: Int)  {
             fooCallCount += 1
-        
             if let fooHandler = fooHandler {
                 fooHandler(arg, tag)
             }
-            
         }
         
         public var barCallCount = 0
         public var barHandler: ((String, Float) -> ())?
         public func bar(name: String, more: Float)  {
             barCallCount += 1
-        
             if let barHandler = barHandler {
                 barHandler(name, more)
             }
-            
         }
     }
 """

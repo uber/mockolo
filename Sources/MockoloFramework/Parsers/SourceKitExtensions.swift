@@ -168,11 +168,6 @@ extension Structure: EntityNode {
         return nil
     }
 
-    
-    var acl: String {
-        return accessControlLevelDescription
-    }
-    
     var attributesDescription: String {
         return attributes?.description ?? ""
     }
@@ -201,13 +196,9 @@ extension Structure: EntityNode {
         return kind == SwiftDeclarationAttributeKind.available.rawValue
     }
     
-    var accessControlLevelDescription: String {
-        return accessControlLevel == "internal" ? "" : accessControlLevel
-    }
-    
-    var accessControlLevel: String {
+    var accessLevel: String {
         if let access = dictionary["key.accessibility"] as? String, let level = access.components(separatedBy: ".").last {
-            return level
+            return level == "internal" ? "" : level
         }
         return .unknownVal
     }

@@ -267,7 +267,7 @@ extension ProtocolDeclSyntax: EntityNode {
         return identifier.text
     }
     
-    var acl: String {
+    var accessLevel: String {
         return self.modifiers?.acl ?? ""
     }
     
@@ -300,7 +300,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
     
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: acl, declType: declType, metadata: metadata, processed: isProcessed)
+        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed)
     }
 }
 
@@ -310,7 +310,7 @@ extension ClassDeclSyntax: EntityNode {
         return identifier.text
     }
     
-    var acl: String {
+    var accessLevel: String {
         return self.modifiers?.acl ?? ""
     }
     
@@ -351,7 +351,7 @@ extension ClassDeclSyntax: EntityNode {
     }
     
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: acl, declType: declType, metadata: nil, processed: isProcessed)
+        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
     }
 }
 
@@ -556,7 +556,6 @@ extension AssociatedtypeDeclSyntax {
     }
 }
 
-
 extension TypealiasDeclSyntax {
     func model(with acl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> Model {
         return TypeAliasModel(name: self.identifier.text,
@@ -576,8 +575,12 @@ final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
     var imports: [String] = []
     let annotation: String
-    init(annotation: String = "") {
+    let path: String
+    let declType: DeclType
+    init(_ path: String, annotation: String = "", declType: DeclType) {
         self.annotation = annotation
+        self.path = path
+        self.declType = declType
     }
     
     func reset() {
@@ -593,7 +596,7 @@ final class EntityVisitor: SyntaxVisitor {
 
     private func visitImpl(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
-        if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
+        if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
             entities.append(ent)
         }
         return .skipChildren
@@ -608,13 +611,15 @@ final class EntityVisitor: SyntaxVisitor {
     private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.name.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
-            if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
+            if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
                 entities.append(ent)
             }
         } else {
-            let metadata = node.annotationMetadata(with: annotation)
-            if let ent = Entity.node(with: node, isPrivate: node.isPrivate, isFinal: node.isFinal, metadata: metadata, processed: false) {
-                entities.append(ent)
+            if declType == .classType || declType == .all {
+                let metadata = node.annotationMetadata(with: annotation)
+                if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: node.isFinal, metadata: metadata, processed: false) {
+                    entities.append(ent)
+                }
             }
         }
         return .skipChildren
@@ -633,6 +638,14 @@ final class EntityVisitor: SyntaxVisitor {
         }
         return .visitChildren
     }
+    
+    func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+
 }
 
 extension Trivia {

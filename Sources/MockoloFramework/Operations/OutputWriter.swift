@@ -24,6 +24,7 @@ func write(candidates: [(String, Int64)],
            header: String?,
            macro: String?,
            testableImports: [String]?,
+           customImports: [String]?,
            to outputFilePath: String) -> String {
     
     var importLines = [String]()
@@ -36,6 +37,10 @@ func write(candidates: [(String, Int64)],
         let v = findImportLines(data: filecontent, offset: offset)
         importLines.append(contentsOf: v)
         break
+    }
+    
+    if let customImports = customImports {
+        importLines.append(contentsOf: customImports.map {$0.asImport})
     }
     
     var importLineStr = ""
@@ -80,3 +85,4 @@ func write(candidates: [(String, Int64)],
     _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
     return ret
 }
+

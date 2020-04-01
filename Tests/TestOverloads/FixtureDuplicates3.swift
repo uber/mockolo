@@ -15,15 +15,12 @@ func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -
 }
 """
 
-let overloadMock5 =
-"""
-class FooMock: Foo {
-    
-    private var _doneInit = false
+let overloadMock5 = """
 
-    init() {
-        _doneInit = true
-    }
+class FooMock: Foo {
+
+    init() { }
+
     var collectionViewCallCount = 0
     var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
     func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
@@ -40,7 +37,7 @@ class FooMock: Foo {
         if let collectionViewConfigureCellHandler = collectionViewConfigureCellHandler {
             collectionViewConfigureCellHandler(collectionView, cell, index)
         }
-        
+
     }
     var collectionViewSizeForItemAtCallCount = 0
     var collectionViewSizeForItemAtHandler: ((UICollectionView, Int) -> (CGSize))?
@@ -58,7 +55,7 @@ class FooMock: Foo {
         if let collectionViewDidEndDisplayingHandler = collectionViewDidEndDisplayingHandler {
             collectionViewDidEndDisplayingHandler(collectionView, cell, index)
         }
-        
+
     }
     var collectionViewConfigureCallCount = 0
     var collectionViewConfigureHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
@@ -67,7 +64,7 @@ class FooMock: Foo {
         if let collectionViewConfigureHandler = collectionViewConfigureHandler {
             collectionViewConfigureHandler(collectionView, cell, index)
         }
-        
+
     }
     var loadImageCallCount = 0
     var loadImageHandler: ((URL) -> (Observable<UIImage>))?
@@ -76,7 +73,7 @@ class FooMock: Foo {
         if let loadImageHandler = loadImageHandler {
             return loadImageHandler(url)
         }
-        return Observable.empty()
+        return Observable<UIImage>.empty()
     }
     var loadImageAtURLCallCount = 0
     var loadImageAtURLHandler: ((URL, UIImage) -> (Observable<UIImage>))?
@@ -85,7 +82,7 @@ class FooMock: Foo {
         if let loadImageAtURLHandler = loadImageAtURLHandler {
             return loadImageAtURLHandler(url, placeholder)
         }
-        return Observable.empty()
+        return Observable<UIImage>.empty()
     }
     var loadImageAtURLRetryIntervalCallCount = 0
     var loadImageAtURLRetryIntervalHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
@@ -94,8 +91,7 @@ class FooMock: Foo {
         if let loadImageAtURLRetryIntervalHandler = loadImageAtURLRetryIntervalHandler {
             return loadImageAtURLRetryIntervalHandler(url, retryInterval, maxRetries)
         }
-        return Observable.empty()
+        return Observable<UIImage>.empty()
     }
 }
-
 """

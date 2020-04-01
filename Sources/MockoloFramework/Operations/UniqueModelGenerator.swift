@@ -21,32 +21,19 @@ import Foundation
 func generateUniqueModels(protocolMap: [String: Entity],
                           annotatedProtocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
-                          typeKeys: [String: String]?,
-                          semaphore: DispatchSemaphore?,
-                          queue: DispatchQueue?,
                           completion: @escaping (ResolvedEntityContainer) -> ()) {
-    if let queue = queue {
-        let lock = NSLock()
-        for (key, val) in annotatedProtocolMap {
-            _ = semaphore?.wait(timeout: DispatchTime.distantFuture)
-            queue.async {
-                generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: lock, completion: completion)
-                semaphore?.signal()
-            }
-        }
-        queue.sync(flags: .barrier) { }
-    } else {
-        for (key, val) in annotatedProtocolMap {
-            generateUniqueModels(key: key, entity: val, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap, lock: nil, completion: completion)
-        }
+    scan(annotatedProtocolMap) { (key, val, lock) in
+        let ret = generateUniqueModels(key: key, entity: val, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+        lock?.lock()
+        completion(ret)
+        lock?.unlock()
     }
 }
 
-func generateUniqueModels(key: String,
-                          entity: Entity,
-                          typeKeys: [String: String]?,
-                          protocolMap: [String: Entity],
-                          inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
+private func generateUniqueModels(key: String,
+                                  entity: Entity,
+                                  protocolMap: [String: Entity],
+                                  inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
     let (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
     
@@ -83,21 +70,3 @@ func generateUniqueModels(key: String,
     
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }
-
-
-
-func generateUniqueModels(key: String,
-                          entity: Entity,
-                          typeKeys: [String: String]?,
-                          protocolMap: [String: Entity],
-                          inheritanceMap: [String: Entity],
-                          lock: NSLock? = nil,
-                          completion: @escaping (ResolvedEntityContainer) -> ()) {
-    let ret = generateUniqueModels(key: key, entity: entity, typeKeys: typeKeys, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
-    
-    lock?.lock()
-    completion(ret)
-    lock?.unlock()
-}
-
-

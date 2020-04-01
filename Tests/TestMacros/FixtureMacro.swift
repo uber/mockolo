@@ -16,9 +16,9 @@ let macroMock = """
 
 class PresentableListenerMock: PresentableListener {
     
-    private var _doneInit = false
     
-    init() { _doneInit = true }
+    
+    init() {  }
     
     var runCallCount = 0
     var runHandler: (() -> ())?

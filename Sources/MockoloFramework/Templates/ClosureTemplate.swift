@@ -16,54 +16,58 @@
 
 import Foundation
 
-func applyClosureTemplate(name: String,
-                          type: Type,
-                          typeKeys: [String: String]?,
-                          genericTypeNames: [String],
-                          paramVals: [String]?,
-                          paramTypes: [Type]?,
-                          suffix: String,
-                          returnDefaultType: Type) -> String {
-    
-    var handlerParamValsStr = ""
-    if let paramVals = paramVals, let paramTypes = paramTypes {
-        let zipped = zip(paramVals, paramTypes).map { (arg) -> String in
-            let (argName, argType) = arg
-            if argType.typeName.hasPrefix(String.autoclosure) {
-                return argName.safeName + "()"
+extension ClosureModel {
+    func applyClosureTemplate(name: String,
+                              type: Type,
+                              genericTypeNames: [String],
+                              paramVals: [String]?,
+                              paramTypes: [Type]?,
+                              suffix: String,
+                              returnDefaultType: Type) -> String {
+        
+        var handlerParamValsStr = ""
+        if let paramVals = paramVals, let paramTypes = paramTypes {
+            let zipped = zip(paramVals, paramTypes).map { (arg) -> String in
+                let (argName, argType) = arg
+                if argType.isAutoclosure {
+                    return argName.safeName + "()"
+                }
+                if argType.isInOut {
+                    return "&" + argName.safeName
+                }
+                return argName.safeName
             }
-            return argName.safeName
+            handlerParamValsStr = zipped.joined(separator: ", ")
         }
-        handlerParamValsStr = zipped.joined(separator: ", ")
-    }
-    let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType, typeKeys: typeKeys)
-
-    let prefix = suffix.isThrowsOrRethrows ? String.SwiftKeywords.try.rawValue + " " : ""
-    
-    let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "
-    let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")"
-    
-    let template = """
+        let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
+        
+        let prefix = suffix.isThrowsOrRethrows ? String.SwiftKeywords.try.rawValue + " " : ""
+        
+        let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "
+        let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")"
+        
+        let template = """
         \(2.tab)if let \(name) = \(name) {
         \(3.tab)\(callExpr)
         \(2.tab)}
         \(2.tab)\(handlerReturnDefault)
         """
-
-    return template
-}
-
-
-private func renderReturnDefaultStatement(name: String, type: Type, typeKeys: [String: String]?) -> String {
-    guard !type.isUnknown else { return "" }
-
-    let result = type.defaultVal(with: typeKeys) ?? String.fatalError
+        
+        return template
+    }
     
-    if result.isEmpty {
-        return ""
+    
+    private func renderReturnDefaultStatement(name: String, type: Type) -> String {
+        guard !type.isUnknown else { return "" }
+        
+        let result = type.defaultVal() ?? String.fatalError
+        
+        if result.isEmpty {
+            return ""
+        }
+        if result.contains(String.fatalError) {
+            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
+        }
+        return  "return \(result)"
     }
-    if result.contains(String.fatalError) {
-        return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-    }
-    return  "return \(result)"
 }

@@ -4,27 +4,21 @@ class RxVarTests: MockoloTestCase {
     
     func testRx() {
         verify(srcContent: rx,
-               dstContent: rxMock,
-               concurrencyLimit: nil)
+               dstContent: rxMock)
     }
 
     func testRxMultiParents() {
            verify(srcContent: rxMultiParents,
-                  dstContent: rxMultiParentsMock,
-                  concurrencyLimit: nil)
+                  dstContent: rxMultiParentsMock)
     }
 
     func testRxVarInherited() {
         verify(srcContent: rxVarInherited,
-               dstContent: rxVarInheritedMock,
-               concurrencyLimit: nil)
+               dstContent: rxVarInheritedMock)
     }
 
     func testRxVarSubjects() {
         verify(srcContent: rxVarSubjects,
-               dstContent: rxVarSubjectsMock,
-               concurrencyLimit: nil)
+               dstContent: rxVarSubjectsMock)
     }
-    
-    
 }
