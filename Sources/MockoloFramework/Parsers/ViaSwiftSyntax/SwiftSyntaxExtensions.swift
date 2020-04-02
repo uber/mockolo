@@ -639,12 +639,25 @@ final class EntityVisitor: SyntaxVisitor {
         return .visitChildren
     }
     
+    #if swift(>=5.2)
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    #else
     func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
+    #endif
+
+    #if swift(>=5.2)
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    #else
     func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
+    #endif
 
 }
 

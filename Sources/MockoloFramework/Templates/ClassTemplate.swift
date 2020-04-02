@@ -82,7 +82,7 @@ extension ClassModel {
 
         let template = """
         \(attribute)
-        \(acl)class \(moduleDot)\(name): \(moduleDot)\(identifier) {
+        \(acl)class \(name): \(moduleDot)\(identifier) {
         \(body)
         }
         """

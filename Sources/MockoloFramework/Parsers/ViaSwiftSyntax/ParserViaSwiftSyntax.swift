@@ -78,7 +78,6 @@ public class ParserViaSwiftSyntax: SourceParsing {
             let ret = treeVisitor.entities
             results.append(contentsOf: ret)
             let imports = treeVisitor.imports
-            treeVisitor.reset()
 
             lock?.lock()
             defer {lock?.unlock()}
