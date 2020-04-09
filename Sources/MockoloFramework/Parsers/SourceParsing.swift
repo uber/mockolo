@@ -24,14 +24,26 @@ public enum DeclType {
 public protocol SourceParsing {
     
     /// Parses processed decls (mock classes) and calls a completion block
+    /// @param paths File paths containing processed mocks
+    /// @param fileMacro: File level macro
+    /// @param completion:The block to be executed on completion
     func parseProcessedDecls(_ paths: [String],
-                             completion: @escaping ([Entity], [String: [String]]?) -> ())
+                             fileMacro: String?,
+                             completion: @escaping ([Entity], ImportMap?) -> ())
     
     /// Parses decls (protocol, class) with annotations (/// @mockable) and calls a completion block
+    /// @param paths File/dir paths containing types with mock annotation
+    /// @param isDirs:True if paths are dir paths
+    /// @param exclusionSuffixess List of file suffixes to exclude when processing
+    /// @param annotation The mock annotation
+    /// @param fileMacro: File level macro
+    /// @param declType: The declaration type, e.g. protocol, class.
+    /// @param completion:The block to be executed on completion
     func parseDecls(_ paths: [String]?,
                     isDirs: Bool,
                     exclusionSuffixes: [String]?,
                     annotation: String,
+                    fileMacro: String?,
                     declType: DeclType,
-                    completion: @escaping ([Entity], [String: [String]]?) -> ())
+                    completion: @escaping ([Entity], ImportMap?) -> ())
 }

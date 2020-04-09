@@ -18,11 +18,13 @@ import Foundation
 import SourceKittenFramework
 
 public class ParserViaSourceKit: SourceParsing {
+    
     public init() {}
     
     public func parseProcessedDecls(_ paths: [String],
-                                    completion: @escaping ([Entity], [String: [String]]?) -> ()) {
-         scan(paths) { (filePath, lock) in
+                                    fileMacro: String?,
+                                    completion: @escaping ([Entity], ImportMap?) -> ()) {
+        scan(paths) { (filePath, lock) in
             self.generateProcessedASTs(filePath, lock: lock, completion: completion)
         }
     }
@@ -31,27 +33,29 @@ public class ParserViaSourceKit: SourceParsing {
                            isDirs: Bool,
                            exclusionSuffixes: [String]? = nil,
                            annotation: String,
+                           fileMacro: String?,
                            declType: DeclType,
-                           completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                           completion: @escaping ([Entity], ImportMap?) -> ()) {
         guard !annotation.isEmpty else { return }
         guard let paths = paths else { return }
         if isDirs {
-            generateASTs(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, declType: declType, completion: completion)
+            generateASTs(dirs: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, fileMacro: fileMacro, declType: declType, completion: completion)
         } else {
-            generateASTs(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, declType: declType, completion: completion)
+            generateASTs(files: paths, exclusionSuffixes: exclusionSuffixes, annotation: annotation, fileMacro: fileMacro, declType: declType, completion: completion)
         }
     }
     
     private func generateASTs(dirs: [String],
-                                  exclusionSuffixes: [String]? = nil,
-                                  annotation: String,
-                                  declType: DeclType,
-                                  completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                              exclusionSuffixes: [String]? = nil,
+                              annotation: String,
+                              fileMacro: String?,
+                              declType: DeclType,
+                              completion: @escaping ([Entity], ImportMap?) -> ()) {
         
         guard let annotationData = annotation.data(using: .utf8) else {
             fatalError("Annotation is invalid: \(annotation)")
         }
-
+        
         scan(dirs: dirs) { (path, lock) in
             self.generateASTs(path,
                               exclusionSuffixes: exclusionSuffixes,
@@ -65,12 +69,13 @@ public class ParserViaSourceKit: SourceParsing {
     private func generateASTs(files: [String],
                               exclusionSuffixes: [String]? = nil,
                               annotation: String,
+                              fileMacro: String?,
                               declType: DeclType,
-                              completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                              completion: @escaping ([Entity], ImportMap?) -> ()) {
         guard let annotationData = annotation.data(using: .utf8) else {
             fatalError("Annotation is invalid: \(annotation)")
         }
-
+        
         scan(files) { (path, lock) in
             self.generateASTs(path,
                               exclusionSuffixes: exclusionSuffixes,
@@ -82,11 +87,11 @@ public class ParserViaSourceKit: SourceParsing {
     }
     
     private func generateASTs(_ path: String,
-                                  exclusionSuffixes: [String]? = nil,
-                                  annotationData: Data,
-                                  declType: DeclType,
-                                  lock: NSLock?,
-                                  completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                              exclusionSuffixes: [String]? = nil,
+                              annotationData: Data,
+                              declType: DeclType,
+                              lock: NSLock?,
+                              completion: @escaping ([Entity], ImportMap?) -> ()) {
         
         guard path.shouldParse(with: exclusionSuffixes) else { return }
         guard let content = FileManager.default.contents(atPath: path) else {
@@ -108,7 +113,7 @@ public class ParserViaSourceKit: SourceParsing {
                 case .all:
                     parseCurrent = true
                 }
-
+                
                 guard parseCurrent else { continue }
                 let metadata = current.annotationMetadata(with: annotationData, in: content)
                 if let node = Entity.node(with: current, filepath: path, data: content, isPrivate: current.isPrivate, isFinal: current.isFinal, metadata: metadata, processed: false) {
@@ -126,8 +131,8 @@ public class ParserViaSourceKit: SourceParsing {
     }
     
     private func generateProcessedASTs(_ path: String,
-                                           lock: NSLock?,
-                                           completion: @escaping ([Entity], [String: [String]]) -> ()) {
+                                       lock: NSLock?,
+                                       completion: @escaping ([Entity], ImportMap?) -> ()) {
         
         guard let content = FileManager.default.contents(atPath: path) else {
             fatalError("Retrieving contents of \(path) failed")
@@ -140,9 +145,9 @@ public class ParserViaSourceKit: SourceParsing {
                 return Entity.node(with: current, filepath: path, data: content, isPrivate: current.isPrivate, isFinal: current.isFinal, metadata: nil, processed: true)
             }
             
-            let imports = findImportLines(data: content, offset: subs.first?.offset)
+            let imports = content.findImportLines(at: subs.first?.offset)
             lock?.lock()
-            completion(results, [path: imports])
+            completion(results, [path: ["": imports]])
             lock?.unlock()
         } catch {
             fatalError(error.localizedDescription)

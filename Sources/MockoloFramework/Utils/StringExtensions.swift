@@ -57,11 +57,17 @@ extension String {
     static let `open` = "open"
     static let initializer = "init"
     static let handlerSuffix = "Handler"
-    static let observableLeftAngleBracket = "Observable<"
-    static let rxObservableLeftAngleBracket = "RxSwift.Observable<"
+    static let observable = "Observable"
+    static let rxObservable = "RxSwift.Observable"
+    static let observableLeftAngleBracket = observable + "<"
+    static let rxObservableLeftAngleBracket = rxObservable + "<"
     static let publishSubject = "PublishSubject"
     static let behaviorSubject = "BehaviorSubject"
     static let replaySubject = "ReplaySubject"
+    static let replaySubjectCreate = ".create(bufferSize: 1)"
+    static let behaviorRelay = "BehaviorRelay"
+    static let variable = "Variable"
+    static let empty = ".empty()"
     static let observableEmpty = "Observable.empty()"
     static let rxObservableEmpty = "RxSwift.Observable.empty()"
     static let `required` = "required"
@@ -210,8 +216,8 @@ extension StringProtocol {
         return "import \(self)"
     }
     
-    var moduleName: String? {
-        guard self.hasPrefix(String.importSpace) else { return nil }
+    var moduleNameInImport: String {
+        guard self.hasPrefix(String.importSpace) else { return "" }
         return self.dropFirst(String.importSpace.count).trimmingCharacters(in: .whitespaces)
     }
 }

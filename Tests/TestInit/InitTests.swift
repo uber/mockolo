@@ -12,6 +12,10 @@ class InitTests: MockoloTestCase {
                dstContent: nonSimpleInitVarsMock)
     }
 
+    func testBlankInitMethod() {
+        verify(srcContent: protocolWithBlankInit,
+               dstContent: protocolWithBlankInitMock)
+    }
 
     func testInitMethod() {
         verify(srcContent: protocolWithInit,

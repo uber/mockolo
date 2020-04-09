@@ -33,7 +33,21 @@ extension Data {
         guard let subdata = sliced(offset: offset, length: length) else { return "" }
         return String(data: subdata, encoding: .utf8) ?? ""
     }
-    
+
+
+    /// Returns import lines of a file
+    /// @param content The source file content
+    /// @returns A list of import lines from the content
+    func findImportLines(at offset: Int64?) -> [String] {
+        if let offset = offset, offset > 0 {
+            let part = self.toString(offset: 0, length: offset)
+            let lines = part.components(separatedBy: "\n")
+            let importlines = lines.filter {$0.trimmingCharacters(in: .whitespaces).hasPrefix(String.importSpace)}
+            return importlines
+        }
+        return []
+    }
+
     func parseAnnotationArguments(for keys: String...) -> [String: [String: String]]? {
         let extracted = self
         var ret = [String: [String: String]]()

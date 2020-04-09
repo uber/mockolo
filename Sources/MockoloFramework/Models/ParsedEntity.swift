@@ -108,6 +108,7 @@ struct AnnotationMetadata {
     var varTypes: [String: String]?
 }
 
+public typealias ImportMap = [String: [String: [String]]]
 
 /// Metadata for a type being mocked
 public final class Entity {

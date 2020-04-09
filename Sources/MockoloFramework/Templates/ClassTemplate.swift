@@ -107,19 +107,22 @@ extension ClassModel {
         } else {
             if declType == .protocolType {
                 needParamedInit = !initParamCandidates.isEmpty
-                
+                needBlankInit = true
+
                 let buffer = initParamCandidates.sorted(path: \.fullName, fallback: \.name)
                 for paramList in declaredInitParamsPerInit {
-                    let list = paramList.sorted(path: \.fullName, fallback: \.name)
-                    if list.count == buffer.count {
-                        let dups = zip(list, buffer).filter {$0.0.fullName == $0.1.fullName}
-                        if !dups.isEmpty {
-                            needParamedInit = false
-                            break
+                    if paramList.isEmpty {
+                        needBlankInit = false
+                    } else {
+                        let list = paramList.sorted(path: \.fullName, fallback: \.name)
+                        if list.count > 0, list.count == buffer.count {
+                            let dups = zip(list, buffer).filter {$0.0.fullName == $0.1.fullName}
+                            if !dups.isEmpty {
+                                needParamedInit = false
+                            }
                         }
                     }
                 }
-                needBlankInit = true
             }
         }
         
