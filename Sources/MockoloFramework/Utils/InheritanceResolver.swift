@@ -151,19 +151,3 @@ func uniqueEntities(`in` models: [Model], exclude: [String: Model], fullnames: [
     return uniquifyDuplicates(group: Dictionary(grouping: models) { $0.name(by: 0) }, level: 0, nameByLevelVisited: exclude, fullNameVisited: fullnames)
 }
 
-
-
-/// Returns import lines of a file
-/// @param content The source file content
-/// @returns A list of import lines from the content
-func findImportLines(data: Data, offset: Int64?) -> [String] {
-    
-    if let offset = offset, offset > 0 {
-        let part = data.toString(offset: 0, length: offset)
-        let lines = part.components(separatedBy: "\n")
-        let importlines = lines.filter {$0.trimmingCharacters(in: .whitespaces).hasPrefix(String.importSpace)}
-        return importlines
-    }
-    
-    return []
-}

@@ -21,9 +21,10 @@ public class ParserViaSwiftSyntax: SourceParsing {
     public init() {}
     
     public func parseProcessedDecls(_ paths: [String],
-                                    completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                                    fileMacro: String?,
+                                    completion: @escaping ([Entity], ImportMap?) -> ()) {
         scan(paths) { (path, lock) in
-            self.generateASTs(path, annotation: "", declType: .classType, lock: lock, completion: completion)
+            self.generateASTs(path, annotation: "", fileMacro: fileMacro, declType: .classType, lock: lock, completion: completion)
         }
     }
     
@@ -31,14 +32,16 @@ public class ParserViaSwiftSyntax: SourceParsing {
                            isDirs: Bool,
                            exclusionSuffixes: [String]? = nil,
                            annotation: String,
+                           fileMacro: String?,
                            declType: DeclType,
-                           completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                           completion: @escaping ([Entity], ImportMap?) -> ()) {
         
         guard let paths = paths else { return }
         scan(paths, isDirectory: isDirs) { (path, lock) in
             self.generateASTs(path,
                               exclusionSuffixes: exclusionSuffixes,
                               annotation: annotation,
+                              fileMacro: fileMacro,
                               declType: declType,
                               lock: lock,
                               completion: completion)
@@ -48,9 +51,10 @@ public class ParserViaSwiftSyntax: SourceParsing {
     private func generateASTs(_ path: String,
                               exclusionSuffixes: [String]? = nil,
                               annotation: String,
+                              fileMacro: String?,
                               declType: DeclType,
                               lock: NSLock?,
-                              completion: @escaping ([Entity], [String: [String]]?) -> ()) {
+                              completion: @escaping ([Entity], ImportMap?) -> ()) {
         
         guard path.shouldParse(with: exclusionSuffixes) else { return }
 
@@ -69,7 +73,7 @@ public class ParserViaSwiftSyntax: SourceParsing {
         do {
             var results = [Entity]()
             let node = try SyntaxParser.parse(path)
-            var treeVisitor = EntityVisitor(path, annotation: annotation, declType: declType)
+            var treeVisitor = EntityVisitor(path, annotation: annotation, fileMacro: fileMacro, declType: declType)
             #if swift(>=5.2)
             treeVisitor.walk(node)
             #else
@@ -77,11 +81,11 @@ public class ParserViaSwiftSyntax: SourceParsing {
             #endif
             let ret = treeVisitor.entities
             results.append(contentsOf: ret)
-            let imports = treeVisitor.imports
+            let importMap = treeVisitor.imports
 
             lock?.lock()
             defer {lock?.unlock()}
-            completion(results, [path: imports])
+            completion(results, [path: importMap])
         } catch {
             fatalError(error.localizedDescription)
         }

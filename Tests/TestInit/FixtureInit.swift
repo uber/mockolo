@@ -38,14 +38,26 @@ class KeywordProtocolMock: KeywordProtocol {
 
 //  MARK - protocol containing init
 
+let protocolWithBlankInit = """
+/// \(String.mockAnnotation)
+public protocol BlankInit {
+    init()
+}
+"""
+
+let protocolWithBlankInitMock = """
+public class BlankInitMock: BlankInit {
+    required public init() {
+    }
+}
+"""
+
 let protocolWithInit = """
 /// \(String.mockAnnotation)
 public protocol HasInit: HasInitParent {
     init(arg: String)
 }
 """
-
-
 
 let protocolWithInitParentMock = """
 public protocol HasInitParent {

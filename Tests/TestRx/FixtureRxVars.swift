@@ -1,6 +1,54 @@
 import MockoloFramework
 
 
+let rxSubjects = """
+/// \(String.mockAnnotation)
+public protocol Foo: AnyObject {
+    var someBehavior: BehaviorSubject<String> { get }
+    var someReply: ReplaySubject<String> { get }
+    var someVariable: Variable<Bool> { get }
+    var someBar: Bar { get }
+}
+"""
+
+let rxSubjectsParent = """
+public class BarMock: Bar {
+    public init() {}
+}
+"""
+
+let rxSubjectsMock = """
+public class FooMock: Foo {
+    public init() { }
+    public init(someBehavior: BehaviorSubject<String>, someReply: ReplaySubject<String> = ReplaySubject<String>.create(bufferSize: 1), someVariable: Variable<Bool>, someBar: Bar = BarMock()) {
+        self._someBehavior = someBehavior
+        self.someReply = someReply
+        self._someVariable = someVariable
+        self.someBar = someBar
+    }
+
+    public var someBehaviorSetCallCount = 0
+    private var _someBehavior: BehaviorSubject<String>!  { didSet { someBehaviorSetCallCount += 1 } }
+    public var someBehavior: BehaviorSubject<String> {
+        get { return _someBehavior }
+        set { _someBehavior = newValue }
+    }
+
+    public var someReplySetCallCount = 0
+    public var someReply: ReplaySubject<String> = ReplaySubject<String>.create(bufferSize: 1) { didSet { someReplySetCallCount += 1 } }
+
+    public var someVariableSetCallCount = 0
+    private var _someVariable: Variable<Bool>!  { didSet { someVariableSetCallCount += 1 } }
+    public var someVariable: Variable<Bool> {
+        get { return _someVariable }
+        set { _someVariable = newValue }
+    }
+
+    public var someBarSetCallCount = 0
+    public var someBar: Bar = BarMock() { didSet { someBarSetCallCount += 1 } }
+}
+"""
+
 let rx = """
 /// \(String.mockAnnotation)(rx: attachedRouter = BehaviorSubject)
 protocol TaskRouting: BaseRouting {
@@ -11,9 +59,6 @@ protocol TaskRouting: BaseRouting {
 """
 
 let rxMock = """
-
-
-
 class TaskRoutingMock: TaskRouting {
     init() { }
     init(attachedRouter: Observable<Bool> = BehaviorSubject<Bool>(value: false)) {
@@ -40,7 +85,7 @@ class TaskRoutingMock: TaskRouting {
 """
 
 
-let rxVarSubjects = """
+let rxObservables = """
 /// \(String.mockAnnotation)(rx: nameStream = BehaviorSubject; integerStream = ReplaySubject)
 protocol RxVar {
     var isEnabled: Observable<Bool> { get }
@@ -49,7 +94,7 @@ protocol RxVar {
 }
 """
 
-let rxVarSubjectsMock = """
+let rxObservablesMock = """
 
 class RxVarMock: RxVar {
     init() { }

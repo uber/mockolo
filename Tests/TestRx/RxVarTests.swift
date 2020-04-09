@@ -17,8 +17,14 @@ class RxVarTests: MockoloTestCase {
                dstContent: rxVarInheritedMock)
     }
 
-    func testRxVarSubjects() {
-        verify(srcContent: rxVarSubjects,
-               dstContent: rxVarSubjectsMock)
+    func testRxObservables() {
+        verify(srcContent: rxObservables,
+               dstContent: rxObservablesMock)
+    }
+
+    func testRxSubjects() {
+        verify(srcContent: rxSubjects,
+               mockContent: rxSubjectsParent,
+               dstContent: rxSubjectsMock)
     }
 }

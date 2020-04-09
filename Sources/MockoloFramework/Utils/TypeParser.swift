@@ -355,7 +355,7 @@ public final class Type {
             return cachedDefaultVal
         }
 
-        if let val = Type.customTypeMap[typeName] {
+        if let val = Type.customTypeMap?[typeName] {
             cachedDefaultVal = val
             return val
         }
@@ -386,7 +386,7 @@ public final class Type {
             if subjectKind == String.publishSubject {
                 underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)()"
             } else if subjectKind == String.replaySubject {
-                underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType).create(bufferSize: 1)"
+                underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)\(String.replaySubjectCreate)"
             } else if subjectKind == String.behaviorSubject {
                 if let val = Type(String(typeParamStr)).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
                     underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
@@ -448,6 +448,8 @@ public final class Type {
                 let sub = String(arg.typeName[arg.typeName.startIndex..<idx])
                 if bracketPrefixTypes.contains(sub) {
                     return "\(arg.typeName)()"
+                } else if let val = rxTypes[sub], let suffix = val {
+                    return "\(arg.typeName)\(suffix)"
                 } else {
                     return nil
                 }
@@ -585,10 +587,15 @@ public final class Type {
         }
     }
 
-    public static var customTypeMap = [String: String]()
+    public static var customTypeMap: [String: String]?
 
-    private let bracketPrefixTypes = ["Array", "Set", "Dictionary", "PublishSubject", "ReplaySubject", "BehaviorSubject"]
-
+    private let bracketPrefixTypes = ["Array", "Set", "Dictionary"]
+    private let rxTypes = [String.publishSubject : "()",
+                           String.replaySubject : String.replaySubjectCreate,
+                           String.behaviorSubject : nil,
+                           String.behaviorRelay: nil,
+                           String.observableLeftAngleBracket: String.empty,
+                           String.rxObservableLeftAngleBracket: String.empty]
 
     enum BracketType {
         case angle

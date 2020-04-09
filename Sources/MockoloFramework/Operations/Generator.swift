@@ -52,29 +52,25 @@ public func generate(sourceDirs: [String]?,
     scanConcurrencyLimit = concurrencyLimit
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
-    var parentMocks = [String: Entity]()
-    var annotatedProtocolMap = [String: Entity]()
-    var protocolMap = [String: Entity]()
-    var pathToContentMap = [(String, Data, Int64)]()
-    var pathToImportsMap = [String: [String]]()
-    var relevantPaths = [String]()
     var resolvedEntities = [ResolvedEntity]()
+    var parentMocks = [String: Entity]()
+    var protocolMap = [String: Entity]()
+    var annotatedProtocolMap = [String: Entity]()
+    var pathToContentMap = [(String, Data, Int64)]()
+    var pathToImportsMap = ImportMap()
 
     signpost_begin(name: "Process input")
     let t0 = CFAbsoluteTimeGetCurrent()
     log("Process input mock files...", level: .info)
     if let mockFilePaths = mockFilePaths, !mockFilePaths.isEmpty {
-        parser.parseProcessedDecls(mockFilePaths) { (elements, imports) in
+        parser.parseProcessedDecls(mockFilePaths, fileMacro: macro) { (elements, imports) in
                                     elements.forEach { element in
                                         parentMocks[element.entityNode.name] = element
                                     }
                                     
                                     if let imports = imports {
-                                        for (path, modules) in imports {
-                                            if pathToImportsMap[path] == nil {
-                                                pathToImportsMap[path] = []
-                                            }
-                                            pathToImportsMap[path]?.append(contentsOf: modules)
+                                        for (path, importMap) in imports {
+                                            pathToImportsMap[path] = importMap
                                         }
                                     }
         }
@@ -85,13 +81,13 @@ public func generate(sourceDirs: [String]?,
     
     signpost_begin(name: "Generate protocol map")
     log("Process source files and generate an annotated/protocol map...", level: .info)
-    
     let paths = sourceDirs ?? sourceFiles
     let isDirs = sourceDirs != nil
     parser.parseDecls(paths,
                       isDirs: isDirs,
                       exclusionSuffixes: exclusionSuffixes,
                       annotation: annotation,
+                      fileMacro: macro,
                       declType: declType) { (elements, imports) in
                         elements.forEach { element in
                             protocolMap[element.entityNode.name] = element
@@ -100,11 +96,8 @@ public func generate(sourceDirs: [String]?,
                             }
                         }
                         if let imports = imports {
-                            for (path, modules) in imports {
-                                if pathToImportsMap[path] == nil {
-                                    pathToImportsMap[path] = []
-                                }
-                                pathToImportsMap[path]?.append(contentsOf: modules)
+                            for (path, importMap) in imports {
+                                pathToImportsMap[path] = importMap
                             }
                         }
     }
@@ -112,21 +105,20 @@ public func generate(sourceDirs: [String]?,
     let t2 = CFAbsoluteTimeGetCurrent()
     log("Took", t2-t1, level: .verbose)
     
-    signpost_begin(name: "Generate models")
     let typeKeyList = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
     var typeKeys = [String: String]()
     typeKeyList.forEach { (t: String) in
         typeKeys[t] = "\(t)Mock()"
     }
-    
+    Type.customTypeMap = typeKeys
+
+    signpost_begin(name: "Generate models")
     log("Resolve inheritance and generate unique entity models...", level: .info)
-    
     generateUniqueModels(protocolMap: protocolMap,
                          annotatedProtocolMap: annotatedProtocolMap,
                          inheritanceMap: parentMocks,
                          completion: { container in
                             pathToContentMap.append(contentsOf: container.imports)
-                            relevantPaths.append(contentsOf: container.paths)
                             resolvedEntities.append(container.entity)
     })
     signpost_end(name: "Generate models")
@@ -142,17 +134,19 @@ public func generate(sourceDirs: [String]?,
     signpost_end(name: "Render models")
     let t4 = CFAbsoluteTimeGetCurrent()
     log("Took", t4-t3, level: .verbose)
-    
+     
     signpost_begin(name: "Write results")
     log("Write the mock results and import lines to", outputFilePath, level: .info)
+
+    let imports = handleImports(pathToImportsMap: pathToImportsMap,
+                                pathToContentMap: pathToContentMap,
+                                customImports: customImports,
+                                testableImports: testableImports)
+
     let result = write(candidates: candidates,
-                       pathToImportsMap: pathToImportsMap,
-                       relevantPaths: relevantPaths,
-                       pathToContentMap: pathToContentMap,
                        header: header,
                        macro: macro,
-                       testableImports: testableImports,
-                       customImports: customImports,
+                       imports: imports,
                        to: outputFilePath)
     signpost_end(name: "Write results")
     let t5 = CFAbsoluteTimeGetCurrent()

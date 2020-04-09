@@ -18,51 +18,10 @@ import Foundation
 
 /// Combines a list of entities and import lines and header and writes the final output
 func write(candidates: [(String, Int64)],
-           pathToImportsMap: [String: [String]],
-           relevantPaths: [String],
-           pathToContentMap: [(String, Data, Int64)],
            header: String?,
            macro: String?,
-           testableImports: [String]?,
-           customImports: [String]?,
+           imports: String,
            to outputFilePath: String) -> String {
-    
-    var importLines = [String]()
-    for path in relevantPaths {
-        if let lines = pathToImportsMap[path] {
-            importLines.append(contentsOf: lines)
-        }
-    }
-    for (_, filecontent, offset) in pathToContentMap {
-        let v = findImportLines(data: filecontent, offset: offset)
-        importLines.append(contentsOf: v)
-        break
-    }
-    
-    if let customImports = customImports {
-        importLines.append(contentsOf: customImports.map {$0.asImport})
-    }
-    
-    var importLineStr = ""
-    
-    if let testableImports = testableImports {
-        var imports = importLines.compactMap { (importLine) -> String? in
-            return importLine.moduleName
-        }
-        imports.append(contentsOf: testableImports)
-        importLineStr = Set(imports)
-            .sorted()
-            .map { testableModuleName -> String in
-            guard testableImports.contains(testableModuleName) else {
-                return testableModuleName.asImport
-            }
-            return testableModuleName.asTestableImport
-        }
-        .joined(separator: "\n")
-    } else {
-        let importsSet = Set(importLines.map{$0.trimmingCharacters(in: .whitespaces)})
-        importLineStr = importsSet.sorted().joined(separator: "\n")
-    }
 
     let entities = candidates
         .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
@@ -80,7 +39,7 @@ func write(candidates: [(String, Int64)],
         macroStart = .poundIf + mcr
         macroEnd = .poundEndIf
     }
-    let ret = [headerStr, macroStart, importLineStr, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
+    let ret = [headerStr, macroStart, imports, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
     
     _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
     return ret
