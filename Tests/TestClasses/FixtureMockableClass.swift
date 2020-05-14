@@ -106,22 +106,24 @@ public class HighMock: High {
 let klassMock = """
 public class LowMock: Low {
     
-    var nameSetCallCount = 0
-    override var name: String = "" { didSet { nameSetCallCount += 1 } }
+    override init(i: Int = 0) {
+        super.init(i: i)
+
+    }
     required init(arg: String = "") {
         super.init(arg: arg)
         
     }
+
     required init(orderId: Int = 0) {
         super.init(orderId: orderId)
-        
     }
-    override init(i: Int = 0) {
-        super.init(i: i)
-        
-    }
+    var nameSetCallCount = 0
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
+
     var whatSetCallCount = 0
     override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
+
     var barCallCount = 0
     var barHandler: (() -> ())?
     override func bar()  {
@@ -145,22 +147,20 @@ public class LowMock: Low {
 
 let klassLongerMock = """
 public class LowMock: Low {
-    
-    
-    var nameSetCallCount = 0
-    override var name: String = "" { didSet { nameSetCallCount += 1 } }
-    required init(arg: String = "") {
-        super.init(arg: arg)
-        
-    }
-    required init(orderId: Int = 0) {
-        super.init(orderId: orderId)
-        
-    }
     override init(i: Int = 0) {
         super.init(i: i)
-        
     }
+
+    required init(arg: String = "") {
+        super.init(arg: arg)
+    }
+
+    required init(orderId: Int = 0) {
+        super.init(orderId: orderId)
+    }
+
+    var nameSetCallCount = 0
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
     var whatSetCallCount = 0
     override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
     var barCallCount = 0

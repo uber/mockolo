@@ -36,6 +36,7 @@ class Executor {
     private var customImports: OptionArgument<[String]>!
     private var annotation: OptionArgument<String>!
     private var useTemplateFunc: OptionArgument<Bool>!
+    private var useMockObservable: OptionArgument<Bool>!
     private var mockAll: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var useSourceKit: OptionArgument<Bool>!
@@ -114,6 +115,9 @@ class Executor {
         useTemplateFunc = parser.add(option: "--use-template-func",
                                  kind: Bool.self,
                                  usage: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
+        useMockObservable = parser.add(option: "--use-mock-observable",
+                                 kind: Bool.self,
+                                 usage: "If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).")
         mockAll = parser.add(option: "--mock-all",
                                  kind: Bool.self,
                                  usage: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
@@ -178,6 +182,7 @@ class Executor {
         let customImports = arguments.get(self.customImports)
         let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
         let shouldUseTemplateFunc = arguments.get(useTemplateFunc) ?? false
+        let shouldUseMockObservable = arguments.get(useMockObservable) ?? false
         let shouldMockAll = arguments.get(mockAll) ?? false
 
         do {
@@ -191,6 +196,7 @@ class Executor {
                          macro: macro,
                          declType: shouldMockAll ? .all : .protocolType,
                          useTemplateFunc: shouldUseTemplateFunc,
+                         useMockObservable: shouldUseMockObservable,
                          testableImports: testableImports,
                          customImports: customImports,
                          to: outputFilePath,

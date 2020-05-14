@@ -39,14 +39,6 @@ final class ParamModel: Model {
         return label + "_" + name
     }
     
-    func underlyingName(with defaultTypeValue: String?) -> String {
-        if let _ = defaultTypeValue, !type.isRxObservable {
-            return "_\(name)"
-        }
-        return name
-    }
-
-
     init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool, offset: Int64, length: Int64) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
@@ -74,6 +66,10 @@ final class ParamModel: Model {
         self.label = ast.name != label ? label : ""
     }
 
+    var underlyingName: String {
+        return "_\(name)"
+    }
+    
     var asVarDecl: String? {
         if self.inInit, self.needVarDecl {
             return applyVarTemplate(name: name, type: type)
@@ -81,7 +77,7 @@ final class ParamModel: Model {
         return nil
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false) -> String? {
         return applyParamTemplate(name: name, label: label, type: type, inInit: inInit)
     }
 }

@@ -71,22 +71,18 @@ let klassInitMock = """
 
 public class LowMock: Low {
     
-    
-
-    var nameSetCallCount = 0
-    override var name: String = "" { didSet { nameSetCallCount += 1 } }
+    override public init(m: Int = 0) {
+        super.init(m: m)
+    }
     required public init(arg: String = "") {
         super.init(arg: arg)
-        
     }
     required public init(orderId: Int = 0) {
         super.init(orderId: orderId)
-        
     }
-    override public init(m: Int = 0) {
-        super.init(m: m)
-        
-    }
+
+    var nameSetCallCount = 0
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
 }
 """
 
@@ -94,21 +90,20 @@ public class LowMock: Low {
 let klassInitLongerMock = """
 
 public class LowMock: Low {
-    
-    
-    var nameSetCallCount = 0
-    override var name: String = "" { didSet { nameSetCallCount += 1 } }
-    required public init(arg: String = "") {
-        super.init(arg: arg)
-        
-    }
-    required public init(orderId: Int = 0) {
-        super.init(orderId: orderId)
-        
-    }
+
     override public init(m: Int = 0) {
         super.init(m: m)
-        
     }
+
+    required public init(arg: String = "") {
+        super.init(arg: arg)
+    }
+
+    required public init(orderId: Int = 0) {
+        super.init(orderId: orderId)
+    }
+
+    var nameSetCallCount = 0
+    override var name: String = "" { didSet { nameSetCallCount += 1 } }
 }
 """

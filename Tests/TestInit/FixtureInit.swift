@@ -25,11 +25,11 @@ let keywordParamsMock = """
 
 
 class KeywordProtocolMock: KeywordProtocol {
-    private var `in`: Int!
+    private var _in: Int!
     init() { }
 
     required init(in: Int = 0) {
-        self.`in` = `in`
+        self._in = `in`
     }
 }
 
@@ -99,7 +99,7 @@ public class HasInitParentMock: HasInitParent {
 let protocolWithInitResultMock = """
 
 public class HasInitMock: HasInit {
-    private var arg: String!
+    private var _arg: String!
     public init() { }
     public init(order: Int = 0, num: Int = 0, rate: Double = 0.0) {
         self.order = order
@@ -107,7 +107,7 @@ public class HasInitMock: HasInit {
         self.rate = rate
     }
     required public init(arg: String = "") {
-        self.arg = arg
+        self._arg = arg
     }
     required public init(order: Int) {
         self._order = order

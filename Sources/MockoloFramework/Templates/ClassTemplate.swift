@@ -24,6 +24,7 @@ extension ClassModel {
                             declType: DeclType,
                             metadata: AnnotationMetadata?,
                             useTemplateFunc: Bool,
+                            useMockObservable: Bool,
                             initParamCandidates: [Model],
                             declaredInits: [MethodModel],
                             entities: [(String, Model)]) -> String {
@@ -39,7 +40,10 @@ extension ClassModel {
                 if model.modelType == .variable, model.name == String.hasBlankInit {
                     return nil
                 }
-                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc) {
+                if model.modelType == .method, model.isInitializer, !model.processed {
+                    return nil
+                }
+                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable) {
                     return (ret, model.offset)
                 }
                 return nil
@@ -68,7 +72,7 @@ extension ClassModel {
         }
         
         let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declType: declType, overrides: metadata?.varTypes)
-          
+
         var body = ""
         if !typealiasTemplate.isEmpty {
             body += "\(typealiasTemplate)\n"
@@ -165,22 +169,65 @@ extension ClassModel {
             return nil
         }
         .joined(separator: "\n")
-        
-        var blankInit = ""
-        if needBlankInit {
-            // In case of protocol mocking, we want to provide a blank init (if not present already) for convenience,
-            // where instance vars do not have to be set in init since they all have get/set (see VariableTemplate).
-            blankInit = "\(acl)init() { }"
-        }
+
+        let declaredInitStr = declaredInits.compactMap { (m: MethodModel) -> String? in
+            if case let .initKind(required, override) = m.kind, !m.processed {
+                let modifier = required ? "\(String.required) " : (override ? "\(String.override) " : "")
+                let mAcl = m.accessLevel.isEmpty ? "" : "\(m.accessLevel) "
+                let genericTypeDeclsStr = m.genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
+                let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
+                let paramDeclsStr = m.params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
+
+                if override {
+                    let paramsList = m.params.map { param in
+                        return "\(param.name): \(param.name.safeName)"
+                    }.joined(separator: ", ")
+
+                    return """
+                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) {
+                    \(2.tab)super.init(\(paramsList))
+                    \(1.tab)}
+                    """
+                } else {
+                    let paramsAssign = m.params.map { param in
+                        let underVars = initParamCandidates.compactMap { return $0.name.safeName == param.name.safeName ? $0.underlyingName : nil}
+                        if let underVar = underVars.first {
+                            return "\(2.tab)self.\(underVar) = \(param.name.safeName)"
+                        } else {
+                            return "\(2.tab)self.\(param.underlyingName) = \(param.name.safeName)"
+                        }
+                    }.joined(separator: "\n")
+
+                    return """
+                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) {
+                    \(paramsAssign)
+                    \(1.tab)}
+                    """
+                }
+            }
+            return nil
+        }.sorted().joined(separator: "\n")
 
         var template = ""
+
         if !extraVarsToDecl.isEmpty {
             template += "\(1.tab)\(extraVarsToDecl)\n"
         }
-        template += """
-        \(1.tab)\(blankInit)
-        \(initTemplate)
-        """
+
+        if needBlankInit {
+            // In case of protocol mocking, we want to provide a blank init (if not present already) for convenience,
+            // where instance vars do not have to be set in init since they all have get/set (see VariableTemplate).
+            let blankInit = "\(acl)init() { }"
+            template += "\(1.tab)\(blankInit)\n"
+        }
+
+        if !initTemplate.isEmpty {
+            template += "\(initTemplate)\n"
+        }
+
+        if !declaredInitStr.isEmpty {
+            template += "\(declaredInitStr)\n"
+        }
 
         return template
     }

@@ -26,6 +26,13 @@ final class VariableModel: Model {
         return name + suffix
     }
 
+    var underlyingName: String {
+        if isStatic || type.defaultVal() == nil {
+            return "_\(name)"
+        }
+        return name
+    }
+
     init(name: String,
          typeName: String,
          acl: String?,
@@ -67,7 +74,7 @@ final class VariableModel: Model {
         self.filePath = filepath
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false) -> String? {
         if processed {
             var prefix = ""
             if shouldOverride, !name.isGenerated(type: type) {
@@ -91,10 +98,11 @@ final class VariableModel: Model {
 
         if let rxVar = applyRxVariableTemplate(name: identifier,
                                                type: type,
-                                               overrideTypes: overrideTypes,
                                                encloser: encloser,
-                                               isStatic: isStatic,
+                                               overrideTypes: overrideTypes,
                                                shouldOverride: shouldOverride,
+                                               useMockObservable: useMockObservable,
+                                               isStatic: isStatic,
                                                accessLevel: accessLevel) {
             return rxVar
         }

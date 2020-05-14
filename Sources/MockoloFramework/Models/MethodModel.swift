@@ -19,7 +19,7 @@ import SourceKittenFramework
 
 public enum MethodKind: Equatable {
     case funcKind
-    case initKind(required: Bool)
+    case initKind(required: Bool, override: Bool)
     case subscriptKind
 }
 
@@ -49,7 +49,7 @@ final class MethodModel: Model {
     }
     
     var isInitializer: Bool {
-        if case .initKind(_) = kind {
+        if case .initKind(_, _) = kind {
             return true
         }
         return false
@@ -145,7 +145,7 @@ final class MethodModel: Model {
             self.kind = .subscriptKind
         } else if ast.isInitializer {
             let isRequired = ast.isRequired || encloserType == .protocolType
-            self.kind = .initKind(required: isRequired)
+            self.kind = .initKind(required: isRequired, override: shouldOverride)
         } else {
             self.kind = .funcKind
         }
@@ -200,11 +200,11 @@ final class MethodModel: Model {
         return name(by: level - 1) + postfix
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool) -> String? {
         if processed {
             var prefix = shouldOverride  ? "\(String.override) " : ""
 
-            if case .initKind(required: let isRequired) = self.kind {
+            if case .initKind(required: let isRequired, override: let override) = self.kind {
                 if isRequired {
                     prefix = ""
                 }

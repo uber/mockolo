@@ -12,6 +12,12 @@ class RxVarTests: MockoloTestCase {
                   dstContent: rxMultiParentsMock)
     }
 
+    func testRxMultiParentsMockObservable() {
+           verify(srcContent: rxMultiParents,
+                  dstContent: rxMultiParentsMockObservable,
+                  useMockObservable: true)
+    }
+
     func testRxVarInherited() {
         verify(srcContent: rxVarInherited,
                dstContent: rxVarInheritedMock)

@@ -254,8 +254,6 @@ extension IfConfigDeclSyntax {
                             hasInit = hasInit || initFlag
                         }
                     }
-                } else if let list = cl.elements.as(ImportDeclSyntax.self) {
-
                 }
             }
         }
@@ -474,7 +472,7 @@ extension InitializerDeclSyntax {
         
         return MethodModel(name: "init",
                            typeName: "",
-                           kind: .initKind(required: requiredInit),
+                           kind: .initKind(required: requiredInit, override: declType == .classType),
                            encloserType: declType,
                            acl: acl,
                            genericTypeParams: genericTypeParams,

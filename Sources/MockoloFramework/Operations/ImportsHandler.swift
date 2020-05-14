@@ -8,7 +8,7 @@
 import Foundation
 
 func handleImports(pathToImportsMap: ImportMap,
-                   pathToContentMap: [(String, Data, Int64)], // TODO: is this needed??
+                   pathToContentMap: [(String, Data, Int64)],
                    customImports: [String]?,
                    testableImports: [String]?) -> String {
 
@@ -30,7 +30,6 @@ func handleImports(pathToImportsMap: ImportMap,
     for (_, filecontent, offset) in pathToContentMap {
         let v = filecontent.findImportLines(at: offset)
         importLines[defaultKey]?.append(contentsOf: v)
-//        break  // TODO: why break here?
     }
 
     if let customImports = customImports {

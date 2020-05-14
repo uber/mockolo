@@ -38,6 +38,7 @@ public func generate(sourceDirs: [String]?,
                      macro: String?,
                      declType: DeclType,
                      useTemplateFunc: Bool,
+                     useMockObservable: Bool,
                      testableImports: [String]?,
                      customImports: [String]?,
                      to outputFilePath: String,
@@ -128,7 +129,8 @@ public func generate(sourceDirs: [String]?,
     signpost_begin(name: "Render models")
     log("Render models with templates...", level: .info)
     renderTemplates(entities: resolvedEntities,
-                    useTemplateFunc: useTemplateFunc) { (mockString: String, offset: Int64) in
+                    useTemplateFunc: useTemplateFunc,
+                    useMockObservable: useMockObservable) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
     }
     signpost_end(name: "Render models")

@@ -99,10 +99,6 @@ public final class Type {
         return ret
     }
 
-    // TODO: correct this
-    var isTuple: Bool {
-        return typeName.contains(",")
-    }
     /// Returns true if this type is a single atomic type (e.g. an identifier, a tuple, etc).
     /// If it can be split into an input / output, e.g. T -> U, it will return false.
     /// Note that (T -> U) will be considered atomic, but T -> U won't.

@@ -54,7 +54,7 @@ class MockoloTestCase: XCTestCase {
         }
     }
     
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String]? = [], concurrencyLimit: Int? = 1, parser: ParserType = .random) {
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String]? = [], concurrencyLimit: Int? = 1, parser: ParserType = .random) {
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -62,10 +62,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, concurrencyLimit: concurrencyLimit, parser: parser)
+        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, concurrencyLimit: concurrencyLimit, parser: parser)
     }
     
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: DeclType, useTemplateFunc: Bool, testableImports: [String]?, concurrencyLimit: Int?, parser: ParserType) {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: DeclType, useTemplateFunc: Bool, useMockObservable: Bool, testableImports: [String]?, concurrencyLimit: Int?, parser: ParserType) {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -126,6 +126,7 @@ class MockoloTestCase: XCTestCase {
                       macro: "MOCK",
                       declType: declType,
                       useTemplateFunc: useTemplateFunc,
+                      useMockObservable: useMockObservable, 
                       testableImports: testableImports,
                       customImports: nil,
                       to: dstFilePath,

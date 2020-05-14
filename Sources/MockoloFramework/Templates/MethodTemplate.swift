@@ -40,33 +40,8 @@ extension MethodModel {
         let paramDeclsStr = params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
         
         switch kind {
-        case .initKind(let isRequired):
-            if isOverride {
-                let modifier = isRequired ? "\(String.required) " : (isOverride ? "\(String.override) " : "")
-                let paramsList = params.map { param in
-                    return "\(param.name): \(param.name.safeName)"
-                }.joined(separator: ", ")
-                
-                template = """
-                \(1.tab)\(modifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-                \(2.tab)super.init(\(paramsList))
-                \(1.tab)}
-                """
-            } else {
-                
-                let reqModifier = isRequired ? "\(String.required) " : ""
-                
-                let paramsAssign = params.map { param in
-                    return "\(2.tab)self.\(param.underlyingName) = \(param.name.safeName)"
-                }.joined(separator: "\n")
-                
-                template = """
-                \(1.tab)\(reqModifier)\(acl)init\(genericTypesStr)(\(paramDeclsStr)) {
-                \(paramsAssign)
-                \(1.tab)}
-                """
-            }
-            
+        case .initKind(_, _):  // ClassTemplate needs to handle this as it needs a context of all the vars
+            return ""
         default:
             
             guard let handler = handler else { return "" }
