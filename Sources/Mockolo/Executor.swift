@@ -34,6 +34,7 @@ class Executor {
     private var macro: OptionArgument<String>!
     private var testableImports: OptionArgument<[String]>!
     private var customImports: OptionArgument<[String]>!
+    private var excludeImports: OptionArgument<[String]>!
     private var annotation: OptionArgument<String>!
     private var useTemplateFunc: OptionArgument<Bool>!
     private var useMockObservable: OptionArgument<Bool>!
@@ -109,6 +110,9 @@ class Executor {
                                         shortName: "-c",
                                         kind: [String].self,
                                         usage: "If set, custom module imports will be added to the final import statement list.")
+        excludeImports = parser.add(option: "--exclude-imports",
+                                        kind: [String].self,
+                                        usage: "If set, listed modules will be exluded from the import statements in the mock output.")
         header = parser.add(option: "--header",
                                 kind: String.self,
                                 usage: "A custom header documentation to be added to the beginning of a generated mock file.")
@@ -180,6 +184,7 @@ class Executor {
         let macro = arguments.get(self.macro)
         let testableImports = arguments.get(self.testableImports)
         let customImports = arguments.get(self.customImports)
+        let excludeImports = arguments.get(self.excludeImports)
         let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
         let shouldUseTemplateFunc = arguments.get(useTemplateFunc) ?? false
         let shouldUseMockObservable = arguments.get(useMockObservable) ?? false
@@ -199,6 +204,7 @@ class Executor {
                          useMockObservable: shouldUseMockObservable,
                          testableImports: testableImports,
                          customImports: customImports,
+                         excludeImports: excludeImports,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
