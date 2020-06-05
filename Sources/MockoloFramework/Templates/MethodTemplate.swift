@@ -101,7 +101,7 @@ extension MethodModel {
                     case 2...:
                         body = """
                         \(body)
-                        \(2.tab)\(argsHistoryVarName).append((\(params.map(path: \.name).joined(separator: ", ")))
+                        \(2.tab)\(argsHistoryVarName).append((\(params.map(path: \.name).joined(separator: ", "))))
                         """
                     default:
                         break
