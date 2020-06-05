@@ -27,7 +27,6 @@ extension SyntaxParser {
     }
 }
 
-#if swift(>=5.2)
 extension SyntaxProtocol {
     var offset: Int64 {
         return Int64(self.position.utf8Offset)
@@ -37,17 +36,7 @@ extension SyntaxProtocol {
         return Int64(self.totalLength.utf8Length)
     }
 }
-#else
-extension Syntax {
-    var offset: Int64 {
-        return Int64(self.position.utf8Offset)
-    }
 
-    var length: Int64 {
-        return Int64(self.totalLength.utf8Length)
-    }
-}
-#endif
 
 extension AttributeListSyntax {
     var trimmedDescription: String? {
@@ -586,11 +575,7 @@ final class EntityVisitor: SyntaxVisitor {
         self.declType = declType
     }
     
-    #if swift(>=5.2)
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #else
-    func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #endif
 
     private func visitImpl(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
@@ -600,11 +585,7 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
     
-    #if swift(>=5.2)
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #else
-    func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #endif
 
     private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.name.hasSuffix("Mock") {
@@ -623,11 +604,7 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
-    #if swift(>=5.2)
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #else
-    func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #endif
 
     private func visitImpl(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         if let ret = node.path.firstToken?.text {
@@ -640,11 +617,7 @@ final class EntityVisitor: SyntaxVisitor {
         return .visitChildren
     }
 
-    #if swift(>=5.2)
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #else
-    func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-    #endif
 
     private func visitImpl(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
         for cl in node.clauses {
@@ -675,26 +648,13 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
-    #if swift(>=5.2)
     override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
-    #else
-    func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-    #endif
 
-    #if swift(>=5.2)
     override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
-    #else
-    func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
-        return .skipChildren
-    }
-    #endif
-
 }
 
 extension Trivia {
@@ -764,14 +724,3 @@ extension Trivia {
         return nil
     }
 }
-
-#if swift(<5.2)
-private extension Syntax {
-    /// A shim function for source compatibility between SwiftSyntax
-    /// 0.50100.0 and 0.50200.0.
-    /// - See Also: https://github.com/apple/swift-syntax/blob/master/Changelog.md#swift-52
-    func `as`<S: Syntax>(_ syntaxType: S.Type) -> S? {
-        return self as? S
-    }
-}
-#endif

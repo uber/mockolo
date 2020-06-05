@@ -14,8 +14,8 @@
 //  limitations under the License.
 //
 import Foundation
-import SPMUtility
-import Basic
+import TSCUtility
+import TSCBasic
 
 func main() {
     let parser = ArgumentParser(usage: "<options>", overview: "Mockolo: Swift mock generator.")
