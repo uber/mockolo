@@ -41,6 +41,7 @@ class Executor {
     private var mockAll: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var useSourceKit: OptionArgument<Bool>!
+    private var enableArgsHistory: OptionArgument<Bool>!
 
     /// Initializer.
     ///
@@ -132,6 +133,9 @@ class Executor {
         useSourceKit = parser.add(option: "--use-sourcekit",
                              kind: Bool.self,
                              usage: "Whether to use SourceKit for parsing. By default it will use SwiftSyntax.")
+        enableArgsHistory = parser.add(option: "--enable-args-history",
+                                       kind: Bool.self,
+                                       usage: "Whether generated mock contains function args history capturing. If set, `history` annotation will be ignored (default = false).")
     }
     
     private func fullPath(_ path: String) -> String {
@@ -189,6 +193,7 @@ class Executor {
         let shouldUseTemplateFunc = arguments.get(useTemplateFunc) ?? false
         let shouldUseMockObservable = arguments.get(useMockObservable) ?? false
         let shouldMockAll = arguments.get(mockAll) ?? false
+        let shouldCaptureAllFuncArgsHistory = arguments.get(enableArgsHistory) ?? false
 
         do {
             try generate(sourceDirs: srcDirs,
