@@ -129,6 +129,7 @@ class MockoloTestCase: XCTestCase {
                       useMockObservable: useMockObservable, 
                       testableImports: testableImports,
                       customImports: nil,
+                      excludeImports: nil,
                       to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,
