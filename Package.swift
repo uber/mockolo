@@ -1,21 +1,17 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.2
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/apple/swift-package-manager.git", .exact("0.5.0")),
-    .package(url: "https://github.com/jpsim/SourceKitten.git", from: "0.26.0"),
+    .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.4")),
+    .package(url: "https://github.com/apple/swift-tools-support-core.git", .branch("master")),
+    .package(url: "https://github.com/jpsim/SourceKitten", from: "0.29.0"),
+    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0"))
 ]
-
-#if swift(>=5.2)
-dependencies.append(.package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0")))
-#elseif swift(>=5.1)
-dependencies.append(.package(url: "https://github.com/apple/swift-syntax.git", .exact("0.50100.0")))
-#endif
 
 let package = Package(
     name: "Mockolo",
     platforms: [
-        .macOS(.v10_14),
+        .macOS(.v10_15),
     ],
     products: [
         .executable(name: "mockolo", targets: ["Mockolo"]),
@@ -26,14 +22,15 @@ let package = Package(
         .target(
             name: "Mockolo",
             dependencies: [
-                "SPMUtility",
                 "MockoloFramework",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
                 ]),
         .target(
             name: "MockoloFramework",
             dependencies: [
-                "SourceKittenFramework",
-                "SwiftSyntax",
+                .product(name: "SourceKittenFramework", package: "SourceKitten"),
+                .product(name: "SwiftSyntax", package: "SwiftSyntax"),
             ]
         ),
         .testTarget(
@@ -43,6 +40,7 @@ let package = Package(
             ],
             path: "Tests"
         )
-    ]
+    ],
+    swiftLanguageVersions: [.v5]
 )
 
