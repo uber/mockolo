@@ -21,10 +21,11 @@ import Foundation
 func renderTemplates(entities: [ResolvedEntity],
                      useTemplateFunc: Bool,
                      useMockObservable: Bool,
+                     captureAllFuncArgsHistory: Bool,
                      completion: @escaping (String, Int64) -> ()) {
     scan(entities) { (resolvedEntity, lock) in
         let mockModel = resolvedEntity.model()
-        if let mockString = mockModel.render(with: resolvedEntity.key, encloser: mockModel.name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable), !mockString.isEmpty {
+        if let mockString = mockModel.render(with: resolvedEntity.key, encloser: mockModel.name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, captureAllFuncArgsHistory: captureAllFuncArgsHistory), !mockString.isEmpty {
             lock?.lock()
             completion(mockString, mockModel.offset)
             lock?.unlock()

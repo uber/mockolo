@@ -20,9 +20,10 @@ extension IfMacroModel {
     func applyMacroTemplate(name: String,
                             useTemplateFunc: Bool,
                             useMockObservable: Bool,
+                            captureAllFuncArgsHistory: Bool,
                             entities: [Model]) -> String {
         let rendered = entities
-            .compactMap {$0.render(with: $0.name, encloser: "", useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable) }
+            .compactMap {$0.render(with: $0.name, encloser: "", useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, captureAllFuncArgsHistory: captureAllFuncArgsHistory) }
             .joined(separator: "\n")
         
         let template = """
