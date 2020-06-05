@@ -24,6 +24,7 @@ extension MethodModel {
                              useTemplateFunc: Bool,
                              isStatic: Bool,
                              isOverride: Bool,
+                             captureAllFuncArgsHistory: Bool,
                              genericTypeParams: [ParamModel],
                              params: [ParamModel],
                              returnType: Type,
@@ -47,6 +48,8 @@ extension MethodModel {
             guard let handler = handler else { return "" }
             
             let callCount = "\(identifier)\(String.callCountSuffix)"
+            let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
+            let argsHistoryVarType = Type.toArgumentsHistoryType(with: params.map(path: \.type), typeParams: genericTypeParams.map(path: \.name)).typeName
             let handlerVarName = "\(identifier)\(String.handlerSuffix)"
             let handlerVarType = handler.type.typeName // ?? "Any"
             let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
@@ -86,6 +89,27 @@ extension MethodModel {
             if body.isEmpty {
                 body = """
                 \(2.tab)\(callCount) += 1
+                """
+                
+                if captureAllFuncArgsHistory {
+                    switch params.count {
+                    case 1:
+                        body = """
+                        \(body)
+                        \(2.tab)\(argsHistoryVarName).append(\(params[0].name))
+                        """
+                    case 2...:
+                        body = """
+                        \(body)
+                        \(2.tab)\(argsHistoryVarName).append((\(params.map(path: \.name).joined(separator: ", ")))
+                        """
+                    default:
+                        break
+                    }
+                }
+
+                body = """
+                \(body)
                 \(handlerReturn)
                 """
             }
@@ -101,9 +125,21 @@ extension MethodModel {
             }
             
             let overrideStr = isOverride ? "\(String.override) " : ""
+
             template = """
 
             \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
+            """
+            
+            if captureAllFuncArgsHistory && !params.isEmpty {
+                template = """
+                \(template)
+                \(1.tab)\(acl)\(staticStr)var \(argsHistoryVarName) = \(argsHistoryVarType)()
+                """
+            }
+            
+            template = """
+            \(template)
             \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
             \(1.tab)\(acl)\(staticStr)\(overrideStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
             \(wrapped)

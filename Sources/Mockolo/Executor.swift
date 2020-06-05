@@ -213,6 +213,7 @@ class Executor {
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
+                         captureAllFuncArgsHistory: shouldCaptureAllFuncArgsHistory,
                          onCompletion: { _ in
                     log("Done. Exiting program.", level: .info)
                     exit(0)

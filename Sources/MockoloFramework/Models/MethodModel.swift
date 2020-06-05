@@ -222,6 +222,7 @@ final class MethodModel: Model {
                                          useTemplateFunc: useTemplateFunc,
                                          isStatic: isStatic,
                                          isOverride: shouldOverride,
+                                         captureAllFuncArgsHistory: false,
                                          genericTypeParams: genericTypeParams,
                                          params: params,
                                          returnType: type,

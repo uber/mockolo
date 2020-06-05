@@ -45,6 +45,7 @@ public func generate(sourceDirs: [String]?,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
+                     captureAllFuncArgsHistory: Bool,
                      onCompletion: @escaping (String) -> ()) throws {
     guard sourceDirs != nil || sourceFiles != nil else {
         log("Source files or directories do not exist", level: .error)
