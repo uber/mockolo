@@ -34,7 +34,7 @@ extension Structure: EntityNode {
         var ret = AnnotationMetadata()
         
         // Look up override arguments if any
-        if let argsMap = extracted.parseAnnotationArguments(for: String.typealiasColon, String.moduleColon, String.rxColon, String.varColon) {
+        if let argsMap = extracted.parseAnnotationArguments(for: String.typealiasColon, String.moduleColon, String.rxColon, String.varColon, String.historyColon) {
             if let val = argsMap[.typealiasColon] {
                 ret.typeAliases = val
             }
@@ -50,6 +50,9 @@ extension Structure: EntityNode {
             }
             if let val = argsMap[.moduleColon] {
                 ret.module = val[.prefix]
+            }
+            if let val = argsMap[.historyColon] {
+                ret.historyCapturedFuncs = val.compactMap { k, v in v == "true" ? k : nil }
             }
         }
         return ret

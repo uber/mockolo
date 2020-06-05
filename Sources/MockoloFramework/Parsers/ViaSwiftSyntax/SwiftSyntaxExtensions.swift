@@ -693,6 +693,9 @@ extension Trivia {
                         }
                     }
                 }
+                if argsStr.contains(String.historyColon), let subStr = argsStr.components(separatedBy: String.historyColon).last, !subStr.isEmpty {
+                    ret.historyCapturedFuncs = subStr.arguments(with: .annotationArgDelimiter)?.compactMap { k, v in v == "true" ? k : nil }
+                }
             }
             return ret
         }
