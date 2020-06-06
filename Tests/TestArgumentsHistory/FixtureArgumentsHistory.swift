@@ -1,5 +1,71 @@
 import MockoloFramework
 
+let argumentsHistoryWithAnnotation = """
+/// \(String.mockAnnotation)(history: fooFunc = true)
+protocol Foo {
+func fooFunc(val: Int)
+func barFunc(val: Int)
+}
+"""
+
+let argumentsHistoryWithAnnotationAllFuncCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    var fooFuncCallCount = 0
+    var fooFuncValues = [Int]()
+    var fooFuncHandler: ((Int) -> ())?
+    func fooFunc(val: Int) {
+        fooFuncCallCount += 1
+        fooFuncValues.append(val)
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val)
+        }
+    }
+
+    var barFuncCallCount = 0
+    var barFuncValues = [Int]()
+    var barFuncHandler: ((Int) -> ())?
+    func barFunc(val: Int) {
+        barFuncCallCount += 1
+        barFuncValues.append(val)
+
+        if let barFuncHandler = barFuncHandler {
+            barFuncHandler(val)
+        }
+    }
+}
+"""
+
+let argumentsHistoryWithAnnotationNotAllFuncCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    var fooFuncCallCount = 0
+    var fooFuncValues = [Int]()
+    var fooFuncHandler: ((Int) -> ())?
+    func fooFunc(val: Int) {
+        fooFuncCallCount += 1
+        fooFuncValues.append(val)
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val)
+        }
+    }
+
+    var barFuncCallCount = 0
+    var barFuncHandler: ((Int) -> ())?
+    func barFunc(val: Int) {
+        barFuncCallCount += 1
+
+        if let barFuncHandler = barFuncHandler {
+            barFuncHandler(val)
+        }
+    }
+}
+"""
+
 let argumentsHistorySimpleCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
