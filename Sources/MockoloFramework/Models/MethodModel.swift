@@ -87,12 +87,9 @@ final class MethodModel: Model {
             return nil
         }
 
-        let paramNames = self.params.map(path: \.name)
-        let paramTypes = self.params.map(path: \.type)
         let ret = ArgumentsHistoryModel(name: name,
                                         genericTypeParams: genericTypeParams,
-                                        paramNames:paramNames,
-                                        paramTypes: paramTypes,
+                                        params: params,
                                         isHistoryAnnotated: historyCapturedFuncs.contains(name),
                                         suffix: suffix)
         

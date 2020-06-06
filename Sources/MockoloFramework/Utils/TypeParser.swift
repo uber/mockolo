@@ -544,8 +544,18 @@ public final class Type {
     }
     
     static func toArgumentsHistoryType(with params: [Type], typeParams: [String]) -> Type {
-        let displayableParamTypes = params.map { (subtype: Type) -> String in
-            return subtype.processTypeParams(with: typeParams)
+        // Expected only history capturable types.
+        let displayableParamTypes = params.compactMap { (subtype: Type) -> String? in
+            var processedType = subtype.processTypeParams(with: typeParams)
+            
+            if subtype.isInOut {
+                processedType = String(processedType.dropFirst((String.inout + " ").count))
+            }
+            if subtype.isIUO {
+                processedType = String(processedType.dropLast("!".count))
+            }
+            
+            return processedType
         }
         
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")

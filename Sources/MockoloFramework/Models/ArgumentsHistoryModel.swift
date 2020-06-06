@@ -4,28 +4,31 @@ final class ArgumentsHistoryModel: Model {
     var name: String
     var type: Type
     var offset: Int64 = .max
-    let paramNames: [String]
-    let paramTypes: [Type]
     let suffix: String
+    let capturableParamNames: [String]
+    let capturableParamTypes: [Type]
     let isHistoryAnnotated: Bool
 
     var modelType: ModelType {
         return .class
     }
 
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], isHistoryAnnotated: Bool, suffix: String) {
+    init(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: String) {
         self.name = name + .argsHistorySuffix
-        self.paramNames = paramNames
-        self.paramTypes = paramTypes
         self.suffix = suffix
         self.isHistoryAnnotated = isHistoryAnnotated
 
+        // Value contains closure is not supported.
+        let capturables = params.filter { !$0.type.hasClosure }
+        self.capturableParamNames = capturables.map(path: \.name)
+        self.capturableParamTypes = capturables.map(path: \.type)
+        
         let genericTypeNameList = genericTypeParams.map(path: \.name)
-        self.type = Type.toArgumentsHistoryType(with: paramTypes, typeParams: genericTypeNameList)
+        self.type = Type.toArgumentsHistoryType(with: capturableParamTypes, typeParams: genericTypeNameList)
     }
     
     func needsCaptureHistory(force: Bool) -> Bool {
-        return (force || isHistoryAnnotated) && !paramNames.isEmpty
+        return (force || isHistoryAnnotated) && !capturableParamNames.isEmpty
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, captureAllFuncArgsHistory: Bool) -> String? {
@@ -33,11 +36,11 @@ final class ArgumentsHistoryModel: Model {
             return ""
         }
         
-        switch paramNames.count {
+        switch capturableParamNames.count {
         case 1:
-            return "\(name).append(\(paramNames[0]))"
+            return "\(name).append(\(capturableParamNames[0]))"
         case 2...:
-            let paramNamesStr = paramNames.joined(separator: ", ")
+            let paramNamesStr = capturableParamNames.joined(separator: ", ")
             return "\(name).append((\(paramNamesStr)))"
         default:
             fatalError("paramNames must not be empty.")
