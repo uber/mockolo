@@ -165,5 +165,17 @@ class FooMock: Foo {
             fooFuncHandler(&val)
         }
     }
+
+    var barFuncCallCount = 0
+    var barFuncValues = [Int]()
+    var barFuncHandler: ((inout Int) -> ())?
+    func barFunc(into val: inout Int) {
+        barFuncCallCount += 1
+        barFuncValues.append(val)
+
+        if let barFuncHandler = barFuncHandler {
+        barFuncHandler(&val)
+        }
+    }
 }
 """
