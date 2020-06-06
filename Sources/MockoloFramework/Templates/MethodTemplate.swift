@@ -30,6 +30,7 @@ extension MethodModel {
                              returnType: Type,
                              accessLevel: String,
                              suffix: String,
+                             argsHistory: ArgumentsHistoryModel?,
                              handler: ClosureModel?) -> String {
         var template = ""
         
@@ -45,11 +46,12 @@ extension MethodModel {
             return ""
         default:
             
-            guard let handler = handler else { return "" }
+            guard let handler = handler, let argsHistory = argsHistory else { return "" }
             
             let callCount = "\(identifier)\(String.callCountSuffix)"
             let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
-            let argsHistoryVarType = Type.toArgumentsHistoryType(with: params.map(path: \.type), typeParams: genericTypeParams.map(path: \.name)).typeName
+            let argsHistoryVarType = argsHistory.type.typeName
+            let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", captureAllFuncArgsHistory: captureAllFuncArgsHistory) ?? ""
             let handlerVarName = "\(identifier)\(String.handlerSuffix)"
             let handlerVarType = handler.type.typeName // ?? "Any"
             let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
@@ -91,21 +93,11 @@ extension MethodModel {
                 \(2.tab)\(callCount) += 1
                 """
                 
-                if captureAllFuncArgsHistory {
-                    switch params.count {
-                    case 1:
-                        body = """
-                        \(body)
-                        \(2.tab)\(argsHistoryVarName).append(\(params[0].name))
-                        """
-                    case 2...:
-                        body = """
-                        \(body)
-                        \(2.tab)\(argsHistoryVarName).append((\(params.map(path: \.name).joined(separator: ", "))))
-                        """
-                    default:
-                        break
-                    }
+                if argsHistory.needsCaptureHistory(force: captureAllFuncArgsHistory) {
+                    body = """
+                    \(body)
+                    \(2.tab)\(argsHistoryCapture)
+                    """
                 }
 
                 body = """
@@ -131,7 +123,7 @@ extension MethodModel {
             \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
             """
             
-            if captureAllFuncArgsHistory && !params.isEmpty {
+            if argsHistory.needsCaptureHistory(force: captureAllFuncArgsHistory) {
                 template = """
                 \(template)
                 \(1.tab)\(acl)\(staticStr)var \(argsHistoryVarName) = \(argsHistoryVarType)()

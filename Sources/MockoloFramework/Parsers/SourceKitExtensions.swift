@@ -160,7 +160,7 @@ extension Structure: EntityNode {
             }
             
             if validated {
-                return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, processed: processed)
+                return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, historyCapturedFuncs: metadata?.historyCapturedFuncs ?? [], processed: processed)
             }
             return nil
 

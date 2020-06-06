@@ -40,6 +40,7 @@ final class MethodModel: Model {
     let shouldOverride: Bool
     let suffix: String
     let kind: MethodKind
+    let historyCapturedFuncs: [String]
     var modelType: ModelType {
         return .method
     }
@@ -81,7 +82,23 @@ final class MethodModel: Model {
         return ret
     }()
     
-    
+    lazy var argsHistory: ArgumentsHistoryModel? = {
+        if isInitializer {
+            return nil
+        }
+
+        let paramNames = self.params.map(path: \.name)
+        let paramTypes = self.params.map(path: \.type)
+        let ret = ArgumentsHistoryModel(name: name,
+                                        genericTypeParams: genericTypeParams,
+                                        paramNames:paramNames,
+                                        paramTypes: paramTypes,
+                                        isHistoryAnnotated: historyCapturedFuncs.contains(name),
+                                        suffix: suffix)
+        
+        return ret
+    }()
+
     lazy var handler: ClosureModel? = {
         if isInitializer {
             return nil
@@ -111,6 +128,7 @@ final class MethodModel: Model {
          isStatic: Bool,
          offset: Int64,
          length: Int64,
+         historyCapturedFuncs: [String],
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -124,11 +142,12 @@ final class MethodModel: Model {
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.processed = processed
+        self.historyCapturedFuncs = historyCapturedFuncs
         self.modelDescription = modelDescription
         self.accessLevel = acl
     }
     
-    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, processed: Bool) {
+    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, historyCapturedFuncs: [String], processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
         // give the name part that we expect.
@@ -139,6 +158,7 @@ final class MethodModel: Model {
         self.name = nameString
         self.type = Type(ast.typeName)
         self.isStatic = ast.isStaticMethod
+        self.historyCapturedFuncs = historyCapturedFuncs
         self.processed = processed
         self.shouldOverride = ast.isOverride || encloserType == .classType
         if ast.isSubscript {
@@ -228,6 +248,7 @@ final class MethodModel: Model {
                                          returnType: type,
                                          accessLevel: accessLevel,
                                          suffix: suffix,
+                                         argsHistory: argsHistory,
                                          handler: handler)
         return result
     }
