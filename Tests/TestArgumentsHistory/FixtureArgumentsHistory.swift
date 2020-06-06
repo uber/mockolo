@@ -142,6 +142,44 @@ class FooMock: Foo {
 }
 """
 
+let argumentsHistoryTupleCase = """
+/// \(String.mockAnnotation)(history: fooFunc = true)
+protocol Foo {
+    func fooFunc(val: (Int, String))
+    func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))
+}
+"""
+
+let argumentsHistoryTupleCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    var fooFuncCallCount = 0
+    var fooFuncValues = [(Int, String)]()
+    var fooFuncHandler: (((Int, String)) -> ())?
+    func fooFunc(val: (Int, String)) {
+        fooFuncCallCount += 1
+        fooFuncValues.append(val)
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val)
+        }
+    }
+
+    var barFuncCallCount = 0
+    var barFuncValues = [((bar1: Int, String), (bar3: Int, bar4: String))]()
+    var barFuncHandler: (((bar1: Int, String), (bar3: Int, bar4: String)) -> ())?
+    func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String)) {
+        barFuncCallCount += 1
+        barFuncValues.append((val1, val2))
+
+        if let barFuncHandler = barFuncHandler {
+            barFuncHandler(val1, val2)
+        }
+    }
+}
+"""
+
 let argumentsHistoryInoutCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
