@@ -25,4 +25,10 @@ class ArgumentsHistoryTests: MockoloTestCase {
                dstContent: argumentsHistoryInoutCaseMock,
                captureAllFuncArgsHistory: true)
     }
+    
+    func testArgumentsHistoryHandlerCase() {
+        verify(srcContent: argumentsHistoryHandlerCase,
+               dstContent: argumentsHistoryHandlerCaseMock,
+               captureAllFuncArgsHistory: true)
+    }
 }
