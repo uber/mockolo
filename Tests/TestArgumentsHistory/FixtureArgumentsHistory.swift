@@ -1,6 +1,6 @@
 import MockoloFramework
 
-let argumentsHistoryForAllFuncs = """
+let argumentsHistorySimpleCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
    func fooFunc()
@@ -11,7 +11,7 @@ protocol Foo {
 }
 """
 
-let argumentsHistoryForAllFuncsMock = """
+let argumentsHistorySimpleCaseMock = """
 class FooMock: Foo {
     init() { }
 
@@ -71,6 +71,32 @@ class FooMock: Foo {
 
         if let quuxFuncHandler = quuxFuncHandler {
             quuxFuncHandler(val1, val2)
+        }
+    }
+}
+"""
+
+let argumentsHistoryInoutCase = """
+/// \(String.mockAnnotation)
+protocol Foo {
+    func fooFunc(val: inout Int)
+    func barFunc(into val: inout Int)
+}
+"""
+
+let argumentsHistoryInoutCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    var fooFuncCallCount = 0
+    var fooFuncValues = [Int]()
+    var fooFuncHandler: ((inout Int) -> ())?
+    func fooFunc(val: inout Int) {
+        fooFuncCallCount += 1
+        fooFuncValues.append(val)
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(&val)
         }
     }
 }

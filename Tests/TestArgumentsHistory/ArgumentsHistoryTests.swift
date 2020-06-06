@@ -2,10 +2,15 @@ import Foundation
 
 class ArgumentsHistoryTests: MockoloTestCase {
     
-    func testArgumentsHistoryForAllFuncs() {
-        verify(srcContent: argumentsHistoryForAllFuncs,
-               dstContent: argumentsHistoryForAllFuncsMock,
+    func testArgumentsHistorySimpleCase() {
+        verify(srcContent: argumentsHistorySimpleCase,
+               dstContent: argumentsHistorySimpleCaseMock,
                captureAllFuncArgsHistory: true)
     }
     
+    func testArgumentsHistoryInoutCase() {
+        verify(srcContent: argumentsHistoryInoutCase,
+               dstContent: argumentsHistoryInoutCaseMock,
+               captureAllFuncArgsHistory: true)
+    }
 }
