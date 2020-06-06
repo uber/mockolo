@@ -104,6 +104,7 @@ OPTIONS:
   --concurrency-limit, -j Maximum number of threads to execute concurrently (default = number of cores on the running machine).
   --logging-level, -v     The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
   --use-sourcekit         If this argument is added, it will use SourceKit for parsing. By default it uses SwiftSyntax.
+  --enable-args-history   Whether generated mock contains function args history capturing. If set, `history` annotation will be ignored (default = false).
   --help, -h                  Displays available options.
   ```
 
@@ -265,6 +266,45 @@ public class FooMock: Foo {
 }
 ```
 
+To capture function arguments history:
+
+```swift
+/// @mockable(history: fooFunc = true)
+public protocol Foo {
+    func fooFunc(val: Int)
+    func barFunc(_ val: (a: String, Float))
+    func bazFunc(val1: Int, val2: String)
+}
+```
+
+This will generate: 
+
+```swift
+public class FooMock: Foo {
+    var fooFuncCallCount = 0
+    var fooFuncValues = [Int]() // arguments captor
+    var fooFuncHandler: ((Int) -> ())?
+    func fooFunc(val: Int) {
+        fooFuncCallCount += 1
+        fooFuncValues.append(val)   // capture arguments
+
+        if fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val)
+        }
+    }
+
+    ...
+    var barFuncValues = [(a: String, Float)]() // tuple is also supported.
+    ...
+
+    ...
+    var bazFuncValues = [(Int, String)]()
+    ...
+}
+```
+
+and also, enable the arguments captor for all functions if you passed `--enable-args-history` arg to `mockolo` command.
+> NOTE: The arguments captor only supports singular types (e.g. variable, tuple). The closure variable is not supported.
 
 
 ## Used libraries
