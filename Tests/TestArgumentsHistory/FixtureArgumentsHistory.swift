@@ -292,3 +292,28 @@ class FooMock: Foo {
     }
 }
 """
+
+let argumentsHistoryStaticCase = """
+/// \(String.mockAnnotation)
+protocol Foo {
+    static func fooFunc(val: Int)
+}
+"""
+
+let argumentsHistoryStaticCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    static var fooFuncCallCount = 0
+    static var fooFuncArgValues = [Int]()
+    static var fooFuncHandler: ((Int) -> ())?
+    static func fooFunc(val: Int) {
+        fooFuncCallCount += 1
+        fooFuncArgValues.append(val)
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val)
+        }
+    }
+}
+"""
