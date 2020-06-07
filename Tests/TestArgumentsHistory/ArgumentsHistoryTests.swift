@@ -25,6 +25,12 @@ class ArgumentsHistoryTests: MockoloTestCase {
                dstContent: argumentsHistoryTupleCaseMock,
                enableFuncArgsHistory: true)
     }
+
+    func testArgumentsHistoryOverloadedCase() {
+        verify(srcContent: argumentsHistoryOverloadedCase,
+               dstContent: argumentsHistoryOverloadedCaseMock,
+               enableFuncArgsHistory: true)
+    }
     
     func testArgumentsHistoryGenericsCase() {
         verify(srcContent: argumentsHistoryGenericsCase,

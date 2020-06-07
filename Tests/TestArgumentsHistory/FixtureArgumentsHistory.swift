@@ -180,6 +180,69 @@ class FooMock: Foo {
 }
 """
 
+let argumentsHistoryOverloadedCase = """
+/// \(String.mockAnnotation)
+protocol Foo {
+    func fooFunc()
+    func fooFunc(val1: Int)
+    func fooFunc(val1: String)
+    func fooFunc(val2: Int)
+}
+"""
+
+let argumentsHistoryOverloadedCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    var fooFuncCallCount = 0
+    var fooFuncHandler: (() -> ())?
+    func fooFunc() {
+        fooFuncCallCount += 1
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler()
+        }
+    }
+
+    var fooFuncVal1CallCount = 0
+    var fooFuncVal1ArgValues = [Int]()
+    var fooFuncVal1Handler: ((Int) -> ())?
+    func fooFunc(val1: Int)  {
+        fooFuncVal1CallCount += 1
+        fooFuncVal1ArgValues.append(val1)
+
+        if let fooFuncVal1Handler = fooFuncVal1Handler {
+            fooFuncVal1Handler(val1)
+        }
+        
+    }
+
+    var fooFuncVal1StringCallCount = 0
+    var fooFuncVal1StringArgValues = [String]()
+    var fooFuncVal1StringHandler: ((String) -> ())?
+    func fooFunc(val1: String)  {
+        fooFuncVal1StringCallCount += 1
+        fooFuncVal1StringArgValues.append(val1)
+
+        if let fooFuncVal1StringHandler = fooFuncVal1StringHandler {
+            fooFuncVal1StringHandler(val1)
+        }
+    }
+
+    var fooFuncVal2CallCount = 0
+    var fooFuncVal2ArgValues = [Int]()
+    var fooFuncVal2Handler: ((Int) -> ())?
+    func fooFunc(val2: Int)  {
+        fooFuncVal2CallCount += 1
+        fooFuncVal2ArgValues.append(val2)
+
+        if let fooFuncVal2Handler = fooFuncVal2Handler {
+            fooFuncVal2Handler(val2)
+        }
+    }
+}
+"""
+
 let argumentsHistoryGenericsCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
