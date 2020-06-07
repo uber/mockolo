@@ -55,6 +55,13 @@ final class MethodModel: Model {
         return false
     }
     
+    var isSubscript: Bool {
+        if case .subscriptKind = kind {
+            return true
+        }
+        return false
+    }
+    
     lazy var signatureComponents: [String] = {
         let paramLabels = self.params.map {$0.label != "_" ? $0.label : ""}
         let paramNames = self.params.map(path: \.name)
@@ -82,7 +89,7 @@ final class MethodModel: Model {
     }()
     
     lazy var argsHistory: ArgumentsHistoryModel? = {
-        if isInitializer {
+        if isInitializer || isSubscript {
             return nil
         }
 

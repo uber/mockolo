@@ -45,12 +45,9 @@ extension MethodModel {
             return ""
         default:
             
-            guard let handler = handler, let argsHistory = argsHistory else { return "" }
+            guard let handler = handler else { return "" }
             
             let callCount = "\(identifier)\(String.callCountSuffix)"
-            let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
-            let argsHistoryVarType = argsHistory.type.typeName
-            let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", enableFuncArgsHistory: enableFuncArgsHistory) ?? ""
             let handlerVarName = "\(identifier)\(String.handlerSuffix)"
             let handlerVarType = handler.type.typeName // ?? "Any"
             let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
@@ -58,7 +55,6 @@ extension MethodModel {
             let suffixStr = suffix.isEmpty ? "" : "\(suffix) "
             let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
             let staticStr = isStatic ? String.static + " " : ""
-            let isSubscript = kind == .subscriptKind
             let keyword = isSubscript ? "" : "func "
             var body = ""
 
@@ -92,7 +88,9 @@ extension MethodModel {
                 \(2.tab)\(callCount) += 1
                 """
                 
-                if argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
+                if let argsHistory = argsHistory, argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
+                    let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", enableFuncArgsHistory: enableFuncArgsHistory) ?? ""
+                    
                     body = """
                     \(body)
                     \(2.tab)\(argsHistoryCapture)
@@ -122,7 +120,10 @@ extension MethodModel {
             \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
             """
             
-            if argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
+            if let argsHistory = argsHistory, argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
+                let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
+                let argsHistoryVarType = argsHistory.type.typeName
+                
                 template = """
                 \(template)
                 \(1.tab)\(acl)\(staticStr)var \(argsHistoryVarName) = \(argsHistoryVarType)()
