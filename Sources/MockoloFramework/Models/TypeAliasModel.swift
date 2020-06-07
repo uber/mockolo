@@ -15,8 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
-
 
 final class TypeAliasModel: Model {
     var filePath: String = ""
@@ -52,32 +50,6 @@ final class TypeAliasModel: Model {
             self.type  = Type(val)
         } else {
             self.type = typeName.isEmpty ? Type(String.any) : Type(typeName)
-        }
-    }
-
-    init(_ ast: Structure, filepath: String, data: Data, overrideTypes: [String: String]?, processed: Bool) {
-        self.name = ast.name
-        self.filePath = filepath
-        self.offset = ast.offset
-        self.length = ast.length
-        self.typeOffset = ast.nameOffset + ast.nameLength + 1
-        self.typeLength = ast.offset + ast.length - typeOffset
-        self.accessLevel = ast.accessLevel
-        self.processed = processed
-        self.overrideTypes = overrideTypes
-        self.modelDescription = ast.description
-        // If there's an override typealias value, set it to type
-        if let val = overrideTypes?[self.name] {
-            self.type  = Type(val)
-        } else {
-            // Sourcekit doesn't give inheritance type info for an associatedtype, so need to manually parse it from the content
-            if typeLength < 0 {
-                self.type = Type(String.any)
-            } else {
-                let charset = CharacterSet(arrayLiteral: "=", ":").union(.whitespaces)
-                let typeArg = data.toString(offset: typeOffset, length: typeLength).trimmingCharacters(in: charset)
-                self.type = Type(typeArg)
-            }
         }
     }
 

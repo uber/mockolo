@@ -8,8 +8,7 @@ class HeaderTests: MockoloTestCase {
         verify(srcContent: simpleInit,
                mockContent: simpleInitParentMock,
                dstContent: simpleInitResultMock,
-               header: "/// Copyright ©",
-               parser: .swiftSyntax)
+               header: "/// Copyright ©")
     }
     
     func testHeader2() {

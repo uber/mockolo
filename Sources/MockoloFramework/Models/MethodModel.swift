@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 public enum MethodKind: Equatable {
     case funcKind
@@ -128,65 +127,6 @@ final class MethodModel: Model {
         self.accessLevel = acl
     }
     
-    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, processed: Bool) {
-        // This will split func signature into name and the rest (params, return type). In case it's a generic func,
-        // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
-        // give the name part that we expect.
-        var comps = ast.name.components(separatedBy: CharacterSet(arrayLiteral: ":", "(", ")")).filter {!$0.isEmpty}
-        let nameString = comps.removeFirst()
-        self.filePath = filepath
-        self.data = data
-        self.name = nameString
-        self.type = Type(ast.typeName)
-        self.isStatic = ast.isStaticMethod
-        self.processed = processed
-        self.shouldOverride = ast.isOverride || encloserType == .classType
-        if ast.isSubscript {
-            self.kind = .subscriptKind
-        } else if ast.isInitializer {
-            let isRequired = ast.isRequired || encloserType == .protocolType
-            self.kind = .initKind(required: isRequired, override: shouldOverride)
-        } else {
-            self.kind = .funcKind
-        }
-        self.offset = ast.range.offset
-        self.length = ast.range.length
-        let needVarDecl = encloserType == .protocolType // Params in protocol init should be declared as private vars if not done already
-        
-        let paramDecls = ast.substructures.filter(path: \.isVarParameter)
-        assert(paramDecls.count == comps.count)
-        
-        let zippedParams = zip(paramDecls, comps)
-        self.params = zippedParams.map { (argAst: Structure, argLabel: String) -> ParamModel in
-            return ParamModel(argAst, label: argLabel, offset: argAst.offset, length: argAst.length, data: data, inInit: ast.isInitializer, needVarDecl: needVarDecl)
-        }
-        
-        self.genericTypeParams = ast.substructures
-            .filter(path: \.isGenericTypeParam)
-            .map { (arg: Structure) -> ParamModel in
-                ParamModel(arg, label: arg.name, offset: arg.offset, length: arg.length, data: data, isGeneric: true, needVarDecl: false)
-        }
-        
-        // Sourcekit structure api doesn't provide info on throws/rethrows, so manually parse it here
-        let suffixOffset = ast.nameOffset + ast.nameLength + 1
-        let suffixLen = ast.offset + ast.length - suffixOffset
-        if suffixLen > 0, suffixOffset > ast.bodyOffset - 1 {
-            let suffixPart = data.toString(offset: suffixOffset, length: suffixLen).trimmingCharacters(in: .whitespacesAndNewlines)
-            if suffixPart.hasPrefix("\(String.SwiftKeywords.rethrows.rawValue)") {
-                self.suffix = String.SwiftKeywords.rethrows.rawValue
-            } else if suffixPart.hasPrefix("\(String.SwiftKeywords.throws.rawValue)") {
-                self.suffix = String.SwiftKeywords.throws.rawValue
-            } else {
-                self.suffix = ""
-            }
-        } else {
-            self.suffix = ""
-        }
-        
-        self.accessLevel = ast.accessLevel
-        self.attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : []
-    }
-
     var fullName: String {
         return self.name + self.signatureComponents.joined() + staticKind
     }
@@ -204,7 +144,7 @@ final class MethodModel: Model {
         if processed {
             var prefix = shouldOverride  ? "\(String.override) " : ""
 
-            if case .initKind(required: let isRequired, override: let override) = self.kind {
+            if case .initKind(required: let isRequired, override: _) = self.kind {
                 if isRequired {
                     prefix = ""
                 }

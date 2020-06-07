@@ -103,7 +103,6 @@ OPTIONS:
   --testable-imports, -i  If set, @testable import statments will be added for each module name in this list.
   --concurrency-limit, -j Maximum number of threads to execute concurrently (default = number of cores on the running machine).
   --logging-level, -v     The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
-  --use-sourcekit         If this argument is added, it will use SourceKit for parsing. By default it uses SwiftSyntax.
   --help, -h                  Displays available options.
   ```
 
@@ -270,7 +269,6 @@ public class FooMock: Foo {
 ## Used libraries
 
 [SwiftSyntax](https://github.com/apple/swift-syntax) | 
-[SourceKitten](https://github.com/jpsim/SourceKitten)
 
 
 ## How to contribute to Mockolo

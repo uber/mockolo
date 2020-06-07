@@ -3,40 +3,34 @@ import Foundation
 class MacroTests: MockoloTestCase {
    func testMacroInFunc() {
         verify(srcContent: macroInFunc,
-               dstContent: macroInFuncMock,
-               parser: .swiftSyntax)
+               dstContent: macroInFuncMock)
     }
 
     func testMacroImports() {
          verify(srcContent: macroImports,
-                dstContent: macroImportsMock,
-                parser: .swiftSyntax)
+                dstContent: macroImportsMock)
      }
     
     func testMacroImportsWithOtherMacro() {
          verify(srcContent: macroImports,
                 mockContent: parentMock,
-                dstContent: macroImportsWithParentMock,
-                parser: .swiftSyntax)
+                dstContent: macroImportsWithParentMock)
      }
 
     func testInheritedMacroImports() {
          verify(srcContent: macroImports,
                 mockContent: parentWithMacroMock,
-                dstContent: inheritedMacroImportsMock,
-                parser: .swiftSyntax)
+                dstContent: inheritedMacroImportsMock)
      }
 
     func testIfElseMacroImports() {
          verify(srcContent: ifElseMacroImports,
-                dstContent: ifElseMacroImportsMock,
-                parser: .swiftSyntax)
+                dstContent: ifElseMacroImportsMock)
      }
 
     func testNestedMacroImports() {
          verify(srcContent: nestedMacroImports,
-                dstContent: nestedMacroImportsMock,
-                parser: .swiftSyntax)
+                dstContent: nestedMacroImportsMock)
      }
 
 }

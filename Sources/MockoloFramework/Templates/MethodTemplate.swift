@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 extension MethodModel {
     func applyMethodTemplate(name: String,
