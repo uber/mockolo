@@ -39,13 +39,13 @@ public func generate(sourceDirs: [String]?,
                      declType: DeclType,
                      useTemplateFunc: Bool,
                      useMockObservable: Bool,
+                     enableFuncArgsHistory: Bool,
                      testableImports: [String]?,
                      customImports: [String]?,
                      excludeImports: [String]?,
                      to outputFilePath: String,
                      loggingLevel: Int,
                      concurrencyLimit: Int?,
-                     captureAllFuncArgsHistory: Bool,
                      onCompletion: @escaping (String) -> ()) throws {
     guard sourceDirs != nil || sourceFiles != nil else {
         log("Source files or directories do not exist", level: .error)
@@ -133,7 +133,7 @@ public func generate(sourceDirs: [String]?,
     renderTemplates(entities: resolvedEntities,
                     useTemplateFunc: useTemplateFunc,
                     useMockObservable: useMockObservable,
-                    captureAllFuncArgsHistory: captureAllFuncArgsHistory) { (mockString: String, offset: Int64) in
+                    enableFuncArgsHistory: enableFuncArgsHistory) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
     }
     signpost_end(name: "Render models")

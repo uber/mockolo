@@ -5,36 +5,36 @@ class ArgumentsHistoryTests: MockoloTestCase {
     func testArgumentsHistoryWithAnnotationAllFuncCases() {
         verify(srcContent: argumentsHistoryWithAnnotation,
                dstContent: argumentsHistoryWithAnnotationAllFuncCaseMock,
-               captureAllFuncArgsHistory: true)
+               enableFuncArgsHistory: true)
     }
         
     func testArgumentsHistoryWithAnnotationNotAllFuncCases() {
         verify(srcContent: argumentsHistoryWithAnnotation,
                dstContent: argumentsHistoryWithAnnotationNotAllFuncCaseMock,
-               captureAllFuncArgsHistory: false)
+               enableFuncArgsHistory: false)
     }
     
     func testArgumentsHistorySimpleCase() {
         verify(srcContent: argumentsHistorySimpleCase,
                dstContent: argumentsHistorySimpleCaseMock,
-               captureAllFuncArgsHistory: true)
+               enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryTupleCase() {
         verify(srcContent: argumentsHistoryTupleCase,
                dstContent: argumentsHistoryTupleCaseMock,
-               captureAllFuncArgsHistory: true)
+               enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryInoutCase() {
         verify(srcContent: argumentsHistoryInoutCase,
                dstContent: argumentsHistoryInoutCaseMock,
-               captureAllFuncArgsHistory: true)
+               enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryHandlerCase() {
         verify(srcContent: argumentsHistoryHandlerCase,
                dstContent: argumentsHistoryHandlerCaseMock,
-               captureAllFuncArgsHistory: true)
+               enableFuncArgsHistory: true)
     }
 }

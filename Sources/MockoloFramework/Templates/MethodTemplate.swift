@@ -22,7 +22,7 @@ extension MethodModel {
                              identifier: String,
                              kind: MethodKind,
                              useTemplateFunc: Bool,
-                             captureAllFuncArgsHistory: Bool,
+                             enableFuncArgsHistory: Bool,
                              isStatic: Bool,
                              isOverride: Bool,
                              genericTypeParams: [ParamModel],
@@ -51,7 +51,7 @@ extension MethodModel {
             let callCount = "\(identifier)\(String.callCountSuffix)"
             let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
             let argsHistoryVarType = argsHistory.type.typeName
-            let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", captureAllFuncArgsHistory: captureAllFuncArgsHistory) ?? ""
+            let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", enableFuncArgsHistory: enableFuncArgsHistory) ?? ""
             let handlerVarName = "\(identifier)\(String.handlerSuffix)"
             let handlerVarType = handler.type.typeName // ?? "Any"
             let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
@@ -93,7 +93,7 @@ extension MethodModel {
                 \(2.tab)\(callCount) += 1
                 """
                 
-                if argsHistory.needsCaptureHistory(force: captureAllFuncArgsHistory) {
+                if argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
                     body = """
                     \(body)
                     \(2.tab)\(argsHistoryCapture)
@@ -123,7 +123,7 @@ extension MethodModel {
             \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
             """
             
-            if argsHistory.needsCaptureHistory(force: captureAllFuncArgsHistory) {
+            if argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
                 template = """
                 \(template)
                 \(1.tab)\(acl)\(staticStr)var \(argsHistoryVarName) = \(argsHistoryVarType)()

@@ -207,13 +207,13 @@ class Executor {
                          declType: shouldMockAll ? .all : .protocolType,
                          useTemplateFunc: shouldUseTemplateFunc,
                          useMockObservable: shouldUseMockObservable,
+                         enableFuncArgsHistory: shouldCaptureAllFuncArgsHistory,
                          testableImports: testableImports,
                          customImports: customImports,
                          excludeImports: excludeImports,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit,
-                         captureAllFuncArgsHistory: shouldCaptureAllFuncArgsHistory,
                          onCompletion: { _ in
                     log("Done. Exiting program.", level: .info)
                     exit(0)
