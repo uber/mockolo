@@ -26,6 +26,12 @@ class ArgumentsHistoryTests: MockoloTestCase {
                enableFuncArgsHistory: true)
     }
     
+    func testArgumentsHistoryGenericsCase() {
+        verify(srcContent: argumentsHistoryGenericsCase,
+               dstContent: argumentsHistoryGenericsCaseMock,
+               enableFuncArgsHistory: true)
+    }
+    
     func testArgumentsHistoryInoutCase() {
         verify(srcContent: argumentsHistoryInoutCase,
                dstContent: argumentsHistoryInoutCaseMock,

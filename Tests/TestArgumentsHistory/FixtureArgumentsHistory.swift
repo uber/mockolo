@@ -180,6 +180,45 @@ class FooMock: Foo {
 }
 """
 
+let argumentsHistoryGenericsCase = """
+/// \(String.mockAnnotation)
+protocol Foo {
+    func fooFunc<T: StringProtocol>(val1: T, val2: T?)
+    func barFunc<T: Sequence, U: Collection>(val: T) -> U
+}
+"""
+
+let argumentsHistoryGenericsCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    var fooFuncCallCount = 0
+    var fooFuncArgValues = [(Any, Any?)]()
+    var fooFuncHandler: ((Any, Any?) -> ())?
+    func fooFunc<T: StringProtocol>(val1: T, val2: T?) {
+        fooFuncCallCount += 1
+        fooFuncArgValues.append((val1, val2))
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val1, val2)
+        }
+    }
+
+    var barFuncCallCount = 0
+    var barFuncArgValues = [Any]()
+    var barFuncHandler: ((Any) -> (Any))?
+    func barFunc<T: Sequence, U: Collection>(val: T) -> U {
+        barFuncCallCount += 1
+        barFuncArgValues.append(val)
+
+        if let barFuncHandler = barFuncHandler {
+            return barFuncHandler(val) as! U
+        }
+        fatalError("barFuncHandler returns can't have a default value thus its handler must be set")
+    }
+}
+"""
+
 let argumentsHistoryInoutCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
