@@ -40,7 +40,6 @@ class Executor {
     private var useMockObservable: OptionArgument<Bool>!
     private var mockAll: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
-    private var useSourceKit: OptionArgument<Bool>!
     private var enableArgsHistory: OptionArgument<Bool>!
 
     /// Initializer.
@@ -130,9 +129,6 @@ class Executor {
                                       shortName: "-j",
                                       kind: Int.self,
                                       usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
-        useSourceKit = parser.add(option: "--use-sourcekit",
-                             kind: Bool.self,
-                             usage: "Whether to use SourceKit for parsing. By default it will use SwiftSyntax.")
         enableArgsHistory = parser.add(option: "--enable-args-history",
                                        kind: Bool.self,
                                        usage: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument. ")
@@ -189,7 +185,6 @@ class Executor {
         let testableImports = arguments.get(self.testableImports)
         let customImports = arguments.get(self.customImports)
         let excludeImports = arguments.get(self.excludeImports)
-        let shouldUseSourceKit = arguments.get(useSourceKit) ?? false
         let shouldUseTemplateFunc = arguments.get(useTemplateFunc) ?? false
         let shouldUseMockObservable = arguments.get(useMockObservable) ?? false
         let shouldMockAll = arguments.get(mockAll) ?? false
@@ -198,7 +193,7 @@ class Executor {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
-                         parser: shouldUseSourceKit ? ParserViaSourceKit() : ParserViaSwiftSyntax(),
+                         parser: ParserViaSwiftSyntax(),
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,

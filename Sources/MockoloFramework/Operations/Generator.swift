@@ -21,12 +21,6 @@ enum InputError: Error {
     case sourceFilesError
 }
 
-public enum ParserType {
-    case swiftSyntax
-    case sourceKit
-    case random
-}
-
 /// Performs end to end mock generation flow
 public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,

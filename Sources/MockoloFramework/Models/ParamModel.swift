@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 final class ParamModel: Model {
     var name: String
@@ -51,21 +50,6 @@ final class ParamModel: Model {
         self.needVarDecl = needVarDecl
     }
     
-    init(_ ast: Structure, label: String = "", offset: Int64, length: Int64, data: Data, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool) {
-        self.name = ast.name
-        self.offset = offset
-        self.length = length
-        // Sourcekit doesn't specify if a func arg is variadic, so look ahead for the following characters to  determine.
-        let lookahead = data.toString(offset: offset + length, length: 3)
-        let isVariadic = lookahead == "..."
-        self.isGeneric = isGeneric
-        self.inInit = inInit
-        self.needVarDecl = needVarDecl
-        let typeArg = isGeneric ? (ast.inheritedTypes.first ?? .unknownVal) : (isVariadic ? ast.typeName + "..." : ast.typeName)
-        self.type = Type(typeArg)
-        self.label = ast.name != label ? label : ""
-    }
-
     var underlyingName: String {
         return "_\(name)"
     }

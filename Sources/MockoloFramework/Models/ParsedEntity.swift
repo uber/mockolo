@@ -15,7 +15,6 @@
 //
 
 import Foundation
-import SourceKittenFramework
 
 /// Metadata containing unique models and potential init params ready to be rendered for output
 struct ResolvedEntity {

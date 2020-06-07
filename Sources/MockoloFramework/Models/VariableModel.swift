@@ -1,5 +1,4 @@
 import Foundation
-import SourceKittenFramework
 
 final class VariableModel: Model {
     var name: String
@@ -56,22 +55,6 @@ final class VariableModel: Model {
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.modelDescription = modelDescription
-    }
-    
-    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, overrideTypes: [String: String]?, processed: Bool) {
-        name = ast.name
-        type = Type(ast.typeName)
-        offset = ast.range.offset
-        length = ast.range.length
-        canBeInitParam = ast.canBeInitParam
-        isStatic = ast.isStaticVariable
-        shouldOverride = ast.isOverride || encloserType == .classType
-        accessLevel = ast.accessLevel
-        attributes = ast.hasAvailableAttribute ? ast.extractAttributes(data, filterOn: SwiftDeclarationAttributeKind.available.rawValue) : nil
-        self.processed = processed
-        self.overrideTypes = overrideTypes
-        self.data = data
-        self.filePath = filepath
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
