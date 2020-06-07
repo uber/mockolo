@@ -88,7 +88,7 @@ extension MethodModel {
                 \(2.tab)\(callCount) += 1
                 """
                 
-                if let argsHistory = argsHistory, argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
+                if let argsHistory = argsHistory, argsHistory.enable(force: enableFuncArgsHistory) {
                     let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", enableFuncArgsHistory: enableFuncArgsHistory) ?? ""
                     
                     body = """
@@ -120,7 +120,7 @@ extension MethodModel {
             \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
             """
             
-            if let argsHistory = argsHistory, argsHistory.needsCaptureHistory(force: enableFuncArgsHistory) {
+            if let argsHistory = argsHistory, argsHistory.enable(force: enableFuncArgsHistory) {
                 let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
                 let argsHistoryVarType = argsHistory.type.typeName
                 

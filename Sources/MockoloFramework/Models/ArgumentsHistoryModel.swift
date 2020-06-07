@@ -27,12 +27,12 @@ final class ArgumentsHistoryModel: Model {
         self.type = Type.toArgumentsHistoryType(with: capturableParamTypes, typeParams: genericTypeNameList)
     }
     
-    func needsCaptureHistory(force: Bool) -> Bool {
+    func enable(force: Bool) -> Bool {
         return (force || isHistoryAnnotated) && !capturableParamNames.isEmpty
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool) -> String? {
-        guard needsCaptureHistory(force: enableFuncArgsHistory) else {
+        guard enable(force: enableFuncArgsHistory) else {
             return ""
         }
         
