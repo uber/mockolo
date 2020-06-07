@@ -56,7 +56,7 @@ extension String {
     static let `public` = "public"
     static let `open` = "open"
     static let initializer = "init"
-    static let argsHistorySuffix = "Values"
+    static let argsHistorySuffix = "ArgValues"
     static let handlerSuffix = "Handler"
     static let observable = "Observable"
     static let rxObservable = "RxSwift.Observable"

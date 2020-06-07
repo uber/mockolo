@@ -13,11 +13,11 @@ class FooMock: Foo {
     init() { }
 
     var fooFuncCallCount = 0
-    var fooFuncValues = [Int]()
+    var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
     func fooFunc(val: Int) {
         fooFuncCallCount += 1
-        fooFuncValues.append(val)
+        fooFuncArgValues.append(val)
 
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(val)
@@ -25,11 +25,11 @@ class FooMock: Foo {
     }
 
     var barFuncCallCount = 0
-    var barFuncValues = [Int]()
+    var barFuncArgValues = [Int]()
     var barFuncHandler: ((Int) -> ())?
     func barFunc(val: Int) {
         barFuncCallCount += 1
-        barFuncValues.append(val)
+        barFuncArgValues.append(val)
 
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
@@ -43,11 +43,11 @@ class FooMock: Foo {
     init() { }
 
     var fooFuncCallCount = 0
-    var fooFuncValues = [Int]()
+    var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
     func fooFunc(val: Int) {
         fooFuncCallCount += 1
-        fooFuncValues.append(val)
+        fooFuncArgValues.append(val)
 
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(val)
@@ -92,11 +92,11 @@ class FooMock: Foo {
     }
 
     var barFuncCallCount = 0
-    var barFuncValues = [Int]()
+    var barFuncArgValues = [Int]()
     var barFuncHandler: ((Int) -> ())?
     func barFunc(val: Int) {
         barFuncCallCount += 1
-        barFuncValues.append(val)
+        barFuncArgValues.append(val)
 
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
@@ -104,11 +104,11 @@ class FooMock: Foo {
     }
 
     var bazFuncCallCount = 0
-    var bazFuncValues = [Int]()
+    var bazFuncArgValues = [Int]()
     var bazFuncHandler: ((Int) -> ())?
     func bazFunc(_ val: Int) {
         bazFuncCallCount += 1
-        bazFuncValues.append(val)
+        bazFuncArgValues.append(val)
 
         if let bazFuncHandler = bazFuncHandler {
             bazFuncHandler(val)
@@ -116,11 +116,11 @@ class FooMock: Foo {
     }
 
     var quxFuncCallCount = 0
-    var quxFuncValues = [Int]()
+    var quxFuncArgValues = [Int]()
     var quxFuncHandler: ((Int) -> (String))?
     func quxFunc(val: Int) -> String {
         quxFuncCallCount += 1
-        quxFuncValues.append(val)
+        quxFuncArgValues.append(val)
 
         if let quxFuncHandler = quxFuncHandler {
             return quxFuncHandler(val)
@@ -129,11 +129,11 @@ class FooMock: Foo {
     }
 
     var quuxFuncCallCount = 0
-    var quuxFuncValues = [(String, Float)]()
+    var quuxFuncArgValues = [(String, Float)]()
     var quuxFuncHandler: ((String, Float) -> ())?
     func quuxFunc(val1: String, val2: Float) {
         quuxFuncCallCount += 1
-        quuxFuncValues.append((val1, val2))
+        quuxFuncArgValues.append((val1, val2))
 
         if let quuxFuncHandler = quuxFuncHandler {
             quuxFuncHandler(val1, val2)
@@ -155,11 +155,11 @@ class FooMock: Foo {
     init() { }
 
     var fooFuncCallCount = 0
-    var fooFuncValues = [(Int, String)]()
+    var fooFuncArgValues = [(Int, String)]()
     var fooFuncHandler: (((Int, String)) -> ())?
     func fooFunc(val: (Int, String)) {
         fooFuncCallCount += 1
-        fooFuncValues.append(val)
+        fooFuncArgValues.append(val)
 
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(val)
@@ -167,11 +167,11 @@ class FooMock: Foo {
     }
 
     var barFuncCallCount = 0
-    var barFuncValues = [((bar1: Int, String), (bar3: Int, bar4: String))]()
+    var barFuncArgValues = [((bar1: Int, String), (bar3: Int, bar4: String))]()
     var barFuncHandler: (((bar1: Int, String), (bar3: Int, bar4: String)) -> ())?
     func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String)) {
         barFuncCallCount += 1
-        barFuncValues.append((val1, val2))
+        barFuncArgValues.append((val1, val2))
 
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val1, val2)
@@ -193,11 +193,11 @@ class FooMock: Foo {
     init() { }
 
     var fooFuncCallCount = 0
-    var fooFuncValues = [Int]()
+    var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((inout Int) -> ())?
     func fooFunc(val: inout Int) {
         fooFuncCallCount += 1
-        fooFuncValues.append(val)
+        fooFuncArgValues.append(val)
 
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(&val)
@@ -205,11 +205,11 @@ class FooMock: Foo {
     }
 
     var barFuncCallCount = 0
-    var barFuncValues = [Int]()
+    var barFuncArgValues = [Int]()
     var barFuncHandler: ((inout Int) -> ())?
     func barFunc(into val: inout Int) {
         barFuncCallCount += 1
-        barFuncValues.append(val)
+        barFuncArgValues.append(val)
 
         if let barFuncHandler = barFuncHandler {
         barFuncHandler(&val)
@@ -241,11 +241,11 @@ class FooMock: Foo {
     }
 
     var barFuncCallCount = 0
-    var barFuncValues = [Int]()
+    var barFuncArgValues = [Int]()
     var barFuncHandler: ((Int, (String) -> Void) -> ())?
     func barFunc(val: Int, handler: (String) -> Void) {
         barFuncCallCount += 1
-        barFuncValues.append(val)
+        barFuncArgValues.append(val)
 
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val, handler)
