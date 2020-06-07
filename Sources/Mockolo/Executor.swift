@@ -135,7 +135,7 @@ class Executor {
                              usage: "Whether to use SourceKit for parsing. By default it will use SwiftSyntax.")
         enableArgsHistory = parser.add(option: "--enable-args-history",
                                        kind: Bool.self,
-                                       usage: "Whether generated mock contains function args history capturing. If set, `history` annotation will be ignored (default = false).")
+                                       usage: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument. ")
     }
     
     private func fullPath(_ path: String) -> String {
