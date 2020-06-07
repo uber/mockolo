@@ -38,10 +38,10 @@ final class ArgumentsHistoryModel: Model {
         
         switch capturableParamNames.count {
         case 1:
-            return "\(name).append(\(capturableParamNames[0]))"
+            return "\(identifier)\(String.argsHistorySuffix).append(\(capturableParamNames[0]))"
         case 2...:
             let paramNamesStr = capturableParamNames.joined(separator: ", ")
-            return "\(name).append((\(paramNamesStr)))"
+            return "\(identifier)\(String.argsHistorySuffix).append((\(paramNamesStr)))"
         default:
             fatalError("paramNames must not be empty.")
         }
