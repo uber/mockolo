@@ -106,7 +106,7 @@ struct AnnotationMetadata {
     var module: String?
     var typeAliases: [String: String]?
     var varTypes: [String: String]?
-    var historyCapturedFuncs: [String]?
+    var funcsWithArgsHistory: [String]?
 }
 
 public typealias ImportMap = [String: [String: [String]]]

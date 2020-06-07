@@ -52,7 +52,7 @@ extension Structure: EntityNode {
                 ret.module = val[.prefix]
             }
             if let val = argsMap[.historyColon] {
-                ret.historyCapturedFuncs = val.compactMap { k, v in v == "true" ? k : nil }
+                ret.funcsWithArgsHistory = val.compactMap { k, v in v == "true" ? k : nil }
             }
         }
         return ret
@@ -160,7 +160,7 @@ extension Structure: EntityNode {
             }
             
             if validated {
-                return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, historyCapturedFuncs: metadata?.historyCapturedFuncs ?? [], processed: processed)
+                return MethodModel(element, encloserType: encloserType, filepath: filepath, data: data, funcsWithArgsHistory: metadata?.funcsWithArgsHistory ?? [], processed: processed)
             }
             return nil
 

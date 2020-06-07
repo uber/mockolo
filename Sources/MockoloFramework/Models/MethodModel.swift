@@ -40,7 +40,7 @@ final class MethodModel: Model {
     let shouldOverride: Bool
     let suffix: String
     let kind: MethodKind
-    let historyCapturedFuncs: [String]
+    let funcsWithArgsHistory: [String]
     var modelType: ModelType {
         return .method
     }
@@ -90,7 +90,7 @@ final class MethodModel: Model {
         let ret = ArgumentsHistoryModel(name: name,
                                         genericTypeParams: genericTypeParams,
                                         params: params,
-                                        isHistoryAnnotated: historyCapturedFuncs.contains(name),
+                                        isHistoryAnnotated: funcsWithArgsHistory.contains(name),
                                         suffix: suffix)
         
         return ret
@@ -125,7 +125,7 @@ final class MethodModel: Model {
          isStatic: Bool,
          offset: Int64,
          length: Int64,
-         historyCapturedFuncs: [String],
+         funcsWithArgsHistory: [String],
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -139,12 +139,12 @@ final class MethodModel: Model {
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.processed = processed
-        self.historyCapturedFuncs = historyCapturedFuncs
+        self.funcsWithArgsHistory = funcsWithArgsHistory
         self.modelDescription = modelDescription
         self.accessLevel = acl
     }
     
-    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, historyCapturedFuncs: [String], processed: Bool) {
+    init(_ ast: Structure, encloserType: DeclType, filepath: String, data: Data, funcsWithArgsHistory: [String], processed: Bool) {
         // This will split func signature into name and the rest (params, return type). In case it's a generic func,
         // its type parameters will be in its substrctures (and < > are omitted in the func ast.name), so it will only
         // give the name part that we expect.
@@ -155,7 +155,7 @@ final class MethodModel: Model {
         self.name = nameString
         self.type = Type(ast.typeName)
         self.isStatic = ast.isStaticMethod
-        self.historyCapturedFuncs = historyCapturedFuncs
+        self.funcsWithArgsHistory = funcsWithArgsHistory
         self.processed = processed
         self.shouldOverride = ast.isOverride || encloserType == .classType
         if ast.isSubscript {
