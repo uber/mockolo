@@ -33,7 +33,7 @@ final class ArgumentsHistoryModel: Model {
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool) -> String? {
         guard enable(force: enableFuncArgsHistory) else {
-            return ""
+            return nil
         }
         
         switch capturableParamNames.count {
