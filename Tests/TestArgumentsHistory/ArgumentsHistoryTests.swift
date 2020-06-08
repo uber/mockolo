@@ -50,6 +50,12 @@ class ArgumentsHistoryTests: MockoloTestCase {
                enableFuncArgsHistory: true)
     }
     
+    func testArgumentsHistoryAutoclosureCase() {
+        verify(srcContent: argumentsHistoryAutoclosureCase,
+               dstContent: argumentsHistoryAutoclosureCaseMock,
+               enableFuncArgsHistory: true)
+    }
+    
     func testArgumentsHistoryStaticCase() {
         verify(srcContent: argumentsHistoryStaticCase,
                dstContent: argumentsHistoryStaticCaseMock,

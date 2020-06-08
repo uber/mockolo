@@ -13,13 +13,17 @@ final class ArgumentsHistoryModel: Model {
         return .class
     }
 
-    init(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: String) {
+    init?(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: String) {
+        // Value contains closure is not supported.
+        let capturables = params.filter { !$0.type.hasClosure && !$0.type.isAutoclosure }
+        guard !capturables.isEmpty else {
+            return nil
+        }
+        
         self.name = name + .argsHistorySuffix
         self.suffix = suffix
         self.isHistoryAnnotated = isHistoryAnnotated
 
-        // Value contains closure is not supported.
-        let capturables = params.filter { !$0.type.hasClosure }
         self.capturableParamNames = capturables.map(path: \.name)
         self.capturableParamTypes = capturables.map(path: \.type)
         
@@ -28,7 +32,7 @@ final class ArgumentsHistoryModel: Model {
     }
     
     func enable(force: Bool) -> Bool {
-        return (force || isHistoryAnnotated) && !capturableParamNames.isEmpty
+        return force || isHistoryAnnotated
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool) -> String? {

@@ -356,6 +356,31 @@ class FooMock: Foo {
 }
 """
 
+let argumentsHistoryAutoclosureCase = """
+/// \(String.mockAnnotation)
+protocol Foo {
+    func fooFunc(handler: @autoclosure () -> Int)
+}
+"""
+
+let argumentsHistoryAutoclosureCaseMock = """
+class FooMock: Foo {
+    init() {
+    }
+    
+    var fooFuncCallCount = 0
+    var fooFuncHandler: ((@autoclosure () -> Int) -> ())?
+    func fooFunc(handler: @autoclosure () -> Int) {
+        fooFuncCallCount += 1
+        
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(handler())
+        }
+    }
+}
+
+"""
+
 let argumentsHistoryStaticCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
