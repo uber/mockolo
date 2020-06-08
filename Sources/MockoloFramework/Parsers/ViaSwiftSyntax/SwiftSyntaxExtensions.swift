@@ -412,7 +412,7 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
     
-    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?,  processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
