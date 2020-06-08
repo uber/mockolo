@@ -39,6 +39,7 @@ final class MethodModel: Model {
     let shouldOverride: Bool
     let suffix: String
     let kind: MethodKind
+    let funcsWithArgsHistory: [String]
     var modelType: ModelType {
         return .method
     }
@@ -49,6 +50,13 @@ final class MethodModel: Model {
     
     var isInitializer: Bool {
         if case .initKind(_, _) = kind {
+            return true
+        }
+        return false
+    }
+    
+    var isSubscript: Bool {
+        if case .subscriptKind = kind {
             return true
         }
         return false
@@ -80,7 +88,20 @@ final class MethodModel: Model {
         return ret
     }()
     
-    
+    lazy var argsHistory: ArgumentsHistoryModel? = {
+        if isInitializer || isSubscript {
+            return nil
+        }
+
+        let ret = ArgumentsHistoryModel(name: name,
+                                        genericTypeParams: genericTypeParams,
+                                        params: params,
+                                        isHistoryAnnotated: funcsWithArgsHistory.contains(name),
+                                        suffix: suffix)
+        
+        return ret
+    }()
+
     lazy var handler: ClosureModel? = {
         if isInitializer {
             return nil
@@ -110,6 +131,7 @@ final class MethodModel: Model {
          isStatic: Bool,
          offset: Int64,
          length: Int64,
+         funcsWithArgsHistory: [String],
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -123,6 +145,7 @@ final class MethodModel: Model {
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.processed = processed
+        self.funcsWithArgsHistory = funcsWithArgsHistory
         self.modelDescription = modelDescription
         self.accessLevel = acl
     }
@@ -140,7 +163,7 @@ final class MethodModel: Model {
         return name(by: level - 1) + postfix
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, enableFuncArgsHistory: Bool) -> String? {
         if processed {
             var prefix = shouldOverride  ? "\(String.override) " : ""
 
@@ -160,6 +183,7 @@ final class MethodModel: Model {
                                          identifier: identifier,
                                          kind: kind,
                                          useTemplateFunc: useTemplateFunc,
+                                         enableFuncArgsHistory: enableFuncArgsHistory,
                                          isStatic: isStatic,
                                          isOverride: shouldOverride,
                                          genericTypeParams: genericTypeParams,
@@ -167,6 +191,7 @@ final class MethodModel: Model {
                                          returnType: type,
                                          accessLevel: accessLevel,
                                          suffix: suffix,
+                                         argsHistory: argsHistory,
                                          handler: handler)
         return result
     }

@@ -40,6 +40,7 @@ class Executor {
     private var useMockObservable: OptionArgument<Bool>!
     private var mockAll: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
+    private var enableArgsHistory: OptionArgument<Bool>!
 
     /// Initializer.
     ///
@@ -128,6 +129,9 @@ class Executor {
                                       shortName: "-j",
                                       kind: Int.self,
                                       usage: "Maximum number of threads to execute concurrently (default = number of cores on the running machine).")
+        enableArgsHistory = parser.add(option: "--enable-args-history",
+                                       kind: Bool.self,
+                                       usage: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument. ")
     }
     
     private func fullPath(_ path: String) -> String {
@@ -184,6 +188,7 @@ class Executor {
         let shouldUseTemplateFunc = arguments.get(useTemplateFunc) ?? false
         let shouldUseMockObservable = arguments.get(useMockObservable) ?? false
         let shouldMockAll = arguments.get(mockAll) ?? false
+        let shouldCaptureAllFuncArgsHistory = arguments.get(enableArgsHistory) ?? false
 
         do {
             try generate(sourceDirs: srcDirs,
@@ -197,6 +202,7 @@ class Executor {
                          declType: shouldMockAll ? .all : .protocolType,
                          useTemplateFunc: shouldUseTemplateFunc,
                          useMockObservable: shouldUseMockObservable,
+                         enableFuncArgsHistory: shouldCaptureAllFuncArgsHistory,
                          testableImports: testableImports,
                          customImports: customImports,
                          excludeImports: excludeImports,

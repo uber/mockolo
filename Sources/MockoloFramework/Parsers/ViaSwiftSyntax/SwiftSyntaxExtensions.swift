@@ -157,7 +157,7 @@ extension MemberDeclListItemSyntax {
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                let item = funcMember.model(with: acl, declType: declType, processed: processed)
+                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, processed: processed)
                 return (item, funcMember.attributes?.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
@@ -403,6 +403,7 @@ extension SubscriptDeclSyntax {
                                          isStatic: isStatic,
                                          offset: self.offset,
                                          length: self.length,
+                                         funcsWithArgsHistory: [],
                                          modelDescription: self.description,
                                          processed: processed)
         return subscriptModel
@@ -411,7 +412,7 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
     
-    func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
@@ -431,6 +432,7 @@ extension FunctionDeclSyntax {
                                     isStatic: isStatic,
                                     offset: self.offset,
                                     length: self.length,
+                                    funcsWithArgsHistory: funcsWithArgsHistory ?? [],
                                     modelDescription: self.description,
                                     processed: processed)
         return funcmodel
@@ -470,6 +472,7 @@ extension InitializerDeclSyntax {
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
+                           funcsWithArgsHistory: [],
                            modelDescription: self.description,
                            processed: processed)
     }
@@ -692,6 +695,9 @@ extension Trivia {
                             ret.varTypes?.merge(val, uniquingKeysWith: {$1})
                         }
                     }
+                }
+                if argsStr.contains(String.historyColon), let subStr = argsStr.components(separatedBy: String.historyColon).last, !subStr.isEmpty {
+                    ret.funcsWithArgsHistory = subStr.arguments(with: .annotationArgDelimiter)?.compactMap { k, v in v == "true" ? k : nil }
                 }
             }
             return ret

@@ -21,6 +21,7 @@ extension MethodModel {
                              identifier: String,
                              kind: MethodKind,
                              useTemplateFunc: Bool,
+                             enableFuncArgsHistory: Bool,
                              isStatic: Bool,
                              isOverride: Bool,
                              genericTypeParams: [ParamModel],
@@ -28,6 +29,7 @@ extension MethodModel {
                              returnType: Type,
                              accessLevel: String,
                              suffix: String,
+                             argsHistory: ArgumentsHistoryModel?,
                              handler: ClosureModel?) -> String {
         var template = ""
         
@@ -53,7 +55,6 @@ extension MethodModel {
             let suffixStr = suffix.isEmpty ? "" : "\(suffix) "
             let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
             let staticStr = isStatic ? String.static + " " : ""
-            let isSubscript = kind == .subscriptKind
             let keyword = isSubscript ? "" : "func "
             var body = ""
 
@@ -85,6 +86,19 @@ extension MethodModel {
             if body.isEmpty {
                 body = """
                 \(2.tab)\(callCount) += 1
+                """
+                
+                if let argsHistory = argsHistory, argsHistory.enable(force: enableFuncArgsHistory) {
+                    let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", enableFuncArgsHistory: enableFuncArgsHistory) ?? ""
+                    
+                    body = """
+                    \(body)
+                    \(2.tab)\(argsHistoryCapture)
+                    """
+                }
+
+                body = """
+                \(body)
                 \(handlerReturn)
                 """
             }
@@ -100,9 +114,24 @@ extension MethodModel {
             }
             
             let overrideStr = isOverride ? "\(String.override) " : ""
+
             template = """
 
             \(1.tab)\(acl)\(staticStr)var \(callCount) = 0
+            """
+            
+            if let argsHistory = argsHistory, argsHistory.enable(force: enableFuncArgsHistory) {
+                let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
+                let argsHistoryVarType = argsHistory.type.typeName
+                
+                template = """
+                \(template)
+                \(1.tab)\(acl)\(staticStr)var \(argsHistoryVarName) = \(argsHistoryVarType)()
+                """
+            }
+            
+            template = """
+            \(template)
             \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
             \(1.tab)\(acl)\(staticStr)\(overrideStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr) {
             \(wrapped)

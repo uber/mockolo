@@ -103,6 +103,7 @@ OPTIONS:
   --testable-imports, -i  If set, @testable import statments will be added for each module name in this list.
   --concurrency-limit, -j Maximum number of threads to execute concurrently (default = number of cores on the running machine).
   --logging-level, -v     The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
+  --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument. 
   --help, -h                  Displays available options.
   ```
 
@@ -264,6 +265,45 @@ public class FooMock: Foo {
 }
 ```
 
+To capture function arguments history:
+
+```swift
+/// @mockable(history: fooFunc = true)
+public protocol Foo {
+    func fooFunc(val: Int)
+    func barFunc(_ val: (a: String, Float))
+    func bazFunc(val1: Int, val2: String)
+}
+```
+
+This will generate: 
+
+```swift
+public class FooMock: Foo {
+    var fooFuncCallCount = 0
+    var fooFuncArgValues = [Int]() // arguments captor
+    var fooFuncHandler: ((Int) -> ())?
+    func fooFunc(val: Int) {
+        fooFuncCallCount += 1
+        fooFuncArgValues.append(val)   // capture arguments
+
+        if fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(val)
+        }
+    }
+
+    ...
+    var barFuncArgValues = [(a: String, Float)]() // tuple is also supported.
+    ...
+
+    ...
+    var bazFuncArgValues = [(Int, String)]()
+    ...
+}
+```
+
+and also, enable the arguments captor for all functions if you passed `--enable-args-history` arg to `mockolo` command.
+> NOTE: The arguments captor only supports singular types (e.g. variable, tuple). The closure variable is not supported.
 
 
 ## Used libraries

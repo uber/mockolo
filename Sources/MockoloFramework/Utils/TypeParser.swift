@@ -542,6 +542,30 @@ public final class Type {
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
         return Type(typeStr, cast: returnTypeCast)
     }
+    
+    static func toArgumentsHistoryType(with params: [Type], typeParams: [String]) -> Type {
+        // Expected only history capturable types.
+        let displayableParamTypes = params.compactMap { (subtype: Type) -> String? in
+            var processedType = subtype.processTypeParams(with: typeParams)
+            
+            if subtype.isInOut {
+                processedType = String(processedType.dropFirst((String.inout + " ").count))
+            }
+            if subtype.isIUO {
+                processedType = String(processedType.dropLast("!".count))
+            }
+            
+            return processedType
+        }
+        
+        let displayableParamStr = displayableParamTypes.joined(separator: ", ")
+
+        if displayableParamTypes.count >= 2 {
+            return Type("[(\(displayableParamStr))]")
+        } else {
+            return Type("[\(displayableParamStr)]")
+        }
+    }
 
 
     func processTypeParams(with typeParamList: [String]) -> String {

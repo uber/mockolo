@@ -33,6 +33,7 @@ public func generate(sourceDirs: [String]?,
                      declType: DeclType,
                      useTemplateFunc: Bool,
                      useMockObservable: Bool,
+                     enableFuncArgsHistory: Bool,
                      testableImports: [String]?,
                      customImports: [String]?,
                      excludeImports: [String]?,
@@ -125,7 +126,8 @@ public func generate(sourceDirs: [String]?,
     log("Render models with templates...", level: .info)
     renderTemplates(entities: resolvedEntities,
                     useTemplateFunc: useTemplateFunc,
-                    useMockObservable: useMockObservable) { (mockString: String, offset: Int64) in
+                    useMockObservable: useMockObservable,
+                    enableFuncArgsHistory: enableFuncArgsHistory) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
     }
     signpost_end(name: "Render models")
