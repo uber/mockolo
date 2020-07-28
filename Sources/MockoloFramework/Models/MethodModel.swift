@@ -123,6 +123,7 @@ final class MethodModel: Model {
     init(name: String,
          typeName: String,
          kind: MethodKind,
+         encloser: String?,
          encloserType: DeclType,
          acl: String,
          genericTypeParams: [ParamModel],
@@ -135,7 +136,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
+        self.type = Type(typeName.trimmingCharacters(in: .whitespaces), encloser: encloser)
         self.suffix = throwsOrRethrows
         self.offset = offset
         self.length = length

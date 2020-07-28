@@ -27,8 +27,14 @@ public final class Type {
     let cast: String?
     var cachedDefaultVal: String?
 
-    init(_ type: String, cast: String? = nil){
-        self.typeName = type == .unknownVal ? "" : type
+    init(_ type: String, cast: String? = nil, encloser: String? = nil){
+        var typeNameStr = type
+        if type == .unknownVal {
+            typeNameStr = ""
+        } else if type == .`Self`, let encloser = encloser {
+            typeNameStr = encloser
+        }
+        self.typeName = typeNameStr
         self.cast = cast
     }
 

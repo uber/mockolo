@@ -514,3 +514,33 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 }
 """
+
+let returnSelfFunc = """
+import Foundation
+
+/// \(String.mockAnnotation)
+protocol NonSimpleFuncs {
+@discardableResult
+func returnSelf() -> Self
+}
+"""
+
+let returnSelfFuncMock = """
+
+import Foundation
+
+
+class NonSimpleFuncsMock: NonSimpleFuncs {
+    init() { }
+
+    var returnSelfCallCount = 0
+    var returnSelfHandler: (() -> (NonSimpleFuncsMock))?
+    func returnSelf() -> NonSimpleFuncsMock {
+        returnSelfCallCount += 1
+        if let returnSelfHandler = returnSelfHandler {
+            return returnSelfHandler()
+        }
+        fatalError("returnSelfHandler returns can't have a default value thus its handler must be set")
+    }
+}
+"""
