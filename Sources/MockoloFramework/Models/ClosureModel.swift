@@ -31,7 +31,7 @@ final class ClosureModel: Model {
     }
 
     
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, encloser: String?) {
         self.name = name + .handlerSuffix
         self.suffix = suffix
         let genericTypeNameList = genericTypeParams.map(path: \.name)
@@ -39,7 +39,7 @@ final class ClosureModel: Model {
         self.paramNames = paramNames
         self.paramTypes = paramTypes
         self.funcReturnType = returnType
-        self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType)
+        self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType, encloser: encloser)
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {

@@ -146,7 +146,7 @@ extension MemberDeclListItemSyntax {
         return modifiers?.acl ?? ""
     }
     
-    func transformToModel(with encloserAcl: String, encloser: String?, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool)? {
+    func transformToModel(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool, encloser: String?) -> (Model, String?, Bool)? {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
@@ -157,13 +157,13 @@ extension MemberDeclListItemSyntax {
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                let item = funcMember.model(with: acl, declType: declType, encloser: encloser, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, processed: processed)
+                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, processed: processed, encloser: encloser)
                 return (item, funcMember.attributes?.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
             if validateMember(subscriptMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
-                let item = subscriptMember.model(with: acl, declType: declType, encloser: encloser, processed: processed)
+                let item = subscriptMember.model(with: acl, declType: declType, processed: processed)
                 return (item, subscriptMember.attributes?.trimmedDescription, false)
             }
         } else if let initMember = self.decl.as(InitializerDeclSyntax.self) {
@@ -181,7 +181,7 @@ extension MemberDeclListItemSyntax {
             let item = taMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
             return (item, taMember.attributes?.trimmedDescription, false)
         } else if let ifMacroMember = self.decl.as(IfConfigDeclSyntax.self) {
-            let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, encloser: encloser, declType: declType, metadata: metadata, processed: processed)
+            let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declType: declType, metadata: metadata, processed: processed)
             return (item, attr, initFlag)
         }
         
@@ -205,13 +205,13 @@ extension MemberDeclListSyntax {
         return false
     }
 
-    func memberData(with encloserAcl: String, encloser: String?, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> EntityNodeSubContainer {
+    func memberData(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool, encloser: String?) -> EntityNodeSubContainer {
         var attributeList = [String]()
         var memberList = [Model]()
         var hasInit = false
 
         for m in self {
-            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, encloser: encloser, declType: declType, metadata: metadata, processed: processed) {
+            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed, encloser: encloser) {
                 memberList.append(item)
                 if let attrDesc = attr {
                     attributeList.append(attrDesc)
@@ -224,7 +224,7 @@ extension MemberDeclListSyntax {
 }
 
 extension IfConfigDeclSyntax {
-    func model(with encloserAcl: String, encloser: String?, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
+    func model(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
         var subModels = [Model]()
         var attrDesc: String?
         var hasInit = false
@@ -235,7 +235,7 @@ extension IfConfigDeclSyntax {
                 if let list = cl.elements.as(MemberDeclListSyntax.self) {
                     name = desc
                     for element in list {
-                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, encloser: encloser, declType: declType, metadata: metadata, processed: processed) {
+                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed, encloser: nil) {
                             subModels.append(item)
                             if let attr = attr, attr.contains(String.available) {
                                 attrDesc = attr
@@ -260,7 +260,7 @@ extension ProtocolDeclSyntax: EntityNode {
     var encloser: String {
         return name + "Mock"
     }
-    
+
     var accessLevel: String {
         return self.modifiers?.acl ?? ""
     }
@@ -294,7 +294,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
     
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: accessLevel, encloser: encloser, declType: declType, metadata: metadata, processed: isProcessed)
+        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed, encloser: encloser)
     }
 }
 
@@ -345,7 +345,7 @@ extension ClassDeclSyntax: EntityNode {
     }
     
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: accessLevel, encloser: nil, declType: declType, metadata: nil, processed: isProcessed)
+        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed, encloser: nil)
     }
 }
 
@@ -387,7 +387,7 @@ extension VariableDeclSyntax {
 }
 
 extension SubscriptDeclSyntax {
-    func model(with acl: String, declType: DeclType, encloser: String?, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
@@ -399,7 +399,7 @@ extension SubscriptDeclSyntax {
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
                                          typeName: self.result.returnType.description,
                                          kind: .subscriptKind,
-                                         encloser: encloser,
+                                         encloser: nil,
                                          encloserType: declType,
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
@@ -417,7 +417,7 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
     
-    func model(with acl: String, declType: DeclType, encloser: String?, funcsWithArgsHistory: [String]?, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, processed: Bool, encloser: String?) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic

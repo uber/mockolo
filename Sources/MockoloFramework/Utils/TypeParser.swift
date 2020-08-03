@@ -27,14 +27,8 @@ public final class Type {
     let cast: String?
     var cachedDefaultVal: String?
 
-    init(_ type: String, cast: String? = nil, encloser: String? = nil){
-        var typeNameStr = type
-        if type == .unknownVal {
-            typeNameStr = ""
-        } else if type == .`Self`, let encloser = encloser {
-            typeNameStr = encloser
-        }
-        self.typeName = typeNameStr
+    init(_ type: String, cast: String? = nil){
+        self.typeName = type == .unknownVal ? "" : type
         self.cast = cast
     }
 
@@ -505,7 +499,8 @@ public final class Type {
     }
 
 
-    static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type) -> Type {
+    static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type, encloser: String?) -> Type {
+
 
         let displayableParamTypes = params.map { (subtype: Type) -> String in
             return subtype.processTypeParams(with: typeParams)
@@ -513,6 +508,11 @@ public final class Type {
 
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
         var displayableReturnType = returnType.typeName
+
+        if let encloser = encloser, displayableReturnType == String.`Self` {
+            displayableReturnType = encloser
+        }
+
         let returnComps = displayableReturnType.literalComponents
 
         var returnAsStr = ""

@@ -34,7 +34,7 @@ extension MethodModel {
         var template = ""
         
         let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
-        
+
         let acl = accessLevel.isEmpty ? "" : accessLevel+" "
         let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
         let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
@@ -142,4 +142,3 @@ extension MethodModel {
         return template
     }
 }
-

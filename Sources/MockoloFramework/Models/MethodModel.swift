@@ -40,6 +40,7 @@ final class MethodModel: Model {
     let suffix: String
     let kind: MethodKind
     let funcsWithArgsHistory: [String]
+    let encloser: String?
     var modelType: ModelType {
         return .method
     }
@@ -114,7 +115,8 @@ final class MethodModel: Model {
                                paramNames: paramNames,
                                paramTypes: paramTypes,
                                suffix: suffix,
-                               returnType: type)
+                               returnType: type,
+                               encloser: encloser)
         
         return ret
     }()
@@ -136,7 +138,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = Type(typeName.trimmingCharacters(in: .whitespaces), encloser: encloser)
+        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
         self.suffix = throwsOrRethrows
         self.offset = offset
         self.length = length
@@ -149,6 +151,7 @@ final class MethodModel: Model {
         self.funcsWithArgsHistory = funcsWithArgsHistory
         self.modelDescription = modelDescription
         self.accessLevel = acl
+        self.encloser = encloser
     }
     
     var fullName: String {
