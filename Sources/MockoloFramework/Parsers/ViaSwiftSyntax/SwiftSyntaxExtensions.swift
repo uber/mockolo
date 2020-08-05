@@ -146,7 +146,7 @@ extension MemberDeclListItemSyntax {
         return modifiers?.acl ?? ""
     }
     
-    func transformToModel(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool, encloser: String?) -> (Model, String?, Bool)? {
+    func transformToModel(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool)? {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
@@ -157,7 +157,7 @@ extension MemberDeclListItemSyntax {
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, processed: processed, encloser: encloser)
+                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, processed: processed)
                 return (item, funcMember.attributes?.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
@@ -205,13 +205,13 @@ extension MemberDeclListSyntax {
         return false
     }
 
-    func memberData(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool, encloser: String?) -> EntityNodeSubContainer {
+    func memberData(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> EntityNodeSubContainer {
         var attributeList = [String]()
         var memberList = [Model]()
         var hasInit = false
 
         for m in self {
-            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed, encloser: encloser) {
+            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed) {
                 memberList.append(item)
                 if let attrDesc = attr {
                     attributeList.append(attrDesc)
@@ -235,7 +235,7 @@ extension IfConfigDeclSyntax {
                 if let list = cl.elements.as(MemberDeclListSyntax.self) {
                     name = desc
                     for element in list {
-                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed, encloser: nil) {
+                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed) {
                             subModels.append(item)
                             if let attr = attr, attr.contains(String.available) {
                                 attrDesc = attr
@@ -255,10 +255,6 @@ extension IfConfigDeclSyntax {
 extension ProtocolDeclSyntax: EntityNode {
     var name: String {
         return identifier.text
-    }
-
-    var encloser: String {
-        return name + "Mock"
     }
 
     var accessLevel: String {
@@ -294,7 +290,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
     
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed, encloser: encloser)
+        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed)
     }
 }
 
@@ -345,7 +341,7 @@ extension ClassDeclSyntax: EntityNode {
     }
     
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
-        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed, encloser: nil)
+        return self.members.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
     }
 }
 
@@ -399,7 +395,6 @@ extension SubscriptDeclSyntax {
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
                                          typeName: self.result.returnType.description,
                                          kind: .subscriptKind,
-                                         encloser: nil,
                                          encloserType: declType,
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
@@ -417,7 +412,7 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
     
-    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, processed: Bool, encloser: String?) -> Model {
+    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
@@ -429,7 +424,6 @@ extension FunctionDeclSyntax {
         let funcmodel = MethodModel(name: self.identifier.description,
                                     typeName: self.signature.output?.returnType.description ?? "",
                                     kind: .funcKind,
-                                    encloser: encloser,
                                     encloserType: declType,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
@@ -470,7 +464,6 @@ extension InitializerDeclSyntax {
         return MethodModel(name: "init",
                            typeName: "",
                            kind: .initKind(required: requiredInit, override: declType == .classType),
-                           encloser: nil,
                            encloserType: declType,
                            acl: acl,
                            genericTypeParams: genericTypeParams,

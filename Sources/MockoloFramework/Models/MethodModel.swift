@@ -40,7 +40,6 @@ final class MethodModel: Model {
     let suffix: String
     let kind: MethodKind
     let funcsWithArgsHistory: [String]
-    let encloser: String?
     var modelType: ModelType {
         return .method
     }
@@ -103,7 +102,7 @@ final class MethodModel: Model {
         return ret
     }()
 
-    lazy var handler: ClosureModel? = {
+    func handler(encloser: String) -> ClosureModel? {
         if isInitializer {
             return nil
         }
@@ -119,13 +118,12 @@ final class MethodModel: Model {
                                encloser: encloser)
         
         return ret
-    }()
+    }
     
     
     init(name: String,
          typeName: String,
          kind: MethodKind,
-         encloser: String?,
          encloserType: DeclType,
          acl: String,
          genericTypeParams: [ParamModel],
@@ -151,7 +149,6 @@ final class MethodModel: Model {
         self.funcsWithArgsHistory = funcsWithArgsHistory
         self.modelDescription = modelDescription
         self.accessLevel = acl
-        self.encloser = encloser
     }
     
     var fullName: String {
@@ -196,7 +193,7 @@ final class MethodModel: Model {
                                          accessLevel: accessLevel,
                                          suffix: suffix,
                                          argsHistory: argsHistory,
-                                         handler: handler)
+                                         handler: handler(encloser: encloser))
         return result
     }
 }

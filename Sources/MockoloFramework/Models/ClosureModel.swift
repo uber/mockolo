@@ -31,7 +31,7 @@ final class ClosureModel: Model {
     }
 
     
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, encloser: String?) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, encloser: String) {
         self.name = name + .handlerSuffix
         self.suffix = suffix
         let genericTypeNameList = genericTypeParams.map(path: \.name)

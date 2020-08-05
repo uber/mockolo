@@ -129,6 +129,10 @@ public final class Type {
         return typeName.hasPrefix(String.escaping)
     }
 
+    var isSelf: Bool {
+        return typeName == String.`Self`
+    }
+
     var splitByClosure: Bool {
         let arg = typeName
         if let closureOpRange = arg.range(of: String.closureArrow) {
@@ -499,7 +503,7 @@ public final class Type {
     }
 
 
-    static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type, encloser: String?) -> Type {
+    static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type, encloser: String) -> Type {
 
 
         let displayableParamTypes = params.map { (subtype: Type) -> String in
@@ -509,7 +513,7 @@ public final class Type {
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
         var displayableReturnType = returnType.typeName
 
-        if let encloser = encloser, displayableReturnType == String.`Self` {
+        if returnType.isSelf {
             displayableReturnType = encloser
         }
 
@@ -527,6 +531,8 @@ public final class Type {
             } else if returnType.isIUO {
                 displayableReturnType = .any + "!"
                 returnAsStr.removeLast()
+            } else if returnType.isSelf {
+                returnAsStr = String.`Self`
             } else {
                 displayableReturnType = .any
             }

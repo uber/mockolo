@@ -538,7 +538,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     func returnSelf() -> Self {
         returnSelfCallCount += 1
         if let returnSelfHandler = returnSelfHandler {
-            return returnSelfHandler()
+            return returnSelfHandler() as! Self
         }
         fatalError("returnSelfHandler returns can't have a default value thus its handler must be set")
     }
