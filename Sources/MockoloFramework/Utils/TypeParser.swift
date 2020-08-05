@@ -513,10 +513,6 @@ public final class Type {
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
         var displayableReturnType = returnType.typeName
 
-        if returnType.isSelf {
-            displayableReturnType = encloser
-        }
-
         let returnComps = displayableReturnType.literalComponents
 
         var returnAsStr = ""
@@ -540,6 +536,11 @@ public final class Type {
             if !returnAsStr.isEmpty {
                 returnTypeCast = " as\(asSuffix) " + returnAsStr
             }
+        }
+
+         if returnType.isSelf {
+            displayableReturnType = encloser
+            returnTypeCast = " as! " + String.`Self`
         }
 
         let isSimpleTuple = displayableReturnType.hasPrefix("(") && displayableReturnType.hasSuffix(")") &&
