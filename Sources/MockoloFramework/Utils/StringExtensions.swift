@@ -41,6 +41,7 @@ extension String {
 
     static let `inout` = "inout"
     static let hasBlankInit = "_hasBlankInit"
+    static let `Self` = "Self"
     static let `static` = "static"
     static let importSpace = "import "
     static public let `class` = "class"

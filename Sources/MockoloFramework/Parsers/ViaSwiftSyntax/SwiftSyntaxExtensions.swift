@@ -256,7 +256,7 @@ extension ProtocolDeclSyntax: EntityNode {
     var name: String {
         return identifier.text
     }
-    
+
     var accessLevel: String {
         return self.modifiers?.acl ?? ""
     }

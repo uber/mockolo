@@ -37,4 +37,9 @@ class NonSimpleVarTests: MockoloTestCase {
         verify(srcContent: forArgClosureFunc,
                dstContent: forArgClosureFuncMock)
     }
+
+    func testReturnSelfFunc() {
+        verify(srcContent: returnSelfFunc,
+               dstContent: returnSelfFuncMock)
+    }
 }

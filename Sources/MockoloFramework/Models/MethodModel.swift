@@ -102,7 +102,7 @@ final class MethodModel: Model {
         return ret
     }()
 
-    lazy var handler: ClosureModel? = {
+    func handler(encloser: String) -> ClosureModel? {
         if isInitializer {
             return nil
         }
@@ -114,10 +114,11 @@ final class MethodModel: Model {
                                paramNames: paramNames,
                                paramTypes: paramTypes,
                                suffix: suffix,
-                               returnType: type)
+                               returnType: type,
+                               encloser: encloser)
         
         return ret
-    }()
+    }
     
     
     init(name: String,
@@ -192,7 +193,7 @@ final class MethodModel: Model {
                                          accessLevel: accessLevel,
                                          suffix: suffix,
                                          argsHistory: argsHistory,
-                                         handler: handler)
+                                         handler: handler(encloser: encloser))
         return result
     }
 }

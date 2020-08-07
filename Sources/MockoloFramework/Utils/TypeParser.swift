@@ -129,6 +129,10 @@ public final class Type {
         return typeName.hasPrefix(String.escaping)
     }
 
+    var isSelf: Bool {
+        return typeName == String.`Self`
+    }
+
     var splitByClosure: Bool {
         let arg = typeName
         if let closureOpRange = arg.range(of: String.closureArrow) {
@@ -499,7 +503,8 @@ public final class Type {
     }
 
 
-    static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type) -> Type {
+    static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type, encloser: String) -> Type {
+
 
         let displayableParamTypes = params.map { (subtype: Type) -> String in
             return subtype.processTypeParams(with: typeParams)
@@ -507,6 +512,7 @@ public final class Type {
 
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
         var displayableReturnType = returnType.typeName
+
         let returnComps = displayableReturnType.literalComponents
 
         var returnAsStr = ""
@@ -521,6 +527,8 @@ public final class Type {
             } else if returnType.isIUO {
                 displayableReturnType = .any + "!"
                 returnAsStr.removeLast()
+            } else if returnType.isSelf {
+                returnAsStr = String.`Self`
             } else {
                 displayableReturnType = .any
             }
@@ -528,6 +536,11 @@ public final class Type {
             if !returnAsStr.isEmpty {
                 returnTypeCast = " as\(asSuffix) " + returnAsStr
             }
+        }
+
+         if returnType.isSelf {
+            displayableReturnType = encloser
+            returnTypeCast = " as! " + String.`Self`
         }
 
         let isSimpleTuple = displayableReturnType.hasPrefix("(") && displayableReturnType.hasSuffix(")") &&
