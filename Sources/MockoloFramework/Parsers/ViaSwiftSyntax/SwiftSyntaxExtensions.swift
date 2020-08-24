@@ -624,20 +624,28 @@ final class EntityVisitor: SyntaxVisitor {
 
     private func visitImpl(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
         for cl in node.clauses {
-            guard let ifmacro = cl.condition?.as(IdentifierExprSyntax.self) else { return .visitChildren }
-            guard ifmacro.identifier.text != fileMacro else { return .visitChildren }
+            var macroName = ""
+            if let ifmacro = cl.condition?.as(IdentifierExprSyntax.self) {
+                macroName = ifmacro.identifier.text
+            } else if let expr = cl.condition?.as(FunctionCallExprSyntax.self) {
+                macroName = expr.description
+            } else {
+                return .visitChildren
+            }
+
+            guard macroName != fileMacro else { return .visitChildren }
             
             if let list = cl.elements.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        let key = ifmacro.identifier.text
+                        let key = macroName
                         if imports[key] == nil {
                             imports[key] = []
                         }
                         imports[key]?.append(importItem.description.trimmingCharacters(in: .whitespacesAndNewlines))
                         
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        let key = ifmacro.identifier.text
+                        let key = macroName
                         if imports[key] == nil {
                             imports[key] = []
                         }

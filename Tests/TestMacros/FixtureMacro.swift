@@ -4,7 +4,7 @@ let macroImports = """
 import X
 import Y
 
-#if DEBUG
+#if canImport(NewFramework)
 import Z
 import W
 #endif
@@ -21,7 +21,7 @@ let macroImportsMock = """
 import V
 import X
 import Y
-#if DEBUG
+#if canImport(NewFramework)
 import W
 import Z
 #endif
@@ -59,7 +59,7 @@ import Foundation
 import V
 import X
 import Y
-#if DEBUG
+#if canImport(NewFramework)
 import W
 import Z
 #endif
@@ -101,6 +101,8 @@ import X
 import Y
 #if DEBUG
 import P
+#endif
+#if canImport(NewFramework)
 import W
 import Z
 #endif
