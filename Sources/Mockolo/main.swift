@@ -19,8 +19,13 @@ import TSCBasic
 
 func main() {
     let parser = ArgumentParser(usage: "<options>", overview: "Mockolo: Swift mock generator.")
-    let command = Executor(parser: parser)
     let inputs = Array(CommandLine.arguments.dropFirst())
+    if let arg = inputs.first, (arg == "--version" || arg == "-v") {
+        print(Version.current.value)
+        return
+    }
+    
+    let command = Executor(parser: parser)
 
     print("Start...")
     do {

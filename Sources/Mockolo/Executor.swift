@@ -56,8 +56,9 @@ class Executor {
     ///
     /// - parameter parser: The argument parser to use.
     private func setupArguments(with parser: ArgumentParser) {
+        
         loggingLevel = parser.add(option: "--logging-level",
-                                  shortName: "-v",
+                                  shortName: "-l",
                                   kind: Int.self,
                                   usage: "The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.")
         sourceFiles = parser.add(option: "--sourcefiles",
@@ -145,6 +146,7 @@ class Executor {
         return FileManager.default.currentDirectoryPath + "/" + path
     }
     
+    
     /// Execute the command.
     ///
     /// - parameter arguments: The command line arguments to execute the command with.
@@ -218,3 +220,12 @@ class Executor {
         }
     }
 }
+
+public struct Version {
+    /// The string value for this version.
+    public let value: String
+
+    /// The current Mockolo version.
+    public static let current = Version(value: "1.2.5")
+}
+
