@@ -1,10 +1,11 @@
 import MockoloFramework
 
 let argumentsHistoryWithAnnotation = """
-/// \(String.mockAnnotation)(history: fooFunc = true)
+/// \(String.mockAnnotation)(history: fooFunc = true; bazFunc = true)
 protocol Foo {
     func fooFunc(val: Int)
-    func barFunc(val: Int)
+    func barFunc(val: [Int])
+    func bazFunc(arg: String, other: Float)
 }
 """
 
@@ -12,58 +13,87 @@ let argumentsHistoryWithAnnotationAllFuncCaseMock = """
 class FooMock: Foo {
     init() { }
 
+
     var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
-    func fooFunc(val: Int) {
+    func fooFunc(val: Int)  {
         fooFuncCallCount += 1
         fooFuncArgValues.append(val)
-
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(val)
         }
+        
     }
 
     var barFuncCallCount = 0
-    var barFuncArgValues = [Int]()
-    var barFuncHandler: ((Int) -> ())?
-    func barFunc(val: Int) {
+    var barFuncArgValues = [[Int]]()
+    var barFuncHandler: (([Int]) -> ())?
+    func barFunc(val: [Int])  {
         barFuncCallCount += 1
         barFuncArgValues.append(val)
-
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
         }
+        
+    }
+
+    var bazFuncCallCount = 0
+    var bazFuncArgValues = [(String, Float)]()
+    var bazFuncHandler: ((String, Float) -> ())?
+    func bazFunc(arg: String, other: Float)  {
+        bazFuncCallCount += 1
+        bazFuncArgValues.append((arg, other))
+        if let bazFuncHandler = bazFuncHandler {
+            bazFuncHandler(arg, other)
+        }
+        
     }
 }
+
 """
 
 let argumentsHistoryWithAnnotationNotAllFuncCaseMock = """
+
 class FooMock: Foo {
     init() { }
+
 
     var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
-    func fooFunc(val: Int) {
+    func fooFunc(val: Int)  {
         fooFuncCallCount += 1
         fooFuncArgValues.append(val)
-
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(val)
         }
+        
     }
 
     var barFuncCallCount = 0
-    var barFuncHandler: ((Int) -> ())?
-    func barFunc(val: Int) {
+    var barFuncHandler: (([Int]) -> ())?
+    func barFunc(val: [Int])  {
         barFuncCallCount += 1
-
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
         }
+        
+    }
+
+    var bazFuncCallCount = 0
+    var bazFuncArgValues = [(String, Float)]()
+    var bazFuncHandler: ((String, Float) -> ())?
+    func bazFunc(arg: String, other: Float)  {
+        bazFuncCallCount += 1
+        bazFuncArgValues.append((arg, other))
+        if let bazFuncHandler = bazFuncHandler {
+            bazFuncHandler(arg, other)
+        }
+        
     }
 }
+
 """
 
 let argumentsHistorySimpleCase = """
