@@ -135,7 +135,16 @@ extension String {
     var withRightParen: String {
         return "\(self))"
     }
-    
+
+    mutating func withoutTrailingCharacters(_ characters: [String]) -> String {
+        for character in characters {
+            if hasSuffix(character) {
+                _ = self.removeLast()
+            }
+        }
+        return self
+    }
+
 
     func canBeInitParam(type: String, isStatic: Bool) -> Bool {
         return !(isStatic || type == .unknownVal || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))

@@ -49,6 +49,7 @@ protocol GenericFunc {
     func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable
     func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T?) -> ())
     func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())
+    func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?)
     func add<T: FixedWidthInteger>(n1: T, n2: T?)
     func add<T: Sequence> (a: T?, b: T?)
     func add<T: Collection> (a: T, b: T)
@@ -131,6 +132,15 @@ class GenericFuncMock: GenericFunc {
         pullEventsCallCount += 1
         if let pullEventsHandler = pullEventsHandler {
             pullEventsHandler(events, until, closure)
+        }
+
+    }
+    var optionalPullCallCount = 0
+    var optionalPullHandler: (([SomeEvent], Any, Bool, ((Any?) -> ())?) -> ())?
+    func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?)  {
+        optionalPullCallCount += 1
+        if let optionalPullHandler = optionalPullHandler {
+            optionalPullHandler(events, value, once, closure as? ((Any?) -> ()))
         }
 
     }
