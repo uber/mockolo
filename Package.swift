@@ -4,8 +4,13 @@ import PackageDescription
 var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-argument-parser", .upToNextMinor(from: "0.0.4")),
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .exact("0.1.5")),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0"))
 ]
+
+#if compiler(>=5.3)
+dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("swift-5.3-DEVELOPMENT-SNAPSHOT-2020-09-07-a")))
+#else
+dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0")))
+#endif
 
 let package = Package(
     name: "Mockolo",
