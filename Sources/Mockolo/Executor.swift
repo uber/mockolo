@@ -39,6 +39,7 @@ class Executor {
     private var useTemplateFunc: OptionArgument<Bool>!
     private var useMockObservable: OptionArgument<Bool>!
     private var mockAll: OptionArgument<Bool>!
+    private var mockFinal: OptionArgument<Bool>!
     private var concurrencyLimit: OptionArgument<Int>!
     private var enableArgsHistory: OptionArgument<Bool>!
 
@@ -126,6 +127,9 @@ class Executor {
         mockAll = parser.add(option: "--mock-all",
                                  kind: Bool.self,
                                  usage: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
+        mockFinal = parser.add(option: "--mock-final",
+                                 kind: Bool.self,
+                                 usage: "If set, generated mock classes will have the 'final' attributes (default is set to false).")
         concurrencyLimit = parser.add(option: "--concurrency-limit",
                                       shortName: "-j",
                                       kind: Int.self,
@@ -191,6 +195,7 @@ class Executor {
         let shouldUseMockObservable = arguments.get(useMockObservable) ?? false
         let shouldMockAll = arguments.get(mockAll) ?? false
         let shouldCaptureAllFuncArgsHistory = arguments.get(enableArgsHistory) ?? false
+        let shouldMockFinal = arguments.get(mockFinal) ?? false
 
         do {
             try generate(sourceDirs: srcDirs,
@@ -205,6 +210,7 @@ class Executor {
                          useTemplateFunc: shouldUseTemplateFunc,
                          useMockObservable: shouldUseMockObservable,
                          enableFuncArgsHistory: shouldCaptureAllFuncArgsHistory,
+                         mockFinal: shouldMockFinal,
                          testableImports: testableImports,
                          customImports: customImports,
                          excludeImports: excludeImports,
@@ -226,6 +232,5 @@ public struct Version {
     public let value: String
 
     /// The current Mockolo version.
-    public static let current = Version(value: "1.2.7")
+    public static let current = Version(value: "1.2.8")
 }
-

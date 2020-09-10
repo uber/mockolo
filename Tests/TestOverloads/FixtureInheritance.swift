@@ -31,9 +31,9 @@ public class SimpleChildMock: SimpleChild {
         self.number = number
         
     }
-    public var nameSetCallCount = 0
+    public private(set) var nameSetCallCount = 0
     public var name: String = "" { didSet { nameSetCallCount += 1 } }
-    public var fooCallCount = 0
+    public private(set) var fooCallCount = 0
     public var fooHandler: (() -> ())?
     public func foo()  {
         fooCallCount += 1
@@ -42,9 +42,9 @@ public class SimpleChildMock: SimpleChild {
         }
         
     }
-    public var numberSetCallCount = 0
+    public private(set) var numberSetCallCount = 0
     public var number: Int = 0 { didSet { numberSetCallCount += 1 } }
-    public var barCallCount = 0
+    public private(set) var barCallCount = 0
     public var barHandler: ((Double) -> (Float?))?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1
@@ -64,9 +64,9 @@ public class SimpleParentMock: SimpleParent {
         self.number = number
         
     }
-    public var numberSetCallCount = 0
+    public private(set) var numberSetCallCount = 0
     public var number: Int = 0 { didSet { numberSetCallCount += 1 } }
-    public var barCallCount = 0
+    public private(set) var barCallCount = 0
     public var barHandler: ((Double) -> (Float?))?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1

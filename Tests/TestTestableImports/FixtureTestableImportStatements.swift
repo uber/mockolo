@@ -27,7 +27,7 @@ class SimpleVarMock: SimpleVar {
         self.name = name
         
     }
-    var nameSetCallCount = 0
+    private(set) var nameSetCallCount = 0
     var name: Int = 0 { didSet { nameSetCallCount += 1 } }
 }
 
@@ -60,7 +60,7 @@ class SimpleVarMock: SimpleVar {
         self.name = name
         
     }
-    var nameSetCallCount = 0
+    private(set) var nameSetCallCount = 0
     var name: Int = 0 { didSet { nameSetCallCount += 1 } }
 }
 

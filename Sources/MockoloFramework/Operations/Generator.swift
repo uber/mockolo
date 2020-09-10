@@ -34,6 +34,7 @@ public func generate(sourceDirs: [String]?,
                      useTemplateFunc: Bool,
                      useMockObservable: Bool,
                      enableFuncArgsHistory: Bool,
+                     mockFinal: Bool,
                      testableImports: [String]?,
                      customImports: [String]?,
                      excludeImports: [String]?,
@@ -127,6 +128,7 @@ public func generate(sourceDirs: [String]?,
     renderTemplates(entities: resolvedEntities,
                     useTemplateFunc: useTemplateFunc,
                     useMockObservable: useMockObservable,
+                    mockFinal: mockFinal,
                     enableFuncArgsHistory: enableFuncArgsHistory) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
     }
@@ -159,3 +161,54 @@ public func generate(sourceDirs: [String]?,
     onCompletion(result)
 }
 
+
+
+ class ModuleX {
+     typealias SomeType = String
+    static var x: String? = nil
+}
+@objc
+ protocol NonSimpleVars {
+    @available(iOS 10.0, *)
+    var dict: Dictionary<String, Int> { get set }
+
+    var closureVar: ((_ arg: String) -> Void)? { get }
+    var voidHandler: (() -> ()) { get }
+    var hasDot: ModuleX.SomeType? { get }
+    static var someVal: String { get }
+}
+
+
+@available(iOS 10.0, *)
+ class NonSimpleVarsMock: NonSimpleVars {
+     init() { }
+     init(dict: Dictionary<String, Int> = Dictionary<String, Int>(), voidHandler: @escaping (() -> ()), hasDot: ModuleX.SomeType? = nil) {
+        self.dict = dict
+        self._voidHandler = voidHandler
+        self.hasDot = hasDot
+    }
+
+
+     private(set) var dictSetCallCount = 0
+     var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
+
+     private(set) var closureVarSetCallCount = 0
+     var closureVar: ((_ arg: String) -> Void)? = nil { didSet { closureVarSetCallCount += 1 } }
+
+     private(set) var voidHandlerSetCallCount = 0
+    private var _voidHandler: ((() -> ()))!  { didSet { voidHandlerSetCallCount += 1 } }
+     var voidHandler: (() -> ()) {
+        get { return _voidHandler }
+        set { _voidHandler = newValue }
+    }
+
+     private(set) var hasDotSetCallCount = 0
+     var hasDot: ModuleX.SomeType? = nil { didSet { hasDotSetCallCount += 1 } }
+
+     static private(set) var someValSetCallCount = 0
+    static private var _someVal: String = "" { didSet { someValSetCallCount += 1 } }
+     static var someVal: String {
+        get { return _someVal }
+        set { _someVal = newValue }
+    }
+}

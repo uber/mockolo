@@ -42,7 +42,7 @@ final class ClosureModel: Model {
         self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType, encloser: encloser)
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         return applyClosureTemplate(name: identifier + .handlerSuffix,
                                     type: type,
                                     genericTypeNames: genericTypeNames,

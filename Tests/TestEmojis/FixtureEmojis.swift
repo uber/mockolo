@@ -20,18 +20,18 @@ public class EmojiParentMock: EmojiParent {
         self._👌😳👍 = 👌😳👍
     }
 
-    var dictSetCallCount = 0
+    private(set) var dictSetCallCount = 0
     var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
 
-    var 👍SetCallCount = 0
+    private(set) var 👍SetCallCount = 0
     private var _👍: Emoji!  { didSet { 👍SetCallCount += 1 } }
     var 👍: Emoji {
         get { return _👍 }
         set { _👍 = newValue }
     }
     
-    var 👌😳👍SetCallCount = 0
-    var _👌😳👍: Emoji! { didSet { 👌😳👍SetCallCount += 1 } }
+    private(set) var 👌😳👍SetCallCount = 0
+    private(set) var _👌😳👍: Emoji! { didSet { 👌😳👍SetCallCount += 1 } }
     var 👌😳👍: Emoji {
         get { return _👌😳👍 }
         set { _👌😳👍 = newValue }
@@ -42,20 +42,22 @@ public class EmojiParentMock: EmojiParent {
 
 
 let emojiVarsMock = """
-    @available(iOS 10.0, *)
-    class EmojiVarsMock: EmojiVars {
-        init() {  }
-        init(😂: Emoji) {
-            self._😂 = 😂
-        }
-            
-        var 😂SetCallCount = 0
-        private var _😂: Emoji!  { didSet { 😂SetCallCount += 1 } }
-        var 😂: Emoji {
-            get { return _😂 }
-            set { _😂 = newValue }
-        }
+@available(iOS 10.0, *)
+class EmojiVarsMock: EmojiVars {
+    init() { }
+    init(😂: Emoji) {
+        self._😂 = 😂
     }
+
+
+    private(set) var 😂SetCallCount = 0
+    private var _😂: Emoji!  { didSet { 😂SetCallCount += 1 } }
+    var 😂: Emoji {
+        get { return _😂 }
+        set { _😂 = newValue }
+    }
+}
+
 """
 
 
@@ -73,25 +75,24 @@ class EmojiVarsMock: EmojiVars {
         self._👌😳👍 = 👌😳👍
     }
 
-    var 😂SetCallCount = 0
+
+    private(set) var 😂SetCallCount = 0
     private var _😂: Emoji!  { didSet { 😂SetCallCount += 1 } }
     var 😂: Emoji {
         get { return _😂 }
         set { _😂 = newValue }
     }
-
-    var dictSetCallCount = 0
+    private(set) var dictSetCallCount = 0
     var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
-
-    var 👍SetCallCount = 0
+    private(set) var 👍SetCallCount = 0
     private var _👍: Emoji!  { didSet { 👍SetCallCount += 1 } }
     var 👍: Emoji {
         get { return _👍 }
         set { _👍 = newValue }
     }
-
-    var 👌😳👍SetCallCount = 0
-    var _👌😳👍: Emoji! { didSet { 👌😳👍SetCallCount += 1 } }
+    
+    private(set) var 👌😳👍SetCallCount = 0
+    private(set) var _👌😳👍: Emoji! { didSet { 👌😳👍SetCallCount += 1 } }
     var 👌😳👍: Emoji {
         get { return _👌😳👍 }
         set { _👌😳👍 = newValue }

@@ -47,6 +47,7 @@ extension String {
     static public let `class` = "class"
     static public let `final` = "final"
     static let override = "override"
+    static let privateSet = "private(set)"
     static let mockType = "protocol"
     static let unknownVal = "Unknown"
     static let prefix = "prefix"

@@ -79,8 +79,8 @@ public class HighMock: High {
         
     }
 
-    var orderSetCallCount = 0
-    var underlyingOrder: Int = 0
+    private(set) var orderSetCallCount = 0
+    private(set) var underlyingOrder: Int = 0
     override var order: Int {
         get { return underlyingOrder }
         set {
@@ -89,7 +89,7 @@ public class HighMock: High {
         }
     }
 
-    var bazCallCount = 0
+    private(set) var bazCallCount = 0
     var bazHandler: (() -> (Double))?
     override func baz() -> Double {
         bazCallCount += 1
@@ -104,27 +104,26 @@ public class HighMock: High {
 """
 
 let klassMock = """
+
 public class LowMock: Low {
-    
     override init(i: Int = 0) {
         super.init(i: i)
-
     }
     required init(arg: String = "") {
         super.init(arg: arg)
-        
     }
-
     required init(orderId: Int = 0) {
         super.init(orderId: orderId)
     }
-    var nameSetCallCount = 0
+
+
+    private(set) var nameSetCallCount = 0
     override var name: String = "" { didSet { nameSetCallCount += 1 } }
 
-    var whatSetCallCount = 0
+    private(set) var whatSetCallCount = 0
     override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
 
-    var barCallCount = 0
+    private(set) var barCallCount = 0
     var barHandler: (() -> ())?
     override func bar()  {
         barCallCount += 1
@@ -133,7 +132,8 @@ public class LowMock: Low {
         }
         
     }
-    var fooCallCount = 0
+
+    private(set) var fooCallCount = 0
     var fooHandler: (() -> (Int))?
     override func foo() -> Int {
         fooCallCount += 1
@@ -143,27 +143,30 @@ public class LowMock: Low {
         return 0
     }
 }
+
 """
 
 let klassLongerMock = """
+
 public class LowMock: Low {
     override init(i: Int = 0) {
         super.init(i: i)
     }
-
     required init(arg: String = "") {
         super.init(arg: arg)
     }
-
     required init(orderId: Int = 0) {
         super.init(orderId: orderId)
     }
 
-    var nameSetCallCount = 0
+
+    private(set) var nameSetCallCount = 0
     override var name: String = "" { didSet { nameSetCallCount += 1 } }
-    var whatSetCallCount = 0
+
+    private(set) var whatSetCallCount = 0
     override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
-    var barCallCount = 0
+
+    private(set)  var barCallCount = 0
     var barHandler: (() -> ())?
     override func bar()  {
         barCallCount += 1
@@ -172,7 +175,8 @@ public class LowMock: Low {
         }
         
     }
-    var fooCallCount = 0
+
+    private(set) var fooCallCount = 0
     var fooHandler: (() -> (Int))?
     override func foo() -> Int {
         fooCallCount += 1

@@ -14,7 +14,7 @@ class FooMock: Foo {
     init() { }
 
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
     func fooFunc(val: Int)  {
@@ -26,7 +26,7 @@ class FooMock: Foo {
         
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncArgValues = [[Int]]()
     var barFuncHandler: (([Int]) -> ())?
     func barFunc(val: [Int])  {
@@ -38,7 +38,7 @@ class FooMock: Foo {
         
     }
 
-    var bazFuncCallCount = 0
+    private(set) var bazFuncCallCount = 0
     var bazFuncArgValues = [(String, Float)]()
     var bazFuncHandler: ((String, Float) -> ())?
     func bazFunc(arg: String, other: Float)  {
@@ -59,7 +59,7 @@ class FooMock: Foo {
     init() { }
 
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
     func fooFunc(val: Int)  {
@@ -71,7 +71,7 @@ class FooMock: Foo {
         
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
     func barFunc(val: [Int])  {
         barFuncCallCount += 1
@@ -81,7 +81,7 @@ class FooMock: Foo {
         
     }
 
-    var bazFuncCallCount = 0
+    private(set) var bazFuncCallCount = 0
     var bazFuncArgValues = [(String, Float)]()
     var bazFuncHandler: ((String, Float) -> ())?
     func bazFunc(arg: String, other: Float)  {
@@ -111,7 +111,7 @@ let argumentsHistorySimpleCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncHandler: (() -> ())?
     func fooFunc() {
         fooFuncCallCount += 1
@@ -121,7 +121,7 @@ class FooMock: Foo {
         }
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncArgValues = [Int]()
     var barFuncHandler: ((Int) -> ())?
     func barFunc(val: Int) {
@@ -133,7 +133,7 @@ class FooMock: Foo {
         }
     }
 
-    var bazFuncCallCount = 0
+    private(set) var bazFuncCallCount = 0
     var bazFuncArgValues = [Int]()
     var bazFuncHandler: ((Int) -> ())?
     func bazFunc(_ val: Int) {
@@ -145,7 +145,7 @@ class FooMock: Foo {
         }
     }
 
-    var quxFuncCallCount = 0
+    private(set) var quxFuncCallCount = 0
     var quxFuncArgValues = [Int]()
     var quxFuncHandler: ((Int) -> (String))?
     func quxFunc(val: Int) -> String {
@@ -158,7 +158,7 @@ class FooMock: Foo {
         return ""
     }
 
-    var quuxFuncCallCount = 0
+    private(set) var quuxFuncCallCount = 0
     var quuxFuncArgValues = [(String, Float)]()
     var quuxFuncHandler: ((String, Float) -> ())?
     func quuxFunc(val1: String, val2: Float) {
@@ -184,7 +184,7 @@ let argumentsHistoryTupleCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [(Int, String)]()
     var fooFuncHandler: (((Int, String)) -> ())?
     func fooFunc(val: (Int, String)) {
@@ -196,7 +196,7 @@ class FooMock: Foo {
         }
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncArgValues = [((bar1: Int, String), (bar3: Int, bar4: String))]()
     var barFuncHandler: (((bar1: Int, String), (bar3: Int, bar4: String)) -> ())?
     func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String)) {
@@ -224,7 +224,7 @@ let argumentsHistoryOverloadedCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncHandler: (() -> ())?
     func fooFunc() {
         fooFuncCallCount += 1
@@ -234,7 +234,7 @@ class FooMock: Foo {
         }
     }
 
-    var fooFuncVal1CallCount = 0
+    private(set) var fooFuncVal1CallCount = 0
     var fooFuncVal1ArgValues = [Int]()
     var fooFuncVal1Handler: ((Int) -> ())?
     func fooFunc(val1: Int)  {
@@ -247,7 +247,7 @@ class FooMock: Foo {
         
     }
 
-    var fooFuncVal1StringCallCount = 0
+    private(set) var fooFuncVal1StringCallCount = 0
     var fooFuncVal1StringArgValues = [String]()
     var fooFuncVal1StringHandler: ((String) -> ())?
     func fooFunc(val1: String)  {
@@ -259,7 +259,7 @@ class FooMock: Foo {
         }
     }
 
-    var fooFuncVal2CallCount = 0
+    private(set) var fooFuncVal2CallCount = 0
     var fooFuncVal2ArgValues = [Int]()
     var fooFuncVal2Handler: ((Int) -> ())?
     func fooFunc(val2: Int)  {
@@ -285,7 +285,7 @@ let argumentsHistoryGenericsCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [(Any, Any?)]()
     var fooFuncHandler: ((Any, Any?) -> ())?
     func fooFunc<T: StringProtocol>(val1: T, val2: T?) {
@@ -297,7 +297,7 @@ class FooMock: Foo {
         }
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncArgValues = [Any]()
     var barFuncHandler: ((Any) -> (Any))?
     func barFunc<T: Sequence, U: Collection>(val: T) -> U {
@@ -324,7 +324,7 @@ let argumentsHistoryInoutCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    var fooFuncCallCount = 0
+    private(set)  var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((inout Int) -> ())?
     func fooFunc(val: inout Int) {
@@ -336,7 +336,7 @@ class FooMock: Foo {
         }
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncArgValues = [Int]()
     var barFuncHandler: ((inout Int) -> ())?
     func barFunc(into val: inout Int) {
@@ -362,7 +362,7 @@ let argumentsHistoryHandlerCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncHandler: ((() -> Int) -> ())?
     func fooFunc(handler: () -> Int) {
         fooFuncCallCount += 1
@@ -372,7 +372,7 @@ class FooMock: Foo {
         }
     }
 
-    var barFuncCallCount = 0
+    private(set) var barFuncCallCount = 0
     var barFuncArgValues = [Int]()
     var barFuncHandler: ((Int, (String) -> Void) -> ())?
     func barFunc(val: Int, handler: (String) -> Void) {
@@ -398,7 +398,7 @@ class FooMock: Foo {
     init() {
     }
     
-    var fooFuncCallCount = 0
+    private(set) var fooFuncCallCount = 0
     var fooFuncHandler: ((@autoclosure () -> Int) -> ())?
     func fooFunc(handler: @autoclosure () -> Int) {
         fooFuncCallCount += 1
@@ -422,7 +422,7 @@ let argumentsHistoryStaticCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    static var fooFuncCallCount = 0
+    static private(set) var fooFuncCallCount = 0
     static var fooFuncArgValues = [Int]()
     static var fooFuncHandler: ((Int) -> ())?
     static func fooFunc(val: Int) {

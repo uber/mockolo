@@ -55,7 +55,7 @@ final class ClassModel: Model {
         self.accessLevel = acl
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, enableFuncArgsHistory: Bool = false) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, accessLevel: accessLevel, attribute: attribute, declType: declType, metadata: metadata, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, enableFuncArgsHistory: enableFuncArgsHistory, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
+        return applyClassTemplate(name: name, identifier: self.identifier, accessLevel: accessLevel, attribute: attribute, declType: declType, metadata: metadata, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
     }
 }

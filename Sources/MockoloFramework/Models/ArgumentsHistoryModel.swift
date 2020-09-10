@@ -35,7 +35,7 @@ final class ArgumentsHistoryModel: Model {
         return force || isHistoryAnnotated
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool) -> String? {
         guard enable(force: enableFuncArgsHistory) else {
             return nil
         }

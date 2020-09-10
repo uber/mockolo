@@ -81,7 +81,7 @@ public class LowMock: Low {
         super.init(orderId: orderId)
     }
 
-    var nameSetCallCount = 0
+    private(set) var nameSetCallCount = 0
     override var name: String = "" { didSet { nameSetCallCount += 1 } }
 }
 """
@@ -103,7 +103,7 @@ public class LowMock: Low {
         super.init(orderId: orderId)
     }
 
-    var nameSetCallCount = 0
+    private(set) var nameSetCallCount = 0
     override var name: String = "" { didSet { nameSetCallCount += 1 } }
 }
 """

@@ -17,11 +17,13 @@ func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -
 
 let overloadMock5 = """
 
-class FooMock: Foo {
 
+
+class FooMock: Foo {
     init() { }
 
-    var collectionViewCallCount = 0
+
+    private(set) var collectionViewCallCount = 0
     var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
     func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
         collectionViewCallCount += 1
@@ -30,16 +32,18 @@ class FooMock: Foo {
         }
         return nil
     }
-    var collectionViewConfigureCellCallCount = 0
+
+    private(set) var collectionViewConfigureCellCallCount = 0
     var collectionViewConfigureCellHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
     func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)  {
         collectionViewConfigureCellCallCount += 1
         if let collectionViewConfigureCellHandler = collectionViewConfigureCellHandler {
             collectionViewConfigureCellHandler(collectionView, cell, index)
         }
-
+        
     }
-    var collectionViewSizeForItemAtCallCount = 0
+
+    private(set) var collectionViewSizeForItemAtCallCount = 0
     var collectionViewSizeForItemAtHandler: ((UICollectionView, Int) -> (CGSize))?
     func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize {
         collectionViewSizeForItemAtCallCount += 1
@@ -48,25 +52,28 @@ class FooMock: Foo {
         }
         return .zero
     }
-    var collectionViewDidEndDisplayingCallCount = 0
+
+    private(set) var collectionViewDidEndDisplayingCallCount = 0
     var collectionViewDidEndDisplayingHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)  {
         collectionViewDidEndDisplayingCallCount += 1
         if let collectionViewDidEndDisplayingHandler = collectionViewDidEndDisplayingHandler {
             collectionViewDidEndDisplayingHandler(collectionView, cell, index)
         }
-
+        
     }
-    var collectionViewConfigureCallCount = 0
+
+    private(set) var collectionViewConfigureCallCount = 0
     var collectionViewConfigureHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
     func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int)  {
         collectionViewConfigureCallCount += 1
         if let collectionViewConfigureHandler = collectionViewConfigureHandler {
             collectionViewConfigureHandler(collectionView, cell, index)
         }
-
+        
     }
-    var loadImageCallCount = 0
+
+    private(set) var loadImageCallCount = 0
     var loadImageHandler: ((URL) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL) -> Observable<UIImage> {
         loadImageCallCount += 1
@@ -75,7 +82,8 @@ class FooMock: Foo {
         }
         return Observable<UIImage>.empty()
     }
-    var loadImageAtURLCallCount = 0
+
+    private(set) var loadImageAtURLCallCount = 0
     var loadImageAtURLHandler: ((URL, UIImage) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL, placeholder: UIImage) -> Observable<UIImage> {
         loadImageAtURLCallCount += 1
@@ -84,7 +92,8 @@ class FooMock: Foo {
         }
         return Observable<UIImage>.empty()
     }
-    var loadImageAtURLRetryIntervalCallCount = 0
+
+    private(set) var loadImageAtURLRetryIntervalCallCount = 0
     var loadImageAtURLRetryIntervalHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
     func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -> Observable<UIImage> {
         loadImageAtURLRetryIntervalCallCount += 1

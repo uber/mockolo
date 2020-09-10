@@ -89,30 +89,26 @@ protocol Foo {
 let patOverrideMock =
 """
 
+
 class FooMock: Foo {
-    
-    
-    
-    init() {
-        
-        
-    }
+    init() { }
+
     typealias T = Any
     typealias U = Bar
     typealias R = (String, Int)
     typealias S = AnyObject
-    
-    var updateCallCount = 0
+
+    private(set) var updateCallCount = 0
     var updateHandler: ((T, U) -> (U, R))?
     func update(x: T, y: U) -> (U, R) {
         updateCallCount += 1
-        
         if let updateHandler = updateHandler {
             return updateHandler(x, y)
         }
         fatalError("updateHandler returns can't have a default value thus its handler must be set")
     }
 }
+
 """
 
 let protocolWithTypealias =
@@ -132,7 +128,7 @@ public class SomeTypeMock: SomeType {
         self._key = key
     }
     public typealias Key = String
-    public var keySetCallCount = 0
+    public private(set) var keySetCallCount = 0
     private var _key: Key!  { didSet { keySetCallCount += 1 } }
     public var key: Key {
         get { return _key }

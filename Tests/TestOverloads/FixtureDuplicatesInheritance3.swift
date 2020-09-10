@@ -19,20 +19,17 @@ protocol Baz: Foo, Bar {
 let overloadMock10 =
 """
 
+
+
+
 class FooMock: Foo {
-    
-    
-    
-    init() {
-        
-        
-    }
-    
-    var updateCallCount = 0
+    init() { }
+
+
+    private(set) var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
     func update(arg: Int)  {
         updateCallCount += 1
-        
         if let updateHandler = updateHandler {
             updateHandler(arg)
         }
@@ -41,19 +38,13 @@ class FooMock: Foo {
 }
 
 class BarMock: Bar {
-    
-    
-    
-    init() {
-        
-        
-    }
-    
-    var updateCallCount = 0
+    init() { }
+
+
+    private(set) var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
     func update(arg: Int)  {
         updateCallCount += 1
-        
         if let updateHandler = updateHandler {
             updateHandler(arg)
         }
@@ -62,19 +53,13 @@ class BarMock: Bar {
 }
 
 class BazMock: Baz {
-    
-    
-    
-    init() {
-        
-        
-    }
-    
-    var updateCallCount = 0
+    init() { }
+
+
+    private(set) var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
     func update(arg: Int)  {
         updateCallCount += 1
-        
         if let updateHandler = updateHandler {
             updateHandler(arg)
         }

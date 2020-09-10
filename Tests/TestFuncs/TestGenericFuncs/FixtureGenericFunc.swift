@@ -10,10 +10,12 @@ public protocol GenericProtocol {
 
 let genericOptionalTypeMock = """
 
+
 public class GenericProtocolMock: GenericProtocol {
     public init() { }
 
-    public var nonOptionalCallCount = 0
+
+    public private(set) var nonOptionalCallCount = 0
     public var nonOptionalHandler: (() -> (Any))?
     public func nonOptional<T>() -> T {
         nonOptionalCallCount += 1
@@ -23,7 +25,7 @@ public class GenericProtocolMock: GenericProtocol {
         fatalError("nonOptionalHandler returns can't have a default value thus its handler must be set")
     }
 
-    public var optionalCallCount = 0
+    public private(set) var optionalCallCount = 0
     public var optionalHandler: (() -> (Any?))?
     public func optional<T>() -> T? {
         optionalCallCount += 1
@@ -33,6 +35,7 @@ public class GenericProtocolMock: GenericProtocol {
         return nil
     }
 }
+
 
 """
 
@@ -58,12 +61,15 @@ protocol GenericFunc {
 
 let genericFuncMock =
 """
+
 import Foundation
+
 
 class GenericFuncMock: GenericFunc {
     init() { }
 
-    var containsGenericCallCount = 0
+
+    private(set) var containsGenericCallCount = 0
     var containsGenericHandler: ((Any, Any) -> (Any))?
     func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U)) {
         containsGenericCallCount += 1
@@ -72,16 +78,18 @@ class GenericFuncMock: GenericFunc {
         }
         fatalError("containsGenericHandler returns can't have a default value thus its handler must be set")
     }
-    var sendEventsCallCount = 0
+
+    private(set) var sendEventsCallCount = 0
     var sendEventsHandler: (([SomeEvent], Any, Bool, Any) -> ())?
     func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())  {
         sendEventsCallCount += 1
         if let sendEventsHandler = sendEventsHandler {
             sendEventsHandler(events, value, once, closure)
         }
-
+        
     }
-    var pushCallCount = 0
+
+    private(set) var pushCallCount = 0
     var pushHandler: ((Request, StatusCode.Type?) -> (Any))?
     func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T> {
         pushCallCount += 1
@@ -90,7 +98,8 @@ class GenericFuncMock: GenericFunc {
         }
         return Observable<T>.empty()
     }
-    var fetchCallCount = 0
+
+    private(set) var fetchCallCount = 0
     var fetchHandler: ((Request, StatusCode.Type?) -> (Any))?
     func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T> {
         fetchCallCount += 1
@@ -99,7 +108,8 @@ class GenericFuncMock: GenericFunc {
         }
         return Observable<T>.empty()
     }
-    var tellCallCount = 0
+
+    private(set) var tellCallCount = 0
     var tellHandler: ((ResponseType, Any) -> (Disposable))?
     func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable {
         tellCallCount += 1
@@ -108,7 +118,8 @@ class GenericFuncMock: GenericFunc {
         }
         fatalError("tellHandler returns can't have a default value thus its handler must be set")
     }
-    var tellTypeCallCount = 0
+
+    private(set) var tellTypeCallCount = 0
     var tellTypeHandler: ((ResponseType, Any) -> (Disposable))?
     func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable {
         tellTypeCallCount += 1
@@ -117,60 +128,67 @@ class GenericFuncMock: GenericFunc {
         }
         fatalError("tellTypeHandler returns can't have a default value thus its handler must be set")
     }
-    var pullCallCount = 0
+
+    private(set) var pullCallCount = 0
     var pullHandler: (([SomeEvent], Any, Bool, Any) -> ())?
     func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T?) -> ())  {
         pullCallCount += 1
         if let pullHandler = pullHandler {
             pullHandler(events, value, once, closure)
         }
-
+        
     }
-    var pullEventsCallCount = 0
+
+    private(set) var pullEventsCallCount = 0
     var pullEventsHandler: (([SomeEvent], Any?, @escaping () -> ()) -> ())?
     func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())  {
         pullEventsCallCount += 1
         if let pullEventsHandler = pullEventsHandler {
             pullEventsHandler(events, until, closure)
         }
-
+        
     }
-    var optionalPullCallCount = 0
+
+    private(set) var optionalPullCallCount = 0
     var optionalPullHandler: (([SomeEvent], Any, Bool, ((Any?) -> ())?) -> ())?
     func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?)  {
         optionalPullCallCount += 1
         if let optionalPullHandler = optionalPullHandler {
             optionalPullHandler(events, value, once, closure as? ((Any?) -> ()))
         }
-
+        
     }
-    var addCallCount = 0
+
+    private(set) var addCallCount = 0
     var addHandler: ((Any, Any?) -> ())?
     func add<T: FixedWidthInteger>(n1: T, n2: T?)  {
         addCallCount += 1
         if let addHandler = addHandler {
             addHandler(n1, n2)
         }
-
+        
     }
-    var addACallCount = 0
+
+    private(set) var addACallCount = 0
     var addAHandler: ((Any?, Any?) -> ())?
     func add<T: Sequence>(a: T?, b: T?)  {
         addACallCount += 1
         if let addAHandler = addAHandler {
             addAHandler(a, b)
         }
-
+        
     }
-    var addABCallCount = 0
+
+    private(set) var addABCallCount = 0
     var addABHandler: ((Any, Any) -> ())?
     func add<T: Collection>(a: T, b: T)  {
         addABCallCount += 1
         if let addABHandler = addABHandler {
             addABHandler(a, b)
         }
-
+        
     }
 }
+
 
 """

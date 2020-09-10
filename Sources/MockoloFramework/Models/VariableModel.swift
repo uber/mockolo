@@ -57,7 +57,7 @@ final class VariableModel: Model {
         self.modelDescription = modelDescription
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         if processed {
             var prefix = ""
             if shouldOverride, !name.isGenerated(type: type) {

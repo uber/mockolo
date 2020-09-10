@@ -16,7 +16,7 @@ public class BarMock: Bar {
         
     }
     
-    public var tellCallCount = 0
+    public private(set) var tellCallCount = 0
     public var tellHandler: (([String: String], ClientProtocol) -> (Observable<EncryptedData>))?
     public func tell(data: [String: String], for client: ClientProtocol) -> Observable<EncryptedData> {
         tellCallCount += 1
@@ -26,7 +26,7 @@ public class BarMock: Bar {
         return Observable.empty()
     }
     
-    public var tellKeyCallCount = 0
+    public private(set) var tellKeyCallCount = 0
     public var tellKeyHandler: ((Double) -> (Int))?
     public func tell(key: Double) -> Int {
         tellKeyCallCount += 1
@@ -45,25 +45,20 @@ let overloadMock2 =
 """
 
 public class FooMock: Foo {
-    
-    
-    
-    public init() {
-        
-        
-    }
-    
-    public var tellStatusCallCount = 0
+    public init() { }
+
+
+    public private(set) var tellStatusCallCount = 0
     public var tellStatusHandler: ((Int, String) -> (Double))?
     public func tell(status: Int, msg: String) -> Double {
         tellStatusCallCount += 1
-        
         if let tellStatusHandler = tellStatusHandler {
             return tellStatusHandler(status, msg)
         }
         return 0.0
     }
-    public var tellCallCount = 0
+    
+    public private(set) var tellCallCount = 0
     public var tellHandler: (([String: String], ClientProtocol) -> (Observable<EncryptedData>))?
     public func tell(data: [String: String], for client: ClientProtocol) -> Observable<EncryptedData> {
         tellCallCount += 1
@@ -72,7 +67,8 @@ public class FooMock: Foo {
         }
         return Observable.empty()
     }
-    public var tellKeyCallCount = 0
+    
+    public private(set) var tellKeyCallCount = 0
     public var tellKeyHandler: ((Double) -> (Int))?
     public func tell(key: Double) -> Int {
         tellKeyCallCount += 1
@@ -82,4 +78,5 @@ public class FooMock: Foo {
         return 0
     }
 }
+
 """
