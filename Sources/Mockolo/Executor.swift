@@ -114,7 +114,7 @@ class Executor {
                                         usage: "If set, custom module imports will be added to the final import statement list.")
         excludeImports = parser.add(option: "--exclude-imports",
                                         kind: [String].self,
-                                        usage: "If set, listed modules will be exluded from the import statements in the mock output.")
+                                        usage: "If set, listed modules will be excluded from the import statements in the mock output.")
         header = parser.add(option: "--header",
                                 kind: String.self,
                                 usage: "A custom header documentation to be added to the beginning of a generated mock file.")
