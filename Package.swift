@@ -7,7 +7,7 @@ var dependencies: [Package.Dependency] = [
 ]
 
 #if compiler(>=5.3)
-dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("swift-5.3-DEVELOPMENT-SNAPSHOT-2020-09-07-a")))
+dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("swift-5.3-RELEASE")))
 #else
 dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0")))
 #endif
