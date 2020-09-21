@@ -1,4 +1,4 @@
-// swift-tools-version:5.2
+// swift-tools-version:5.3
 import PackageDescription
 
 var dependencies: [Package.Dependency] = [
@@ -6,11 +6,7 @@ var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .exact("0.1.5")),
 ]
 
-#if compiler(>=5.3)
 dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("swift-5.3-RELEASE")))
-#else
-dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50200.0")))
-#endif
 
 let package = Package(
     name: "Mockolo",
