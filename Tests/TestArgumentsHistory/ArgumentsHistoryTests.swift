@@ -49,6 +49,12 @@ class ArgumentsHistoryTests: MockoloTestCase {
                dstContent: argumentsHistoryHandlerCaseMock,
                enableFuncArgsHistory: true)
     }
+
+    func testArgumentsHistoryEscapingTypealiasHandlerCase() {
+        verify(srcContent: argumentsHistoryEscapingTypealiasHandlerCase,
+               dstContent: argumentsHistoryEscapingTypealiasHandlerCaseMock,
+               enableFuncArgsHistory: true)
+    }
     
     func testArgumentsHistoryAutoclosureCase() {
         verify(srcContent: argumentsHistoryAutoclosureCase,

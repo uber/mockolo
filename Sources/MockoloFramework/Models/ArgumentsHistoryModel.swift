@@ -15,7 +15,7 @@ final class ArgumentsHistoryModel: Model {
 
     init?(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: String) {
         // Value contains closure is not supported.
-        let capturables = params.filter { !$0.type.hasClosure && !$0.type.isAutoclosure }
+        let capturables = params.filter { !$0.type.hasClosure && !$0.type.isEscaping && !$0.type.isAutoclosure }
         guard !capturables.isEmpty else {
             return nil
         }

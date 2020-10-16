@@ -386,6 +386,45 @@ class FooMock: Foo {
 }
 """
 
+let argumentsHistoryEscapingTypealiasHandlerCase = """
+typealias FooHandler = () -> Int
+typealias BarHandler = (String) -> Void
+
+/// \(String.mockAnnotation)
+protocol Foo {
+    func fooFunc(handler: @escaping FooHandler)
+    func barFunc(val: Int, handler: @escaping BarHandler)
+}
+"""
+
+let argumentsHistoryEscapingTypealiasHandlerCaseMock = """
+class FooMock: Foo {
+    init() { }
+
+    private(set) var fooFuncCallCount = 0
+    var fooFuncHandler: ((@escaping FooHandler) -> ())?
+    func fooFunc(handler: @escaping FooHandler) {
+        fooFuncCallCount += 1
+
+        if let fooFuncHandler = fooFuncHandler {
+            fooFuncHandler(handler)
+        }
+    }
+
+    private(set) var barFuncCallCount = 0
+    var barFuncArgValues = [Int]()
+    var barFuncHandler: ((Int, @escaping BarHandler) -> ())?
+    func barFunc(val: Int, handler: @escaping BarHandler) {
+        barFuncCallCount += 1
+        barFuncArgValues.append(val)
+
+        if let barFuncHandler = barFuncHandler {
+            barFuncHandler(val, handler)
+        }
+    }
+}
+"""
+
 let argumentsHistoryAutoclosureCase = """
 /// \(String.mockAnnotation)
 protocol Foo {
