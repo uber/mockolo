@@ -32,6 +32,7 @@ final class MethodModel: Model {
     let accessLevel: String
     var attributes: [String]? = nil
     let genericTypeParams: [ParamModel]
+    var genericWhereClause: String? = nil
     let params: [ParamModel]
     let processed: Bool
     var modelDescription: String? = nil
@@ -127,6 +128,7 @@ final class MethodModel: Model {
          encloserType: DeclType,
          acl: String,
          genericTypeParams: [ParamModel],
+         genericWhereClause: String?,
          params: [ParamModel],
          throwsOrRethrows: String,
          isStatic: Bool,
@@ -145,6 +147,7 @@ final class MethodModel: Model {
         self.shouldOverride = encloserType == .classType
         self.params = params
         self.genericTypeParams = genericTypeParams
+        self.genericWhereClause = genericWhereClause
         self.processed = processed
         self.funcsWithArgsHistory = funcsWithArgsHistory
         self.modelDescription = modelDescription
@@ -188,6 +191,7 @@ final class MethodModel: Model {
                                          isStatic: isStatic,
                                          isOverride: shouldOverride,
                                          genericTypeParams: genericTypeParams,
+                                         genericWhereClause: genericWhereClause,
                                          params: params,
                                          returnType: type,
                                          accessLevel: accessLevel,
