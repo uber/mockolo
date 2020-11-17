@@ -192,3 +192,40 @@ class GenericFuncMock: GenericFunc {
 
 
 """
+
+
+let funcWhereClause = """
+
+protocol Parsable {
+    //  ...
+}
+protocol APITarget {
+    associatedtype ResultType
+
+    // ...
+}
+
+/// @mockable
+protocol Networking {
+    func request<T>(_ target: T) -> T.ResultType where T: APITarget & Parsable
+}
+"""
+
+let funcWhereClauseMock = """
+
+class NetworkingMock: Networking {
+    init() { }
+
+
+    private(set) var requestCallCount = 0
+    var requestHandler: ((Any) -> (Any))?
+    func request<T>(_ target: T) -> T.ResultType where T: APITarget & Parsable {
+        requestCallCount += 1
+        if let requestHandler = requestHandler {
+            return requestHandler(target) as! T.ResultType
+        }
+        fatalError("requestHandler returns can't have a default value thus its handler must be set")
+    }
+}
+"""
+

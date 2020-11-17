@@ -11,6 +11,11 @@ class GenericFuncTests: MockoloTestCase {
         verify(srcContent: genericFunc,
                dstContent: genericFuncMock)
     }
+    
+    func testWhereClause() {
+        verify(srcContent: funcWhereClause,
+               dstContent: funcWhereClauseMock)
+    }
 }
 
 

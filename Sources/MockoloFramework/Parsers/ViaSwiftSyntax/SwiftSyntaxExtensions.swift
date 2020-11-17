@@ -391,6 +391,7 @@ extension SubscriptDeclSyntax {
         
         let params = self.indices.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
+        let genericWhereClause = self.genericWhereClause?.description
         
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
                                          typeName: self.result.returnType.description,
@@ -398,6 +399,7 @@ extension SubscriptDeclSyntax {
                                          encloserType: declType,
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
+                                         genericWhereClause: genericWhereClause,
                                          params: params,
                                          throwsOrRethrows: "",
                                          isStatic: isStatic,
@@ -420,6 +422,7 @@ extension FunctionDeclSyntax {
         
         let params = self.signature.input.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
+        let genericWhereClause = self.genericWhereClause?.description
         
         let funcmodel = MethodModel(name: self.identifier.description,
                                     typeName: self.signature.output?.returnType.description ?? "",
@@ -427,6 +430,7 @@ extension FunctionDeclSyntax {
                                     encloserType: declType,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
+                                    genericWhereClause: genericWhereClause,
                                     params: params,
                                     throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text ?? "",
                                     isStatic: isStatic,
@@ -460,6 +464,7 @@ extension InitializerDeclSyntax {
         
         let params = self.parameters.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: true) } ?? []
+        let genericWhereClause = self.genericWhereClause?.description
         
         return MethodModel(name: "init",
                            typeName: "",
@@ -467,6 +472,7 @@ extension InitializerDeclSyntax {
                            encloserType: declType,
                            acl: acl,
                            genericTypeParams: genericTypeParams,
+                           genericWhereClause: genericWhereClause,
                            params: params,
                            throwsOrRethrows: self.throwsOrRethrowsKeyword?.text ?? "",
                            isStatic: false,
