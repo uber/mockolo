@@ -1,5 +1,5 @@
-language: objective-c
-osx_image: xcode12.0
+language: swift
+osx_image: xcode12.2
 matrix:
     include:
         - name: "MockoloTests"
