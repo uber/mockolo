@@ -40,7 +40,12 @@ func write(candidates: [(String, Int64)],
         macroEnd = .poundEndIf
     }
     let ret = [headerStr, macroStart, imports, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
-    
+    let currentFileContents = try? String(contentsOfFile: outputFilePath, encoding: .utf8)
+    guard currentFileContents != ret else {
+        log("Not writing the file as content is unchanged", level: .info)
+        return ret
+    }
+
     _ = try? ret.write(toFile: outputFilePath, atomically: true, encoding: .utf8)
     return ret
 }
