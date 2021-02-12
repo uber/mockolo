@@ -51,7 +51,13 @@ public protocol Model {
     var offset: Int64 { get set }
 
     /// Applies a corresponding template to this model to output mocks
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool) -> String?
+    func render(with identifier: String,
+                encloser: String,
+                useTemplateFunc: Bool,
+                useMockObservable: Bool,
+                allowSetCallCount: Bool,
+                mockFinal: Bool,
+                enableFuncArgsHistory: Bool) -> String?
 
     /// Used to differentiate multiple entities with the same name
     /// @param level The verbosity level

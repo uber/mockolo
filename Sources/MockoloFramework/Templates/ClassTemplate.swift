@@ -25,6 +25,7 @@ extension ClassModel {
                             metadata: AnnotationMetadata?,
                             useTemplateFunc: Bool,
                             useMockObservable: Bool,
+                            allowSetCallCount: Bool,
                             mockFinal: Bool,
                             enableFuncArgsHistory: Bool,
                             initParamCandidates: [Model],
@@ -45,7 +46,7 @@ extension ClassModel {
                 if model.modelType == .method, model.isInitializer, !model.processed {
                     return nil
                 }
-                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory) {
+                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory) {
                     return (ret, model.offset)
                 }
                 return nil

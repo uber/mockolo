@@ -21,6 +21,7 @@ extension MethodModel {
                              identifier: String,
                              kind: MethodKind,
                              useTemplateFunc: Bool,
+                             allowSetCallCount: Bool,
                              enableFuncArgsHistory: Bool,
                              isStatic: Bool,
                              isOverride: Bool,
@@ -119,7 +120,7 @@ extension MethodModel {
             }
             
             let overrideStr = isOverride ? "\(String.override) " : ""
-            let privateSetSpace = "\(String.privateSet) "
+            let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
             
             template = """
 

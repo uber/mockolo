@@ -18,4 +18,9 @@ class VarTests: MockoloTestCase {
                mockFinal: true)
     }
 
+    func testVarCallCounts() {
+        verify(srcContent: simpleVars,
+               dstContent: simpleVarsAllowCallCountMock,
+               allowSetCallCount: true)
+    }
 }

@@ -23,6 +23,7 @@ extension VariableModel {
                                type: Type,
                                encloser: String,
                                isStatic: Bool,
+                               allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String) -> String {
         
@@ -44,7 +45,7 @@ extension VariableModel {
             assignVal = "= \(val)"
         }
         
-        let privateSetSpace = "\(String.privateSet) "
+        let privateSetSpace = allowSetCallCount ? "" :  "\(String.privateSet) "
         let setCallCountStmt = "\(underlyingSetCallCount) += 1"
         
         var template = ""
@@ -76,11 +77,12 @@ extension VariableModel {
                                  overrideTypes: [String: String]?,
                                  shouldOverride: Bool,
                                  useMockObservable: Bool,
+                                 allowSetCallCount: Bool,
                                  isStatic: Bool,
                                  accessLevel: String) -> String? {
         
         let staticSpace = isStatic ? "\(String.static) " : ""
-        let privateSetSpace = "\(String.privateSet) "
+        let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
 
         if let overrideTypes = overrideTypes, !overrideTypes.isEmpty {
             let (subjectType, _, subjectVal) = type.parseRxVar(overrides: overrideTypes, overrideKey: name, isInitParam: true)

@@ -29,6 +29,24 @@ class SimpleVarMock: SimpleVar {
 
 """
 
+
+let simpleVarsAllowCallCountMock = """
+
+import Foundation
+
+class SimpleVarMock: SimpleVar {
+    
+    init() {  }
+    init(name: Int = 0) {
+        self.name = name
+        
+    }
+    var nameSetCallCount = 0
+    var name: Int = 0 { didSet { nameSetCallCount += 1 } }
+}
+
+"""
+
 let simpleVarsFinalMock = """
 
 import Foundation

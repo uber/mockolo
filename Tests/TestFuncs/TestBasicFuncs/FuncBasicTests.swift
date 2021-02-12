@@ -43,6 +43,11 @@ class BasicFuncTests: MockoloTestCase {
                dstContent: simpleFuncsMock)
     }
 
+    func testSimpleFuncsAllowCallCount() {
+        verify(srcContent: simpleFuncs,
+               dstContent: simpleFuncsAllowCallCountMock,
+               allowSetCallCount: true)
+    }
     func testMockFuncs() {
         verify(srcContent: simpleFuncs,
                dstContent: simpleMockFuncMock,

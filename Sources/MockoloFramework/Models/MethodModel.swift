@@ -167,7 +167,7 @@ final class MethodModel: Model {
         return name(by: level - 1) + postfix
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, mockFinal: Bool = false, enableFuncArgsHistory: Bool) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool) -> String? {
         if processed {
             var prefix = shouldOverride  ? "\(String.override) " : ""
 
@@ -187,6 +187,7 @@ final class MethodModel: Model {
                                          identifier: identifier,
                                          kind: kind,
                                          useTemplateFunc: useTemplateFunc,
+                                         allowSetCallCount: allowSetCallCount,
                                          enableFuncArgsHistory: enableFuncArgsHistory,
                                          isStatic: isStatic,
                                          isOverride: shouldOverride,

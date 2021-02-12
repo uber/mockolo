@@ -54,7 +54,7 @@ class MockoloTestCase: XCTestCase {
         }
     }
     
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String]? = [], mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, concurrencyLimit: Int? = 1) {
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String]? = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, concurrencyLimit: Int? = 1) {
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -62,10 +62,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, concurrencyLimit: concurrencyLimit)
+        verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, concurrencyLimit: concurrencyLimit)
     }
     
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: DeclType, useTemplateFunc: Bool, useMockObservable: Bool, testableImports: [String]?, mockFinal: Bool, enableFuncArgsHistory: Bool, concurrencyLimit: Int?) {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: DeclType, useTemplateFunc: Bool, useMockObservable: Bool, testableImports: [String]?, allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, concurrencyLimit: Int?) {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -116,7 +116,8 @@ class MockoloTestCase: XCTestCase {
                       macro: "MOCK",
                       declType: declType,
                       useTemplateFunc: useTemplateFunc,
-                      useMockObservable: useMockObservable, 
+                      useMockObservable: useMockObservable,
+                      allowSetCallCount: allowSetCallCount,
                       enableFuncArgsHistory: enableFuncArgsHistory,
                       mockFinal: mockFinal,
                       testableImports: testableImports,

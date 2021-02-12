@@ -57,7 +57,7 @@ final class VariableModel: Model {
         self.modelDescription = modelDescription
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         if processed {
             var prefix = ""
             if shouldOverride, !name.isGenerated(type: type) {
@@ -85,6 +85,7 @@ final class VariableModel: Model {
                                                overrideTypes: overrideTypes,
                                                shouldOverride: shouldOverride,
                                                useMockObservable: useMockObservable,
+                                               allowSetCallCount: allowSetCallCount,
                                                isStatic: isStatic,
                                                accessLevel: accessLevel) {
             return rxVar
@@ -94,6 +95,7 @@ final class VariableModel: Model {
                                      type: type,
                                      encloser: encloser,
                                      isStatic: isStatic,
+                                     allowSetCallCount: allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel)
     }
