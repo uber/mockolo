@@ -41,7 +41,7 @@ extension VariableModel {
         }
         
         var assignVal = ""
-        if let val = underlyingVarDefaultVal {
+        if !shouldOverride, let val = underlyingVarDefaultVal {
             assignVal = "= \(val)"
         }
         

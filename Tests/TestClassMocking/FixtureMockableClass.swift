@@ -118,10 +118,10 @@ public class LowMock: Low {
 
 
     private(set) var nameSetCallCount = 0
-    override var name: String = "" { didSet { nameSetCallCount += 1 } }
+    override var name: String { didSet { nameSetCallCount += 1 } }
 
     private(set) var whatSetCallCount = 0
-    override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
+    override var what: Float { didSet { whatSetCallCount += 1 } }
 
     private(set) var barCallCount = 0
     var barHandler: (() -> ())?
@@ -161,10 +161,10 @@ public class LowMock: Low {
 
 
     private(set) var nameSetCallCount = 0
-    override var name: String = "" { didSet { nameSetCallCount += 1 } }
+    override var name: String { didSet { nameSetCallCount += 1 } }
 
     private(set) var whatSetCallCount = 0
-    override var what: Float = 0.0 { didSet { whatSetCallCount += 1 } }
+    override var what: Float { didSet { whatSetCallCount += 1 } }
 
     private(set)  var barCallCount = 0
     var barHandler: (() -> ())?
