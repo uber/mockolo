@@ -44,7 +44,7 @@ final class TypeAliasModel: Model {
         self.modelDescription = modelDescription
         self.overrideTypes = overrideTypes
         self.useDescription = useDescription
-        self.addAcl = encloserType == .protocolType
+        self.addAcl = encloserType == .protocolType && !processed
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
             self.type  = Type(val)
