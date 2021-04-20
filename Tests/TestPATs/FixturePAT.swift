@@ -73,6 +73,30 @@ class BazMock: Baz {
 }
 """
 
+let simplePat =
+"""
+/// \(String.mockAnnotation)(typealias: T = String)
+public protocol FooBar: Foo {
+    associatedtype T
+}
+"""
+let parentPatMock =
+"""
+public class FooMock: Foo {
+    public init() { }
+
+    public typealias T = String
+}
+"""
+let patWithParentMock =
+"""
+public class FooBarMock: FooBar {
+    public init() { }
+
+    public typealias T = String
+}
+"""
+
 
 let patOverride =
 """
