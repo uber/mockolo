@@ -18,7 +18,7 @@ let package = Package(
         ],
     dependencies: dependencies,
     targets: [
-        .target(
+        .executableTarget(
             name: "Mockolo",
             dependencies: [
                 "MockoloFramework",
