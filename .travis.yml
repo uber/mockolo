@@ -1,8 +1,0 @@
-language: swift
-osx_image: xcode12.2
-matrix:
-    include:
-        - name: "MockoloTests"
-          script: swift test -Xswiftc -DDEBUG
-        - name: "MockoloBinary"
-          script: swift build -c release
