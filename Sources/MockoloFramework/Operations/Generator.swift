@@ -24,7 +24,7 @@ enum InputError: Error {
 /// Performs end to end mock generation flow
 public func generate(sourceDirs: [String]?,
                      sourceFiles: [String]?,
-                     parser: SourceParsing,
+                     parser: SourceParser,
                      exclusionSuffixes: [String],
                      mockFilePaths: [String]?,
                      annotation: String,

@@ -108,7 +108,7 @@ class MockoloTestCase: XCTestCase {
         
         try? generate(sourceDirs: nil,
                       sourceFiles: srcFilePaths,
-                      parser: ParserViaSwiftSyntax(),
+                      parser: SourceParser(),
                       exclusionSuffixes: ["Mocks", "Tests"],
                       mockFilePaths: mockFilePaths,
                       annotation: String.mockAnnotation,
