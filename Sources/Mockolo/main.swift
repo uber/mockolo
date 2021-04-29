@@ -16,6 +16,7 @@
 import Foundation
 import TSCUtility
 import TSCBasic
+import MockoloFramework
 
 func main() {
     let parser = ArgumentParser(usage: "<options>", overview: "Mockolo: Swift mock generator.")
