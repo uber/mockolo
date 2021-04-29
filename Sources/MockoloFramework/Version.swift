@@ -3,5 +3,5 @@ public struct Version {
     public let value: String
 
     /// The current Mockolo version.
-    public static let current = Version(value: "1.3.2")
+    public static let current = Version(value: "1.4.0")
 }
