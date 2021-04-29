@@ -7,13 +7,19 @@ on:
     branches: [master]
 
 jobs:
-  macos:
+  build-macos:
     runs-on: macOS-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build
         run: swift build -v
+
+  test-macos:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
       - name: Test
         run: swift test -v -c release
 
