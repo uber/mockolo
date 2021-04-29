@@ -1,0 +1,17 @@
+name: Build Actions
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+jobs:
+  macos:
+    runs-on: macOS-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Build
+        run: swift build -v
+      - name: Test
+        run: swift test -v -c release
+
