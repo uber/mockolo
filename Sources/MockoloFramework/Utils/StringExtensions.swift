@@ -192,12 +192,12 @@ extension StringProtocol {
         return prefix(1).capitalized + dropFirst()
     }
     
-    func shouldParse(with exclusionList: [String]? = nil) -> Bool {
+    func shouldParse(with exclusionList: [String]) -> Bool {
         guard hasSuffix(".swift") else { return false }
-        guard let exlist = exclusionList else { return true }
+        guard !exclusionList.isEmpty else { return true }
         
         if let name = components(separatedBy: ".swift").first {
-            for ex in exlist {
+            for ex in exclusionList {
                 if name.hasSuffix(ex) {
                     return false
                 }
