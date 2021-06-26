@@ -43,15 +43,15 @@ public class SourceParser {
     /// @param fileMacro: File level macro
     /// @param declType: The declaration type, e.g. protocol, class.
     /// @param completion:The block to be executed on completion
-    public func parseDecls(_ paths: [String]?,
+    public func parseDecls(_ paths: [String],
                            isDirs: Bool,
-                           exclusionSuffixes: [String]? = nil,
+                           exclusionSuffixes: [String],
                            annotation: String,
                            fileMacro: String?,
                            declType: DeclType,
                            completion: @escaping ([Entity], ImportMap?) -> ()) {
         
-        guard let paths = paths else { return }
+        guard !paths.isEmpty else { return }
         scan(paths, isDirectory: isDirs) { (path, lock) in
             self.generateASTs(path,
                               exclusionSuffixes: exclusionSuffixes,
@@ -64,7 +64,7 @@ public class SourceParser {
     }
 
     private func generateASTs(_ path: String,
-                              exclusionSuffixes: [String]? = nil,
+                              exclusionSuffixes: [String] = [],
                               annotation: String,
                               fileMacro: String?,
                               declType: DeclType,
