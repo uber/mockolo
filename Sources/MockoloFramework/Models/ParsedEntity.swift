@@ -100,12 +100,13 @@ final class EntityNodeSubContainer {
 }
 
 /// Contains arguments to annotation
-/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true)
+/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true, referenceType: someVar = weak)
 struct AnnotationMetadata {
     var module: String?
     var typeAliases: [String: String]?
     var varTypes: [String: String]?
     var funcsWithArgsHistory: [String]?
+    var referenceTypes: [String: ReferenceType]?
 }
 
 public typealias ImportMap = [String: [String: [String]]]

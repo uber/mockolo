@@ -150,7 +150,7 @@ extension MemberDeclListItemSyntax {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
-                if let item = varMember.models(with: acl, declType: declType, overrides: metadata?.varTypes, processed: processed).first {
+                if let item = varMember.models(with: acl, declType: declType, overrides: metadata?.varTypes, referenceTypes: metadata?.referenceTypes, processed: processed).first {
                     return (item, varMember.attributes?.trimmedDescription, false)
                 }
             }
@@ -346,7 +346,7 @@ extension ClassDeclSyntax: EntityNode {
 }
 
 extension VariableDeclSyntax {
-    func models(with acl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> [Model] {
+    func models(with acl: String, declType: DeclType, overrides: [String: String]?, referenceTypes: [String : ReferenceType]?, processed: Bool) -> [Model] {
         // Detect whether it's static
         var isStatic = false
         if let modifiers = self.modifiers {
@@ -374,6 +374,7 @@ extension VariableDeclSyntax {
                                          offset: v.offset,
                                          length: v.length,
                                          overrideTypes: overrides,
+                                         referenceTypes: referenceTypes,
                                          modelDescription: self.description,
                                          processed: processed)
             return varmodel
@@ -710,8 +711,16 @@ extension Trivia {
                         }
                     }
                 }
-                if argsStr.contains(String.historyColon), let subStr = argsStr.components(separatedBy: String.historyColon).last, !subStr.isEmpty {
-                    ret.funcsWithArgsHistory = subStr.arguments(with: .annotationArgDelimiter)?.compactMap { k, v in v == "true" ? k : nil }
+                if argsStr.contains(String.referenceTypeColon), let subStr = argsStr.components(separatedBy: String.referenceTypeColon).last, !subStr.isEmpty {
+                    if let rawReferenceTypes: [String: String] = subStr.arguments(with: .annotationArgDelimiter) {
+                        var referenceTypes: [String: ReferenceType] = [:]
+                        for tuple in rawReferenceTypes {
+                            guard let referenceType: ReferenceType = ReferenceType(rawValue: tuple.value)
+                            else { continue }
+                            referenceTypes[tuple.key] = referenceType
+                        }
+                        ret.referenceTypes = referenceTypes
+                    }
                 }
             }
             return ret

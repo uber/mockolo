@@ -14,6 +14,7 @@ final class VariableModel: Model {
     var isStatic = false
     var shouldOverride = false
     var overrideTypes: [String: String]?
+    var referenceTypes: [String: ReferenceType]?
     var cachedDefaultTypeVal: String?
     var modelDescription: String? = nil
     var modelType: ModelType {
@@ -41,6 +42,7 @@ final class VariableModel: Model {
          offset: Int64,
          length: Int64,
          overrideTypes: [String: String]?,
+         referenceTypes: [String: ReferenceType]?,
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -52,6 +54,7 @@ final class VariableModel: Model {
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.overrideTypes = overrideTypes
+        self.referenceTypes = referenceTypes
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.modelDescription = modelDescription
@@ -91,10 +94,19 @@ final class VariableModel: Model {
             return rxVar
         }
 
+        let referenceType: ReferenceType
+        if let referenceTypes = self.referenceTypes,
+           let overrideReferenceType: ReferenceType = referenceTypes[identifier] {
+            referenceType = overrideReferenceType
+        } else {
+            referenceType = .default
+        }
+
         return applyVariableTemplate(name: identifier,
                                      type: type,
                                      encloser: encloser,
                                      isStatic: isStatic,
+                                     referenceType: referenceType,
                                      allowSetCallCount: allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel)

@@ -81,6 +81,7 @@ extension String {
     static let rxColon = "rx:"
     static let varColon = "var:"
     static let historyColon = "history:"
+    static let referenceTypeColon = "referenceType:"
     static let `typealias` = "typealias"
     static let annotationArgDelimiter = ";"
     static let subjectSuffix = "Subject"
