@@ -16,8 +16,8 @@
 
 import Foundation
 
-internal enum ReferenceType: String {
-    case `default` = "default"
+internal enum Modifier: String {
+    case none = "none"
     case weak = "weak"
     case dynamic = "dynamic"
 }
@@ -28,7 +28,7 @@ extension VariableModel {
                                type: Type,
                                encloser: String,
                                isStatic: Bool,
-                               referenceType: ReferenceType,
+                               modifier: Modifier,
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String) -> String {
@@ -54,12 +54,12 @@ extension VariableModel {
         let privateSetSpace = allowSetCallCount ? "" :  "\(String.privateSet) "
         let setCallCountStmt = "\(underlyingSetCallCount) += 1"
 
-        let referenceTypStr: String
-        switch referenceType {
-        case .default:
-            referenceTypStr = ""
+        let modifierTypeStr: String
+        switch modifier {
+        case .none:
+            modifierTypeStr = ""
         case .dynamic, .weak:
-            referenceTypStr = (overrideStr.isEmpty ? "" :  " ") + referenceType.rawValue + " "
+            modifierTypeStr = (overrideStr.isEmpty ? "" :  " ") + modifier.rawValue + " "
         }
 
         var template = ""
@@ -69,7 +69,7 @@ extension VariableModel {
 
             \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
             \(1.tab)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal) { didSet { \(setCallCountStmt) } }
-            \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(referenceTypStr)var \(name): \(type.typeName) {
+            \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
             \(2.tab)get { return \(underlyingName) }
             \(2.tab)set { \(underlyingName) = newValue }
             \(1.tab)}
@@ -78,7 +78,7 @@ extension VariableModel {
             template = """
 
             \(1.tab)\(acl)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(acl)\(overrideStr)\(referenceTypStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
+            \(1.tab)\(acl)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
             """
         }
 

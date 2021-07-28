@@ -12,4 +12,9 @@ class ReferenceTypesTests: MockoloTestCase {
         verify(srcContent: referenceTypesWithDynamicAnnotation,
                dstContent: referenceTypesWithDynamicAnnotationMock)
     }
+
+    func testReferenceTypesWithDynamicFunc() {
+        verify(srcContent: referenceTypesWithDynamicFuncAnnotation,
+               dstContent: referenceTypesWithDynamicFuncAnnotationMock)
+    }
 }

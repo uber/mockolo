@@ -14,7 +14,7 @@ final class VariableModel: Model {
     var isStatic = false
     var shouldOverride = false
     var overrideTypes: [String: String]?
-    var referenceTypes: [String: ReferenceType]?
+    var modifiers: [String: Modifier]?
     var cachedDefaultTypeVal: String?
     var modelDescription: String? = nil
     var modelType: ModelType {
@@ -42,7 +42,7 @@ final class VariableModel: Model {
          offset: Int64,
          length: Int64,
          overrideTypes: [String: String]?,
-         referenceTypes: [String: ReferenceType]?,
+         modifiers: [String: Modifier]?,
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -54,12 +54,12 @@ final class VariableModel: Model {
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.overrideTypes = overrideTypes
-        self.referenceTypes = referenceTypes
+        self.modifiers = modifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.modelDescription = modelDescription
     }
-    
+
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         if processed {
             var prefix = ""
@@ -69,7 +69,7 @@ final class VariableModel: Model {
             if let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty {
                 return prefix + modelDescription
             }
-            
+
             if let ret = self.data?.toString(offset: self.offset, length: self.length) {
                 if !ret.contains(identifier),
                     let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
@@ -94,19 +94,19 @@ final class VariableModel: Model {
             return rxVar
         }
 
-        let referenceType: ReferenceType
-        if let referenceTypes = self.referenceTypes,
-           let overrideReferenceType: ReferenceType = referenceTypes[identifier] {
-            referenceType = overrideReferenceType
+        let modifier: Modifier
+        if let modifiers = self.modifiers,
+           let overrideModifier: Modifier = modifiers[identifier] {
+            modifier = overrideModifier
         } else {
-            referenceType = .default
+            modifier = .none
         }
 
         return applyVariableTemplate(name: identifier,
                                      type: type,
                                      encloser: encloser,
                                      isStatic: isStatic,
-                                     referenceType: referenceType,
+                                     modifier: modifier,
                                      allowSetCallCount: allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel)
