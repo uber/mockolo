@@ -1,6 +1,6 @@
 import MockoloFramework
 
-let referenceTypesWithWeakAnnotation = """
+let modifiersTypesWithWeakAnnotation = """
 /// \(String.mockAnnotation)(modifiers: listener = weak)
 protocol Foo {
     var listener: AnyObject? { get }
@@ -9,7 +9,7 @@ protocol Foo {
 }
 """
 
-let referenceTypesWithWeakAnnotationMock = """
+let modifiersTypesWithWeakAnnotationMock = """
 class FooMock: Foo {
     init() { }
     init(listener: AnyObject? = nil) {
@@ -43,7 +43,7 @@ class FooMock: Foo {
 
 """
 
-let referenceTypesWithDynamicAnnotation = """
+let modifiersTypesWithDynamicAnnotation = """
 /// \(String.mockAnnotation)(modifiers: listener = dynamic)
 protocol Foo {
     var listener: AnyObject? { get }
@@ -52,7 +52,7 @@ protocol Foo {
 }
 """
 
-let referenceTypesWithDynamicAnnotationMock = """
+let modifiersTypesWithDynamicAnnotationMock = """
 class FooMock: Foo {
     init() { }
     init(listener: AnyObject? = nil) {
@@ -86,7 +86,7 @@ class FooMock: Foo {
 
 """
 
-let referenceTypesWithDynamicFuncAnnotation = """
+let modifiersTypesWithDynamicFuncAnnotation = """
 /// \(String.mockAnnotation)(modifiers: barFunc = dynamic)
 protocol Foo {
     var listener: AnyObject? { get }
@@ -95,7 +95,7 @@ protocol Foo {
 }
 """
 
-let referenceTypesWithDynamicFuncAnnotationMock = """
+let modifiersTypesWithDynamicFuncAnnotationMock = """
 class FooMock: Foo {
     init() { }
     init(listener: AnyObject? = nil) {

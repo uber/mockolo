@@ -58,8 +58,8 @@ extension VariableModel {
         switch modifier {
         case .none:
             modifierTypeStr = ""
-        case .dynamic, .weak:
-            modifierTypeStr = (overrideStr.isEmpty ? "" :  " ") + modifier.rawValue + " "
+        default:
+            modifierTypeStr = modifier.rawValue + " "
         }
 
         var template = ""

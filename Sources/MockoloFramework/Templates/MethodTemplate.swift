@@ -123,10 +123,10 @@ extension MethodModel {
             let overrideStr = isOverride ? "\(String.override) " : ""
             let modifierTypeString: String
             switch modifier {
-                case .dynamic, .weak:
-                    modifierTypeString = (overrideStr.isEmpty ? "" :  " ") + "dynamic" + " "
-                default:
+                case .none:
                     modifierTypeString = ""
+                default:
+                    modifierTypeString = modifier.rawValue + " "
             }
             let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
 
