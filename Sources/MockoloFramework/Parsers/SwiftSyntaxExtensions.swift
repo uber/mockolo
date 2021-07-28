@@ -724,7 +724,7 @@ extension Trivia {
                 if argsStr.contains(String.historyColon), let subStr = argsStr.components(separatedBy: String.historyColon).last, !subStr.isEmpty {
                     ret.funcsWithArgsHistory = subStr.arguments(with: .annotationArgDelimiter)?.compactMap { k, v in v == "true" ? k : nil }
                 }
-                if argsStr.contains(String.modifierColon), let subStr = argsStr.components(separatedBy: String.modifierColon).last, !subStr.isEmpty {
+                if argsStr.contains(String.modifiersColon), let subStr = argsStr.components(separatedBy: String.modifiersColon).last, !subStr.isEmpty {
                     if let rawModifiers: [String: String] = subStr.arguments(with: .annotationArgDelimiter) {
                         var modifiers: [String: Modifier] = [:]
                         for tuple in rawModifiers {
