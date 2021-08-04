@@ -14,7 +14,7 @@ final class VariableModel: Model {
     var isStatic = false
     var shouldOverride = false
     var overrideTypes: [String: String]?
-    var modifiers: [String: Modifier]?
+    var customModifiers: [String: Modifier]?
     var cachedDefaultTypeVal: String?
     var modelDescription: String? = nil
     var modelType: ModelType {
@@ -42,7 +42,7 @@ final class VariableModel: Model {
          offset: Int64,
          length: Int64,
          overrideTypes: [String: String]?,
-         modifiers: [String: Modifier]?,
+         customModifiers: [String: Modifier]?,
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -54,7 +54,7 @@ final class VariableModel: Model {
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.overrideTypes = overrideTypes
-        self.modifiers = modifiers
+        self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.modelDescription = modelDescription
@@ -94,19 +94,11 @@ final class VariableModel: Model {
             return rxVar
         }
 
-        let modifier: Modifier
-        if let modifiers = self.modifiers,
-           let overrideModifier: Modifier = modifiers[identifier] {
-            modifier = overrideModifier
-        } else {
-            modifier = .none
-        }
-
         return applyVariableTemplate(name: identifier,
                                      type: type,
                                      encloser: encloser,
                                      isStatic: isStatic,
-                                     modifier: modifier,
+                                     customModifiers: customModifiers,
                                      allowSetCallCount: allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel)

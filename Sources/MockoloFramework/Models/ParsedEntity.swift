@@ -154,3 +154,9 @@ public final class Entity {
         self.isProcessed = isProcessed
     }
 }
+
+enum Modifier: String {
+    case none = ""
+    case weak = "weak"
+    case dynamic = "dynamic"
+}

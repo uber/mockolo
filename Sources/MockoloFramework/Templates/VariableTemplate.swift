@@ -16,19 +16,13 @@
 
 import Foundation
 
-internal enum Modifier: String {
-    case none = "none"
-    case weak = "weak"
-    case dynamic = "dynamic"
-}
-
 extension VariableModel {
 
     func applyVariableTemplate(name: String,
                                type: Type,
                                encloser: String,
                                isStatic: Bool,
-                               modifier: Modifier,
+                               customModifiers: [String: Modifier]?,
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String) -> String {
@@ -55,11 +49,11 @@ extension VariableModel {
         let setCallCountStmt = "\(underlyingSetCallCount) += 1"
 
         let modifierTypeStr: String
-        switch modifier {
-        case .none:
+        if let customModifiers = self.customModifiers,
+           let customModifier: Modifier = customModifiers[name] {
+            modifierTypeStr = customModifier.rawValue + " "
+        } else {
             modifierTypeStr = ""
-        default:
-            modifierTypeStr = modifier.rawValue + " "
         }
 
         var template = ""

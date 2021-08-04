@@ -150,14 +150,14 @@ extension MemberDeclListItemSyntax {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
-                if let item = varMember.models(with: acl, declType: declType, overrides: metadata?.varTypes, modifiers: metadata?.modifiers, processed: processed).first {
+                if let item = varMember.models(with: acl, declType: declType, overrides: metadata?.varTypes, customModifiers: metadata?.modifiers, processed: processed).first {
                     return (item, varMember.attributes?.trimmedDescription, false)
                 }
             }
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, modifiers: metadata?.modifiers, processed: processed)
+                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
                 return (item, funcMember.attributes?.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
@@ -346,7 +346,7 @@ extension ClassDeclSyntax: EntityNode {
 }
 
 extension VariableDeclSyntax {
-    func models(with acl: String, declType: DeclType, overrides: [String: String]?, modifiers: [String : Modifier]?, processed: Bool) -> [Model] {
+    func models(with acl: String, declType: DeclType, overrides: [String: String]?, customModifiers: [String : Modifier]?, processed: Bool) -> [Model] {
         // Detect whether it's static
         var isStatic = false
         if let modifiers = self.modifiers {
@@ -374,7 +374,7 @@ extension VariableDeclSyntax {
                                          offset: v.offset,
                                          length: v.length,
                                          overrideTypes: overrides,
-                                         modifiers: modifiers,
+                                         customModifiers: customModifiers,
                                          modelDescription: self.description,
                                          processed: processed)
             return varmodel
@@ -404,10 +404,10 @@ extension SubscriptDeclSyntax {
                                          params: params,
                                          throwsOrRethrows: "",
                                          isStatic: isStatic,
-                                         modifier: .none,
                                          offset: self.offset,
                                          length: self.length,
                                          funcsWithArgsHistory: [],
+                                         customModifiers: [:],
                                          modelDescription: self.description,
                                          processed: processed)
         return subscriptModel
@@ -416,7 +416,7 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
 
-    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, modifiers: [String : Modifier]?, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
@@ -425,13 +425,6 @@ extension FunctionDeclSyntax {
         let params = self.signature.input.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
-
-        let modifier: Modifier
-        if let passedModifiers = modifiers {
-            modifier = passedModifiers[self.identifier.description] ?? .none
-        } else {
-            modifier = .none
-        }
 
         let funcmodel = MethodModel(name: self.identifier.description,
                                     typeName: self.signature.output?.returnType.description ?? "",
@@ -443,10 +436,10 @@ extension FunctionDeclSyntax {
                                     params: params,
                                     throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text ?? "",
                                     isStatic: isStatic,
-                                    modifier: modifier,
                                     offset: self.offset,
                                     length: self.length,
                                     funcsWithArgsHistory: funcsWithArgsHistory ?? [],
+                                    customModifiers: customModifiers ?? [:],
                                     modelDescription: self.description,
                                     processed: processed)
         return funcmodel
@@ -486,10 +479,10 @@ extension InitializerDeclSyntax {
                            params: params,
                            throwsOrRethrows: self.throwsOrRethrowsKeyword?.text ?? "",
                            isStatic: false,
-                           modifier: .none,
                            offset: self.offset,
                            length: self.length,
                            funcsWithArgsHistory: [],
+                           customModifiers: [:],
                            modelDescription: self.description,
                            processed: processed)
     }

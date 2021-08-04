@@ -37,11 +37,11 @@ final class MethodModel: Model {
     let processed: Bool
     var modelDescription: String? = nil
     var isStatic: Bool
-    let modifier: Modifier
     let shouldOverride: Bool
     let suffix: String
     let kind: MethodKind
     let funcsWithArgsHistory: [String]
+    let customModifiers: [String : Modifier]
     var modelType: ModelType {
         return .method
     }
@@ -133,10 +133,10 @@ final class MethodModel: Model {
          params: [ParamModel],
          throwsOrRethrows: String,
          isStatic: Bool,
-         modifier: Modifier,
          offset: Int64,
          length: Int64,
          funcsWithArgsHistory: [String],
+         customModifiers: [String: Modifier],
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -146,13 +146,13 @@ final class MethodModel: Model {
         self.length = length
         self.kind = kind
         self.isStatic = isStatic
-        self.modifier = modifier
         self.shouldOverride = encloserType == .classType
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.genericWhereClause = genericWhereClause
         self.processed = processed
         self.funcsWithArgsHistory = funcsWithArgsHistory
+        self.customModifiers = customModifiers
         self.modelDescription = modelDescription
         self.accessLevel = acl
     }
@@ -193,7 +193,7 @@ final class MethodModel: Model {
                                          allowSetCallCount: allowSetCallCount,
                                          enableFuncArgsHistory: enableFuncArgsHistory,
                                          isStatic: isStatic,
-                                         modifier: modifier,
+                                         customModifiers: customModifiers,
                                          isOverride: shouldOverride,
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,

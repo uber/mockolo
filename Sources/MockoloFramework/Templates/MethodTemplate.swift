@@ -24,7 +24,7 @@ extension MethodModel {
                              allowSetCallCount: Bool,
                              enableFuncArgsHistory: Bool,
                              isStatic: Bool,
-                             modifier: Modifier,
+                             customModifiers: [String: Modifier]?,
                              isOverride: Bool,
                              genericTypeParams: [ParamModel],
                              genericWhereClause: String?,
@@ -121,12 +121,12 @@ extension MethodModel {
             }
 
             let overrideStr = isOverride ? "\(String.override) " : ""
-            let modifierTypeString: String
-            switch modifier {
-                case .none:
-                    modifierTypeString = ""
-                default:
-                    modifierTypeString = modifier.rawValue + " "
+            let modifierTypeStr: String
+            if let customModifiers = customModifiers,
+            let customModifier: Modifier = customModifiers[name] {
+                modifierTypeStr = customModifier.rawValue + " "
+            } else {
+                modifierTypeStr = ""
             }
             let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
 
@@ -148,7 +148,7 @@ extension MethodModel {
             template = """
             \(template)
             \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-            \(1.tab)\(acl)\(staticStr)\(overrideStr)\(modifierTypeString)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr)\(genericWhereStr) {
+            \(1.tab)\(acl)\(staticStr)\(overrideStr)\(modifierTypeStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr)\(genericWhereStr) {
             \(wrapped)
             \(1.tab)}
             """
