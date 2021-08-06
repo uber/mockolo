@@ -35,7 +35,9 @@ private func generateUniqueModels(key: String,
                                   protocolMap: [String: Entity],
                                   inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
-    let (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+    var (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+
+    models = combinePostLookup(models: models)
     
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
@@ -69,4 +71,62 @@ private func generateUniqueModels(key: String,
     let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes)
     
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
+}
+
+private func combinePostLookup(models: [Model]) -> [Model] {
+    var variableModels = [VariableModel]()
+    var nameToVariableModels = [String: VariableModel]()
+
+    for model in models {
+        guard let variableModel = model as? VariableModel else {
+            continue
+        }
+        variableModels.append(variableModel)
+        nameToVariableModels[variableModel.name] = variableModel
+    }
+
+    var retModels = models
+    for variableModel in variableModels {
+        guard let combinePublishedAlias = variableModel.combinePublishedAlias else {
+            continue
+        }
+
+        // If a variable member in this entity already exists in this entity, link the two together.
+        // Otherwise, create a model representing this entity. This is needed for it to be considered
+        // as init params.
+        let publishedModel: VariableModel
+
+        if let matchingPublishedModel = nameToVariableModels[combinePublishedAlias] {
+            publishedModel = matchingPublishedModel
+        } else {
+            var subjectTypeName = ""
+
+            if let range = variableModel.type.typeName.range(of: String.anyPublisherLeftAngleBracket),
+               let lastIdx = variableModel.type.typeName.lastIndex(of: ">") {
+
+                let typeParamStr = variableModel.type.typeName[range.upperBound..<lastIdx]
+
+                if let lastCommaIndex = typeParamStr.lastIndex(of: ",") {
+                    subjectTypeName = String(typeParamStr[..<lastCommaIndex])
+                }
+            }
+
+            publishedModel = VariableModel(name: combinePublishedAlias,
+                                           typeName: subjectTypeName,
+                                           acl: variableModel.accessLevel,
+                                           encloserType: variableModel.encloserType,
+                                           isStatic: variableModel.isStatic,
+                                           canBeInitParam: true,
+                                           offset: max(0, variableModel.offset - 1),
+                                           overrideTypes: variableModel.overrideTypes,
+                                           modelDescription: nil,
+                                           combineSubjectType: nil,
+                                           combinePublishedAlias: nil,
+                                           processed: false)
+            retModels.append(publishedModel)
+        }
+        variableModel.publishedAliasModel = publishedModel
+        publishedModel.isCombinePublishedAlias = true
+    }
+    return retModels
 }

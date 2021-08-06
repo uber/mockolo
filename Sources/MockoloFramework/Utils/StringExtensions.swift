@@ -64,6 +64,12 @@ extension String {
     static let rxObservable = "RxSwift.Observable"
     static let observableLeftAngleBracket = observable + "<"
     static let rxObservableLeftAngleBracket = rxObservable + "<"
+    static let anyPublisher = "AnyPublisher"
+    static let anyPublisherLeftAngleBracket = anyPublisher + "<"
+    static let eraseToAnyPublisher = "eraseToAnyPublisher"
+    static let passthroughSubject = "PassthroughSubject"
+    static let currentValueSubject = "CurrentValueSubject"
+    static let publishedPropertyWrapper = "@Published"
     static let publishSubject = "PublishSubject"
     static let behaviorSubject = "BehaviorSubject"
     static let replaySubject = "ReplaySubject"
@@ -78,6 +84,8 @@ extension String {
     static let closureArrow = "->"
     static let moduleColon = "module:"
     static let typealiasColon = "typealias:"
+    static let subjectColon = "subject:"
+    static let publishedColon = "published:"
     static let rxColon = "rx:"
     static let varColon = "var:"
     static let historyColon = "history:"
@@ -148,7 +156,7 @@ extension String {
 
 
     func canBeInitParam(type: String, isStatic: Bool) -> Bool {
-        return !(isStatic || type == .unknownVal || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))
+        return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))
     }
     
     func isGenerated(type: Type) -> Bool {

@@ -26,13 +26,15 @@ extension VariableModel {
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String) -> String {
-        
+
         let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
         let underlyingVarDefaultVal = type.defaultVal()
         var underlyingType = type.typeName
         if underlyingVarDefaultVal == nil {
             underlyingType = type.underlyingType
         }
+
+        let propertyWrapper = isCombinePublishedAlias ? "\(String.publishedPropertyWrapper) " : ""
         
         let overrideStr = shouldOverride ? "\(String.override) " : ""
         var acl = accessLevel
@@ -54,7 +56,7 @@ extension VariableModel {
             template = """
 
             \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal) { didSet { \(setCallCountStmt) } }
+            \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal) { didSet { \(setCallCountStmt) } }
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)var \(name): \(type.typeName) {
             \(2.tab)get { return \(underlyingName) }
             \(2.tab)set { \(underlyingName) = newValue }
@@ -64,11 +66,98 @@ extension VariableModel {
             template = """
 
             \(1.tab)\(acl)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(acl)\(overrideStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
+            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
             """
         }
         
         return template
+    }
+
+    func applyCombineVariableTemplate(name: String,
+                                      type: Type,
+                                      encloser: String,
+                                      shouldOverride: Bool,
+                                      allowSetCallCount: Bool,
+                                      isStatic: Bool,
+                                      accessLevel: String) -> String? {
+        let typeName = type.typeName
+
+        guard
+            // Nested AnyPublishers are not supported.
+            typeName.starts(with: String.anyPublisherLeftAngleBracket),
+            let range = typeName.range(of: String.anyPublisherLeftAngleBracket),
+            let lastIdx = typeName.lastIndex(of: ">")
+        else {
+            return nil
+        }
+
+        let typeParamStr = typeName[range.upperBound..<lastIdx]
+        var subjectTypeStr = ""
+        var errorTypeStr = ""
+        if let lastCommaIndex = typeParamStr.lastIndex(of: ",") {
+            subjectTypeStr = String(typeParamStr[..<lastCommaIndex])
+            let nextIndex = typeParamStr.index(after: lastCommaIndex)
+            errorTypeStr = String(typeParamStr[nextIndex..<typeParamStr.endIndex]).trimmingCharacters(in: .whitespaces)
+        }
+        let subjectType = Type(subjectTypeStr)
+        let subjectDefaultValue = subjectType.defaultVal()
+        let staticSpace = isStatic ? "\(String.static) " : ""
+        let acl = accessLevel.isEmpty ? "" : accessLevel + " "
+        let thisStr = isStatic ? encloser : "self"
+
+        if let publishedAlias = combinePublishedAlias {
+            // Using a @Published property to back this publisher.
+
+            var template = "\n"
+            var isPublishedPropertyOptionalOrForceUnwrapped = false
+            var publishedPropertyName = publishedAlias
+            if let publishedAliasModel = publishedAliasModel {
+                // If the property required by the protocol/class cannot be optional, the published property will be the underlyingProperty
+                // i.e. @Published var_myType: MyType!
+                let publishedAliasModelDefaultValue = publishedAliasModel.type.defaultVal()
+                if publishedAliasModel.type.isOptional || publishedAliasModel.type.defaultVal() == nil {
+
+                }
+                if publishedAliasModelDefaultValue == nil {
+                    publishedPropertyName = "_\(publishedPropertyName)"
+                }
+                isPublishedPropertyOptionalOrForceUnwrapped = publishedAliasModelDefaultValue == nil || publishedAliasModel.type.isOptional
+            }
+
+            var mapping = ""
+            if !subjectType.isOptional, isPublishedPropertyOptionalOrForceUnwrapped {
+                mapping = ".map { $0! }"
+            } else if subjectType.isOptional, !isPublishedPropertyOptionalOrForceUnwrapped {
+                // If the published property is of type: MyType, but the publisher is of type MyType?
+                mapping = ".map { $0 }"
+            }
+
+            // If the underlying published property is a !, this means we must map the AnyPublisher to the correct type.
+            //
+            let setErrorType = ".setFailureType(to: \(errorTypeStr).self)"
+            template += """
+            \(1.tab)\(acl)\(staticSpace)var \(name): \(typeName) { return \(thisStr).$\(publishedPropertyName)\(mapping)\(setErrorType).\(String.eraseToAnyPublisher)() }
+            """
+            return template
+        } else {
+            // Using a combine subject to back this publisher
+            var combineSubjectType = combineSubjectType ?? .passthroughSubject
+
+            let defaultValue = combineSubjectType == .currentValueSubject ? subjectDefaultValue : ""
+            // Unable to generate default value for this CurrentValueSubject. Default back to PassthroughSubject.
+            //
+            if defaultValue == nil {
+                combineSubjectType = .passthroughSubject
+            }
+            let underlyingSubjectName = "\(name)\(String.subjectSuffix)"
+
+            let template = """
+
+            \(1.tab)\(acl)\(staticSpace)var \(name): \(typeName) { return \(thisStr).\(underlyingSubjectName).\(String.eraseToAnyPublisher)() }
+            \(1.tab)\(acl)\(staticSpace)\(String.privateSet) var \(underlyingSubjectName) = \(combineSubjectType.typeName)<\(typeParamStr)>(\(defaultValue ?? ""))
+            """
+            return template
+        }
     }
     
     func applyRxVariableTemplate(name: String,

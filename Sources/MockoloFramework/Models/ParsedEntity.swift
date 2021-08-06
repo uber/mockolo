@@ -99,6 +99,20 @@ final class EntityNodeSubContainer {
     }
 }
 
+public enum CombineSubjectType {
+    case passthroughSubject
+    case currentValueSubject
+
+    var typeName: String {
+        switch self {
+        case .passthroughSubject:
+            return .passthroughSubject
+        case .currentValueSubject:
+            return .currentValueSubject
+        }
+    }
+}
+
 /// Contains arguments to annotation
 /// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true)
 struct AnnotationMetadata {
@@ -106,6 +120,8 @@ struct AnnotationMetadata {
     var typeAliases: [String: String]?
     var varTypes: [String: String]?
     var funcsWithArgsHistory: [String]?
+    var combineSubjectTypes: [String: CombineSubjectType]?
+    var combinePublishedAliases: [String: String]?
 }
 
 public typealias ImportMap = [String: [String: [String]]]
