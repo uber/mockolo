@@ -113,11 +113,8 @@ extension VariableModel {
             var publishedPropertyName = publishedAlias
             if let publishedAliasModel = publishedAliasModel {
                 // If the property required by the protocol/class cannot be optional, the published property will be the underlyingProperty
-                // i.e. @Published var_myType: MyType!
+                // i.e. @Published var _myType: MyType!
                 let publishedAliasModelDefaultValue = publishedAliasModel.type.defaultVal()
-                if publishedAliasModel.type.isOptional || publishedAliasModel.type.defaultVal() == nil {
-
-                }
                 if publishedAliasModelDefaultValue == nil {
                     publishedPropertyName = "_\(publishedPropertyName)"
                 }
@@ -126,6 +123,7 @@ extension VariableModel {
 
             var mapping = ""
             if !subjectType.isOptional, isPublishedPropertyOptionalOrForceUnwrapped {
+                // If the published property is of type: MyType?/MyType!, but the publisher is of type MyType
                 mapping = ".map { $0! }"
             } else if subjectType.isOptional, !isPublishedPropertyOptionalOrForceUnwrapped {
                 // If the published property is of type: MyType, but the publisher is of type MyType?

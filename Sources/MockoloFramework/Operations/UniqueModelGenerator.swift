@@ -91,9 +91,9 @@ private func combinePostLookup(models: [Model]) -> [Model] {
             continue
         }
 
-        // If a variable member in this entity already exists in this entity, link the two together.
+        // If a variable member in this entity already exists, link the two together.
         // Otherwise, create a model representing this entity. This is needed for it to be considered
-        // as init params.
+        // as an init param.
         let publishedModel: VariableModel
 
         if let matchingPublishedModel = nameToVariableModels[combinePublishedAlias] {
@@ -117,6 +117,7 @@ private func combinePostLookup(models: [Model]) -> [Model] {
                                            encloserType: variableModel.encloserType,
                                            isStatic: variableModel.isStatic,
                                            canBeInitParam: true,
+                                           // This new property should be generated right above the AnyPublisher property.
                                            offset: max(0, variableModel.offset - 1),
                                            overrideTypes: variableModel.overrideTypes,
                                            modelDescription: nil,
