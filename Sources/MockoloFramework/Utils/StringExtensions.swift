@@ -89,6 +89,7 @@ extension String {
     static let rxColon = "rx:"
     static let varColon = "var:"
     static let historyColon = "history:"
+    static let modifiersColon = "modifiers:"
     static let `typealias` = "typealias"
     static let annotationArgDelimiter = ";"
     static let subjectSuffix = "Subject"
@@ -128,11 +129,11 @@ extension String {
     var withLeftAngleBracket: String {
         return "\(self)<"
     }
-    
+
     var withRightAngleBracket: String {
         return "\(self)>"
     }
-    
+
     var withColon: String {
         return "\(self):"
     }
@@ -158,7 +159,7 @@ extension String {
     func canBeInitParam(type: String, isStatic: Bool) -> Bool {
         return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))
     }
-    
+
     func isGenerated(type: Type) -> Bool {
           return self.hasPrefix(.underlyingVarPrefix) ||
               self.hasSuffix(.setCallCountSuffix) ||
@@ -166,19 +167,19 @@ extension String {
               self.hasSuffix(.subjectSuffix) ||
               (self.hasSuffix(.handlerSuffix) && type.isOptional)
     }
-    
+
     func arguments(with delimiter: String) -> [String: String]? {
         let argstr = self
         let args = argstr.components(separatedBy: delimiter)
         var argsMap = [String: String]()
         for item in args {
             let keyVal = item.components(separatedBy: "=").map{$0.trimmingCharacters(in: .whitespaces)}
-            
+
             if let k = keyVal.first {
                 if k.contains(":") {
                     break
                 }
-                
+
                 if let v = keyVal.last {
                     argsMap[k] = v
                 }
@@ -195,15 +196,15 @@ extension StringProtocol {
     var isNotEmpty: Bool {
         return !isEmpty
     }
-    
+
     var capitlizeFirstLetter: String {
         return prefix(1).capitalized + dropFirst()
     }
-    
+
     func shouldParse(with exclusionList: [String]) -> Bool {
         guard hasSuffix(".swift") else { return false }
         guard !exclusionList.isEmpty else { return true }
-        
+
         if let name = components(separatedBy: ".swift").first {
             for ex in exclusionList {
                 if name.hasSuffix(ex) {
@@ -212,7 +213,7 @@ extension StringProtocol {
             }
             return true
         }
-        
+
         return false
     }
 
@@ -236,7 +237,7 @@ extension StringProtocol {
     var asImport: String {
         return "import \(self)"
     }
-    
+
     var moduleNameInImport: String {
         guard self.hasPrefix(String.importSpace) else { return "" }
         return self.dropFirst(String.importSpace.count).trimmingCharacters(in: .whitespaces)

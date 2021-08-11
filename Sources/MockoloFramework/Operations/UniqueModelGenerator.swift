@@ -120,6 +120,7 @@ private func combinePostLookup(models: [Model]) -> [Model] {
                                            // This new property should be generated right above the AnyPublisher property.
                                            offset: max(0, variableModel.offset - 1),
                                            overrideTypes: variableModel.overrideTypes,
+                                           customModifiers: nil,
                                            modelDescription: nil,
                                            combineSubjectType: nil,
                                            combinePublishedAlias: nil,

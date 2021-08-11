@@ -18,7 +18,7 @@ extension SyntaxParser {
         return try parse(source: source, filenameForDiagnostics: path,
                          diagnosticEngine: diagnosticEngine)
     }
-    
+
     public static func parse(_ path: String) throws -> SourceFileSyntax {
         guard let fileData = FileManager.default.contents(atPath: path) else {
             fatalError("Retrieving contents of \(path) failed")
@@ -31,7 +31,7 @@ extension SyntaxProtocol {
     var offset: Int64 {
         return Int64(self.position.utf8Offset)
     }
-    
+
     var length: Int64 {
         return Int64(self.totalLength.utf8Length)
     }
@@ -62,31 +62,31 @@ extension ModifierListSyntax {
         }
         return ""
     }
-    
+
     var isStatic: Bool {
         return self.tokens.filter {$0.tokenKind == .staticKeyword }.count > 0
     }
-    
+
     var isRequired: Bool {
         return self.tokens.filter {$0.text == String.required }.count > 0
     }
-    
+
     var isConvenience: Bool {
         return self.tokens.filter {$0.text == String.convenience }.count > 0
     }
-    
+
     var isOverride: Bool {
         return self.tokens.filter {$0.text == String.override }.count > 0
     }
-    
+
     var isFinal: Bool {
         return self.tokens.filter {$0.text == String.final }.count > 0
     }
-    
+
     var isPrivate: Bool {
         return self.tokens.filter {$0.tokenKind == .privateKeyword || $0.tokenKind == .fileprivateKeyword }.count > 0
     }
-    
+
     var isPublic: Bool {
         return self.tokens.filter {$0.tokenKind == .publicKeyword }.count > 0
     }
@@ -102,7 +102,7 @@ extension TypeInheritanceClauseSyntax {
         }
         return list
     }
-    
+
     var typesDescription: String {
         return self.inheritedTypeCollection.description
     }
@@ -117,7 +117,7 @@ extension MemberDeclListItemSyntax {
         }
         return true
     }
-    
+
     private func validateInit(_ initDecl: InitializerDeclSyntax, _ declType: DeclType, processed: Bool) -> Bool {
         var isRequired = false
         if let modifiers = initDecl.modifiers {
@@ -132,20 +132,20 @@ extension MemberDeclListItemSyntax {
             isConvenience = modifiers.isConvenience
             isPrivate = modifiers.isPrivate
         }
-        
+
         if isConvenience || isPrivate {
             return false
         }
         return true
     }
-    
+
     private func memberAcl(_ modifiers: ModifierListSyntax?, _ encloserAcl: String, _ declType: DeclType) -> String {
         if declType == .protocolType {
             return encloserAcl
         }
         return modifiers?.acl ?? ""
     }
-    
+
     func transformToModel(with encloserAcl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool)? {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
@@ -157,7 +157,7 @@ extension MemberDeclListItemSyntax {
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, processed: processed)
+                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
                 return (item, funcMember.attributes?.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
@@ -184,7 +184,7 @@ extension MemberDeclListItemSyntax {
             let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declType: declType, metadata: metadata, processed: processed)
             return (item, attr, initFlag)
         }
-        
+
         return nil
     }
 }
@@ -260,86 +260,86 @@ extension ProtocolDeclSyntax: EntityNode {
     var accessLevel: String {
         return self.modifiers?.acl ?? ""
     }
-    
+
     var declType: DeclType {
         return .protocolType
     }
-    
+
     var isPrivate: Bool {
         return self.modifiers?.isPrivate ?? false
     }
-    
+
     var inheritedTypes: [String] {
         return inheritanceClause?.types ?? []
     }
-    
+
     var attributesDescription: String {
         self.attributes?.trimmedDescription ?? ""
     }
-    
+
     var offset: Int64 {
         return Int64(self.position.utf8Offset)
     }
-    
+
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         return leadingTrivia?.annotationMetadata(with: annotation)
     }
-    
+
     var hasBlankInit: Bool {
         return false
     }
-    
+
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.members.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed)
     }
 }
 
 extension ClassDeclSyntax: EntityNode {
-    
+
     var name: String {
         return identifier.text
     }
-    
+
     var accessLevel: String {
         return self.modifiers?.acl ?? ""
     }
-    
+
     var declType: DeclType {
         return .classType
     }
-    
+
     var inheritedTypes: [String] {
         return inheritanceClause?.types ?? []
     }
-    
+
     var attributesDescription: String {
         self.attributes?.trimmedDescription ?? ""
     }
-    
+
     var offset: Int64 {
         return Int64(self.position.utf8Offset)
     }
-    
+
     var isFinal: Bool {
         return self.modifiers?.isFinal ?? false
     }
-    
+
     var isPrivate: Bool {
         return self.modifiers?.isPrivate ?? false
     }
-    
+
     var isPublic: Bool {
         return self.modifiers?.isPublic ?? false
     }
-    
+
     var hasBlankInit: Bool {
         return self.members.members.hasBlankInit
     }
-    
+
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         return leadingTrivia?.annotationMetadata(with: annotation)
     }
-    
+
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.members.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
     }
@@ -352,19 +352,19 @@ extension VariableDeclSyntax {
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
         }
-        
+
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
             let name = v.pattern.firstToken?.text ?? String.unknownVal
             var typeName = ""
             var potentialInitParam = false
-            
+
             // Get the type info and whether it can be a var param for an initializer
             if let vtype = v.typeAnnotation?.type.description.trimmingCharacters(in: .whitespaces) {
                 potentialInitParam = name.canBeInitParam(type: vtype, isStatic: isStatic)
                 typeName = vtype
             }
-            
+
             let varmodel = VariableModel(name: name,
                                          typeName: typeName,
                                          acl: acl,
@@ -373,6 +373,7 @@ extension VariableDeclSyntax {
                                          canBeInitParam: potentialInitParam,
                                          offset: v.offset,
                                          overrideTypes: metadata?.varTypes,
+                                         customModifiers: metadata?.modifiers,
                                          modelDescription: self.description,
                                          combineSubjectType: metadata?.combineSubjectTypes?[name] ?? metadata?.combineSubjectTypes?["all"],
                                          combinePublishedAlias: metadata?.combinePublishedAliases?[name],
@@ -389,11 +390,11 @@ extension SubscriptDeclSyntax {
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
         }
-        
+
         let params = self.indices.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
-        
+
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
                                          typeName: self.result.returnType.description,
                                          kind: .subscriptKind,
@@ -407,6 +408,7 @@ extension SubscriptDeclSyntax {
                                          offset: self.offset,
                                          length: self.length,
                                          funcsWithArgsHistory: [],
+                                         customModifiers: [:],
                                          modelDescription: self.description,
                                          processed: processed)
         return subscriptModel
@@ -414,17 +416,17 @@ extension SubscriptDeclSyntax {
 }
 
 extension FunctionDeclSyntax {
-    
-    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, processed: Bool) -> Model {
+
+    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
         var isStatic = false
         if let modifiers = self.modifiers {
             isStatic = modifiers.isStatic
         }
-        
+
         let params = self.signature.input.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
-        
+
         let funcmodel = MethodModel(name: self.identifier.description,
                                     typeName: self.signature.output?.returnType.description ?? "",
                                     kind: .funcKind,
@@ -438,6 +440,7 @@ extension FunctionDeclSyntax {
                                     offset: self.offset,
                                     length: self.length,
                                     funcsWithArgsHistory: funcsWithArgsHistory ?? [],
+                                    customModifiers: customModifiers ?? [:],
                                     modelDescription: self.description,
                                     processed: processed)
         return funcmodel
@@ -450,7 +453,7 @@ extension InitializerDeclSyntax {
             return true
         } else if declType == .classType {
             if let modifiers = self.modifiers {
-                
+
                 if modifiers.isConvenience {
                     return false
                 }
@@ -459,14 +462,14 @@ extension InitializerDeclSyntax {
         }
         return false
     }
-    
+
     func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
         let requiredInit = isRequired(with: declType)
-        
+
         let params = self.parameters.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: true) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
-        
+
         return MethodModel(name: "init",
                            typeName: "",
                            kind: .initKind(required: requiredInit, override: declType == .classType),
@@ -480,10 +483,11 @@ extension InitializerDeclSyntax {
                            offset: self.offset,
                            length: self.length,
                            funcsWithArgsHistory: [],
+                           customModifiers: [:],
                            modelDescription: self.description,
                            processed: processed)
     }
-    
+
 }
 
 
@@ -498,7 +502,7 @@ extension GenericParameterSyntax {
                           offset: self.offset,
                           length: self.length)
     }
-    
+
 }
 
 extension FunctionParameterSyntax {
@@ -519,13 +523,13 @@ extension FunctionParameterSyntax {
                 }
             }
         }
-        
+
         // Variadic args are not detected in the parser so need to manually look up
         var type = self.type?.description ?? ""
         if self.description.contains(type + "...") {
             type.append("...")
         }
-        
+
         return ParamModel(label: label,
                           name: name,
                           typeName: type,
@@ -535,7 +539,7 @@ extension FunctionParameterSyntax {
                           offset: self.offset,
                           length: self.length)
     }
-    
+
 }
 
 extension AssociatedtypeDeclSyntax {
@@ -543,7 +547,7 @@ extension AssociatedtypeDeclSyntax {
         // Get the inhertied type for an associated type if any
         var t = self.inheritanceClause?.typesDescription ?? ""
         t.append(self.genericWhereClause?.description ?? "")
-        
+
         return TypeAliasModel(name: self.identifier.text,
                               typeName: t,
                               acl: acl,
@@ -584,7 +588,7 @@ final class EntityVisitor: SyntaxVisitor {
         self.path = path
         self.declType = declType
     }
-    
+
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
 
     private func visitImpl(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
@@ -594,7 +598,7 @@ final class EntityVisitor: SyntaxVisitor {
         }
         return .skipChildren
     }
-    
+
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
 
     private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
@@ -641,7 +645,7 @@ final class EntityVisitor: SyntaxVisitor {
             }
 
             guard macroName != fileMacro else { return .visitChildren }
-            
+
             if let list = cl.elements.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
@@ -650,7 +654,7 @@ final class EntityVisitor: SyntaxVisitor {
                             imports[key] = []
                         }
                         imports[key]?.append(importItem.description.trimmingCharacters(in: .whitespacesAndNewlines))
-                        
+
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
                         let key = macroName
                         if imports[key] == nil {
@@ -732,6 +736,17 @@ extension Trivia {
 
             ret.combinePublishedAliases = arguments
         }
+        if let argument = containsArgument(argsStr, argument: .modifiersColon),
+           let rawModifiers: [String: String] = argument.arguments(with: .annotationArgDelimiter) {
+
+            var modifiers: [String: Modifier] = [:]
+            for tuple in rawModifiers {
+                guard let modifier: Modifier = Modifier(rawValue: tuple.value)
+                else { continue }
+                modifiers[tuple.key] = modifier
+            }
+            ret.modifiers = modifiers
+        }
         return ret
     }
 
@@ -746,7 +761,7 @@ extension Trivia {
 
         return subStr
     }
-    
+
     // Looks up an annotation (e.g. /// @mockable) and its arguments if any.
     // See metadata(with:, in:) for more info on the annotation arguments.
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {

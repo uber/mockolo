@@ -16,13 +16,13 @@
 
 import Foundation
 
-
 extension VariableModel {
 
     func applyVariableTemplate(name: String,
                                type: Type,
                                encloser: String,
                                isStatic: Bool,
+                               customModifiers: [String: Modifier]?,
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String) -> String {
@@ -35,21 +35,29 @@ extension VariableModel {
         }
 
         let propertyWrapper = isCombinePublishedAlias ? "\(String.publishedPropertyWrapper) " : ""
-        
+
         let overrideStr = shouldOverride ? "\(String.override) " : ""
         var acl = accessLevel
         if !acl.isEmpty {
             acl = acl + " "
         }
-        
+
         var assignVal = ""
         if !shouldOverride, let val = underlyingVarDefaultVal {
             assignVal = "= \(val)"
         }
-        
+
         let privateSetSpace = allowSetCallCount ? "" :  "\(String.privateSet) "
         let setCallCountStmt = "\(underlyingSetCallCount) += 1"
-        
+
+        let modifierTypeStr: String
+        if let customModifiers = self.customModifiers,
+           let customModifier: Modifier = customModifiers[name] {
+            modifierTypeStr = customModifier.rawValue + " "
+        } else {
+            modifierTypeStr = ""
+        }
+
         var template = ""
         if isStatic || underlyingVarDefaultVal == nil {
             let staticSpace = isStatic ? "\(String.static) " : ""
@@ -57,7 +65,7 @@ extension VariableModel {
 
             \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
             \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal) { didSet { \(setCallCountStmt) } }
-            \(1.tab)\(acl)\(staticSpace)\(overrideStr)var \(name): \(type.typeName) {
+            \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
             \(2.tab)get { return \(underlyingName) }
             \(2.tab)set { \(underlyingName) = newValue }
             \(1.tab)}
@@ -66,10 +74,10 @@ extension VariableModel {
             template = """
 
             \(1.tab)\(acl)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
+            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
             """
         }
-        
+
         return template
     }
 
@@ -157,7 +165,7 @@ extension VariableModel {
             return template
         }
     }
-    
+
     func applyRxVariableTemplate(name: String,
                                  type: Type,
                                  encloser: String,
@@ -167,28 +175,28 @@ extension VariableModel {
                                  allowSetCallCount: Bool,
                                  isStatic: Bool,
                                  accessLevel: String) -> String? {
-        
+
         let staticSpace = isStatic ? "\(String.static) " : ""
         let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
 
         if let overrideTypes = overrideTypes, !overrideTypes.isEmpty {
             let (subjectType, _, subjectVal) = type.parseRxVar(overrides: overrideTypes, overrideKey: name, isInitParam: true)
             if let underlyingSubjectType = subjectType {
-                
+
                 let underlyingSubjectName = "\(name)\(String.subjectSuffix)"
                 let underlyingSetCallCount = "\(underlyingSubjectName)\(String.setCallCountSuffix)"
-                
+
                 var defaultValAssignStr = ""
                 if let underlyingSubjectTypeDefaultVal = subjectVal {
                     defaultValAssignStr = " = \(underlyingSubjectTypeDefaultVal)"
                 } else {
                     defaultValAssignStr = ": \(underlyingSubjectType)!"
                 }
-                
+
                 let acl = accessLevel.isEmpty ? "" : accessLevel + " "
                 let overrideStr = shouldOverride ? "\(String.override) " : ""
-                
-                
+
+
                 let setCallCountStmt = "\(underlyingSetCallCount) += 1"
                 let fallbackName =  "\(String.underlyingVarPrefix)\(name)"
                 var fallbackType = type.typeName
@@ -206,15 +214,15 @@ extension VariableModel {
                 \(2.tab)set { if let val = newValue as? \(underlyingSubjectType) { \(underlyingSubjectName) = val } else { \(fallbackName) = newValue } }
                 \(1.tab)}
                 """
-                
+
                 return template
             }
         }
-        
+
         let typeName = type.typeName
         if let range = typeName.range(of: String.observableLeftAngleBracket), let lastIdx = typeName.lastIndex(of: ">") {
             let typeParamStr = typeName[range.upperBound..<lastIdx]
-            
+
             let underlyingSubjectName = "\(name)\(String.subjectSuffix)"
             let underlyingSetCallCount = "\(underlyingSubjectName)\(String.setCallCountSuffix)"
             let publishSubjectName = underlyingSubjectName

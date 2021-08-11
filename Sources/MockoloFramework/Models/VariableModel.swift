@@ -13,6 +13,7 @@ final class VariableModel: Model {
     var isStatic = false
     var shouldOverride = false
     var overrideTypes: [String: String]?
+    var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
     var combineSubjectType: CombineSubjectType?
     var combinePublishedAlias: String?
@@ -42,6 +43,7 @@ final class VariableModel: Model {
          canBeInitParam: Bool,
          offset: Int64,
          overrideTypes: [String: String]?,
+         customModifiers: [String: Modifier]?,
          modelDescription: String?,
          combineSubjectType: CombineSubjectType?,
          combinePublishedAlias: String?,
@@ -54,6 +56,7 @@ final class VariableModel: Model {
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.overrideTypes = overrideTypes
+        self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.encloserType = encloserType
@@ -61,7 +64,7 @@ final class VariableModel: Model {
         self.combineSubjectType = combineSubjectType
         self.combinePublishedAlias = combinePublishedAlias
     }
-    
+
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         if processed {
             var prefix = ""
@@ -101,6 +104,7 @@ final class VariableModel: Model {
                                      type: type,
                                      encloser: encloser,
                                      isStatic: isStatic,
+                                     customModifiers: customModifiers,
                                      allowSetCallCount: allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel)
