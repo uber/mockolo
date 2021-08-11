@@ -22,15 +22,15 @@ struct ResolvedEntity {
     let entity: Entity
     let uniqueModels: [(String, Model)]
     let attributes: [String]
-    
+
     var declaredInits: [MethodModel] {
         return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
     }
-    
+
     var hasDeclaredEmptyInit: Bool {
         return !declaredInits.filter { $0.params.isEmpty }.isEmpty
     }
-    
+
     var declaredInitParams: [ParamModel] {
         return declaredInits.map { $0.params }.flatMap{$0}
     }
@@ -49,7 +49,7 @@ struct ResolvedEntity {
 
         // Named params in init should be unique. Add a duplicate param check to ensure it.
         let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
-            
+
         let curVarNames = curVarsSorted.map(path: \.name)
         let parentVars = processed.filter {!curVarNames.contains($0.name)}
         let parentVarsSorted = parentVars.sorted(path: \.offset, fallback: \.name)
@@ -57,7 +57,7 @@ struct ResolvedEntity {
         return result
     }
 
-    
+
     func model() -> Model {
         return ClassModel(identifier: key,
                           acl: entity.entityNode.accessLevel,
@@ -100,12 +100,13 @@ final class EntityNodeSubContainer {
 }
 
 /// Contains arguments to annotation
-/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true)
+/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true, modifiers: someVar = weak)
 struct AnnotationMetadata {
     var module: String?
     var typeAliases: [String: String]?
     var varTypes: [String: String]?
     var funcsWithArgsHistory: [String]?
+    var modifiers: [String: Modifier]?
 }
 
 public typealias ImportMap = [String: [String: [String]]]
@@ -129,15 +130,15 @@ public final class Entity {
                      isFinal: Bool,
                      metadata: AnnotationMetadata?,
                      processed: Bool) -> Entity? {
-        
+
         guard !isPrivate, !isFinal else {return nil}
-        
+
         let node = Entity(entityNode: entityNode,
                           filepath: filepath,
                           data: data,
                           metadata: metadata,
                           isProcessed: processed)
-        
+
         return node
     }
 
@@ -152,4 +153,10 @@ public final class Entity {
         self.metadata = metadata
         self.isProcessed = isProcessed
     }
+}
+
+enum Modifier: String {
+    case none = ""
+    case weak = "weak"
+    case dynamic = "dynamic"
 }

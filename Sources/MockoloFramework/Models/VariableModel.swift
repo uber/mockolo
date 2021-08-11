@@ -14,6 +14,7 @@ final class VariableModel: Model {
     var isStatic = false
     var shouldOverride = false
     var overrideTypes: [String: String]?
+    var customModifiers: [String: Modifier]?
     var cachedDefaultTypeVal: String?
     var modelDescription: String? = nil
     var modelType: ModelType {
@@ -41,6 +42,7 @@ final class VariableModel: Model {
          offset: Int64,
          length: Int64,
          overrideTypes: [String: String]?,
+         customModifiers: [String: Modifier]?,
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -52,11 +54,12 @@ final class VariableModel: Model {
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.overrideTypes = overrideTypes
+        self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.modelDescription = modelDescription
     }
-    
+
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         if processed {
             var prefix = ""
@@ -66,7 +69,7 @@ final class VariableModel: Model {
             if let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty {
                 return prefix + modelDescription
             }
-            
+
             if let ret = self.data?.toString(offset: self.offset, length: self.length) {
                 if !ret.contains(identifier),
                     let first = ret.components(separatedBy: CharacterSet(arrayLiteral: ":", "=")).first,
@@ -95,6 +98,7 @@ final class VariableModel: Model {
                                      type: type,
                                      encloser: encloser,
                                      isStatic: isStatic,
+                                     customModifiers: customModifiers,
                                      allowSetCallCount: allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel)

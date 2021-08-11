@@ -29,20 +29,20 @@ public protocol Model {
     var fullName: String { get }
 
     var underlyingName: String { get }
-    
+
     /// Type of this model
     var modelType: ModelType { get }
-    
+
     /// Indicates whether mock generation for this model has been processed
     var processed: Bool { get }
-    
+
     /// Indicates whether this model can be used as a parameter to an initializer
     var canBeInitParam: Bool { get }
 
     /// Indicates whether this model maps to an init method
     var isInitializer: Bool { get }
 
-    var isStatic: Bool { get } 
+    var isStatic: Bool { get }
 
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: Type { get set }
@@ -64,7 +64,7 @@ public protocol Model {
     /// @returns a unique name given the verbosity (default is name)
     func name(by level: Int) -> String
 
-    
+
     func isEqual(_ other: Model) -> Bool
 
     func isLessThan(_ other: Model) -> Bool
@@ -76,7 +76,7 @@ extension Model {
             self.type.typeName == other.type.typeName &&
             self.modelType == other.modelType
     }
-    
+
     func isLessThan(_ other: Model) -> Bool {
         if self.offset == other.offset {
             return self.name < other.name
@@ -87,23 +87,23 @@ extension Model {
     func name(by level: Int) -> String {
         return name
     }
-    
+
     var fullName: String {
         return name
     }
-    
+
     var underlyingName: String {
         return name.safeName
     }
-    
+
     var isStatic: Bool {
         return false
     }
-    
+
     var processed: Bool {
         return false
     }
-    
+
     var canBeInitParam: Bool {
         return false
     }
