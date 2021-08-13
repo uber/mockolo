@@ -85,13 +85,11 @@ extension VariableModel {
                                       type: Type,
                                       encloser: String,
                                       shouldOverride: Bool,
-                                      allowSetCallCount: Bool,
                                       isStatic: Bool,
                                       accessLevel: String) -> String? {
         let typeName = type.typeName
 
         guard
-            // Nested AnyPublishers are not supported.
             typeName.starts(with: String.anyPublisherLeftAngleBracket),
             let range = typeName.range(of: String.anyPublisherLeftAngleBracket),
             let lastIdx = typeName.lastIndex(of: ">")
@@ -112,37 +110,36 @@ extension VariableModel {
         let staticSpace = isStatic ? "\(String.static) " : ""
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
         let thisStr = isStatic ? encloser : "self"
+        let overrideStr = shouldOverride ? "\(String.override) " : ""
 
         if let publishedAlias = combinePublishedAlias {
-            // Using a property property to back this publisher, such as @Published
+            // Using a property wrapper to back this publisher, such as @Published
 
             var template = "\n"
-            var isPublishedPropertyOptionalOrForceUnwrapped = false
-            var publishedPropertyName = publishedAlias.propertyName
+            var isWrapperPropertyOptionalOrForceUnwrapped = false
+            var wrapperPropertyName = publishedAlias.propertyName
             if let publishedAliasModel = publishedAliasModel {
-                // If the property required by the protocol/class cannot be optional, the published property will be the underlyingProperty
+                // If the property required by the protocol/class cannot be optional, the wrapper property will be the underlyingProperty
                 // i.e. @Published var _myType: MyType!
                 let publishedAliasModelDefaultValue = publishedAliasModel.type.defaultVal()
                 if publishedAliasModelDefaultValue == nil {
-                    publishedPropertyName = "_\(publishedPropertyName)"
+                    wrapperPropertyName = "_\(wrapperPropertyName)"
                 }
-                isPublishedPropertyOptionalOrForceUnwrapped = publishedAliasModelDefaultValue == nil || publishedAliasModel.type.isOptional
+                isWrapperPropertyOptionalOrForceUnwrapped = publishedAliasModelDefaultValue == nil || publishedAliasModel.type.isOptional
             }
 
             var mapping = ""
-            if !subjectType.isOptional, isPublishedPropertyOptionalOrForceUnwrapped {
-                // If the published property is of type: MyType?/MyType!, but the publisher is of type MyType
+            if !subjectType.isOptional, isWrapperPropertyOptionalOrForceUnwrapped {
+                // If the wrapper property is of type: MyType?/MyType!, but the publisher is of type MyType
                 mapping = ".map { $0! }"
-            } else if subjectType.isOptional, !isPublishedPropertyOptionalOrForceUnwrapped {
-                // If the published property is of type: MyType, but the publisher is of type MyType?
+            } else if subjectType.isOptional, !isWrapperPropertyOptionalOrForceUnwrapped {
+                // If the wrapper property is of type: MyType, but the publisher is of type MyType?
                 mapping = ".map { $0 }"
             }
 
-            // If the underlying published property is a !, this means we must map the AnyPublisher to the correct type.
-            //
             let setErrorType = ".setFailureType(to: \(errorTypeStr).self)"
             template += """
-            \(1.tab)\(acl)\(staticSpace)var \(name): \(typeName) { return \(thisStr).$\(publishedPropertyName)\(mapping)\(setErrorType).\(String.eraseToAnyPublisher)() }
+            \(1.tab)\(acl)\(staticSpace)\(overrideStr)var \(name): \(typeName) { return \(thisStr).$\(wrapperPropertyName)\(mapping)\(setErrorType).\(String.eraseToAnyPublisher)() }
             """
             return template
         } else {
@@ -159,7 +156,7 @@ extension VariableModel {
 
             let template = """
 
-            \(1.tab)\(acl)\(staticSpace)var \(name): \(typeName) { return \(thisStr).\(underlyingSubjectName).\(String.eraseToAnyPublisher)() }
+            \(1.tab)\(acl)\(staticSpace)\(overrideStr)var \(name): \(typeName) { return \(thisStr).\(underlyingSubjectName).\(String.eraseToAnyPublisher)() }
             \(1.tab)\(acl)\(staticSpace)\(String.privateSet) var \(underlyingSubjectName) = \(combineSubjectType.typeName)<\(typeParamStr)>(\(defaultValue ?? ""))
             """
             return template

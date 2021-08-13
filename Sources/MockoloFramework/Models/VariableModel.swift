@@ -82,7 +82,6 @@ final class VariableModel: Model {
                                                          type: type,
                                                          encloser: encloser,
                                                          shouldOverride: shouldOverride,
-                                                         allowSetCallCount: allowSetCallCount,
                                                          isStatic: isStatic,
                                                          accessLevel: accessLevel) {
             return combineVar

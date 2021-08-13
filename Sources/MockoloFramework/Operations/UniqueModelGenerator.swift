@@ -91,17 +91,12 @@ private func combinePostLookup(models: [Model]) {
         }
 
         // If a variable member in this entity already exists, link the two together.
-        // Otherwise, create a model representing this entity. This is needed for it to be considered
-        // as an init param.
-        let publishedModel: VariableModel
-
+        // Otherwise, the user's setup is incorrect and we will fallback to using a PassthroughSubject.
+        //
         if let matchingPublishedModel = nameToVariableModels[combinePublishedAlias.propertyName] {
-            publishedModel = matchingPublishedModel
-            variableModel.publishedAliasModel = publishedModel
-            publishedModel.propertyWrapper = variableModel.combinePublishedAlias?.propertyWrapper
+            variableModel.publishedAliasModel = matchingPublishedModel
+            matchingPublishedModel.propertyWrapper = variableModel.combinePublishedAlias?.propertyWrapper
         } else {
-            // Invalid alias. Fallback to PassthroughSubject
-            //
             variableModel.combinePublishedAlias = nil
             variableModel.combineSubjectType = .passthroughSubject
         }

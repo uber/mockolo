@@ -703,18 +703,18 @@ extension Trivia {
         if argsStr.hasSuffix(")") {
             argsStr.removeLast()
         }
-        if let argument = containsArgument(argsStr, argument: .typealiasColon) {
-            ret.typeAliases = argument.arguments(with: .annotationArgDelimiter)
+        if let arguments = parseArguments(argsStr, identifier: .typealiasColon) {
+            ret.typeAliases = arguments
         }
-        if let argument = containsArgument(argsStr, argument: .moduleColon) {
-            let val = argument.arguments(with: .annotationArgDelimiter)
-            ret.module = val?[.prefix]
+        if let arguments = parseArguments(argsStr, identifier: .moduleColon) {
+
+            ret.module = arguments[.prefix]
         }
-        if let argument = containsArgument(argsStr, argument: .rxColon) {
-            ret.varTypes = argument.arguments(with: .annotationArgDelimiter)
+        if let arguments = parseArguments(argsStr, identifier: .rxColon) {
+
+            ret.varTypes = arguments
         }
-        if let argument = containsArgument(argsStr, argument: .varColon),
-           let arguments = argument.arguments(with: .annotationArgDelimiter) {
+        if let arguments = parseArguments(argsStr, identifier: .varColon) {
 
             if ret.varTypes == nil {
                 ret.varTypes = arguments
@@ -722,14 +722,14 @@ extension Trivia {
                 ret.varTypes?.merge(arguments, uniquingKeysWith: {$1})
             }
         }
-        if let argument = containsArgument(argsStr, argument: .historyColon) {
-            ret.funcsWithArgsHistory = argument.arguments(with: .annotationArgDelimiter)?.compactMap { k, v in v == "true" ? k : nil }
-        }
-        if let argument = containsArgument(argsStr, argument: .combineColon),
-           let arguments = argument.arguments(with: .annotationArgDelimiter) {
+        if let arguments = parseArguments(argsStr, identifier: .historyColon) {
 
-            ret.combinePublishedAliases = [String: CombinePublishedProperty]()
-            ret.combineSubjectTypes = [String: CombineSubjectType]()
+            ret.funcsWithArgsHistory = arguments.compactMap { k, v in v == "true" ? k : nil }
+        }
+        if let arguments = parseArguments(argsStr, identifier: .combineColon) {
+
+            ret.combinePublishedAliases = ret.combinePublishedAliases ?? [String: CombinePublishedProperty]()
+            ret.combineSubjectTypes = ret.combineSubjectTypes ?? [String: CombineSubjectType]()
 
             let currentValueSubjectStr = CombineSubjectType.currentValueSubject.typeName.lowercased()
             for pair in arguments {
@@ -748,13 +748,13 @@ extension Trivia {
                 }
             }
         }
-        if let argument = containsArgument(argsStr, argument: .modifiersColon),
-           let rawModifiers: [String: String] = argument.arguments(with: .annotationArgDelimiter) {
+        if let arguments = parseArguments(argsStr, identifier: .modifiersColon) {
 
             var modifiers: [String: Modifier] = [:]
-            for tuple in rawModifiers {
-                guard let modifier: Modifier = Modifier(rawValue: tuple.value)
-                else { continue }
+            for tuple in arguments {
+                guard let modifier: Modifier = Modifier(rawValue: tuple.value) else {
+                    continue
+                }
                 modifiers[tuple.key] = modifier
             }
             ret.modifiers = modifiers
@@ -762,16 +762,16 @@ extension Trivia {
         return ret
     }
 
-    private func containsArgument(_ argsStr: String, argument: String) -> String? {
+    private func parseArguments(_ argsStr: String, identifier: String) -> [String: String]? {
         guard
-            argsStr.contains(argument),
-            let subStr = argsStr.components(separatedBy: argument).last,
+            argsStr.contains(identifier),
+            let subStr = argsStr.components(separatedBy: identifier).last,
             !subStr.isEmpty
         else {
             return nil
         }
 
-        return subStr
+        return subStr.arguments(with: .annotationArgDelimiter)
     }
 
     // Looks up an annotation (e.g. /// @mockable) and its arguments if any.
