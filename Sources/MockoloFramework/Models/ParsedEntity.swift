@@ -113,6 +113,11 @@ public enum CombineSubjectType {
     }
 }
 
+struct CombinePublishedProperty {
+    let propertyWrapper: String
+    let propertyName: String
+}
+
 /// Contains arguments to annotation
 /// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true, modifiers: someVar = weak)
 struct AnnotationMetadata {
@@ -122,7 +127,7 @@ struct AnnotationMetadata {
     var funcsWithArgsHistory: [String]?
     var modifiers: [String: Modifier]?
     var combineSubjectTypes: [String: CombineSubjectType]?
-    var combinePublishedAliases: [String: String]?
+    var combinePublishedAliases: [String: CombinePublishedProperty]?
 }
 
 public typealias ImportMap = [String: [String: [String]]]

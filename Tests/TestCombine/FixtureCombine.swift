@@ -1,7 +1,7 @@
  import MockoloFramework
 
  let combineProtocol = """
-/// \(String.mockAnnotation)(subject: dictionaryPublisher = CurrentValueSubject; myPublisher = PassthroughSubject; noDefaultSubjectValue = CurrentValueSubject)
+/// \(String.mockAnnotation)(combine: dictionaryPublisher = CurrentValueSubject; myPublisher = PassthroughSubject; noDefaultSubjectValue = CurrentValueSubject)
 public protocol Foo: AnyObject {
     var myPublisher: AnyPublisher<String, Never> { get }
     var dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never> { get }
@@ -25,7 +25,7 @@ public class FooMock: Foo {
 """
 
 let combinePublishedProtocol = """
-/// \(String.mockAnnotation)(published: myStringPublisher = myString; myIntPublisher = myInt; myCustomTypePublisher = myCustomType; myNonOptionalPublisher = myNonOptional)
+/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myString; myIntPublisher = @Published myInt; myCustomTypePublisher = @Published myCustomType; myNonOptionalPublisher = @CustomPropertyWrapper myNonOptional)
 public protocol FooPublished {
     var myString: String { get set }
     var myStringPublisher: AnyPublisher<String, Never> { get }
@@ -39,10 +39,8 @@ public protocol FooPublished {
 let combinePublishedProtocolMock = """
 public class FooPublishedMock: FooPublished {
     public init() { }
-    public init(myString: String = "", myInt: Int = 0, myCustomType: MyCustomType, myNonOptional: NonOptional) {
+    public init(myString: String = "", myNonOptional: NonOptional) {
         self.myString = myString
-        self.myInt = myInt
-        self._myCustomType = myCustomType
         self._myNonOptional = myNonOptional
     }
 
@@ -51,22 +49,14 @@ public class FooPublishedMock: FooPublished {
 
     public var myStringPublisher: AnyPublisher<String, Never> { return self.$myString.setFailureType(to: Never.self).eraseToAnyPublisher() }
 
-    public private(set) var myIntSetCallCount = 0
-    @Published public var myInt: Int = 0 { didSet { myIntSetCallCount += 1 } }
+    public var myIntPublisher: AnyPublisher<Int, Never> { return self.myIntPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var myIntPublisherSubject = PassthroughSubject<Int, Never>()
 
-    public var myIntPublisher: AnyPublisher<Int, Never> { return self.$myInt.setFailureType(to: Never.self).eraseToAnyPublisher() }
-
-    public private(set) var myCustomTypeSetCallCount = 0
-    @Published private var _myCustomType: MyCustomType!  { didSet { myCustomTypeSetCallCount += 1 } }
-    public var myCustomType: MyCustomType {
-        get { return _myCustomType }
-        set { _myCustomType = newValue }
-    }
-
-    public var myCustomTypePublisher: AnyPublisher<MyCustomType, Error> { return self.$_myCustomType.map { $0! }.setFailureType(to: Error.self).eraseToAnyPublisher() }
+    public var myCustomTypePublisher: AnyPublisher<MyCustomType, Error> { return self.myCustomTypePublisherSubject.eraseToAnyPublisher() }
+    public private(set) var myCustomTypePublisherSubject = PassthroughSubject<MyCustomType, Error>()
 
     public private(set) var myNonOptionalSetCallCount = 0
-    @Published private var _myNonOptional: NonOptional!  { didSet { myNonOptionalSetCallCount += 1 } }
+    @CustomPropertyWrapper private var _myNonOptional: NonOptional!  { didSet { myNonOptionalSetCallCount += 1 } }
     public var myNonOptional: NonOptional {
         get { return _myNonOptional }
         set { _myNonOptional = newValue }
@@ -77,11 +67,13 @@ public class FooPublishedMock: FooPublished {
 """
 
 let combineNullableProtocol = """
-/// \(String.mockAnnotation)(published: myStringPublisher = myString; myIntPublisher = myInt; myCustomTypePublisher = myCustomType; myNonOptionalPublisher = myNonOptional)
+/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myString; myIntPublisher = @Published myInt; myCustomTypePublisher = @Published myCustomType; myNonOptionalPublisher = @Published myNonOptional)
 public protocol FooNullable {
     var myString: String? { get set }
     var myStringPublisher: AnyPublisher<String, Never> { get }
+    var myInt: Int { get set }
     var myIntPublisher: AnyPublisher<Int?, Never> { get }
+    var myCustomType: MyCustomType? { get set }
     var myCustomTypePublisher: AnyPublisher<MyCustomType?, Error> { get }
     var myNonOptional: NonOptional? { get set }
     var myNonOptionalPublisher: AnyPublisher<NonOptional, Never> { get }
@@ -91,7 +83,7 @@ public protocol FooNullable {
 let combineNullableProtocolMock = """
 public class FooNullableMock: FooNullable {
     public init() { }
-    public init(myString: String? = nil, myInt: Int? = nil, myCustomType: MyCustomType? = nil, myNonOptional: NonOptional? = nil) {
+    public init(myString: String? = nil, myInt: Int = 0, myCustomType: MyCustomType? = nil, myNonOptional: NonOptional? = nil) {
         self.myString = myString
         self.myInt = myInt
         self.myCustomType = myCustomType
@@ -105,9 +97,9 @@ public class FooNullableMock: FooNullable {
     public var myStringPublisher: AnyPublisher<String, Never> { return self.$myString.map { $0! }.setFailureType(to: Never.self).eraseToAnyPublisher() }
 
     public private(set) var myIntSetCallCount = 0
-    @Published public var myInt: Int? = nil { didSet { myIntSetCallCount += 1 } }
+    @Published public var myInt: Int = 0 { didSet { myIntSetCallCount += 1 } }
 
-    public var myIntPublisher: AnyPublisher<Int?, Never> { return self.$myInt.setFailureType(to: Never.self).eraseToAnyPublisher() }
+    public var myIntPublisher: AnyPublisher<Int?, Never> { return self.$myInt.map { $0 }.setFailureType(to: Never.self).eraseToAnyPublisher() }
 
     public private(set) var myCustomTypeSetCallCount = 0
     @Published public var myCustomType: MyCustomType? = nil { didSet { myCustomTypeSetCallCount += 1 } }
@@ -128,13 +120,13 @@ public protocol BaseProtocolA {
     var myStringInBase: String { get set }
 }
 
-/// \(String.mockAnnotation)(published: myIntPublisher = myInt)
+/// \(String.mockAnnotation)(combine: myIntPublisher = @Published myInt)
 public protocol BaseProtocolB {
     var myIntPublisher: AnyPublisher<Int, Error> { get }
     var myOtherPublisher: AnyPublisher<Double, Never> { get }
 }
 
-/// \(String.mockAnnotation)(published: myStringPublisher = myStringInBase)
+/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myStringInBase)
 public protocol Child: BaseProtocolA, BaseProtocolB {
     var myStringPublisher: AnyPublisher<String?, Never> { get }
     var myInt: Int { get set }
@@ -156,15 +148,10 @@ public class BaseProtocolAMock: BaseProtocolA {
 
 public class BaseProtocolBMock: BaseProtocolB {
     public init() { }
-    public init(myInt: Int = 0) {
-        self.myInt = myInt
-    }
 
 
-    public private(set) var myIntSetCallCount = 0
-    @Published public var myInt: Int = 0 { didSet { myIntSetCallCount += 1 } }
-
-    public var myIntPublisher: AnyPublisher<Int, Error> { return self.$myInt.setFailureType(to: Error.self).eraseToAnyPublisher() }
+    public var myIntPublisher: AnyPublisher<Int, Error> { return self.myIntPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var myIntPublisherSubject = PassthroughSubject<Int, Error>()
 
     public var myOtherPublisher: AnyPublisher<Double, Never> { return self.myOtherPublisherSubject.eraseToAnyPublisher() }
     public private(set) var myOtherPublisherSubject = PassthroughSubject<Double, Never>()

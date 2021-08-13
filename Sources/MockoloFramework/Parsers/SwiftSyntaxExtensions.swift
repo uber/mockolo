@@ -725,16 +725,28 @@ extension Trivia {
         if let argument = containsArgument(argsStr, argument: .historyColon) {
             ret.funcsWithArgsHistory = argument.arguments(with: .annotationArgDelimiter)?.compactMap { k, v in v == "true" ? k : nil }
         }
-        if let argument = containsArgument(argsStr, argument: .subjectColon),
+        if let argument = containsArgument(argsStr, argument: .combineColon),
            let arguments = argument.arguments(with: .annotationArgDelimiter) {
 
-            let currentValueSubjectStr = String(describing: CombineSubjectType.currentValueSubject).lowercased()
-            ret.combineSubjectTypes = arguments.mapValues { $0.lowercased() == currentValueSubjectStr ? CombineSubjectType.currentValueSubject : CombineSubjectType.passthroughSubject }
-        }
-        if let argument = containsArgument(argsStr, argument: .publishedColon),
-           let arguments = argument.arguments(with: .annotationArgDelimiter) {
+            ret.combinePublishedAliases = [String: CombinePublishedProperty]()
+            ret.combineSubjectTypes = [String: CombineSubjectType]()
 
-            ret.combinePublishedAliases = arguments
+            let currentValueSubjectStr = CombineSubjectType.currentValueSubject.typeName.lowercased()
+            for pair in arguments {
+                if pair.value.hasPrefix("@") {
+                    let parts = pair.value.split(separator: " ")
+                    if parts.count == 2 {
+                        ret.combinePublishedAliases?[pair.key] = CombinePublishedProperty(propertyWrapper: String(parts[0]), propertyName: String(parts[1]))
+                        continue
+                    }
+                }
+
+                if pair.value.lowercased() == currentValueSubjectStr {
+                    ret.combineSubjectTypes?[pair.key] = .currentValueSubject
+                } else {
+                    ret.combineSubjectTypes?[pair.key] = .passthroughSubject
+                }
+            }
         }
         if let argument = containsArgument(argsStr, argument: .modifiersColon),
            let rawModifiers: [String: String] = argument.arguments(with: .annotationArgDelimiter) {

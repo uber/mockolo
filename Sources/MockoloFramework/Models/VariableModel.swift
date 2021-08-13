@@ -16,9 +16,9 @@ final class VariableModel: Model {
     var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
     var combineSubjectType: CombineSubjectType?
-    var combinePublishedAlias: String?
+    var combinePublishedAlias: CombinePublishedProperty?
     var publishedAliasModel: VariableModel?
-    var isCombinePublishedAlias: Bool = false
+    var propertyWrapper: String?
     var modelType: ModelType {
         return .variable
     }
@@ -46,7 +46,7 @@ final class VariableModel: Model {
          customModifiers: [String: Modifier]?,
          modelDescription: String?,
          combineSubjectType: CombineSubjectType?,
-         combinePublishedAlias: String?,
+         combinePublishedAlias: CombinePublishedProperty?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))

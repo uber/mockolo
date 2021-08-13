@@ -34,7 +34,7 @@ extension VariableModel {
             underlyingType = type.underlyingType
         }
 
-        let propertyWrapper = isCombinePublishedAlias ? "\(String.publishedPropertyWrapper) " : ""
+        let propertyWrapper = propertyWrapper != nil ? "\(propertyWrapper!) " : ""
 
         let overrideStr = shouldOverride ? "\(String.override) " : ""
         var acl = accessLevel
@@ -114,11 +114,11 @@ extension VariableModel {
         let thisStr = isStatic ? encloser : "self"
 
         if let publishedAlias = combinePublishedAlias {
-            // Using a @Published property to back this publisher.
+            // Using a property property to back this publisher, such as @Published
 
             var template = "\n"
             var isPublishedPropertyOptionalOrForceUnwrapped = false
-            var publishedPropertyName = publishedAlias
+            var publishedPropertyName = publishedAlias.propertyName
             if let publishedAliasModel = publishedAliasModel {
                 // If the property required by the protocol/class cannot be optional, the published property will be the underlyingProperty
                 // i.e. @Published var _myType: MyType!

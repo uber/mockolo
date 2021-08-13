@@ -35,9 +35,9 @@ private func generateUniqueModels(key: String,
                                   protocolMap: [String: Entity],
                                   inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
-    var (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+    let (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
 
-    models = combinePostLookup(models: models)
+    combinePostLookup(models: models)
     
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
@@ -73,7 +73,7 @@ private func generateUniqueModels(key: String,
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }
 
-private func combinePostLookup(models: [Model]) -> [Model] {
+private func combinePostLookup(models: [Model]) {
     var variableModels = [VariableModel]()
     var nameToVariableModels = [String: VariableModel]()
 
@@ -85,7 +85,6 @@ private func combinePostLookup(models: [Model]) -> [Model] {
         nameToVariableModels[variableModel.name] = variableModel
     }
 
-    var retModels = models
     for variableModel in variableModels {
         guard let combinePublishedAlias = variableModel.combinePublishedAlias else {
             continue
@@ -96,39 +95,15 @@ private func combinePostLookup(models: [Model]) -> [Model] {
         // as an init param.
         let publishedModel: VariableModel
 
-        if let matchingPublishedModel = nameToVariableModels[combinePublishedAlias] {
+        if let matchingPublishedModel = nameToVariableModels[combinePublishedAlias.propertyName] {
             publishedModel = matchingPublishedModel
+            variableModel.publishedAliasModel = publishedModel
+            publishedModel.propertyWrapper = variableModel.combinePublishedAlias?.propertyWrapper
         } else {
-            var subjectTypeName = ""
-
-            if let range = variableModel.type.typeName.range(of: String.anyPublisherLeftAngleBracket),
-               let lastIdx = variableModel.type.typeName.lastIndex(of: ">") {
-
-                let typeParamStr = variableModel.type.typeName[range.upperBound..<lastIdx]
-
-                if let lastCommaIndex = typeParamStr.lastIndex(of: ",") {
-                    subjectTypeName = String(typeParamStr[..<lastCommaIndex])
-                }
-            }
-
-            publishedModel = VariableModel(name: combinePublishedAlias,
-                                           typeName: subjectTypeName,
-                                           acl: variableModel.accessLevel,
-                                           encloserType: variableModel.encloserType,
-                                           isStatic: variableModel.isStatic,
-                                           canBeInitParam: true,
-                                           // This new property should be generated right above the AnyPublisher property.
-                                           offset: max(0, variableModel.offset - 1),
-                                           overrideTypes: variableModel.overrideTypes,
-                                           customModifiers: nil,
-                                           modelDescription: nil,
-                                           combineSubjectType: nil,
-                                           combinePublishedAlias: nil,
-                                           processed: false)
-            retModels.append(publishedModel)
+            // Invalid alias. Fallback to PassthroughSubject
+            //
+            variableModel.combinePublishedAlias = nil
+            variableModel.combineSubjectType = .passthroughSubject
         }
-        variableModel.publishedAliasModel = publishedModel
-        publishedModel.isCombinePublishedAlias = true
     }
-    return retModels
 }
