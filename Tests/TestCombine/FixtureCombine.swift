@@ -179,3 +179,43 @@ public class ChildMock: Child {
     @Published public var myInt: Int = 0 { didSet { myIntSetCallCount += 1 } }
 }
 """
+
+let combineMockContentProtocol = """
+/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myStringInBase)
+public protocol Child: BaseProtocolA {
+    var myStringPublisher: AnyPublisher<String?, Never> { get }
+}
+
+"""
+
+let combineMockContentMock = """
+public class BaseProtocolAMock: BaseProtocolA {
+    public init() { }
+    public init(myStringInBase: String = "") {
+        self.myStringInBase = myStringInBase
+    }
+
+    public var dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never> { return self.dictionaryPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var dictionaryPublisherSubject = CurrentValueSubject<Dictionary<String, String>, Never>(Dictionary<String, String>())
+
+    public private(set) var myStringInBaseSetCallCount = 0
+    public var myStringInBase: String = "" { didSet { myStringInBaseSetCallCount += 1 } }
+}
+"""
+
+let combineMockContentResult = """
+public class ChildMock: Child {
+    public init() { }
+    public init(myStringInBase: String = "") {
+        self.myStringInBase = myStringInBase
+    }
+
+    public var myStringPublisher: AnyPublisher<String?, Never> { return self.$myStringInBase.map { $0 }.setFailureType(to: Never.self).eraseToAnyPublisher() }
+
+    public var dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never> { return self.dictionaryPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var dictionaryPublisherSubject = CurrentValueSubject<Dictionary<String, String>, Never>(Dictionary<String, String>())
+
+    public private(set) var myStringInBaseSetCallCount = 0
+    @Published public var myStringInBase: String = "" { didSet { myStringInBaseSetCallCount += 1 } }
+}
+"""

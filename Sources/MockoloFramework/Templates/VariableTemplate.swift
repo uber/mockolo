@@ -112,20 +112,20 @@ extension VariableModel {
         let thisStr = isStatic ? encloser : "self"
         let overrideStr = shouldOverride ? "\(String.override) " : ""
 
-        if let publishedAlias = combinePublishedAlias {
+        switch combineType {
+        case .property(_, var wrapperPropertyName):
             // Using a property wrapper to back this publisher, such as @Published
 
             var template = "\n"
             var isWrapperPropertyOptionalOrForceUnwrapped = false
-            var wrapperPropertyName = publishedAlias.propertyName
-            if let publishedAliasModel = publishedAliasModel {
+            if let publishedAliasModel = wrapperAliasModel {
                 // If the property required by the protocol/class cannot be optional, the wrapper property will be the underlyingProperty
                 // i.e. @Published var _myType: MyType!
-                let publishedAliasModelDefaultValue = publishedAliasModel.type.defaultVal()
-                if publishedAliasModelDefaultValue == nil {
+                let wrapperPropertyDefaultValue = publishedAliasModel.type.defaultVal()
+                if wrapperPropertyDefaultValue == nil {
                     wrapperPropertyName = "_\(wrapperPropertyName)"
                 }
-                isWrapperPropertyOptionalOrForceUnwrapped = publishedAliasModelDefaultValue == nil || publishedAliasModel.type.isOptional
+                isWrapperPropertyOptionalOrForceUnwrapped = wrapperPropertyDefaultValue == nil || publishedAliasModel.type.isOptional
             }
 
             var mapping = ""
@@ -142,11 +142,15 @@ extension VariableModel {
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)var \(name): \(typeName) { return \(thisStr).$\(wrapperPropertyName)\(mapping)\(setErrorType).\(String.eraseToAnyPublisher)() }
             """
             return template
-        } else {
+        default:
             // Using a combine subject to back this publisher
-            var combineSubjectType = combineSubjectType ?? .passthroughSubject
+            var combineSubjectType = combineType ?? .passthroughSubject
 
-            let defaultValue = combineSubjectType == .currentValueSubject ? subjectDefaultValue : ""
+            var defaultValue: String? = ""
+            if case .currentValueSubject = combineSubjectType {
+                defaultValue = subjectDefaultValue
+            }
+
             // Unable to generate default value for this CurrentValueSubject. Default back to PassthroughSubject.
             //
             if defaultValue == nil {

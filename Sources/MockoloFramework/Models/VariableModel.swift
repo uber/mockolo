@@ -15,9 +15,8 @@ final class VariableModel: Model {
     var overrideTypes: [String: String]?
     var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
-    var combineSubjectType: CombineSubjectType?
-    var combinePublishedAlias: CombinePublishedProperty?
-    var publishedAliasModel: VariableModel?
+    var combineType: CombineType?
+    var wrapperAliasModel: VariableModel?
     var propertyWrapper: String?
     var modelType: ModelType {
         return .variable
@@ -45,8 +44,7 @@ final class VariableModel: Model {
          overrideTypes: [String: String]?,
          customModifiers: [String: Modifier]?,
          modelDescription: String?,
-         combineSubjectType: CombineSubjectType?,
-         combinePublishedAlias: CombinePublishedProperty?,
+         combineType: CombineType?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
@@ -61,21 +59,24 @@ final class VariableModel: Model {
         self.attributes = nil
         self.encloserType = encloserType
         self.modelDescription = modelDescription
-        self.combineSubjectType = combineSubjectType
-        self.combinePublishedAlias = combinePublishedAlias
+        self.combineType = combineType
     }
 
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
         if processed {
-            var prefix = ""
-            if shouldOverride, !name.isGenerated(type: type) {
-                prefix = "\(String.override) "
-            }
-            if let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty {
-                return prefix + modelDescription
+            guard let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty else {
+                return nil
             }
 
-            return nil
+            var prefix = ""
+            if let propertyWrapper = propertyWrapper, !modelDescription.contains(propertyWrapper) {
+                prefix = "\(propertyWrapper) "
+            }
+            if shouldOverride, !name.isGenerated(type: type) {
+                prefix += "\(String.override) "
+            }
+
+            return prefix + modelDescription
         }
 
         if let combineVar = applyCombineVariableTemplate(name: identifier,

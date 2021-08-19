@@ -375,8 +375,7 @@ extension VariableDeclSyntax {
                                          overrideTypes: metadata?.varTypes,
                                          customModifiers: metadata?.modifiers,
                                          modelDescription: self.description,
-                                         combineSubjectType: metadata?.combineSubjectTypes?[name] ?? metadata?.combineSubjectTypes?["all"],
-                                         combinePublishedAlias: metadata?.combinePublishedAliases?[name],
+                                         combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
                                          processed: processed)
             return varmodel
         }
@@ -728,23 +727,22 @@ extension Trivia {
         }
         if let arguments = parseArguments(argsStr, identifier: .combineColon) {
 
-            ret.combinePublishedAliases = ret.combinePublishedAliases ?? [String: CombinePublishedProperty]()
-            ret.combineSubjectTypes = ret.combineSubjectTypes ?? [String: CombineSubjectType]()
+            ret.combineTypes = ret.combineTypes ?? [String: CombineType]()
 
-            let currentValueSubjectStr = CombineSubjectType.currentValueSubject.typeName.lowercased()
+            let currentValueSubjectStr = CombineType.currentValueSubject.typeName.lowercased()
             for pair in arguments {
                 if pair.value.hasPrefix("@") {
                     let parts = pair.value.split(separator: " ")
                     if parts.count == 2 {
-                        ret.combinePublishedAliases?[pair.key] = CombinePublishedProperty(propertyWrapper: String(parts[0]), propertyName: String(parts[1]))
+                        ret.combineTypes?[pair.key] = .property(wrapper: String(parts[0]), name: String(parts[1]))
                         continue
                     }
                 }
 
                 if pair.value.lowercased() == currentValueSubjectStr {
-                    ret.combineSubjectTypes?[pair.key] = .currentValueSubject
+                    ret.combineTypes?[pair.key] = .currentValueSubject
                 } else {
-                    ret.combineSubjectTypes?[pair.key] = .passthroughSubject
+                    ret.combineTypes?[pair.key] = .passthroughSubject
                 }
             }
         }

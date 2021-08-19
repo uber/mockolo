@@ -21,5 +21,11 @@ class CombineTests: MockoloTestCase {
         verify(srcContent: combineMultiParents,
                dstContent: combineMultiParentsMock)
     }
+
+    func testCombineMockContent() {
+        verify(srcContent: combineMockContentProtocol,
+               mockContent: combineMockContentMock,
+               dstContent: combineMockContentResult)
+    }
 }
 

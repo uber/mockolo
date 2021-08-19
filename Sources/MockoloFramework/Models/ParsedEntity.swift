@@ -99,9 +99,10 @@ final class EntityNodeSubContainer {
     }
 }
 
-public enum CombineSubjectType {
+public enum CombineType {
     case passthroughSubject
     case currentValueSubject
+    case property(wrapper: String, name: String)
 
     var typeName: String {
         switch self {
@@ -109,25 +110,21 @@ public enum CombineSubjectType {
             return .passthroughSubject
         case .currentValueSubject:
             return .currentValueSubject
+        case .property:
+            return ""
         }
     }
 }
 
-struct CombinePublishedProperty {
-    let propertyWrapper: String
-    let propertyName: String
-}
-
 /// Contains arguments to annotation
-/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true, modifiers: someVar = weak)
+/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true; modifiers: someVar = weak; combine: somePublisher = CurrentValuePublisher; otherPublisher = @Published otherProperty)
 struct AnnotationMetadata {
     var module: String?
     var typeAliases: [String: String]?
     var varTypes: [String: String]?
     var funcsWithArgsHistory: [String]?
     var modifiers: [String: Modifier]?
-    var combineSubjectTypes: [String: CombineSubjectType]?
-    var combinePublishedAliases: [String: CombinePublishedProperty]?
+    var combineTypes: [String: CombineType]?
 }
 
 public typealias ImportMap = [String: [String: [String]]]

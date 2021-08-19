@@ -36,8 +36,6 @@ private func generateUniqueModels(key: String,
                                   inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
     let (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
-
-    combinePostLookup(models: models)
     
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
@@ -71,34 +69,4 @@ private func generateUniqueModels(key: String,
     let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes)
     
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
-}
-
-private func combinePostLookup(models: [Model]) {
-    var variableModels = [VariableModel]()
-    var nameToVariableModels = [String: VariableModel]()
-
-    for model in models {
-        guard let variableModel = model as? VariableModel else {
-            continue
-        }
-        variableModels.append(variableModel)
-        nameToVariableModels[variableModel.name] = variableModel
-    }
-
-    for variableModel in variableModels {
-        guard let combinePublishedAlias = variableModel.combinePublishedAlias else {
-            continue
-        }
-
-        // If a variable member in this entity already exists, link the two together.
-        // Otherwise, the user's setup is incorrect and we will fallback to using a PassthroughSubject.
-        //
-        if let matchingPublishedModel = nameToVariableModels[combinePublishedAlias.propertyName] {
-            variableModel.publishedAliasModel = matchingPublishedModel
-            matchingPublishedModel.propertyWrapper = variableModel.combinePublishedAlias?.propertyWrapper
-        } else {
-            variableModel.combinePublishedAlias = nil
-            variableModel.combineSubjectType = .passthroughSubject
-        }
-    }
 }
