@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-macos:
-    runs-on: macOS-latest
+    runs-on: macos-11
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -16,7 +16,7 @@ jobs:
         run: swift build -v
 
   test-macos:
-    runs-on: macOS-latest
+    runs-on: macos-11
     steps:
       - name: Checkout
         uses: actions/checkout@v2
