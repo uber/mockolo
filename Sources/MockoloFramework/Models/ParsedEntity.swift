@@ -117,7 +117,7 @@ public enum CombineType {
 }
 
 /// Contains arguments to annotation
-/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true; modifiers: someVar = weak; combine: somePublisher = CurrentValuePublisher; otherPublisher = @Published otherProperty)
+/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true; modifiers: someVar = weak; combine: fooPublisher = CurrentValueSubject; otherPublisher = @Published otherProperty)
 struct AnnotationMetadata {
     var module: String?
     var typeAliases: [String: String]?
