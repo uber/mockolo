@@ -210,9 +210,12 @@ func testMock() {
 }
 ```
 
+## Arguments
+
 A list of override arguments can be passed in (delimited by a semicolon) to the annotation to set var types, typealiases, module names, etc. 
 
-For a module name:
+
+### Module
 
 ```swift
 /// @mockable(module: prefix = Bar)
@@ -229,7 +232,7 @@ public class FooMock: Bar.Foo {
 }
 ```
 
-For a typealias:
+### Typealias
 
 ```swift
 /// @mockable(typealias: T = AnyObject; U = StringProtocol)
@@ -253,6 +256,8 @@ public class FooMock: Foo {
 ```
 
 
+### RxSwift
+
 For a var type such as an RxSwift observable:
 
 ```swift
@@ -273,6 +278,8 @@ public class FooMock: Foo {
     var doubleStream: Observable<Int> { /* use doubleStreamSubject */ }
 }
 ```
+
+### Function Argument History
 
 To capture function arguments history:
 
@@ -314,7 +321,9 @@ public class FooMock: Foo {
 and also, enable the arguments captor for all functions if you passed `--enable-args-history` arg to `mockolo` command.
 > NOTE: The arguments captor only supports singular types (e.g. variable, tuple). The closure variable is not supported.
 
-To generate Combine's AnyPublisher:
+### Combine's AnyPublisher
+
+To generate mocks for Combine's AnyPublisher:
 
 ```swift
 /// @mockable(combine: fooPublisher = PassthroughSubject; barPublisher = CurrentValueSubject)
@@ -350,7 +359,7 @@ public protocol Foo {
 ```
 
 This will generate:
-```
+```swift
 public class FooMock: Foo {
     public init() { }
     public init(foo: String = "") {
