@@ -210,9 +210,12 @@ func testMock() {
 }
 ```
 
+## Arguments
+
 A list of override arguments can be passed in (delimited by a semicolon) to the annotation to set var types, typealiases, module names, etc. 
 
-For a module name:
+
+### Module
 
 ```swift
 /// @mockable(module: prefix = Bar)
@@ -229,7 +232,7 @@ public class FooMock: Bar.Foo {
 }
 ```
 
-For a typealias:
+### Typealias
 
 ```swift
 /// @mockable(typealias: T = AnyObject; U = StringProtocol)
@@ -253,6 +256,8 @@ public class FooMock: Foo {
 ```
 
 
+### RxSwift
+
 For a var type such as an RxSwift observable:
 
 ```swift
@@ -273,6 +278,8 @@ public class FooMock: Foo {
     var doubleStream: Observable<Int> { /* use doubleStreamSubject */ }
 }
 ```
+
+### Function Argument History
 
 To capture function arguments history:
 
@@ -314,6 +321,57 @@ public class FooMock: Foo {
 and also, enable the arguments captor for all functions if you passed `--enable-args-history` arg to `mockolo` command.
 > NOTE: The arguments captor only supports singular types (e.g. variable, tuple). The closure variable is not supported.
 
+### Combine's AnyPublisher
+
+To generate mocks for Combine's AnyPublisher:
+
+```swift
+/// @mockable(combine: fooPublisher = PassthroughSubject; barPublisher = CurrentValueSubject)
+public protocol Foo {
+    var fooPublisher: AnyPublisher<String, Never> { get }
+    var barPublisher: AnyPublisher<Int, CustomError> { get }
+}
+```
+
+This will generate:
+
+```swift
+public class FooMock: Foo {
+    public init() { }
+
+    public var fooPublisher: AnyPublisher<String, Never> { return self.fooPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var fooPublisherSubject = PassthroughSubject<String, Never>()
+
+    public var barPublisher: AnyPublisher<Int, CustomError> { return self.barPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var barPublisherSubject = CurrentValueSubject<Int, CustomError>(0)
+}
+```
+
+You can also connect an AnyPublisher to a property within the protocol.
+
+For example:
+```swift
+/// @mockable(combine: fooPublisher = @Published foo)
+public protocol Foo {
+    var foo: String { get }
+    var fooPublisher: AnyPublisher<String, Never> { get }
+}
+```
+
+This will generate:
+```swift
+public class FooMock: Foo {
+    public init() { }
+    public init(foo: String = "") {
+        self.foo = foo
+    }
+
+    public private(set) var fooSetCallCount = 0
+    @Published public var foo: String = "" { didSet { fooSetCallCount += 1 } }
+
+    public var fooPublisher: AnyPublisher<String, Never> { return self.$foo.setFailureType(to: Never.self).eraseToAnyPublisher() }
+}
+```
 
 ## Used libraries
 
