@@ -161,7 +161,7 @@ extension VariableModel {
             let template = """
 
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)var \(name): \(typeName) { return \(thisStr).\(underlyingSubjectName).\(String.eraseToAnyPublisher)() }
-            \(1.tab)\(acl)\(staticSpace)\(String.privateSet) var \(underlyingSubjectName) = \(combineSubjectType.typeName)<\(typeParamStr)>(\(defaultValue ?? ""))
+            \(1.tab)\(acl)\(staticSpace) var \(underlyingSubjectName) = \(combineSubjectType.typeName)<\(typeParamStr)>(\(defaultValue ?? ""))
             """
             return template
         }
@@ -303,5 +303,3 @@ extension VariableModel {
         return nil
     }
 }
-
-
