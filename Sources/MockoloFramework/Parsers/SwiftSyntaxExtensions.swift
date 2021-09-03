@@ -372,7 +372,7 @@ extension VariableDeclSyntax {
                                          isStatic: isStatic,
                                          canBeInitParam: potentialInitParam,
                                          offset: v.offset,
-                                         overrideTypes: metadata?.varTypes,
+                                         rxTypes: metadata?.varTypes,
                                          customModifiers: metadata?.modifiers,
                                          modelDescription: self.description,
                                          combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],

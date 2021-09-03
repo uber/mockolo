@@ -369,10 +369,10 @@ public final class Type {
 
             var subjectKind = ""
             var underlyingSubjectType = ""
-            if let overrideTypes = overrides {
-                if let val = overrideTypes[overrideKey], val.hasSuffix(String.subjectSuffix) {
+            if let rxTypes = overrides {
+                if let val = rxTypes[overrideKey], val.hasSuffix(String.subjectSuffix) {
                     subjectKind = val
-                } else if let val = overrideTypes["all"], val.hasSuffix(String.subjectSuffix) {
+                } else if let val = rxTypes["all"], val.hasSuffix(String.subjectSuffix) {
                     subjectKind = val
                 }
             }

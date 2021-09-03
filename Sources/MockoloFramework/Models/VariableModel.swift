@@ -12,7 +12,7 @@ final class VariableModel: Model {
     var filePath: String = ""
     var isStatic = false
     var shouldOverride = false
-    var overrideTypes: [String: String]?
+    var rxTypes: [String: String]?
     var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
     var combineType: CombineType?
@@ -41,7 +41,7 @@ final class VariableModel: Model {
          isStatic: Bool,
          canBeInitParam: Bool,
          offset: Int64,
-         overrideTypes: [String: String]?,
+         rxTypes: [String: String]?,
          customModifiers: [String: Modifier]?,
          modelDescription: String?,
          combineType: CombineType?,
@@ -53,7 +53,7 @@ final class VariableModel: Model {
         self.shouldOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed
-        self.overrideTypes = overrideTypes
+        self.rxTypes = rxTypes
         self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
@@ -91,7 +91,7 @@ final class VariableModel: Model {
         if let rxVar = applyRxVariableTemplate(name: identifier,
                                                type: type,
                                                encloser: encloser,
-                                               overrideTypes: overrideTypes,
+                                               rxTypes: rxTypes,
                                                shouldOverride: shouldOverride,
                                                useMockObservable: useMockObservable,
                                                allowSetCallCount: allowSetCallCount,

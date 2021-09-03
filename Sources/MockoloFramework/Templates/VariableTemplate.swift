@@ -170,7 +170,7 @@ extension VariableModel {
     func applyRxVariableTemplate(name: String,
                                  type: Type,
                                  encloser: String,
-                                 overrideTypes: [String: String]?,
+                                 rxTypes: [String: String]?,
                                  shouldOverride: Bool,
                                  useMockObservable: Bool,
                                  allowSetCallCount: Bool,
@@ -180,8 +180,8 @@ extension VariableModel {
         let staticSpace = isStatic ? "\(String.static) " : ""
         let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
 
-        if let overrideTypes = overrideTypes, !overrideTypes.isEmpty {
-            let (subjectType, _, subjectVal) = type.parseRxVar(overrides: overrideTypes, overrideKey: name, isInitParam: true)
+        if let rxTypes = rxTypes, !rxTypes.isEmpty {
+            let (subjectType, _, subjectVal) = type.parseRxVar(overrides: rxTypes, overrideKey: name, isInitParam: true)
             if let underlyingSubjectType = subjectType {
 
                 let underlyingSubjectName = "\(name)\(String.subjectSuffix)"
