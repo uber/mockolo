@@ -1,10 +1,10 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.5
 import PackageDescription
 
 let dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .exact("0.2.3")),
     .package(url: "https://github.com/apple/swift-argument-parser", .exact("0.4.3")),
-    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50400.0")),
+    .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("release/5.5"))
 ]
 
 let package = Package(
