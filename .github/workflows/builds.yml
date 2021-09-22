@@ -7,19 +7,21 @@ on:
     branches: [master]
 
 jobs:
-  build-macos:
+  run:
     runs-on: macos-11
+    strategy:
+      matrix:
+        xcode: ["12.5.1", "13.0"]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Set Xcode ${{ matrix.xcode }}
+        run: |
+          sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+          xcodebuild -version
+          swift --version
+          swift package --version
       - name: Build
         run: swift build -v
-
-  test-macos:
-    runs-on: macos-11
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Test
         run: swift test -v -c release
-
