@@ -8,7 +8,7 @@ var dependencies: [Package.Dependency] = [
 
 let swiftSyntax: Package.Dependency
 #if swift(>=5.5)
-swiftSyntax = .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("release/5.5"))
+swiftSyntax = .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0"))
 #else
 swiftSyntax = .package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50400.0"))
 #endif
