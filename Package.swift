@@ -3,7 +3,7 @@ import PackageDescription
 
 var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .exact("0.2.3")),
-    .package(url: "https://github.com/apple/swift-argument-parser", .exact("0.4.3")),
+    .package(url: "https://github.com/apple/swift-argument-parser", .exact("1.0.1")),
 ]
 
 let swiftSyntax: Package.Dependency
