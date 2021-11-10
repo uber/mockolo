@@ -66,7 +66,7 @@ extension MethodModel {
             var body = ""
 
             if useTemplateFunc {
-                let callMockFunc = !suffix.isThrowsOrRethrows && (handler.type.cast?.isEmpty ?? false)
+                let callMockFunc = !suffix.hasThrowsOrRethrows && (handler.type.cast?.isEmpty ?? false)
                 if callMockFunc {
                     let handlerParamValsStr = params.map { (arg) -> String in
                         if arg.type.typeName.hasPrefix(String.autoclosure) {

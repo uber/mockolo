@@ -550,7 +550,10 @@ public final class Type {
             displayableReturnType = "(\(displayableReturnType))"
         }
 
-        let suffixStr = suffix.isThrowsOrRethrows ? String.SwiftKeywords.throws.rawValue + " " : ""
+        let suffixStr = [
+            suffix.hasAsync ? String.SwiftKeywords.async.rawValue + " " : nil,
+            suffix.hasThrowsOrRethrows ? String.SwiftKeywords.throws.rawValue + " " : nil,
+        ].compactMap { $0 }.joined()
 
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
         return Type(typeStr, cast: returnTypeCast)
