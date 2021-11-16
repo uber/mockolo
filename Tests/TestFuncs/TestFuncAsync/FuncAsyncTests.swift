@@ -3,7 +3,7 @@ import XCTest
 
 class FuncAsyncTests: MockoloTestCase {
     override func setUpWithError() throws {
-        super.setUpWithError()
+        try super.setUpWithError()
 
 #if swift(<5.5)
         throw XCTSkip("async/await support needs swift5.5")
