@@ -402,7 +402,8 @@ extension SubscriptDeclSyntax {
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
                                          params: params,
-                                         throwsOrRethrows: "",
+                                         throwsOrRethrows: nil,
+                                         asyncOrReasync: nil,
                                          isStatic: isStatic,
                                          offset: self.offset,
                                          length: self.length,
@@ -434,7 +435,8 @@ extension FunctionDeclSyntax {
                                     genericTypeParams: genericTypeParams,
                                     genericWhereClause: genericWhereClause,
                                     params: params,
-                                    throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text ?? "",
+                                    throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text,
+                                    asyncOrReasync: self.signature.asyncOrReasyncKeyword?.text,
                                     isStatic: isStatic,
                                     offset: self.offset,
                                     length: self.length,
@@ -477,7 +479,8 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: self.throwsOrRethrowsKeyword?.text ?? "",
+                           throwsOrRethrows: self.throwsOrRethrowsKeyword?.text,
+                           asyncOrReasync: nil, // "init() async" is not supperted in SwiftSyntax
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
@@ -797,3 +800,11 @@ extension Trivia {
         return nil
     }
 }
+
+#if swift(<5.5)
+extension FunctionSignatureSyntax {
+    var asyncOrReasyncKeyword: TokenSyntax? {
+        return nil
+    }
+}
+#endif

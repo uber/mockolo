@@ -27,6 +27,8 @@ extension String {
         case `throws` = "throws"
         case `rethrows` = "rethrows"
         case `try` = "try"
+        case `async` = "async"
+        case `await` = "await"
         case `for` = "for"
         case `in` = "in"
         case `where` = "where"
@@ -109,8 +111,16 @@ extension String {
     """
 
 
-    var isThrowsOrRethrows: Bool {
-        return self == SwiftKeywords.throws.rawValue || self == SwiftKeywords.rethrows.rawValue
+    var hasThrowsOrRethrows: Bool {
+        return components(separatedBy: .whitespaces).contains { component in
+            return component == SwiftKeywords.throws.rawValue || component == SwiftKeywords.rethrows.rawValue
+        }
+    }
+
+    var hasAsync: Bool {
+        return components(separatedBy: .whitespaces).contains { component in
+            return component == SwiftKeywords.async.rawValue
+        }
     }
 
     var safeName: String {

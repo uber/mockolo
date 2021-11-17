@@ -131,7 +131,8 @@ final class MethodModel: Model {
          genericTypeParams: [ParamModel],
          genericWhereClause: String?,
          params: [ParamModel],
-         throwsOrRethrows: String,
+         throwsOrRethrows: String?,
+         asyncOrReasync: String?,
          isStatic: Bool,
          offset: Int64,
          length: Int64,
@@ -141,7 +142,7 @@ final class MethodModel: Model {
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
-        self.suffix = throwsOrRethrows
+        self.suffix = [asyncOrReasync, throwsOrRethrows].compactMap { $0 }.joined(separator: " ")
         self.offset = offset
         self.length = length
         self.kind = kind
