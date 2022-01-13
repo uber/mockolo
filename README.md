@@ -89,31 +89,79 @@ Use --help to see the complete argument options.
 
 OVERVIEW: Mockolo: Swift mock generator.
 
-USAGE: mockolo <options>
+USAGE: mockolo [<options>] --destination <destination>
 
 OPTIONS:
-  --allow-set-callcount     If set, generated *CallCount vars will be allowed to set manually. 
-  --annotation, -a          A custom annotation string used to indicate if a type should be mocked (default = @mockable).
-  --concurrency-limit, -j   Maximum number of threads to execute concurrently (default = number of cores on the running machine).
-  --custom-imports, -c      If set, custom module imports will be added to the final import statement list.
-  --destination, -d         Output file path containing the generated Swift mock classes. If no value is given, the program will exit.
-  --enable-args-history     Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument. 
-  --exclude-imports         If set, listed modules will be excluded from the import statements in the mock output.
-  --exclude-suffixes, -x    List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).
-  --filelist, -f            Path to a file containing a list of source file paths (delimited by a new line). If the --sourcedirs value exists, this will be ignored. 
-  --header                  A custom header documentation to be added to the beginning of a generated mock file.
-  --logging-level, -l       The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
-  --macro, -m               If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
-  --mock-all                If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).
-  --mock-filelist           Path to a file containing a list of dependent files (separated by a new line) of modules this target depends on.
-  --mock-final              If set, generated mock classes will have the 'final' attributes (default is set to false).
-  --mockfiles, -mocks       List of mock files (separated by a comma or a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.
-  --sourcedirs, -s          Paths to the directories containing source files to generate mocks for. If the --filelist or --sourcefiles values exist, they will be ignored. 
-  --sourcefiles, -srcs      List of source files (separated by a comma or a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored. 
-  --testable-imports, -i    If set, @testable import statments will be added for each module name in this list.
-  --use-mock-observable     If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).
-  --use-template-func       If set, a common template function will be called from all functions in mock classes (default is set to false).
-  --help                    Display available options
+  --allow-set-call-count  If set, generated *CallCount vars will be allowed to
+                          set manually.
+  --annotation <annotation>
+                          A custom annotation string used to indicate if a type
+                          should be mocked (default = @mockable). (default:
+                          @mockable)
+  -j, --concurrency-limit <n>
+                          Maximum number of threads to execute concurrently
+                          (default = number of cores on the running machine).
+  --custom-imports <custom-imports>
+                          If set, custom module imports (separated by a space)
+                          will be added to the final import statement list.
+  --enable-args-history   Whether to enable args history for all functions
+                          (default = false). To enable history per function,
+                          use the 'history' keyword in the annotation argument.
+  --exclude-imports <exclude-imports>
+                          If set, listed modules (separated by a space) will be
+                          excluded from the import statements in the mock
+                          output.
+  -x, --exclude-suffixes <exclude-suffixes>
+                          List of filename suffix(es) without the file
+                          extensions to exclude from parsing (separated by a
+                          space).
+  --header <header>       A custom header documentation to be added to the
+                          beginning of a generated mock file.
+  -l, --logging-level <n> The logging level to use. Default is set to 0 (info
+                          only). Set 1 for verbose, 2 for warning, and 3 for
+                          error. (default: 0)
+  --macro <macro>         If set, #if [macro] / #endif will be added to the
+                          generated mock file content to guard compilation.
+  --mock-all              If set, it will mock all types (protocols and
+                          classes) with a mock annotation (default is set to
+                          false and only mocks protocols with a mock
+                          annotation).
+  --mock-filelist <mock-filelist>
+                          Path to a file containing a list of dependent files
+                          (separated by a new line) of modules this target
+                          depends on.
+  --mock-final            If set, generated mock classes will have the 'final'
+                          attributes (default is set to false).
+  -mocks, --mockfiles <mocks>
+                          List of mock files (separated by a space) from
+                          modules this target depends on. If the
+                          --mock-filelist value exists, this will be ignored.
+  -d, --destination <destination>
+                          Output file path containing the generated Swift mock
+                          classes. If no value is given, the program will exit.
+  -s, --sourcedirs <sourcedirs>
+                          Paths to the directories containing source files to
+                          generate mocks for (separated by a space). If the
+                          --filelist or --sourcefiles values exist, they will
+                          be ignored.
+  -f, --filelist <filelist>
+                          Path to a file containing a list of source file paths
+                          (delimited by a new line). If the --sourcedirs value
+                          exists, this will be ignored.
+  -srcs, --sourcefiles <srcs>
+                          List of source files (separated by a space) to
+                          generate mocks for. If the --sourcedirs or --filelist
+                          value exists, this will be ignored.
+  -i, --testable-imports <testable-imports>
+                          If set, @testable import statements will be added for
+                          each module name in this list (separated by a space).
+  --use-mock-observable   If set, a property wrapper will be used to mock
+                          RxSwift Observable variables (default is set to
+                          false).
+  --use-template-func     If set, a common template function will be called
+                          from all functions in mock classes (default is set to
+                          false).
+  -h, --help              Show help information.
   ```
 
 
