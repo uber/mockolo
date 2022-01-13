@@ -38,7 +38,8 @@ struct Executor: ParsableCommand {
                 valueName: "n"))
     private var concurrencyLimit: Int?
 
-    @Option(help: "If set, custom module imports will be added to the final import statement list.")
+    @Option(parsing: .upToNextOption,
+            help: "If set, custom module imports (separated by a space) will be added to the final import statement list.")
     private var customImports: [String] = []
 
     @Flag(name: .long,
@@ -46,11 +47,13 @@ struct Executor: ParsableCommand {
     private  var enableArgsHistory: Bool = false
 
     @Option(name: .long,
-            help: "If set, listed modules will be excluded from the import statements in the mock output.")
+            parsing: .upToNextOption,
+            help: "If set, listed modules (separated by a space) will be excluded from the import statements in the mock output.")
     private  var excludeImports: [String] = []
 
     @Option(name: [.customShort("x"), .customLong("exclude-suffixes")],
-            help: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).",
+            parsing: .upToNextOption,
+            help: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a space).",
             completion: .file())
     private var exclusionSuffixes: [String] = []
 
@@ -82,7 +85,8 @@ struct Executor: ParsableCommand {
     private var mockFinal: Bool = false
 
     @Option(name: [.customLong("mocks", withSingleDash: true), .customLong("mockfiles")],
-            help: "List of mock files (separated by a comma or a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.",
+            parsing: .upToNextOption,
+            help: "List of mock files (separated by a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.",
             completion: .file())
     private var mockFilePaths: [String] = []
 
@@ -92,7 +96,8 @@ struct Executor: ParsableCommand {
     private var outputFilePath: String
     
     @Option(name: [.customShort("s"), .customLong("sourcedirs")],
-            help: "Paths to the directories containing source files to generate mocks for. If the --filelist or --sourcefiles values exist, they will be ignored.",
+            parsing: .upToNextOption,
+            help: "Paths to the directories containing source files to generate mocks for (separated by a space). If the --filelist or --sourcefiles values exist, they will be ignored.",
             completion: .file())
     private var sourceDirs: [String] = []
 
@@ -102,12 +107,14 @@ struct Executor: ParsableCommand {
     private var sourceFileList: String?
 
     @Option(name: [.customLong("srcs", withSingleDash: true), .customLong("sourcefiles")],
-            help: "List of source files (separated by a comma or a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.",
+            parsing: .upToNextOption,
+            help: "List of source files (separated by a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.",
             completion: .file())
     private var sourceFiles: [String] = []
 
     @Option(name: [.long, .customShort("i")],
-            help: "If set, @testable import statements will be added for each module name in this list.")
+            parsing: .upToNextOption,
+            help: "If set, @testable import statements will be added for each module name in this list (separated by a space).")
     private var testableImports: [String] = []
 
     @Flag(name: .long,
