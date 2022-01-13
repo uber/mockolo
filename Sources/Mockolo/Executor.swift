@@ -26,7 +26,7 @@ struct Executor: ParsableCommand {
 
     // MARK: - Private
     @Flag(name: .long,
-            help: "If set, generated *CallCount vars will be allowed to set manually.")
+          help: "If set, generated *CallCount vars will be allowed to set manually.")
     private var allowSetCallCount: Bool = false
 
     @Option(help: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
@@ -43,7 +43,7 @@ struct Executor: ParsableCommand {
     private var customImports: [String] = []
 
     @Flag(name: .long,
-            help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
+          help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
     private  var enableArgsHistory: Bool = false
 
     @Option(name: .long,
@@ -65,14 +65,14 @@ struct Executor: ParsableCommand {
     @Option(name: [.short, .long],
             help: ArgumentHelp(
                 "The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.",
-            valueName: "n"))
+                valueName: "n"))
     private var loggingLevel: Int = 0
 
     @Option(help: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
     private var macro: String?
 
     @Flag(name: .long,
-            help: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
+          help: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
     private var mockAll: Bool = false
 
     @Option(name: .customLong("mock-filelist"),
@@ -81,7 +81,7 @@ struct Executor: ParsableCommand {
     private var mockFileList: String?
 
     @Flag(name: .long,
-            help: "If set, generated mock classes will have the 'final' attributes (default is set to false).")
+          help: "If set, generated mock classes will have the 'final' attributes (default is set to false).")
     private var mockFinal: Bool = false
 
     @Option(name: [.customLong("mocks", withSingleDash: true), .customLong("mockfiles")],
@@ -118,11 +118,11 @@ struct Executor: ParsableCommand {
     private var testableImports: [String] = []
 
     @Flag(name: .long,
-            help: "If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).")
+          help: "If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).")
     private var useMockObservable: Bool = false
 
     @Flag(name: .long,
-            help: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
+          help: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
     private var useTemplateFunc: Bool = false
     
     init() {
