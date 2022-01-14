@@ -26,7 +26,7 @@ struct Executor: ParsableCommand {
 
     // MARK: - Private
     @Flag(name: .long,
-            help: "If set, generated *CallCount vars will be allowed to set manually.")
+          help: "If set, generated *CallCount vars will be allowed to set manually.")
     private var allowSetCallCount: Bool = false
 
     @Option(help: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
@@ -38,19 +38,22 @@ struct Executor: ParsableCommand {
                 valueName: "n"))
     private var concurrencyLimit: Int?
 
-    @Option(help: "If set, custom module imports will be added to the final import statement list.")
+    @Option(parsing: .upToNextOption,
+            help: "If set, custom module imports (separated by a space) will be added to the final import statement list.")
     private var customImports: [String] = []
 
     @Flag(name: .long,
-            help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
+          help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
     private  var enableArgsHistory: Bool = false
 
     @Option(name: .long,
-            help: "If set, listed modules will be excluded from the import statements in the mock output.")
+            parsing: .upToNextOption,
+            help: "If set, listed modules (separated by a space) will be excluded from the import statements in the mock output.")
     private  var excludeImports: [String] = []
 
     @Option(name: [.customShort("x"), .customLong("exclude-suffixes")],
-            help: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a comma or a space).",
+            parsing: .upToNextOption,
+            help: "List of filename suffix(es) without the file extensions to exclude from parsing (separated by a space).",
             completion: .file())
     private var exclusionSuffixes: [String] = []
 
@@ -62,14 +65,14 @@ struct Executor: ParsableCommand {
     @Option(name: [.short, .long],
             help: ArgumentHelp(
                 "The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.",
-            valueName: "n"))
+                valueName: "n"))
     private var loggingLevel: Int = 0
 
     @Option(help: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
     private var macro: String?
 
     @Flag(name: .long,
-            help: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
+          help: "If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).")
     private var mockAll: Bool = false
 
     @Option(name: .customLong("mock-filelist"),
@@ -78,11 +81,12 @@ struct Executor: ParsableCommand {
     private var mockFileList: String?
 
     @Flag(name: .long,
-            help: "If set, generated mock classes will have the 'final' attributes (default is set to false).")
+          help: "If set, generated mock classes will have the 'final' attributes (default is set to false).")
     private var mockFinal: Bool = false
 
     @Option(name: [.customLong("mocks", withSingleDash: true), .customLong("mockfiles")],
-            help: "List of mock files (separated by a comma or a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.",
+            parsing: .upToNextOption,
+            help: "List of mock files (separated by a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.",
             completion: .file())
     private var mockFilePaths: [String] = []
 
@@ -92,7 +96,8 @@ struct Executor: ParsableCommand {
     private var outputFilePath: String
     
     @Option(name: [.customShort("s"), .customLong("sourcedirs")],
-            help: "Paths to the directories containing source files to generate mocks for. If the --filelist or --sourcefiles values exist, they will be ignored.",
+            parsing: .upToNextOption,
+            help: "Paths to the directories containing source files to generate mocks for (separated by a space). If the --filelist or --sourcefiles values exist, they will be ignored.",
             completion: .file())
     private var sourceDirs: [String] = []
 
@@ -102,20 +107,22 @@ struct Executor: ParsableCommand {
     private var sourceFileList: String?
 
     @Option(name: [.customLong("srcs", withSingleDash: true), .customLong("sourcefiles")],
-            help: "List of source files (separated by a comma or a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.",
+            parsing: .upToNextOption,
+            help: "List of source files (separated by a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.",
             completion: .file())
     private var sourceFiles: [String] = []
 
     @Option(name: [.long, .customShort("i")],
-            help: "If set, @testable import statements will be added for each module name in this list.")
+            parsing: .upToNextOption,
+            help: "If set, @testable import statements will be added for each module name in this list (separated by a space).")
     private var testableImports: [String] = []
 
     @Flag(name: .long,
-            help: "If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).")
+          help: "If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).")
     private var useMockObservable: Bool = false
 
     @Flag(name: .long,
-            help: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
+          help: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
     private var useTemplateFunc: Bool = false
     
     init() {
