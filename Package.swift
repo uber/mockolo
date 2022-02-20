@@ -36,6 +36,10 @@ let package = Package(
             name: "MockoloFramework",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "SwiftSyntax"),
+            ],
+            exclude: [
+                "README.md",
+                "LICENSE.txt",
             ]
         ),
         .testTarget(
