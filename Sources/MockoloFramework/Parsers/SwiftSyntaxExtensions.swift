@@ -7,16 +7,17 @@
 
 import Foundation
 import SwiftSyntax
+#if canImport(SwiftSyntaxParser)
+import SwiftSyntaxParser
+#endif
 
 extension SyntaxParser {
-    public static func parse(_ fileData: Data, path: String,
-                             diagnosticEngine: DiagnosticEngine? = nil) throws -> SourceFileSyntax {
+    public static func parse(_ fileData: Data, path: String) throws -> SourceFileSyntax {
         // Avoid using `String(contentsOf:)` because it creates a wrapped NSString.
         let source = fileData.withUnsafeBytes { buf in
             return String(decoding: buf.bindMemory(to: UInt8.self), as: UTF8.self)
         }
-        return try parse(source: source, filenameForDiagnostics: path,
-                         diagnosticEngine: diagnosticEngine)
+        return try parse(source: source, filenameForDiagnostics: path)
     }
 
     public static func parse(_ path: String) throws -> SourceFileSyntax {
