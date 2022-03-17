@@ -10,7 +10,7 @@ var mockoloFrameworkTargetDependencies: [Target.Dependency] = [
 ]
 
 #if swift(>=5.6)
-dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("release/5.6")))
+dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50600.0")))
 mockoloFrameworkTargetDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
 #elseif swift(>=5.5)
 dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50500.0")))
