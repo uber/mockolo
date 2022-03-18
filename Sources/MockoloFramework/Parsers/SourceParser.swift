@@ -16,7 +16,9 @@
 
 import Foundation
 import SwiftSyntax
-
+#if canImport(SwiftSyntaxParser)
+import SwiftSyntaxParser
+#endif
 
 public enum DeclType {
     case protocolType, classType, other, all
