@@ -38,11 +38,7 @@ let package = Package(
                 ]),
         .target(
             name: "MockoloFramework",
-            dependencies: mockoloFrameworkTargetDependencies,
-            exclude: [
-                "README.md",
-                "LICENSE.txt",
-            ]
+            dependencies: mockoloFrameworkTargetDependencies
         ),
         .testTarget(
             name: "MockoloTests",
