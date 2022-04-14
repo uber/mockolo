@@ -15,7 +15,9 @@
 //
 
 import Foundation
+#if canImport(SwiftSyntax)
 import SwiftSyntax
+#endif
 #if canImport(SwiftSyntaxParser)
 import SwiftSyntaxParser
 #endif
@@ -52,7 +54,7 @@ public class SourceParser {
                            fileMacro: String?,
                            declType: DeclType,
                            completion: @escaping ([Entity], ImportMap?) -> ()) {
-        
+
         guard !paths.isEmpty else { return }
         scan(paths, isDirectory: isDirs) { (path, lock) in
             self.generateASTs(path,
@@ -72,7 +74,7 @@ public class SourceParser {
                               declType: DeclType,
                               lock: NSLock?,
                               completion: @escaping ([Entity], ImportMap?) -> ()) {
-        
+
         guard path.shouldParse(with: exclusionSuffixes) else { return }
 
         if !annotation.isEmpty {
