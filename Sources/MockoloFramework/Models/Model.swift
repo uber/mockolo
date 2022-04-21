@@ -57,7 +57,9 @@ public protocol Model {
                 useMockObservable: Bool,
                 allowSetCallCount: Bool,
                 mockFinal: Bool,
-                enableFuncArgsHistory: Bool) -> String?
+                enableFuncArgsHistory: Bool,
+                disableCombineDefaultValues: Bool
+    ) -> String?
 
     /// Used to differentiate multiple entities with the same name
     /// @param level The verbosity level

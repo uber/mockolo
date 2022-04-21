@@ -378,7 +378,7 @@ extension VariableDeclSyntax {
                                          rxTypes: metadata?.varTypes,
                                          customModifiers: metadata?.modifiers,
                                          modelDescription: self.description,
-                                         combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
+                                         combineType: nil,
                                          processed: processed)
             return varmodel
         }

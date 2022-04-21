@@ -62,7 +62,7 @@ final class VariableModel: Model {
         self.combineType = combineType
     }
 
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false) -> String? {
+    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
         if processed {
             guard let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty else {
                 return nil
@@ -79,12 +79,12 @@ final class VariableModel: Model {
             return prefix + modelDescription
         }
 
-        if let combineVar = applyCombineVariableTemplate(name: identifier,
-                                                         type: type,
-                                                         encloser: encloser,
-                                                         shouldOverride: shouldOverride,
-                                                         isStatic: isStatic,
-                                                         accessLevel: accessLevel) {
+        if !disableCombineDefaultValues, let combineVar = applyCombineVariableTemplate(name: identifier,
+                                                                                     type: type,
+                                                                                     encloser: encloser,
+                                                                                     shouldOverride: shouldOverride,
+                                                                                     isStatic: isStatic,
+                                                                                     accessLevel: accessLevel) {
             return combineVar
         }
 
