@@ -79,13 +79,15 @@ final class VariableModel: Model {
             return prefix + modelDescription
         }
 
-        if !disableCombineDefaultValues, let combineVar = applyCombineVariableTemplate(name: identifier,
-                                                                                     type: type,
-                                                                                     encloser: encloser,
-                                                                                     shouldOverride: shouldOverride,
-                                                                                     isStatic: isStatic,
-                                                                                     accessLevel: accessLevel) {
-            return combineVar
+        if !disableCombineDefaultValues {
+            if let combineVar = applyCombineVariableTemplate(name: identifier,
+                                                            type: type,
+                                                            encloser: encloser,
+                                                            shouldOverride: shouldOverride,
+                                                            isStatic: isStatic,
+                                                            accessLevel: accessLevel) {
+                return combineVar
+            }
         }
 
         if let rxVar = applyRxVariableTemplate(name: identifier,

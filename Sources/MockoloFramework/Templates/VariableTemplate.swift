@@ -87,7 +87,6 @@ extension VariableModel {
                                       shouldOverride: Bool,
                                       isStatic: Bool,
                                       accessLevel: String) -> String? {
-        return nil
         let typeName = type.typeName
 
         guard

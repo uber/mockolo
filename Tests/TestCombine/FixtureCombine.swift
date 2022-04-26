@@ -219,3 +219,31 @@ public class ChildMock: Child {
     @Published public var myStringInBase: String = "" { didSet { myStringInBaseSetCallCount += 1 } }
 }
 """
+
+let combineDisabledProtocolMock = """
+public class FooMock: Foo {
+    public init() { }
+
+
+    public private(set) var myPublisherSetCallCount = 0
+    private var _myPublisher: AnyPublisher<String, Never>!  { didSet { myPublisherSetCallCount += 1 } }
+    public var myPublisher: AnyPublisher<String, Never> {
+        get { return _myPublisher }
+        set { _myPublisher = newValue }
+    }
+
+    public private(set) var dictionaryPublisherSetCallCount = 0
+    private var _dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never>!  { didSet { dictionaryPublisherSetCallCount += 1 } }
+    public var dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never> {
+        get { return _dictionaryPublisher }
+        set { _dictionaryPublisher = newValue }
+    }
+
+    public private(set) var noDefaultSubjectValueSetCallCount = 0
+    private var _noDefaultSubjectValue: AnyPublisher<CustomType, Never>!  { didSet { noDefaultSubjectValueSetCallCount += 1 } }
+    public var noDefaultSubjectValue: AnyPublisher<CustomType, Never> {
+        get { return _noDefaultSubjectValue }
+        set { _noDefaultSubjectValue = newValue }
+    }
+}
+"""
