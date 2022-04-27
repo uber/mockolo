@@ -46,6 +46,10 @@ struct Executor: ParsableCommand {
           help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
     private  var enableArgsHistory: Bool = false
 
+    @Flag(name: .long,
+          help: "Whether to disable generating Combine streams in mocks (default = false). Set this to true to control how your streams are created in your mocks.")
+    private var disableCombineDefaultValues: Bool = false
+
     @Option(name: .long,
             parsing: .upToNextOption,
             help: "If set, listed modules (separated by a space) will be excluded from the import statements in the mock output.")
@@ -194,6 +198,7 @@ struct Executor: ParsableCommand {
                          useMockObservable: useMockObservable,
                          allowSetCallCount: allowSetCallCount,
                          enableFuncArgsHistory: enableArgsHistory,
+                         disableCombineDefaultValues: disableCombineDefaultValues,
                          mockFinal: mockFinal,
                          testableImports: testableImports,
                          customImports: customImports,

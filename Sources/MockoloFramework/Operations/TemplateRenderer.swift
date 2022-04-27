@@ -16,7 +16,7 @@
 
 import Foundation
 
-/// Renders models with temeplates for output
+/// Renders models with templates for output
 
 func renderTemplates(entities: [ResolvedEntity],
                      useTemplateFunc: Bool,
@@ -24,10 +24,11 @@ func renderTemplates(entities: [ResolvedEntity],
                      allowSetCallCount: Bool,
                      mockFinal: Bool,
                      enableFuncArgsHistory: Bool,
+                     disableCombineDefaultValues: Bool,
                      completion: @escaping (String, Int64) -> ()) {
     scan(entities) { (resolvedEntity, lock) in
         let mockModel = resolvedEntity.model()
-        if let mockString = mockModel.render(with: resolvedEntity.key, encloser: mockModel.name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory), !mockString.isEmpty {
+        if let mockString = mockModel.render(with: resolvedEntity.key, encloser: mockModel.name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues), !mockString.isEmpty {
             lock?.lock()
             completion(mockString, mockModel.offset)
             lock?.unlock()

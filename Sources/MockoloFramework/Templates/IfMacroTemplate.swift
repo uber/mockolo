@@ -23,9 +23,10 @@ extension IfMacroModel {
                             allowSetCallCount: Bool,
                             mockFinal: Bool,
                             enableFuncArgsHistory: Bool,
+                            disableCombineDefaultValues: Bool,
                             entities: [Model]) -> String {
         let rendered = entities
-            .compactMap {$0.render(with: $0.name, encloser: "", useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount,  mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory) }
+            .compactMap {$0.render(with: $0.name, encloser: "", useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount,  mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues) }
             .joined(separator: "\n")
         
         let template = """

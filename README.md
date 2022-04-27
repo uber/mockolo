@@ -33,7 +33,7 @@ Option 1: By [Mint](https://github.com/yonaskolb/Mint)
 
 ```
 $ mint install uber/mockolo
-$ mint run uber/mockolo mockolo -h // see commandline input options below 
+$ mint run uber/mockolo mockolo -h // see commandline input options below
 ```
 
 Option 2: [Homebrew](https://brew.sh/)
@@ -42,31 +42,31 @@ Option 2: [Homebrew](https://brew.sh/)
 $ brew install mockolo
 ```
 
-Option 3: Use the binary  
+Option 3: Use the binary
 
-  Go to the Release tab and download/install the binary directly. 
+  Go to the Release tab and download/install the binary directly.
 
 
-Option 4: Clone and build/run 
+Option 4: Clone and build/run
 
 ```
 $ git clone https://github.com/uber/mockolo.git
 $ cd mockolo
 $ swift build -c release
-$ .build/release/mockolo -h  // see commandline input options below 
+$ .build/release/mockolo -h  // see commandline input options below
 ```
 
 To call mockolo from any location, copy the executable into a directory that is part of your `PATH` environment variable.
 
 
-To check out a specific version, 
+To check out a specific version,
 
 ```
 $ git tag -l
 $ git checkout [tag]
 ```
 
-To use Xcode to build and run, 
+To use Xcode to build and run,
 
 ```
 $ swift package generate-xcodeproj
@@ -92,82 +92,48 @@ OVERVIEW: Mockolo: Swift mock generator.
 USAGE: mockolo [<options>] --destination <destination>
 
 OPTIONS:
-  --allow-set-call-count  If set, generated *CallCount vars will be allowed to
-                          set manually.
+  --allow-set-call-count  If set, generated *CallCount vars will be allowed to set manually.
   --annotation <annotation>
-                          A custom annotation string used to indicate if a type
-                          should be mocked (default = @mockable). (default:
-                          @mockable)
+                          A custom annotation string used to indicate if a type should be mocked (default = @mockable). (default: @mockable)
   -j, --concurrency-limit <n>
-                          Maximum number of threads to execute concurrently
-                          (default = number of cores on the running machine).
+                          Maximum number of threads to execute concurrently (default = number of cores on the running machine).
   --custom-imports <custom-imports>
-                          If set, custom module imports (separated by a space)
-                          will be added to the final import statement list.
-  --enable-args-history   Whether to enable args history for all functions
-                          (default = false). To enable history per function,
-                          use the 'history' keyword in the annotation argument.
+                          If set, custom module imports (separated by a space) will be added to the final import statement list.
+  --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
+  --disable-combine-default-values
+                          Whether to disable generating Combine streams in mocks (default = false). Set this to true to control how your streams are created in your mocks.
   --exclude-imports <exclude-imports>
-                          If set, listed modules (separated by a space) will be
-                          excluded from the import statements in the mock
-                          output.
+                          If set, listed modules (separated by a space) will be excluded from the import statements in the mock output.
   -x, --exclude-suffixes <exclude-suffixes>
-                          List of filename suffix(es) without the file
-                          extensions to exclude from parsing (separated by a
-                          space).
-  --header <header>       A custom header documentation to be added to the
-                          beginning of a generated mock file.
-  -l, --logging-level <n> The logging level to use. Default is set to 0 (info
-                          only). Set 1 for verbose, 2 for warning, and 3 for
-                          error. (default: 0)
-  --macro <macro>         If set, #if [macro] / #endif will be added to the
-                          generated mock file content to guard compilation.
-  --mock-all              If set, it will mock all types (protocols and
-                          classes) with a mock annotation (default is set to
-                          false and only mocks protocols with a mock
-                          annotation).
+                          List of filename suffix(es) without the file extensions to exclude from parsing (separated by a space).
+  --header <header>       A custom header documentation to be added to the beginning of a generated mock file.
+  -l, --logging-level <n> The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error. (default: 0)
+  --macro <macro>         If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
+  --mock-all              If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).
   --mock-filelist <mock-filelist>
-                          Path to a file containing a list of dependent files
-                          (separated by a new line) of modules this target
-                          depends on.
-  --mock-final            If set, generated mock classes will have the 'final'
-                          attributes (default is set to false).
+                          Path to a file containing a list of dependent files (separated by a new line) of modules this target depends on.
+  --mock-final            If set, generated mock classes will have the 'final' attributes (default is set to false).
   -mocks, --mockfiles <mocks>
-                          List of mock files (separated by a space) from
-                          modules this target depends on. If the
-                          --mock-filelist value exists, this will be ignored.
+                          List of mock files (separated by a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.
   -d, --destination <destination>
-                          Output file path containing the generated Swift mock
-                          classes. If no value is given, the program will exit.
+                          Output file path containing the generated Swift mock classes. If no value is given, the program will exit.
   -s, --sourcedirs <sourcedirs>
-                          Paths to the directories containing source files to
-                          generate mocks for (separated by a space). If the
-                          --filelist or --sourcefiles values exist, they will
-                          be ignored.
+                          Paths to the directories containing source files to generate mocks for (separated by a space). If the --filelist or --sourcefiles values exist, they will be ignored.
   -f, --filelist <filelist>
-                          Path to a file containing a list of source file paths
-                          (delimited by a new line). If the --sourcedirs value
-                          exists, this will be ignored.
+                          Path to a file containing a list of source file paths (delimited by a new line). If the --sourcedirs value exists, this will be ignored.
   -srcs, --sourcefiles <srcs>
-                          List of source files (separated by a space) to
-                          generate mocks for. If the --sourcedirs or --filelist
-                          value exists, this will be ignored.
+                          List of source files (separated by a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.
   -i, --testable-imports <testable-imports>
-                          If set, @testable import statements will be added for
-                          each module name in this list (separated by a space).
-  --use-mock-observable   If set, a property wrapper will be used to mock
-                          RxSwift Observable variables (default is set to
-                          false).
-  --use-template-func     If set, a common template function will be called
-                          from all functions in mock classes (default is set to
-                          false).
+                          If set, @testable import statements will be added for each module name in this list (separated by a space).
+  --use-mock-observable   If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).
+  --use-template-func     If set, a common template function will be called from all functions in mock classes (default is set to false).
   -h, --help              Show help information.
   ```
 
 
 ## Add MockoloFramework to your project
 
-Option 1: SPM 
+Option 1: SPM
 ```swift
 
 dependencies: [
@@ -178,25 +144,25 @@ targets: [
 ]
 
 ```
-Option 2: Cocoapods 
+Option 2: Cocoapods
 ```
 target 'MyTarget' do
   platform :osx, '10.14'
-  pod 'MockoloFramework', '~>1.1.2' 
+  pod 'MockoloFramework', '~>1.1.2'
 end
 ```
 
 
-## Distribution 
+## Distribution
 
-The `install-script.sh` will build and package up the `mockolo` binary and other necessary resources in the same bundle. 
+The `install-script.sh` will build and package up the `mockolo` binary and other necessary resources in the same bundle.
 
 ```
-$ ./install-script.sh -h  // see input options 
+$ ./install-script.sh -h  // see input options
 $ ./install-script.sh -s [source dir] -t mockolo -d [destination dir] -o [output filename].tar.gz
 ```
 
-This will create a tarball for distribution, which contains the `mockolo` executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running `mockolo` without depending on where the dylib lives. 
+This will create a tarball for distribution, which contains the `mockolo` executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running `mockolo` without depending on where the dylib lives.
 
 
 
@@ -260,7 +226,7 @@ func testMock() {
 
 ## Arguments
 
-A list of override arguments can be passed in (delimited by a semicolon) to the annotation to set var types, typealiases, module names, etc. 
+A list of override arguments can be passed in (delimited by a semicolon) to the annotation to set var types, typealiases, module names, etc.
 
 
 ### Module
@@ -272,7 +238,7 @@ public protocol Foo {
 }
 ```
 
-This will generate: 
+This will generate:
 
 ```swift
 public class FooMock: Bar.Foo {
@@ -286,13 +252,13 @@ public class FooMock: Bar.Foo {
 /// @mockable(typealias: T = AnyObject; U = StringProtocol)
 public protocol Foo {
     associatedtype T
-    associatedtype U: Collection where U.Element == T 
-    associatedtype W 
+    associatedtype U: Collection where U.Element == T
+    associatedtype W
     ...
 }
 ```
 
-This will generate the following mock output: 
+This will generate the following mock output:
 
 ```swift
 public class FooMock: Foo {
@@ -316,7 +282,7 @@ public protocol Foo {
 }
 ```
 
-This will generate: 
+This will generate:
 
 ```swift
 public class FooMock: Foo {
@@ -340,7 +306,7 @@ public protocol Foo {
 }
 ```
 
-This will generate: 
+This will generate:
 
 ```swift
 public class FooMock: Foo {
@@ -423,7 +389,7 @@ public class FooMock: Foo {
 
 ## Used libraries
 
-[SwiftSyntax](https://github.com/apple/swift-syntax) | 
+[SwiftSyntax](https://github.com/apple/swift-syntax) |
 
 
 ## How to contribute to Mockolo

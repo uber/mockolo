@@ -27,5 +27,12 @@ class CombineTests: MockoloTestCase {
                mockContent: combineMockContentMock,
                dstContent: combineMockContentResult)
     }
+
+    func testCombine_disableCombineDefaultValues() {
+        verify(srcContent: combineProtocol,
+               dstContent: combineDisabledProtocolMock,
+               disableCombineDefaultValues: true
+            )
+    }
 }
 

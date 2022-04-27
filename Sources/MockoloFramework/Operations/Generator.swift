@@ -35,6 +35,7 @@ public func generate(sourceDirs: [String],
                      useMockObservable: Bool,
                      allowSetCallCount: Bool,
                      enableFuncArgsHistory: Bool,
+                     disableCombineDefaultValues: Bool,
                      mockFinal: Bool,
                      testableImports: [String],
                      customImports: [String],
@@ -131,7 +132,9 @@ public func generate(sourceDirs: [String],
                     useMockObservable: useMockObservable,
                     allowSetCallCount: allowSetCallCount,
                     mockFinal: mockFinal,
-                    enableFuncArgsHistory: enableFuncArgsHistory) { (mockString: String, offset: Int64) in
+                    enableFuncArgsHistory: enableFuncArgsHistory,
+                    disableCombineDefaultValues: disableCombineDefaultValues
+    ) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))
     }
     signpost_end(name: "Render models")

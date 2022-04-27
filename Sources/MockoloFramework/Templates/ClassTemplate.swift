@@ -28,6 +28,7 @@ extension ClassModel {
                             allowSetCallCount: Bool,
                             mockFinal: Bool,
                             enableFuncArgsHistory: Bool,
+                            disableCombineDefaultValues: Bool,
                             initParamCandidates: [Model],
                             declaredInits: [MethodModel],
                             entities: [(String, Model)]) -> String {
@@ -48,7 +49,7 @@ extension ClassModel {
                 if model.modelType == .method, model.isInitializer, !model.processed {
                     return nil
                 }
-                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory) {
+                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues) {
                     return (ret, model.offset)
                 }
                 return nil
