@@ -8,16 +8,19 @@ on:
 
 jobs:
   run:
-    runs-on: macos-11
+    runs-on: ${{ matrix.xcode.os }}
     strategy:
       matrix:
-        xcode: ["12.5.1", "13.0"]
+        xcode:
+          - { os: macos-11, version: "12.5.1" }
+          - { os: macos-11, version: "13.0" }
+          - { os: macos-12, version: "13.3.1" }
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set Xcode ${{ matrix.xcode }}
+      - name: Set Xcode ${{ matrix.xcode.os }}
         run: |
-          sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode }}.app
+          sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode.version }}.app
           xcodebuild -version
           swift --version
           swift package --version
