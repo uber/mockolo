@@ -8,6 +8,7 @@ on:
 
 jobs:
   run:
+    name: Build and test with Xcode ${{ matrix.xcode.version }} on ${{ matrix.xcode.os }}
     runs-on: ${{ matrix.xcode.os }}
     strategy:
       matrix:
@@ -18,7 +19,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Set Xcode ${{ matrix.xcode.os }}
+      - name: Set Xcode ${{ matrix.xcode.version }}
         run: |
           sudo xcode-select -s /Applications/Xcode_${{ matrix.xcode.version }}.app
           xcodebuild -version
