@@ -20,15 +20,15 @@ import TSCUtility
 import TSCBasic
 import MockoloFramework
 
-func main() {
-    let inputs = Array(CommandLine.arguments.dropFirst())
-    if let arg = inputs.first, (arg == "--version" || arg == "-v") {
-        print(Version.current.value)
-        return
+@main
+struct Mockolo {
+    static func main() {
+        let inputs = Array(CommandLine.arguments.dropFirst())
+        if let arg = inputs.first, (arg == "--version" || arg == "-v") {
+            print(Version.current.value)
+            return
+        }
+
+        Executor.main(inputs)
     }
-
-    Executor.main(inputs)
 }
-
-
-main()
