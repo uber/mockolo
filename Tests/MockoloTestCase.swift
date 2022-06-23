@@ -7,7 +7,7 @@ class MockoloTestCase: XCTestCase {
 
     let bundle = Bundle(for: MockoloTestCase.self)
 
-    lazy var dstFilePath: String = {
+    lazy var defaultDstFilePath: String = {
         return bundle.bundlePath + "/Dst.swift"
     }()
 
@@ -39,13 +39,13 @@ class MockoloTestCase: XCTestCase {
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
-        let created = FileManager.default.createFile(atPath: dstFilePath, contents: nil, attributes: nil)
+        let created = FileManager.default.createFile(atPath: defaultDstFilePath, contents: nil, attributes: nil)
         XCTAssert(created)
     }
 
     override func tearDown() {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
-        try? FileManager.default.removeItem(atPath: dstFilePath)
+        try? FileManager.default.removeItem(atPath: defaultDstFilePath)
         for srcpath in srcFilePaths {
             try? FileManager.default.removeItem(atPath: srcpath)
         }
@@ -54,8 +54,8 @@ class MockoloTestCase: XCTestCase {
         }
     }
 
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, outputFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false) {
-        let outputFilePath = outputFilePath ?? dstFilePath
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false) {
+        let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -63,11 +63,11 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        try? verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, outputFilePath: outputFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues)
+        try? verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues)
     }
     
-    func verifyThrows(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, outputFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, errorHandler: (Error) -> Void = { _ in }) {
-        let outputFilePath = outputFilePath ?? dstFilePath
+    func verifyThrows(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: DeclType = .protocolType, useTemplateFunc: Bool = false, useMockObservable: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, errorHandler: (Error) -> Void = { _ in }) {
+        let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
         if let mock = mockContent {
             if mockList == nil {
@@ -76,13 +76,13 @@ class MockoloTestCase: XCTestCase {
             mockList?.append(mock)
         }
         XCTAssertThrowsError(
-            try verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, outputFilePath: outputFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues),
+            try verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues),
             "No error was thrown",
             errorHandler
         )
     }
 
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: DeclType, useTemplateFunc: Bool, useMockObservable: Bool, testableImports: [String] = [], allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, outputFilePath: String, concurrencyLimit: Int?, disableCombineDefaultValues: Bool) throws {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: DeclType, useTemplateFunc: Bool, useMockObservable: Bool, testableImports: [String] = [], allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, dstFilePath: String, concurrencyLimit: Int?, disableCombineDefaultValues: Bool) throws {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -141,11 +141,11 @@ class MockoloTestCase: XCTestCase {
                       testableImports: testableImports,
                       customImports: [],
                       excludeImports: [],
-                      to: outputFilePath,
+                      to: dstFilePath,
                       loggingLevel: 3,
                       concurrencyLimit: concurrencyLimit,
             onCompletion: { ret in
-                let output = (try? String(contentsOf: URL(fileURLWithPath: self.dstFilePath), encoding: .utf8)) ?? ""
+                let output = (try? String(contentsOf: URL(fileURLWithPath: self.defaultDstFilePath), encoding: .utf8)) ?? ""
                 let outputContents = output.components(separatedBy:  .whitespacesAndNewlines).filter{!$0.isEmpty}
                 let fixtureContents = formattedDstContent.components(separatedBy: .whitespacesAndNewlines).filter{!$0.isEmpty}
                 #if TEST
