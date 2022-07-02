@@ -23,7 +23,7 @@ This project may contain unstable APIs which may not be ready for general use. S
 
 * Swift 5.4 or later
 * Xcode 12.5 or later
-* MacOS 11.0 or later
+* macOS 11.0 or later
 * Support is included for the Swift Package Manager
 
 
