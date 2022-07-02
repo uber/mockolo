@@ -150,7 +150,7 @@ public func generate(sourceDirs: [String],
                                 excludeImports: excludeImports,
                                 testableImports: testableImports)
 
-    let result = write(candidates: candidates,
+    let result = try write(candidates: candidates,
                        header: header,
                        macro: macro,
                        imports: imports,
