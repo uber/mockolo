@@ -38,7 +38,8 @@ struct Executor: ParsableCommand {
                 valueName: "n"))
     private var concurrencyLimit: Int?
 
-    @Option(parsing: .upToNextOption,
+    @Option(name: [.customShort("c"), .long],
+            parsing: .upToNextOption,
             help: "If set, custom module imports (separated by a space) will be added to the final import statement list.")
     private var customImports: [String] = []
 
