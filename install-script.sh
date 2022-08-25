@@ -64,9 +64,9 @@ echo "OUTPUT FILE = ${OUTFILE}"
 
 cd "$SRCDIR"
 rm -rf .build
-swift build -c release 
+swift build -c release --arch arm64 --arch x86_64
 
-cd .build/release
+cd .build/apple/Products/Release
 
 echo "** Install..."
 cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib . 
