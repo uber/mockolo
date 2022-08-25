@@ -39,7 +39,7 @@ $ mint run uber/mockolo mockolo -h // see commandline input options below
 Option 2: [Homebrew](https://brew.sh/)
 
 ```
-$ brew install mockolo
+$ brew reinstall --build-from-source mockolo
 ```
 
 Option 3: Use the binary
