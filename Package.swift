@@ -9,7 +9,7 @@ var mockoloFrameworkTargetDependencies: [Target.Dependency] = [
 ]
 
 #if swift(>=5.6)
-dependencies.append(.package(url: "https://github.com/apple/swift-argument-parser", .upToNextMajor(from: "1.0.1")))
+dependencies.append(.package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.1"))
 #else
 dependencies.append(.package(url: "https://github.com/apple/swift-argument-parser", "1.0.1"..."1.0.3"))
 #endif
