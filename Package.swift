@@ -1,5 +1,6 @@
 // swift-tools-version:5.4
 import PackageDescription
+import Foundation
 
 var dependencies: [Package.Dependency] = [
     .package(url: "https://github.com/apple/swift-tools-support-core.git", .exact("0.2.7")),
@@ -8,13 +9,25 @@ var mockoloFrameworkTargetDependencies: [Target.Dependency] = [
     .product(name: "SwiftSyntax", package: "SwiftSyntax"),
 ]
 
+let mockoloFrameworkLinkerSettings: [LinkerSetting]
+if let parserLibSearchPath = ProcessInfo.processInfo.environment["MOCKOLO_LIB_SEARCH_PATH"] {
+    mockoloFrameworkLinkerSettings = [.unsafeFlags([
+        "-Xlinker", "-rpath", "-Xlinker", parserLibSearchPath,
+    ])]
+} else {
+  mockoloFrameworkLinkerSettings = []
+}
+
 #if swift(>=5.6)
 dependencies.append(.package(url: "https://github.com/apple/swift-argument-parser", from: "1.0.1"))
 #else
 dependencies.append(.package(url: "https://github.com/apple/swift-argument-parser", "1.0.1"..."1.0.3"))
 #endif
 
-#if swift(>=5.6)
+#if swift(>=5.7)
+dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .branch("release/5.7")))
+mockoloFrameworkTargetDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
+#elseif swift(>=5.6)
 dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50600.1")))
 mockoloFrameworkTargetDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
 #elseif swift(>=5.5)
@@ -43,7 +56,8 @@ let package = Package(
                 ]),
         .target(
             name: "MockoloFramework",
-            dependencies: mockoloFrameworkTargetDependencies
+            dependencies: mockoloFrameworkTargetDependencies,
+            linkerSettings: mockoloFrameworkLinkerSettings
         ),
         .testTarget(
             name: "MockoloTests",
