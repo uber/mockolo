@@ -15,7 +15,8 @@ jobs:
         xcode:
           - { os: macos-11, version: "12.5.1" }
           - { os: macos-11, version: "13.0" }
-          - { os: macos-12, version: "13.3.1" }
+          - { os: macos-12, version: "13.4.1" }
+          - { os: macos-12, version: "14.0" }
     steps:
       - name: Checkout
         uses: actions/checkout@v3
