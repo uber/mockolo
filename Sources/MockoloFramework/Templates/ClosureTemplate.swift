@@ -46,8 +46,8 @@ extension ClosureModel {
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
         
         let prefix = [
-            suffix.hasThrowsOrRethrows ? String.SwiftKeywords.try.rawValue + " " : nil,
-            suffix.hasAsync ? String.SwiftKeywords.await.rawValue + " " : nil,
+            suffix.hasThrowsOrRethrows ? String.try + " " : nil,
+            suffix.hasAsync ? String.await + " " : nil,
         ].compactMap { $0 }.joined()
         
         let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "

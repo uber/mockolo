@@ -449,6 +449,7 @@ func max(for: Int) -> (() -> Void)?
 func maxDo(do: Int) -> (() -> Void)?
 func maxIn(in: Int) -> (() -> Void)?
 func maxSwitch(for switch: Int) -> (() -> Void)?
+func maxExtension(extension: Int) -> (() -> Void)?
 }
 """
 
@@ -500,6 +501,17 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
         }
         return nil
     }
+
+    private(set) var maxExtensionCallCount = 0
+    var maxExtensionHandler: ((Int) -> ((() -> Void)?))?
+    func maxExtension(extension: Int) -> (() -> Void)? {
+        maxExtensionCallCount += 1
+        if let maxExtensionHandler = maxExtensionHandler {
+            return maxExtensionHandler(`extension`)
+        }
+        return nil
+    }
+
 }
 """
 
