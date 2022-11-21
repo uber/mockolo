@@ -400,8 +400,6 @@ extension TokenKind {
           self = .poundEndifKeyword
         case "#available":
           self = .poundAvailableKeyword
-        case "#unavailable":
-          self = .poundUnavailableKeyword
         case "#fileLiteral":
           self = .poundFileLiteralKeyword
         case "#imageLiteral":
