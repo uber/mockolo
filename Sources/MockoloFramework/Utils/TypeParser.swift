@@ -551,8 +551,8 @@ public final class Type {
         }
 
         let suffixStr = [
-            suffix.hasAsync ? String.SwiftKeywords.async.rawValue + " " : nil,
-            suffix.hasThrowsOrRethrows ? String.SwiftKeywords.throws.rawValue + " " : nil,
+            suffix.hasAsync ? String.async + " " : nil,
+            suffix.hasThrowsOrRethrows ? String.throws + " " : nil,
         ].compactMap { $0 }.joined()
 
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"

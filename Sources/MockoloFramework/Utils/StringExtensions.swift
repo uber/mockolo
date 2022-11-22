@@ -15,6 +15,7 @@
 //
 
 import Foundation
+import SwiftSyntax
 
 extension Int {
     var tab: String {
@@ -23,24 +24,14 @@ extension Int {
 }
 
 extension String {
-    enum SwiftKeywords: String {
-        case `throws` = "throws"
-        case `rethrows` = "rethrows"
-        case `try` = "try"
-        case `async` = "async"
-        case `await` = "await"
-        case `for` = "for"
-        case `in` = "in"
-        case `where` = "where"
-        case `while` = "while"
-        case `default` = "default"
-        case `fallthrough` = "fallthrough"
-        case `do` = "do"
-        case `switch` = "switch"
-    }
     static public let protocolDecl = "protocol ".data(using: .utf8)
     static public let classDecl = "class ".data(using: .utf8)
 
+    static let `try` = "try"
+    static let `throws` = "throws"
+    static let `rethrows` = "rethrows"
+    static let async = "async"
+    static let await = "await"
     static let `inout` = "inout"
     static let hasBlankInit = "_hasBlankInit"
     static let `Self` = "Self"
@@ -113,18 +104,18 @@ extension String {
 
     var hasThrowsOrRethrows: Bool {
         return components(separatedBy: .whitespaces).contains { component in
-            return component == SwiftKeywords.throws.rawValue || component == SwiftKeywords.rethrows.rawValue
+            return component == .throws || component == .rethrows
         }
     }
 
     var hasAsync: Bool {
         return components(separatedBy: .whitespaces).contains { component in
-            return component == SwiftKeywords.async.rawValue
+            return component == .async
         }
     }
 
     var safeName: String {
-        if let _ = SwiftKeywords(rawValue: self) {
+        if let token = TokenKind(keyword: self), token.isKeyword {
             return "`\(self)`"
         }
         return self
@@ -249,5 +240,174 @@ extension StringProtocol {
     var moduleNameInImport: String {
         guard self.hasPrefix(String.importSpace) else { return "" }
         return self.dropFirst(String.importSpace.count).trimmingCharacters(in: .whitespaces)
+    }
+}
+
+extension TokenKind {
+    init?(keyword: String) {
+        switch keyword {
+        case "associatedtype":
+          self = .associatedtypeKeyword
+        case "class":
+          self = .classKeyword
+        case "deinit":
+          self = .deinitKeyword
+        case "enum":
+          self = .enumKeyword
+        case "extension":
+          self = .extensionKeyword
+        case "func":
+          self = .funcKeyword
+        case "import":
+          self = .importKeyword
+        case "init":
+          self = .initKeyword
+        case "inout":
+          self = .inoutKeyword
+        case "let":
+          self = .letKeyword
+        case "operator":
+          self = .operatorKeyword
+        case "precedencegroup":
+          self = .precedencegroupKeyword
+        case "protocol":
+          self = .protocolKeyword
+        case "struct":
+          self = .structKeyword
+        case "subscript":
+          self = .subscriptKeyword
+        case "typealias":
+          self = .typealiasKeyword
+        case "var":
+          self = .varKeyword
+        case "fileprivate":
+          self = .fileprivateKeyword
+        case "internal":
+          self = .internalKeyword
+        case "private":
+          self = .privateKeyword
+        case "public":
+          self = .publicKeyword
+        case "static":
+          self = .staticKeyword
+        case "defer":
+          self = .deferKeyword
+        case "if":
+          self = .ifKeyword
+        case "guard":
+          self = .guardKeyword
+        case "do":
+          self = .doKeyword
+        case "repeat":
+          self = .repeatKeyword
+        case "else":
+          self = .elseKeyword
+        case "for":
+          self = .forKeyword
+        case "in":
+          self = .inKeyword
+        case "while":
+          self = .whileKeyword
+        case "return":
+          self = .returnKeyword
+        case "break":
+          self = .breakKeyword
+        case "continue":
+          self = .continueKeyword
+        case "fallthrough":
+          self = .fallthroughKeyword
+        case "switch":
+          self = .switchKeyword
+        case "case":
+          self = .caseKeyword
+        case "default":
+          self = .defaultKeyword
+        case "where":
+          self = .whereKeyword
+        case "catch":
+          self = .catchKeyword
+        case "throw":
+          self = .throwKeyword
+        case "as":
+          self = .asKeyword
+        case "Any":
+          self = .anyKeyword
+        case "false":
+          self = .falseKeyword
+        case "is":
+          self = .isKeyword
+        case "nil":
+          self = .nilKeyword
+        case "rethrows":
+          self = .rethrowsKeyword
+        case "super":
+          self = .superKeyword
+        case "self":
+          self = .selfKeyword
+        case "Self":
+          self = .capitalSelfKeyword
+        case "true":
+          self = .trueKeyword
+        case "try":
+          self = .tryKeyword
+        case "throws":
+          self = .throwsKeyword
+        case "__FILE__":
+          self = .__file__Keyword
+        case "__LINE__":
+          self = .__line__Keyword
+        case "__COLUMN__":
+          self = .__column__Keyword
+        case "__FUNCTION__":
+          self = .__function__Keyword
+        case "__DSO_HANDLE__":
+          self = .__dso_handle__Keyword
+        case "_":
+          self = .wildcardKeyword
+        case "#keyPath":
+          self = .poundKeyPathKeyword
+        case "#line":
+          self = .poundLineKeyword
+        case "#selector":
+          self = .poundSelectorKeyword
+        case "#file":
+          self = .poundFileKeyword
+        case "#fileID":
+          self = .poundFileIDKeyword
+        case "#filePath":
+          self = .poundFilePathKeyword
+        case "#column":
+          self = .poundColumnKeyword
+        case "#function":
+          self = .poundFunctionKeyword
+        case "#dsohandle":
+          self = .poundDsohandleKeyword
+        case "#assert":
+          self = .poundAssertKeyword
+        case "#sourceLocation":
+          self = .poundSourceLocationKeyword
+        case "#warning":
+          self = .poundWarningKeyword
+        case "#error":
+          self = .poundErrorKeyword
+        case "#if":
+          self = .poundIfKeyword
+        case "#else":
+          self = .poundElseKeyword
+        case "#elseif":
+          self = .poundElseifKeyword
+        case "#endif":
+          self = .poundEndifKeyword
+        case "#available":
+          self = .poundAvailableKeyword
+        case "#fileLiteral":
+          self = .poundFileLiteralKeyword
+        case "#imageLiteral":
+          self = .poundImageLiteralKeyword
+        case "#colorLiteral":
+          self = .poundColorLiteralKeyword
+        default:
+          return nil
+        }
     }
 }
