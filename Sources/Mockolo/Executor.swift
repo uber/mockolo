@@ -99,7 +99,7 @@ struct Executor: ParsableCommand {
             help: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.",
             completion: .file())
     private var outputFilePath: String
-    
+
     @Option(name: [.customShort("s"), .customLong("sourcedirs")],
             parsing: .upToNextOption,
             help: "Paths to the directories containing source files to generate mocks for (separated by a space). If the --filelist or --sourcefiles values exist, they will be ignored.",
@@ -129,11 +129,11 @@ struct Executor: ParsableCommand {
     @Flag(name: .long,
           help: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
     private var useTemplateFunc: Bool = false
-    
+
     init() {
         self.defaultTimeout = 20
     }
-    
+
     private func fullPath(_ path: String) -> String {
         if path.hasPrefix("/") {
             return path
@@ -170,11 +170,19 @@ struct Executor: ParsableCommand {
     private var srcs: [String] = []
 
     mutating func run() throws {
-        print("Start...")
-        defer { print("Done.") }
+        let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
+
+        if shouldOutputRunStatusMessages {
+            print("Start...")
+        }
+        defer {
+            if shouldOutputRunStatusMessages {
+                print("Done.")
+            }
+        }
 
         let outputFilePath = fullPath(self.outputFilePath)
-        
+
         var mockFilePaths: [String]?
         // First see if a list of mock files are stored in a file
         if let mockList = self.mockFileList {
