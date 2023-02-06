@@ -1,13 +1,13 @@
 import Foundation
 
-class OpaqueReturnTypeFuncTests: MockoloTestCase {
+class OpaqueTypeFuncTests: MockoloTestCase {
 
-    func testOpaqueReturnTypeParamterFuncs() {
+    func testOpaqueTypeParamterFuncs() {
         verify(srcContent: someParameterOptionalType,
                dstContent: someParameterOptionalTypeMock)
     }
 
-    func testOpaqueReturnTypeMultiParamterFuncs() {
+    func testOpaqueTypeMultiParamterFuncs() {
         verify(srcContent: someMultiParameterOptionalType,
                dstContent: someMultiParameterOptionalTypeMock)
     }

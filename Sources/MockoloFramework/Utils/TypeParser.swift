@@ -40,7 +40,7 @@ public final class Type {
         return typeName.hasPrefix(String.autoclosure)
     }
 
-    var isOpaqueReturnType: Bool {
+    var isOpaqueType: Bool {
         typeName.contains(String.some + " ")
     }
 
@@ -617,7 +617,7 @@ public final class Type {
                 ret.literalComponents.contains(item)
             }.isEmpty == false
 
-            if hasGenericType || isOpaqueReturnType {
+            if hasGenericType || isOpaqueType {
                 ret = .any
                 if isTypeOptional {
                     ret += "?"
