@@ -45,6 +45,7 @@ extension String {
     static let unknownVal = "Unknown"
     static let prefix = "prefix"
     static let any = "Any"
+    static let some = "some"
     static let anyObject = "AnyObject"
     static let fatalError = "fatalError"
     static let available = "available"
