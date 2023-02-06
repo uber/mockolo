@@ -2,7 +2,7 @@ import MockoloFramework
 
 let someParameterOptionalType = """
 /// \(String.mockAnnotation)
-public protocol OpaqueReturnTypeProtocol {
+public protocol OpaqueTypeProtocol {
     func nonOptional(_ type: some Error) -> Int
     func optional(_ type: (some Error)?)
 }
@@ -11,7 +11,7 @@ public protocol OpaqueReturnTypeProtocol {
 let someParameterOptionalTypeMock = """
 
 
-public class OpaqueReturnTypeProtocolMock: OpaqueReturnTypeProtocol {
+public class OpaqueTypeProtocolMock: OpaqueTypeProtocol {
     public init() { }
 
 
@@ -41,9 +41,10 @@ public class OpaqueReturnTypeProtocolMock: OpaqueReturnTypeProtocol {
 
 let someMultiParameterOptionalType = """
 /// \(String.mockAnnotation)
-public protocol OpaqueReturnTypeWithMultiTypeProtocol {
+public protocol OpaqueTypeWithMultiTypeProtocol {
     func nonOptional(_ type: some Error) -> Int
     func optional(_ type: ((some (Error & Foo)))?)
+    func multiParam(_ typeA: some Error, _ typeB: some Error)
 }
 """
 
@@ -51,7 +52,7 @@ public protocol OpaqueReturnTypeWithMultiTypeProtocol {
 let someMultiParameterOptionalTypeMock = """
 
 
-public class OpaqueReturnTypeWithMultiTypeProtocolMock: OpaqueReturnTypeWithMultiTypeProtocol {
+public class OpaqueTypeWithMultiTypeProtocolMock: OpaqueTypeWithMultiTypeProtocol {
     public init() { }
 
 
@@ -71,6 +72,16 @@ public class OpaqueReturnTypeWithMultiTypeProtocolMock: OpaqueReturnTypeWithMult
         optionalCallCount += 1
         if let optionalHandler = optionalHandler {
             optionalHandler(type)
+        }
+
+    }
+
+    public private(set) var multiParamCallCount = 0
+    public var multiParamHandler: ((Any, Any) -> ())?
+    public func multiParam(_ typeA: some Error, _ typeB: some Error)  {
+        multiParamCallCount += 1
+        if let multiParamHandler = multiParamHandler {
+            multiParamHandler(typeA, typeB)
         }
 
     }
