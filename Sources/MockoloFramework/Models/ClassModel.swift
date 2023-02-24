@@ -43,7 +43,7 @@ final class ClassModel: Model {
          declaredInits: [MethodModel],
          entities: [(String, Model)]) {
         self.identifier = identifier 
-        self.name = identifier + "Mock"
+        self.name = (metadata?.nameOverride ?? identifier) + "Mock"
         self.type = Type(.class)
         self.declType = declType
         self.entities = entities
