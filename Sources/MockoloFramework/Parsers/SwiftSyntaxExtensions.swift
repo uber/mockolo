@@ -721,6 +721,10 @@ extension Trivia {
         if argsStr.hasSuffix(")") {
             argsStr.removeLast()
         }
+        if let arguments = parseArguments(argsStr, identifier: .objectColon) {
+            let objectTypeRawValue = arguments.first?.value
+            ret.objectType = objectTypeRawValue.flatMap(ObjectType.init(rawValue:))
+        }
         if let arguments = parseArguments(argsStr, identifier: .typealiasColon) {
             ret.typeAliases = arguments
         }
