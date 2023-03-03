@@ -59,15 +59,29 @@ struct ResolvedEntity {
 
 
     func model() -> Model {
-        return ClassModel(identifier: key,
-                          acl: entity.entityNode.accessLevel,
-                          declType: entity.entityNode.declType,
-                          attributes: attributes,
-                          offset: entity.entityNode.offset,
-                          metadata: entity.metadata,
-                          initParamCandidates: initParamCandidates,
-                          declaredInits: declaredInits,
-                          entities: uniqueModels)
+        let objectType = entity.metadata?.objectType
+        switch objectType {
+        case .class, .none:
+            return ClassModel(identifier: key,
+                              acl: entity.entityNode.accessLevel,
+                              declType: entity.entityNode.declType,
+                              attributes: attributes,
+                              offset: entity.entityNode.offset,
+                              metadata: entity.metadata,
+                              initParamCandidates: initParamCandidates,
+                              declaredInits: declaredInits,
+                              entities: uniqueModels)
+        case .actor:
+            return ActorModel(identifier: key,
+                              acl: entity.entityNode.accessLevel,
+                              declType: entity.entityNode.declType,
+                              attributes: attributes,
+                              offset: entity.entityNode.offset,
+                              metadata: entity.metadata,
+                              initParamCandidates: initParamCandidates,
+                              declaredInits: declaredInits,
+                              entities: uniqueModels)
+        }
     }
 }
 
