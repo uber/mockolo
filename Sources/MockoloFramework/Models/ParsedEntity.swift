@@ -59,15 +59,27 @@ struct ResolvedEntity {
 
 
     func model() -> Model {
-        return ClassModel(identifier: key,
-                          acl: entity.entityNode.accessLevel,
-                          declType: entity.entityNode.declType,
-                          attributes: attributes,
-                          offset: entity.entityNode.offset,
-                          metadata: entity.metadata,
-                          initParamCandidates: initParamCandidates,
-                          declaredInits: declaredInits,
-                          entities: uniqueModels)
+        if entity.entityNode.inheritedTypes.contains(.actorProtocol) {
+            return ActorModel(identifier: key,
+                              acl: entity.entityNode.accessLevel,
+                              declType: entity.entityNode.declType,
+                              attributes: attributes,
+                              offset: entity.entityNode.offset,
+                              metadata: entity.metadata,
+                              initParamCandidates: initParamCandidates,
+                              declaredInits: declaredInits,
+                              entities: uniqueModels)
+        } else {
+            return ClassModel(identifier: key,
+                              acl: entity.entityNode.accessLevel,
+                              declType: entity.entityNode.declType,
+                              attributes: attributes,
+                              offset: entity.entityNode.offset,
+                              metadata: entity.metadata,
+                              initParamCandidates: initParamCandidates,
+                              declaredInits: declaredInits,
+                              entities: uniqueModels)
+        }
     }
 }
 
