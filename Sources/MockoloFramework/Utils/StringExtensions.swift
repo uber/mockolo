@@ -76,6 +76,7 @@ extension String {
     static let `required` = "required"
     static let `convenience` = "convenience"
     static let closureArrow = "->"
+    static let objectColon = "object:"
     static let moduleColon = "module:"
     static let typealiasColon = "typealias:"
     static let combineColon = "combine:"
