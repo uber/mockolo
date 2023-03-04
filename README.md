@@ -391,7 +391,7 @@ public class FooMock: Foo {
 
 To override the generated mock name:
 ```swift
-/// @mockable(override: name = Foo)
+/// @mockable(override: name = FooMock)
 public protocol FooProtocol { ... }
 ```
 
