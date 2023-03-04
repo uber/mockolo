@@ -80,8 +80,8 @@ public class SimpleParentMock: SimpleParent {
 
 """
 
-// MARK: Multiple inheritance
-let twoTypeInheritance = """
+// MARK: Composition inheritance
+let compositionInheritance = """
 
 protocol FirstSwiftProtocol {
     var someBool: Bool { get }
@@ -102,7 +102,7 @@ protocol TestProtocol: FirstSwiftProtocol & SecondSwiftProtocol {
 
 """
 
-let twoTypeInheritanceMock = """
+let compositionInheritanceMock = """
 class TestProtocolMock: TestProtocol {
     init() { }
     init(someBool: Bool = false, someInt: Int = 0) {

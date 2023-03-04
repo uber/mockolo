@@ -77,8 +77,8 @@ class OverloadTests: MockoloTestCase {
 
     func testTwoInheritance() {
         verify(
-            srcContent: twoTypeInheritance,
-            dstContent: twoTypeInheritanceMock
+            srcContent: compositionInheritance,
+            dstContent: compositionInheritanceMock
         )
     }
     
