@@ -1,5 +1,6 @@
 import MockoloFramework
 
+// MARK: Simple inheritance
 let simpleInheritance = """
 import Foundation
 
@@ -8,13 +9,13 @@ public protocol SimpleChild: SimpleParent {
     var name: String { get set }
     func foo()
 }
-    
+
 /// \(String.mockAnnotation)
 public protocol SimpleParent: AnyObject {
     var number: Int { get set }
     func bar(arg: Double) -> Float?
 }
-    
+
 """
     
 let simpleInheritanceMock = """
@@ -74,6 +75,76 @@ public class SimpleParentMock: SimpleParent {
             return barHandler(arg)
         }
         return nil
+    }
+}
+
+"""
+
+// MARK: Multiple inheritance
+let twoTypeInheritance = """
+
+protocol FirstSwiftProtocol {
+    var someBool: Bool { get }
+
+    func doSomething()
+}
+
+protocol SecondSwiftProtocol {
+    var someInt: Int { get set }
+
+    func doSomethingElse() -> Bool
+}
+
+/// \(String.mockAnnotation)
+protocol TestProtocol: FirstSwiftProtocol & SecondSwiftProtocol {
+    func doSomethingSpecial()
+}
+
+"""
+
+let twoTypeInheritanceMock = """
+class TestProtocolMock: TestProtocol {
+    init() { }
+    init(someBool: Bool = false, someInt: Int = 0) {
+        self.someBool = someBool
+        self.someInt = someInt
+    }
+
+
+    private(set) var someBoolSetCallCount = 0
+    var someBool: Bool = false { didSet { someBoolSetCallCount += 1 } }
+
+    private(set) var doSomethingCallCount = 0
+    var doSomethingHandler: (() -> ())?
+    func doSomething()  {
+        doSomethingCallCount += 1
+        if let doSomethingHandler = doSomethingHandler {
+            doSomethingHandler()
+        }
+
+    }
+
+    private(set) var someIntSetCallCount = 0
+    var someInt: Int = 0 { didSet { someIntSetCallCount += 1 } }
+
+    private(set) var doSomethingElseCallCount = 0
+    var doSomethingElseHandler: (() -> (Bool))?
+    func doSomethingElse() -> Bool {
+        doSomethingElseCallCount += 1
+        if let doSomethingElseHandler = doSomethingElseHandler {
+            return doSomethingElseHandler()
+        }
+        return false
+    }
+
+    private(set) var doSomethingSpecialCallCount = 0
+    var doSomethingSpecialHandler: (() -> ())?
+    func doSomethingSpecial()  {
+        doSomethingSpecialCallCount += 1
+        if let doSomethingSpecialHandler = doSomethingSpecialHandler {
+            doSomethingSpecialHandler()
+        }
+
     }
 }
 

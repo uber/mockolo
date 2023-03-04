@@ -99,7 +99,15 @@ extension TypeInheritanceClauseSyntax {
     var types: [String] {
         var list = [String]()
         for element in self.inheritedTypeCollection {
-            if let elementName = element.firstToken?.text {
+            if let composition = element.typeName.as(CompositionTypeSyntax.self) {
+                // Match Case: use `&` keyword to conform to multiple protocols.
+                // example: `A: B & C`
+                for compositionElement in composition.elements {
+                    if let elementName = compositionElement.firstToken?.text {
+                        list.append(elementName)
+                    }
+                }
+            } else if let elementName = element.firstToken?.text {
                 list.append(elementName)
             }
         }

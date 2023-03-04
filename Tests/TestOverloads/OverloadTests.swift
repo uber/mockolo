@@ -74,5 +74,12 @@ class OverloadTests: MockoloTestCase {
         verify(srcContent: overload11,
                dstContent: overloadMock11)
     }
+
+    func testTwoInheritance() {
+        verify(
+            srcContent: twoTypeInheritance,
+            dstContent: twoTypeInheritanceMock
+        )
+    }
     
 }
