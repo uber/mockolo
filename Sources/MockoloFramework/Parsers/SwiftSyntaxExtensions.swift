@@ -715,6 +715,10 @@ extension Trivia {
 
             ret.module = arguments[.prefix]
         }
+        if let arguments = parseArguments(argsStr, identifier: .overrideColon) {
+
+            ret.nameOverride = arguments[.name]
+        }
         if let arguments = parseArguments(argsStr, identifier: .rxColon) {
 
             ret.varTypes = arguments
