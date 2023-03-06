@@ -99,11 +99,24 @@ extension TypeInheritanceClauseSyntax {
     var types: [String] {
         var list = [String]()
         for element in self.inheritedTypeCollection {
-            if let elementName = element.firstToken?.text {
-                list.append(elementName)
-            }
+            let elementNameList = parseElementType(type: element.typeName)
+            list.append(contentsOf: elementNameList)
         }
         return list
+    }
+
+    private func parseElementType(type: TypeSyntax) -> [String] {
+        if let simpleTypeIdentifier = type.as(SimpleTypeIdentifierSyntax.self) {
+            // example: `protocol A: B {}`
+            return [simpleTypeIdentifier.name.text]
+        } else if let tupleType = type.as(TupleTypeSyntax.self) {
+            // example: `protocol A: (B) {}`
+            return tupleType.elements.map(\.type).map(parseElementType(type:)).flatMap { $0 }
+        } else if let compositionType = type.as(CompositionTypeSyntax.self) {
+            // example: `protocol A: B & C {}`
+            return compositionType.elements.map(\.type).map(parseElementType(type:)).flatMap { $0 }
+        }
+        return []
     }
 
     var typesDescription: String {
