@@ -15,7 +15,12 @@
 //
 
 import Foundation
+#if canImport(SwiftSyntax)
 import SwiftSyntax
+#endif
+#if canImport(SwiftSyntaxParser)
+import SwiftSyntaxParser
+#endif
 
 extension Int {
     var tab: String {
