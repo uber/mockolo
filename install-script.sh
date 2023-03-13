@@ -69,7 +69,6 @@ swift build -c release --arch arm64 --arch x86_64
 cd .build/apple/Products/Release
 
 echo "** Install..."
-cp "$(xcode-select -p)"/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/macosx/lib_InternalSwiftSyntaxParser.dylib . 
 
 install_name_tool -change @rpath/lib_InternalSwiftSyntaxParser.dylib @executable_path/lib_InternalSwiftSyntaxParser.dylib "$TARGET"
 
