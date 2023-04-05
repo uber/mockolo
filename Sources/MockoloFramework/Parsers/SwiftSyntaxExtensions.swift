@@ -9,24 +9,24 @@ import Foundation
 #if canImport(SwiftSyntax)
 import SwiftSyntax
 #endif
-#if canImport(SwiftSyntaxParser)
-import SwiftSyntaxParser
+#if canImport(SwiftParser)
+import SwiftParser
 #endif
 
-extension SyntaxParser {
-    public static func parse(_ fileData: Data, path: String) throws -> SourceFileSyntax {
+extension Parser {
+    public static func parse(_ fileData: Data, path: String) -> SourceFileSyntax {
         // Avoid using `String(contentsOf:)` because it creates a wrapped NSString.
         let source = fileData.withUnsafeBytes { buf in
             return String(decoding: buf.bindMemory(to: UInt8.self), as: UTF8.self)
         }
-        return try parse(source: source, filenameForDiagnostics: path)
+        return parse(source: source)
     }
 
-    public static func parse(_ path: String) throws -> SourceFileSyntax {
+    public static func parse(_ path: String) -> SourceFileSyntax {
         guard let fileData = FileManager.default.contents(atPath: path) else {
             fatalError("Retrieving contents of \(path) failed")
         }
-        return try parse(fileData, path: path)
+        return parse(fileData, path: path)
     }
 }
 

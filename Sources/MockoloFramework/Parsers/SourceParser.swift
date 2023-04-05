@@ -18,8 +18,8 @@ import Foundation
 #if canImport(SwiftSyntax)
 import SwiftSyntax
 #endif
-#if canImport(SwiftSyntaxParser)
-import SwiftSyntaxParser
+#if canImport(SwiftParser)
+import SwiftParser
 #endif
 
 public enum DeclType {
@@ -91,7 +91,7 @@ public class SourceParser {
 
         do {
             var results = [Entity]()
-            let node = try SyntaxParser.parse(path)
+            let node = try Parser.parse(path)
             let treeVisitor = EntityVisitor(path, annotation: annotation, fileMacro: fileMacro, declType: declType)
             treeVisitor.walk(node)
             let ret = treeVisitor.entities
