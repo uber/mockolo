@@ -14,7 +14,10 @@ dependencies.append(.package(url: "https://github.com/apple/swift-argument-parse
 dependencies.append(.package(url: "https://github.com/apple/swift-argument-parser", "1.0.1"..."1.0.3"))
 #endif
 
-#if swift(>=5.7)
+#if swift(>=5.8)
+dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("508.0.0")))
+mockoloFrameworkTargetDependencies.append(.product(name: "SwiftParser", package: "SwiftSyntax"))
+#elseif swift(>=5.7)
 dependencies.append(.package(name: "SwiftSyntax", url: "https://github.com/apple/swift-syntax.git", .exact("0.50700.1")))
 mockoloFrameworkTargetDependencies.append(.product(name: "SwiftSyntaxParser", package: "SwiftSyntax"))
 #elseif swift(>=5.6)

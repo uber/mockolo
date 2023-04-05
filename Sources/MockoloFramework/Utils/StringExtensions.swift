@@ -354,17 +354,7 @@ extension TokenKind {
         case "try":
           self = .tryKeyword
         case "throws":
-          self = .throwsKeyword
-        case "__FILE__":
-          self = .__file__Keyword
-        case "__LINE__":
-          self = .__line__Keyword
-        case "__COLUMN__":
-          self = .__column__Keyword
-        case "__FUNCTION__":
-          self = .__function__Keyword
-        case "__DSO_HANDLE__":
-          self = .__dso_handle__Keyword
+          self = .throwsKeyword        
         case "_":
           self = .wildcardKeyword
         case "#keyPath":

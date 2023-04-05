@@ -248,7 +248,7 @@ extension IfConfigDeclSyntax {
         var name = ""
         for cl in self.clauses {
             if let desc = cl.condition?.description {
-                if let list = cl.elements.as(MemberDeclListSyntax.self) {
+                if let list = cl.elements?.as(MemberDeclListSyntax.self) {
                     name = desc
                     for element in list {
                         if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed) {
@@ -483,7 +483,7 @@ extension InitializerDeclSyntax {
     func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
         let requiredInit = isRequired(with: declType)
 
-        let params = self.parameters.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
+        let params = self.signature.input.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: true) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
@@ -495,7 +495,7 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: self.throwsOrRethrowsKeyword?.text,
+                           throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text,
                            asyncOrReasync: nil, // "init() async" is not supperted in SwiftSyntax
                            isStatic: false,
                            offset: self.offset,
@@ -581,7 +581,7 @@ extension AssociatedtypeDeclSyntax {
 extension TypealiasDeclSyntax {
     func model(with acl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> Model {
         return TypeAliasModel(name: self.identifier.text,
-                              typeName: self.initializer?.value.description ?? "",
+                              typeName: self.initializer.value.description,
                               acl: acl,
                               encloserType: declType,
                               overrideTypes: overrides,
@@ -605,6 +605,7 @@ final class EntityVisitor: SyntaxVisitor {
         self.fileMacro = fileMacro ?? ""
         self.path = path
         self.declType = declType
+        super.init(viewMode: .sourceAccurate)
     }
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
@@ -664,7 +665,7 @@ final class EntityVisitor: SyntaxVisitor {
 
             guard macroName != fileMacro else { return .visitChildren }
 
-            if let list = cl.elements.as(CodeBlockItemListSyntax.self) {
+            if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
                         let key = macroName
