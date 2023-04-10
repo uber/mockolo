@@ -1,5 +1,6 @@
 import Foundation
 
+#if compiler(>=5.5.2) && canImport(_Concurrency)
 final class ObjectTypesTests: MockoloTestCase {
 
     func testObjectTypesWithNoProperty() {
@@ -17,3 +18,4 @@ final class ObjectTypesTests: MockoloTestCase {
                dstContent: argumentsObjectTypesWithActorAnnotationMock)
     }
 }
+#endif
