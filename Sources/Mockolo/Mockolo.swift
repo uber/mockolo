@@ -16,8 +16,6 @@
 
 import ArgumentParser
 import Foundation
-import TSCUtility
-import TSCBasic
 import MockoloFramework
 
 @main

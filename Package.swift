@@ -11,7 +11,6 @@ let package = Package(
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
         ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-tools-support-core.git", from: "0.5.2"),
         .package(url: "https://github.com/apple/swift-syntax.git", exact: "508.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.2"),
     ],
@@ -20,7 +19,6 @@ let package = Package(
             name: "Mockolo",
             dependencies: [
                 "MockoloFramework",
-                .product(name: "SwiftToolsSupport-auto", package: "swift-tools-support-core"),
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 ]),
         .target(
