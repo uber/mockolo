@@ -70,9 +70,7 @@ cd .build/apple/Products/Release
 
 echo "** Install..."
 
-install_name_tool -change @rpath/lib_InternalSwiftSyntaxParser.dylib @executable_path/lib_InternalSwiftSyntaxParser.dylib "$TARGET"
-
-tar -cvzf "$OUTFILE" "$TARGET" lib_InternalSwiftSyntaxParser.dylib
+tar -cvzf "$OUTFILE" "$TARGET"
 
 mv "$OUTFILE" "$DESTDIR"
 
