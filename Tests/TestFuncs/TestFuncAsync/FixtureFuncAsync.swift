@@ -5,6 +5,7 @@ import Foundation
 
 /// \(String.mockAnnotation)
 protocol FuncAsync {
+    init() async
     func f1(arg: Int) async -> String
     func f2(arg: Int) async
     func g1(arg: (Int) async -> ())
@@ -21,7 +22,9 @@ import Foundation
 
 
 class FuncAsyncMock: FuncAsync {
-    init() { }
+    required init() async {
+
+    }
 
 
     private(set) var f1CallCount = 0
@@ -82,6 +85,7 @@ import Foundation
 
 /// \(String.mockAnnotation)
 protocol FuncAsyncThrows {
+    init() async throws
     func f1(arg: Int) async throws -> String
     func f2(arg: Int) async throws
     func g1(arg: (Int) async throws -> ())
@@ -98,7 +102,9 @@ import Foundation
 
 
 class FuncAsyncThrowsMock: FuncAsyncThrows {
-    init() { }
+    required init() async throws {
+
+    }
 
 
     private(set) var f1CallCount = 0

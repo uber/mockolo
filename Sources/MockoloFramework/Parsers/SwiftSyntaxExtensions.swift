@@ -817,11 +817,3 @@ extension Trivia {
         return nil
     }
 }
-
-#if swift(<5.5)
-extension FunctionSignatureSyntax {
-    var asyncOrReasyncKeyword: TokenSyntax? {
-        return nil
-    }
-}
-#endif
