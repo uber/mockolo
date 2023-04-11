@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11, macos-12]
+        os: [macos-latest, ubuntu-latest]
     steps:
       - uses: sidepelican/setup-swift@swift58
         with:
@@ -25,6 +25,6 @@ jobs:
           swift --version
           swift package --version
       - name: Build
-        run: swift build -v
+        run: swift build
       - name: Test
-        run: swift test -v -c release
+        run: swift test -c release

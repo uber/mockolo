@@ -20,7 +20,7 @@ jobs:
         name: mockolo
         path: mockolo.tar.gz
 
-  test-release:
+  check-portability:
     needs: build-release
     runs-on: ${{ matrix.os }}
     strategy:
@@ -36,8 +36,8 @@ jobs:
       run: ./mockolo --version
 
   deploy-binary:
-    needs: test-release
-    runs-on: macos-12
+    needs: check-portability
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v3
       with:
