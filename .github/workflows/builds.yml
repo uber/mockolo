@@ -19,11 +19,6 @@ jobs:
           swift-version: "5.8"
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Show versions
-        run: |
-          xcodebuild -version
-          swift --version
-          swift package --version
       - name: Build
         run: swift build
       - name: Test
