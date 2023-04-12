@@ -137,7 +137,7 @@ Option 1: SPM
 ```swift
 
 dependencies: [
-    .package(url: "https://github.com/uber/mockolo.git", from: "1.8.1"),
+    .package(url: "https://github.com/uber/mockolo.git", from: "1.8.2"),
 ],
 targets: [
     .target(name: "MyTarget", dependencies: ["MockoloFramework"]),
