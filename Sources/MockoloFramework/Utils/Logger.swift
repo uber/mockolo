@@ -15,9 +15,6 @@
 //
 
 import Foundation
-import os.signpost
-
-fileprivate let perfLog = OSLog(subsystem: "mockolo", category: "PointsOfInterest")
 
 public var minLogLevel = 0
 
@@ -41,6 +38,11 @@ public func log(_ arg: Any..., level: LogLevel = .info) {
     }
 }
 
+#if canImport(os.signpost)
+import os.signpost
+
+fileprivate let perfLog = OSLog(subsystem: "mockolo", category: "PointsOfInterest")
+
 public func signpost_begin(name: StaticString) {
     if minLogLevel == LogLevel.verbose.rawValue {
         os_signpost(.begin, log: perfLog, name: name)
@@ -52,3 +54,10 @@ public func signpost_end(name: StaticString) {
         os_signpost(.end, log: perfLog, name: name)
     }
 }
+#else
+public func signpost_begin(name: StaticString) {
+}
+
+public func signpost_end(name: StaticString) {
+}
+#endif

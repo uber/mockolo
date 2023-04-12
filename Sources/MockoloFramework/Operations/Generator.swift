@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+import CoreFoundation
 import Foundation
 
 enum InputError: Error {
