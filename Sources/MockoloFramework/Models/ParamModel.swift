@@ -56,7 +56,7 @@ final class ParamModel: Model {
     
     var asVarDecl: String? {
         if self.inInit, self.needVarDecl {
-            return applyVarTemplate(name: name, type: type)
+            return applyVarTemplate(type: type)
         }
         return nil
     }

@@ -1,4 +1,5 @@
 import Foundation
+import XCTest
 
 class InitTests: MockoloTestCase {
    func testSimpleInitParams() {
@@ -26,5 +27,20 @@ class InitTests: MockoloTestCase {
     func testInitKeywordParams() {
         verify(srcContent: keywordParams,
                dstContent: keywordParamsMock)
+    }
+
+    func testInitiWithSameParamName() {
+        verify(
+            srcContent: multipleInitsWithSameParamName,
+            dstContent: multipleInitsWithSameParamNameMock
+        )
+    }
+
+    func testInitiWithSameParamNameWithTypeDifference() throws {
+        throw XCTSkip("This feature will be implemented in future work.")
+        verify(
+            srcContent: multipleTypeAwarenessInitsWithSameParamName,
+            dstContent: multipleTypeAwarenessInitsWithSameParamNameMock
+        )
     }
 }

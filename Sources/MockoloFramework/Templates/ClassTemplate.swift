@@ -108,7 +108,7 @@ extension ClassModel {
                                     overrides: [String: String]?) -> String {
         
         let declaredInitParamsPerInit = declaredInits.map { $0.params }
-        
+
         var needParamedInit = false
         var needBlankInit = false
         
@@ -168,14 +168,19 @@ extension ClassModel {
             """
         }
         
-        let extraInitParamNames = initParamCandidates.map{$0.name}
-        let extraVarsToDecl = declaredInitParamsPerInit.flatMap{$0}.compactMap { (p: ParamModel) -> String? in
-            if !extraInitParamNames.contains(p.name) {
-                return p.asVarDecl
+        let preDefinedExtraInitParamNames = initParamCandidates.map{$0.name}
+        var definedExtraInitParamNames = Set<String>()
+        let extraVarsToDecl = declaredInitParamsPerInit
+            .flatMap { $0 }
+            .compactMap { (p: ParamModel) -> String? in
+                let isDuplicatedInitParamName = definedExtraInitParamNames.contains(p.name)
+                if !preDefinedExtraInitParamNames.contains(p.name) && !isDuplicatedInitParamName {
+                    definedExtraInitParamNames.insert(p.name)
+                    return p.asVarDecl
+                }
+                return nil
             }
-            return nil
-        }
-        .joined(separator: "\n")
+            .joined(separator: "\n")
 
         let declaredInitStr = declaredInits.compactMap { (m: MethodModel) -> String? in
             if case let .initKind(required, override) = m.kind, !m.processed {
