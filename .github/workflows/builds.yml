@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
     steps:
-      - uses: sidepelican/setup-swift@swift58
+      - uses: swift-actions/setup-swift@v1
         with:
           swift-version: "5.8"
       - name: Checkout
