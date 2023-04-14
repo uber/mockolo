@@ -176,13 +176,13 @@ extension ClassModel {
                 .filter { $0.name == name }
                 .count > 1
         }
-        var definedExtraInitParamNames = Set<String>()
+        var processed = Set<String>()
         let extraVarsToDecl = declaredInitParamsPerInit
             .flatMap { $0 }
             .compactMap { (p: ParamModel) -> String? in
-                let isDuplicatedInitParamName = definedExtraInitParamNames.contains(p.name)
+                let isDuplicatedInitParamName = processed.contains(p.name)
                 if !extraInitParamNames.contains(p.name) && !isDuplicatedInitParamName {
-                    definedExtraInitParamNames.insert(p.name)
+                    processed.insert(p.name)
                     if hasSameNameInProps.contains(p.name) {
                         return p.asVarDecl(typeErase: true)
                     } else {
