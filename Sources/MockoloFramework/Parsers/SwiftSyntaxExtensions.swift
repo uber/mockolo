@@ -10,12 +10,6 @@ import SwiftSyntax
 import SwiftParser
 
 extension Parser {
-    public static func parse(_ fileData: Data, path: String) -> SourceFileSyntax {
-        return fileData.withUnsafeBytes { buf in
-            parse(source: buf.bindMemory(to: UInt8.self))
-        }
-    }
-
     public static func parse(_ path: String) -> SourceFileSyntax {
         guard let fileData = FileManager.default.contents(atPath: path) else {
             fatalError("Retrieving contents of \(path) failed")
