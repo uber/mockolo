@@ -268,6 +268,36 @@ public class ForcastUpdatingMock: ForcastUpdating {
 }
 """
 
+let initWithSameParamNameButDifferentType = """
+/// \(String.mockAnnotation)
+protocol MyProtocol {
+    init(param: Any)
+    init(param: String)
+    init(param: any Sequence<Character>)
+}
+"""
+
+let initWithSameParamNameButDifferentTypeMock = """
+
+
+
+class MyProtocolMock: MyProtocol {
+        private var _param: Any!
+    init() { }
+    required init(param: Any) {
+        self._param = param
+    }
+    required init(param: String = "") {
+        self._param = param
+    }
+    required init(param: any Sequence<Character>) {
+        self._param = param
+    }
+
+
+}
+"""
+
 let multipleInitsWithSameParamName = """
 /// \(String.mockAnnotation)
 protocol MyProtocol {
@@ -290,42 +320,6 @@ class MyProtocolMock: MyProtocol {
     required init(param: Any, anotherParam: String = "") {
         self._param = param
         self._anotherParam = anotherParam
-    }
-
-
-}
-"""
-
-
-let multipleTypeAwarenessInitsWithSameParamName = """
-/// \(String.mockAnnotation)
-protocol MyProtocol {
-    init(param: Any)
-    init(param: Any, anotherParam: String, othersParams: [Any])
-    init(param: Any, othersParams: [String])
-}
-"""
-
-let multipleTypeAwarenessInitsWithSameParamNameMock = """
-
-
-
-class MyProtocolMock: MyProtocol {
-        private var _param: Any!
-    private var _anotherParam: String!
-    private var _othersParams: [Any]!
-    init() { }
-    required init(param: Any) {
-        self._param = param
-    }
-    required init(param: Any, anotherParam: String = "", othersParams: [Any] = [Any]()) {
-        self._param = param
-        self._anotherParam = anotherParam
-        self._othersParams = othersParams
-    }
-    required init(param: Any, othersParams: [String] = [String]()) {
-        self._param = param
-        self._othersParams = othersParams as [Any]
     }
 
 

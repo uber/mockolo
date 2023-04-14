@@ -36,11 +36,10 @@ class InitTests: MockoloTestCase {
         )
     }
 
-    func testInitiWithSameParamNameWithTypeDifference() throws {
-        throw XCTSkip("This feature will be implemented in future work.")
+    func testInitiWithSameParamNameButDifferentType() {
         verify(
-            srcContent: multipleTypeAwarenessInitsWithSameParamName,
-            dstContent: multipleTypeAwarenessInitsWithSameParamNameMock
+            srcContent: initWithSameParamNameButDifferentType,
+            dstContent: initWithSameParamNameButDifferentTypeMock
         )
     }
 }

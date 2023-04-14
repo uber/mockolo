@@ -54,8 +54,14 @@ final class ParamModel: Model {
         return "_\(name)"
     }
     
-    var asVarDecl: String? {
+    func asVarDecl(typeErase: Bool = false) -> String? {
         if self.inInit, self.needVarDecl {
+            let type: `Type`
+            if typeErase {
+                type = Type("Any")
+            } else {
+                type = self.type
+            }
             return applyVarTemplate(type: type)
         }
         return nil

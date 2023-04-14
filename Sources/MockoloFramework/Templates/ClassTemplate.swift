@@ -169,6 +169,13 @@ extension ClassModel {
         }
         
         let preDefinedExtraInitParamNames = initParamCandidates.map{$0.name}
+        let uniqueParamNameSet = Set(declaredInitParamsPerInit.flatMap { $0 }.map(\.name))
+        let hasSameNameInProps = uniqueParamNameSet.filter { name in
+            declaredInitParamsPerInit
+                .flatMap { $0 }
+                .filter { $0.name == name }
+                .count > 1
+        }
         var definedExtraInitParamNames = Set<String>()
         let extraVarsToDecl = declaredInitParamsPerInit
             .flatMap { $0 }
@@ -176,7 +183,11 @@ extension ClassModel {
                 let isDuplicatedInitParamName = definedExtraInitParamNames.contains(p.name)
                 if !preDefinedExtraInitParamNames.contains(p.name) && !isDuplicatedInitParamName {
                     definedExtraInitParamNames.insert(p.name)
-                    return p.asVarDecl
+                    if hasSameNameInProps.contains(p.name) {
+                        return p.asVarDecl(typeErase: true)
+                    } else {
+                        return p.asVarDecl()
+                    }
                 }
                 return nil
             }
