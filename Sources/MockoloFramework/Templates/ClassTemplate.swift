@@ -168,7 +168,7 @@ extension ClassModel {
             """
         }
         
-        let preDefinedExtraInitParamNames = initParamCandidates.map{$0.name}
+        let extraInitParamNames = initParamCandidates.map{$0.name}
         let uniqueParamNameSet = Set(declaredInitParamsPerInit.flatMap { $0 }.map(\.name))
         let hasSameNameInProps = uniqueParamNameSet.filter { name in
             declaredInitParamsPerInit
@@ -181,7 +181,7 @@ extension ClassModel {
             .flatMap { $0 }
             .compactMap { (p: ParamModel) -> String? in
                 let isDuplicatedInitParamName = definedExtraInitParamNames.contains(p.name)
-                if !preDefinedExtraInitParamNames.contains(p.name) && !isDuplicatedInitParamName {
+                if !extraInitParamNames.contains(p.name) && !isDuplicatedInitParamName {
                     definedExtraInitParamNames.insert(p.name)
                     if hasSameNameInProps.contains(p.name) {
                         return p.asVarDecl(typeErase: true)
