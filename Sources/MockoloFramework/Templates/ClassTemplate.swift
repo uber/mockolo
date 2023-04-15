@@ -306,7 +306,7 @@ extension ClassModel {
     }
 }
 
-fileprivate extension [ParamModel] {
+fileprivate extension Array where Element == ParamModel {
     func findParams(name: String) -> [ParamModel] {
         filter {
             $0.name == name
