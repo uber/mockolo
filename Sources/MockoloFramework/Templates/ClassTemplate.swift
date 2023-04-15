@@ -29,7 +29,7 @@ extension ClassModel {
                             mockFinal: Bool,
                             enableFuncArgsHistory: Bool,
                             disableCombineDefaultValues: Bool,
-                            initParamCandidates: [Model],
+                            initParamCandidates: [VariableModel],
                             declaredInits: [MethodModel],
                             entities: [(String, Model)]) -> String {
 
@@ -101,11 +101,13 @@ extension ClassModel {
         return template
     }
     
-    private func extraInitsIfNeeded(initParamCandidates: [Model],
-                                    declaredInits: [MethodModel],
-                                    acl: String,
-                                    declType: DeclType,
-                                    overrides: [String: String]?) -> String {
+    private func extraInitsIfNeeded(
+        initParamCandidates: [VariableModel],
+        declaredInits: [MethodModel],
+        acl: String,
+        declType: DeclType,
+        overrides: [String: String]?
+    ) -> String {
         
         let declaredInitParamsPerInit = declaredInits.map { $0.params }
 
@@ -169,25 +171,19 @@ extension ClassModel {
         }
         
         let extraInitParamNames = initParamCandidates.map{$0.name}
-        let uniqueParamNameSet = Set(declaredInitParamsPerInit.flatMap { $0 }.map(\.name))
-        let hasSameNameInProps = uniqueParamNameSet.filter { name in
-            declaredInitParamsPerInit
-                .flatMap { $0 }
-                .filter { $0.name == name }
-                .count > 1
-        }
         var processed = Set<String>()
         let extraVarsToDecl = declaredInitParamsPerInit
             .flatMap { $0 }
             .compactMap { (p: ParamModel) -> String? in
-                let isDuplicatedInitParamName = processed.contains(p.name)
-                if !extraInitParamNames.contains(p.name) && !isDuplicatedInitParamName {
+                if !extraInitParamNames.contains(p.name), !processed.contains(p.name) {
                     processed.insert(p.name)
-                    if hasSameNameInProps.contains(p.name) {
-                        return p.asVarDecl(typeErase: true)
-                    } else {
-                        return p.asVarDecl()
-                    }
+                    let shouldEraseType = declaredInitParamsPerInit
+                        .flatMap { $0 }
+                        .checkHasConflictedParam(
+                            name: p.name,
+                            typeName: p.type.typeName
+                        )
+                    return p.asInitVarDecl(eraseType: shouldEraseType)
                 }
                 return nil
             }
@@ -307,5 +303,21 @@ extension ClassModel {
                 variableModel.combineType = .passthroughSubject
             }
         }
+    }
+}
+
+fileprivate extension [ParamModel] {
+    func findParams(name: String) -> [ParamModel] {
+        filter {
+            $0.name == name
+        }
+    }
+
+    /// Check if there is same parameter name with different typeName.
+    func checkHasConflictedParam(name: String, typeName: String) -> Bool {
+        let sameParams = findParams(
+            name: name
+        )
+        return !sameParams.allSatisfy { $0.type.typeName == typeName }
     }
 }

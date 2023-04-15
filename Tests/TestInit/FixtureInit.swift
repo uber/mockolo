@@ -301,8 +301,8 @@ class MyProtocolMock: MyProtocol {
 let multipleInitsWithSameParamName = """
 /// \(String.mockAnnotation)
 protocol MyProtocol {
-    init(param: Any)
-    init(param: Any, anotherParam: String)
+    init(param: String, anotherParam: Int)
+    init(param: String, anotherParam: String)
 }
 """
 
@@ -311,13 +311,14 @@ let multipleInitsWithSameParamNameMock = """
 
 
 class MyProtocolMock: MyProtocol {
-        private var _param: Any!
-    private var _anotherParam: String!
+        private var _param: String!
+    private var _anotherParam: Any!
     init() { }
-    required init(param: Any) {
+    required init(param: String = "", anotherParam: Int = 0) {
         self._param = param
+        self._anotherParam = anotherParam
     }
-    required init(param: Any, anotherParam: String = "") {
+    required init(param: String = "", anotherParam: String = "") {
         self._param = param
         self._anotherParam = anotherParam
     }
