@@ -273,7 +273,7 @@ let initWithSameParamNameButDifferentType = """
 protocol MyProtocol {
     init(param: Any)
     init(param: String)
-    init(param: any Sequence<Character>)
+    init(param: [Character])
 }
 """
 
@@ -290,7 +290,7 @@ class MyProtocolMock: MyProtocol {
     required init(param: String = "") {
         self._param = param
     }
-    required init(param: any Sequence<Character>) {
+    required init(param: [Character] = [Character]()) {
         self._param = param
     }
 
