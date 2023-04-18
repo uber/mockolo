@@ -268,3 +268,61 @@ public class ForcastUpdatingMock: ForcastUpdating {
 }
 """
 
+let initWithSameParamNameButDifferentType = """
+/// \(String.mockAnnotation)
+protocol MyProtocol {
+    init(param: Any)
+    init(param: String)
+    init(with param: [Character])
+}
+"""
+
+let initWithSameParamNameButDifferentTypeMock = """
+
+
+
+class MyProtocolMock: MyProtocol {
+        private var _param: Any!
+    init() { }
+    required init(param: Any) {
+        self._param = param
+    }
+    required init(param: String = "") {
+        self._param = param
+    }
+    required init(with param: [Character] = [Character]()) {
+        self._param = param
+    }
+
+
+}
+"""
+
+let multipleInitsWithSameParamName = """
+/// \(String.mockAnnotation)
+protocol MyProtocol {
+    init(param: String, anotherParam: Int)
+    init(param: String, anotherParam: String)
+}
+"""
+
+let multipleInitsWithSameParamNameMock = """
+
+
+
+class MyProtocolMock: MyProtocol {
+        private var _anotherParam: Any!
+    private var _param: String!
+    init() { }
+    required init(param: String = "", anotherParam: Int = 0) {
+        self._param = param
+        self._anotherParam = anotherParam
+    }
+    required init(param: String = "", anotherParam: String = "") {
+        self._param = param
+        self._anotherParam = anotherParam
+    }
+
+
+}
+"""

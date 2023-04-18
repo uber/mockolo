@@ -7,6 +7,7 @@ final class VariableModel: Model {
     let accessLevel: String
     let attributes: [String]?
     let encloserType: DeclType
+    /// Indicates whether this model can be used as a parameter to an initializer
     var canBeInitParam: Bool
     let processed: Bool
     var filePath: String = ""

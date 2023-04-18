@@ -27,4 +27,18 @@ class InitTests: MockoloTestCase {
         verify(srcContent: keywordParams,
                dstContent: keywordParamsMock)
     }
+
+    func testInitiWithSameParamName() {
+        verify(
+            srcContent: multipleInitsWithSameParamName,
+            dstContent: multipleInitsWithSameParamNameMock
+        )
+    }
+
+    func testInitiWithSameParamNameButDifferentType() {
+        verify(
+            srcContent: initWithSameParamNameButDifferentType,
+            dstContent: initWithSameParamNameButDifferentTypeMock
+        )
+    }
 }

@@ -22,7 +22,7 @@ fileprivate var validIdentifierChars: CharacterSet = {
     return valid
 }()
 
-public final class Type {
+public final class `Type` {
     let typeName: String
     let cast: String?
     var cachedDefaultVal: String?

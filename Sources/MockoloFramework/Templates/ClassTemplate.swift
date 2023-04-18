@@ -29,7 +29,7 @@ extension ClassModel {
                             mockFinal: Bool,
                             enableFuncArgsHistory: Bool,
                             disableCombineDefaultValues: Bool,
-                            initParamCandidates: [Model],
+                            initParamCandidates: [VariableModel],
                             declaredInits: [MethodModel],
                             entities: [(String, Model)]) -> String {
 
@@ -101,14 +101,16 @@ extension ClassModel {
         return template
     }
     
-    private func extraInitsIfNeeded(initParamCandidates: [Model],
-                                    declaredInits: [MethodModel],
-                                    acl: String,
-                                    declType: DeclType,
-                                    overrides: [String: String]?) -> String {
+    private func extraInitsIfNeeded(
+        initParamCandidates: [VariableModel],
+        declaredInits: [MethodModel],
+        acl: String,
+        declType: DeclType,
+        overrides: [String: String]?
+    ) -> String {
         
         let declaredInitParamsPerInit = declaredInits.map { $0.params }
-        
+
         var needParamedInit = false
         var needBlankInit = false
         
@@ -169,13 +171,18 @@ extension ClassModel {
         }
         
         let extraInitParamNames = initParamCandidates.map{$0.name}
-        let extraVarsToDecl = declaredInitParamsPerInit.flatMap{$0}.compactMap { (p: ParamModel) -> String? in
-            if !extraInitParamNames.contains(p.name) {
-                return p.asVarDecl
+        let extraVarsToDecl = Dictionary(
+            grouping: declaredInitParamsPerInit.flatMap {
+                $0.filter { !extraInitParamNames.contains($0.name) }
+            },
+            by: \.name
+        )
+            .compactMap { (name: String, params: [ParamModel]) in
+                let shouldErase = params.contains { params[0].type.typeName != $0.type.typeName }
+                return params[0].asInitVarDecl(eraseType: shouldErase)
             }
-            return nil
-        }
-        .joined(separator: "\n")
+            .sorted()
+            .joined(separator: "\n")
 
         let declaredInitStr = declaredInits.compactMap { (m: MethodModel) -> String? in
             if case let .initKind(required, override) = m.kind, !m.processed {

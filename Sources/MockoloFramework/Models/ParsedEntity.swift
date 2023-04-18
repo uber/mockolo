@@ -35,15 +35,17 @@ struct ResolvedEntity {
         return declaredInits.map { $0.params }.flatMap{$0}
     }
 
-    var initParamCandidates: [Model] {
-        return sortedInitVars(in: uniqueModels.map{$0.1})
+    var initParamCandidates: [VariableModel] {
+        return sortedInitVars(
+            in: uniqueModels.compactMap{ $0.1 as? VariableModel }
+        )
     }
 
     /// Returns models that can be used as parameters to an initializer
     /// @param models The models of the current entity including unprocessed (ones to generate) and
     ///             processed (already mocked by a previous run if any) models.
     /// @returns A list of init parameter models
-    private func sortedInitVars(`in` models: [Model]) -> [Model] {
+    private func sortedInitVars(`in` models: [VariableModel]) -> [VariableModel] {
         let processed = models.filter {$0.processed && $0.canBeInitParam}
         let unprocessed = models.filter {!$0.processed && $0.canBeInitParam}
 

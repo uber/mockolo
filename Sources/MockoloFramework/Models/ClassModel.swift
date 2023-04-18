@@ -25,7 +25,7 @@ final class ClassModel: Model {
     let identifier: String
     let declType: DeclType
     let entities: [(String, Model)]
-    let initParamCandidates: [Model]
+    let initParamCandidates: [VariableModel]
     let declaredInits: [MethodModel]
     let metadata: AnnotationMetadata?
     
@@ -39,7 +39,7 @@ final class ClassModel: Model {
          attributes: [String],
          offset: Int64,
          metadata: AnnotationMetadata?,
-         initParamCandidates: [Model],
+         initParamCandidates: [VariableModel],
          declaredInits: [MethodModel],
          entities: [(String, Model)]) {
         self.identifier = identifier 
@@ -55,7 +55,32 @@ final class ClassModel: Model {
         self.accessLevel = acl
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
-        return applyClassTemplate(name: name, identifier: self.identifier, accessLevel: accessLevel, attribute: attribute, declType: declType, metadata: metadata, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues, initParamCandidates: initParamCandidates, declaredInits: declaredInits, entities: entities)
+    func render(
+        with identifier: String,
+        encloser: String,
+        useTemplateFunc: Bool,
+        useMockObservable: Bool,
+        allowSetCallCount: Bool = false,
+        mockFinal: Bool = false,
+        enableFuncArgsHistory: Bool = false,
+        disableCombineDefaultValues: Bool = false
+    ) -> String? {
+        return applyClassTemplate(
+            name: name,
+            identifier: self.identifier,
+            accessLevel: accessLevel,
+            attribute: attribute,
+            declType: declType,
+            metadata: metadata,
+            useTemplateFunc: useTemplateFunc,
+            useMockObservable: useMockObservable,
+            allowSetCallCount: allowSetCallCount,
+            mockFinal: mockFinal,
+            enableFuncArgsHistory: enableFuncArgsHistory,
+            disableCombineDefaultValues: disableCombineDefaultValues,
+            initParamCandidates: initParamCandidates,
+            declaredInits: declaredInits,
+            entities: entities
+        )
     }
 }
