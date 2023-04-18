@@ -300,19 +300,3 @@ extension ClassModel {
         }
     }
 }
-
-fileprivate extension Array where Element == ParamModel {
-    func findParams(name: String) -> [ParamModel] {
-        filter {
-            $0.name == name
-        }
-    }
-
-    /// Check if there is same parameter name with different typeName.
-    func checkHasConflictedParam(name: String, typeName: String) -> Bool {
-        let sameParams = findParams(
-            name: name
-        )
-        return !sameParams.allSatisfy { $0.type.typeName == typeName }
-    }
-}
