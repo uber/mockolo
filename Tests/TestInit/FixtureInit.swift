@@ -311,8 +311,8 @@ let multipleInitsWithSameParamNameMock = """
 
 
 class MyProtocolMock: MyProtocol {
-        private var _param: String!
-    private var _anotherParam: Any!
+        private var _anotherParam: Any!
+    private var _param: String!
     init() { }
     required init(param: String = "", anotherParam: Int = 0) {
         self._param = param
