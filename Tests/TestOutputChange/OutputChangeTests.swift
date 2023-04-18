@@ -7,15 +7,15 @@ class OutputChangeTests: MockoloTestCase {
                dstContent: simpleFuncsMock)
 
         let expectedAttributes = try FileManager.default.attributesOfItem(atPath: defaultDstFilePath)
-        let expectedCreationDate = (expectedAttributes[.creationDate] as! Date).timeIntervalSinceReferenceDate
-        let expectedModificationDate = (expectedAttributes[.modificationDate] as! Date).timeIntervalSinceReferenceDate
+        let expectedCreationDate = expectedAttributes[.creationDate] as? Date
+        let expectedModificationDate = expectedAttributes[.modificationDate] as? Date
 
         verify(srcContent: simpleFuncs,
                dstContent: simpleFuncsMock)
 
         let attributes = try FileManager.default.attributesOfItem(atPath: defaultDstFilePath)
-        let creationDate = (attributes[.creationDate] as! Date).timeIntervalSinceReferenceDate
-        let modificationDate = (attributes[.modificationDate] as! Date).timeIntervalSinceReferenceDate
+        let creationDate = attributes[.creationDate] as? Date
+        let modificationDate = attributes[.modificationDate] as? Date
 
         XCTAssertEqual(creationDate, expectedCreationDate)
         XCTAssertEqual(modificationDate, expectedModificationDate)

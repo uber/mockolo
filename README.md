@@ -162,7 +162,7 @@ $ ./install-script.sh -h  // see input options
 $ ./install-script.sh -s [source dir] -t mockolo -d [destination dir] -o [output filename].tar.gz
 ```
 
-This will create a tarball for distribution, which contains the `mockolo` executable along with a necessary SwiftSyntax parser dylib (lib_InternalSwiftSyntaxParser.dylib). This allows running `mockolo` without depending on where the dylib lives.
+This will create a tarball for distribution, which contains the `mockolo` executable.
 
 
 
