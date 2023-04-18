@@ -290,7 +290,7 @@ class MyProtocolMock: MyProtocol {
     required init(param: String = "") {
         self._param = param
     }
-    required init(param: [Character] = [Character]()) {
+    required init(with param: [Character] = [Character]()) {
         self._param = param
     }
 
