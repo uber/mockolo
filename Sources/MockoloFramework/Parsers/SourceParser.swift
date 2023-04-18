@@ -15,12 +15,8 @@
 //
 
 import Foundation
-#if canImport(SwiftSyntax)
 import SwiftSyntax
-#endif
-#if canImport(SwiftSyntaxParser)
-import SwiftSyntaxParser
-#endif
+import SwiftParser
 
 public enum DeclType {
     case protocolType, classType, other, all
@@ -89,21 +85,17 @@ public class SourceParser {
             }
         }
 
-        do {
-            var results = [Entity]()
-            let node = try SyntaxParser.parse(path)
-            let treeVisitor = EntityVisitor(path, annotation: annotation, fileMacro: fileMacro, declType: declType)
-            treeVisitor.walk(node)
-            let ret = treeVisitor.entities
-            results.append(contentsOf: ret)
-            let importMap = treeVisitor.imports
+        var results = [Entity]()
+        let node = Parser.parse(path)
+        let treeVisitor = EntityVisitor(path, annotation: annotation, fileMacro: fileMacro, declType: declType)
+        treeVisitor.walk(node)
+        let ret = treeVisitor.entities
+        results.append(contentsOf: ret)
+        let importMap = treeVisitor.imports
 
-            lock?.lock()
-            defer {lock?.unlock()}
-            completion(results, [path: importMap])
-        } catch {
-            fatalError(error.localizedDescription)
-        }
+        lock?.lock()
+        defer {lock?.unlock()}
+        completion(results, [path: importMap])
     }
 
     private func containsDecl(_ decl: Data?, in path: String) -> Bool {

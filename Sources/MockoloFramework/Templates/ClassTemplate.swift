@@ -191,6 +191,7 @@ extension ClassModel {
                 let genericTypeDeclsStr = m.genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
                 let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
                 let paramDeclsStr = m.params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
+                let suffixStr = m.suffix.isEmpty ? "" : "\(m.suffix) "
 
                 if override {
                     let paramsList = m.params.map { param in
@@ -198,7 +199,7 @@ extension ClassModel {
                     }.joined(separator: ", ")
 
                     return """
-                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) {
+                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr){
                     \(2.tab)super.init(\(paramsList))
                     \(1.tab)}
                     """
@@ -213,7 +214,7 @@ extension ClassModel {
                     }.joined(separator: "\n")
 
                     return """
-                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) {
+                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr){
                     \(paramsAssign)
                     \(1.tab)}
                     """

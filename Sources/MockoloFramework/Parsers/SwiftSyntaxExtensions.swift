@@ -6,27 +6,17 @@
 //
 
 import Foundation
-#if canImport(SwiftSyntax)
 import SwiftSyntax
-#endif
-#if canImport(SwiftSyntaxParser)
-import SwiftSyntaxParser
-#endif
+import SwiftParser
 
-extension SyntaxParser {
-    public static func parse(_ fileData: Data, path: String) throws -> SourceFileSyntax {
-        // Avoid using `String(contentsOf:)` because it creates a wrapped NSString.
-        let source = fileData.withUnsafeBytes { buf in
-            return String(decoding: buf.bindMemory(to: UInt8.self), as: UTF8.self)
-        }
-        return try parse(source: source, filenameForDiagnostics: path)
-    }
-
-    public static func parse(_ path: String) throws -> SourceFileSyntax {
+extension Parser {
+    public static func parse(_ path: String) -> SourceFileSyntax {
         guard let fileData = FileManager.default.contents(atPath: path) else {
             fatalError("Retrieving contents of \(path) failed")
         }
-        return try parse(fileData, path: path)
+        return fileData.withUnsafeBytes { buf in
+            parse(source: buf.bindMemory(to: UInt8.self))
+        }
     }
 }
 
@@ -50,7 +40,7 @@ extension AttributeListSyntax {
 extension ModifierListSyntax {
     var acl: String {
         for modifier in self {
-            for token in modifier.tokens {
+            for token in modifier.tokens(viewMode: .sourceAccurate) {
                 switch token.tokenKind {
                 case .publicKeyword, .internalKeyword, .privateKeyword, .fileprivateKeyword:
                     return token.text
@@ -67,31 +57,31 @@ extension ModifierListSyntax {
     }
 
     var isStatic: Bool {
-        return self.tokens.filter {$0.tokenKind == .staticKeyword }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .staticKeyword }.count > 0
     }
 
     var isRequired: Bool {
-        return self.tokens.filter {$0.text == String.required }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.required }.count > 0
     }
 
     var isConvenience: Bool {
-        return self.tokens.filter {$0.text == String.convenience }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.convenience }.count > 0
     }
 
     var isOverride: Bool {
-        return self.tokens.filter {$0.text == String.override }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.override }.count > 0
     }
 
     var isFinal: Bool {
-        return self.tokens.filter {$0.text == String.final }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.final }.count > 0
     }
 
     var isPrivate: Bool {
-        return self.tokens.filter {$0.tokenKind == .privateKeyword || $0.tokenKind == .fileprivateKeyword }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .privateKeyword || $0.tokenKind == .fileprivateKeyword }.count > 0
     }
 
     var isPublic: Bool {
-        return self.tokens.filter {$0.tokenKind == .publicKeyword }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .publicKeyword }.count > 0
     }
 }
 
@@ -248,7 +238,7 @@ extension IfConfigDeclSyntax {
         var name = ""
         for cl in self.clauses {
             if let desc = cl.condition?.description {
-                if let list = cl.elements.as(MemberDeclListSyntax.self) {
+                if let list = cl.elements?.as(MemberDeclListSyntax.self) {
                     name = desc
                     for element in list {
                         if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declType: declType, metadata: metadata, processed: processed) {
@@ -483,7 +473,7 @@ extension InitializerDeclSyntax {
     func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
         let requiredInit = isRequired(with: declType)
 
-        let params = self.parameters.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
+        let params = self.signature.input.parameterList.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: true) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
@@ -495,8 +485,8 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: self.throwsOrRethrowsKeyword?.text,
-                           asyncOrReasync: nil, // "init() async" is not supperted in SwiftSyntax
+                           throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text,
+                           asyncOrReasync: self.signature.asyncOrReasyncKeyword?.text,
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
@@ -581,7 +571,7 @@ extension AssociatedtypeDeclSyntax {
 extension TypealiasDeclSyntax {
     func model(with acl: String, declType: DeclType, overrides: [String: String]?, processed: Bool) -> Model {
         return TypeAliasModel(name: self.identifier.text,
-                              typeName: self.initializer?.value.description ?? "",
+                              typeName: self.initializer.value.description,
                               acl: acl,
                               encloserType: declType,
                               overrideTypes: overrides,
@@ -605,6 +595,7 @@ final class EntityVisitor: SyntaxVisitor {
         self.fileMacro = fileMacro ?? ""
         self.path = path
         self.declType = declType
+        super.init(viewMode: .sourceAccurate)
     }
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
@@ -664,7 +655,7 @@ final class EntityVisitor: SyntaxVisitor {
 
             guard macroName != fileMacro else { return .visitChildren }
 
-            if let list = cl.elements.as(CodeBlockItemListSyntax.self) {
+            if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
                         let key = macroName
@@ -820,11 +811,3 @@ extension Trivia {
         return nil
     }
 }
-
-#if swift(<5.5)
-extension FunctionSignatureSyntax {
-    var asyncOrReasyncKeyword: TokenSyntax? {
-        return nil
-    }
-}
-#endif
