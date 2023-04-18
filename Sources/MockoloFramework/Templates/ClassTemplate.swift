@@ -171,22 +171,17 @@ extension ClassModel {
         }
         
         let extraInitParamNames = initParamCandidates.map{$0.name}
-        var processed = Set<String>()
-        let extraVarsToDecl = declaredInitParamsPerInit
-            .flatMap { $0 }
-            .compactMap { (p: ParamModel) -> String? in
-                if !extraInitParamNames.contains(p.name), !processed.contains(p.name) {
-                    processed.insert(p.name)
-                    let shouldEraseType = declaredInitParamsPerInit
-                        .flatMap { $0 }
-                        .checkHasConflictedParam(
-                            name: p.name,
-                            typeName: p.type.typeName
-                        )
-                    return p.asInitVarDecl(eraseType: shouldEraseType)
-                }
-                return nil
+        let extraVarsToDecl = Dictionary(
+            grouping: declaredInitParamsPerInit.flatMap {
+                $0.filter { !extraInitParamNames.contains($0.name) }
+            },
+            by: \.name
+        )
+            .compactMap { (name: String, params: [ParamModel]) in
+                let shouldErase = params.contains { params[0].type.typeName != $0.type.typeName }
+                return params[0].asInitVarDecl(eraseType: shouldErase)
             }
+            .sorted()
             .joined(separator: "\n")
 
         let declaredInitStr = declaredInits.compactMap { (m: MethodModel) -> String? in
