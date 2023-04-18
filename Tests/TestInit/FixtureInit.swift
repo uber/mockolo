@@ -273,7 +273,7 @@ let initWithSameParamNameButDifferentType = """
 protocol MyProtocol {
     init(param: Any)
     init(param: String)
-    init(param: [Character])
+    init(with param: [Character])
 }
 """
 
