@@ -199,7 +199,7 @@ extension StringProtocol {
         return !isEmpty
     }
 
-    var capitlizeFirstLetter: String {
+    var capitalizeFirstLetter: String {
         return prefix(1).capitalized + dropFirst()
     }
 

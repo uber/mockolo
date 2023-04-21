@@ -72,12 +72,12 @@ final class MethodModel: Model {
         var args = zip(paramLabels, paramNames).compactMap { (argLabel: String, argName: String) -> String? in
             let val = argLabel.isEmpty ? argName : argLabel
             if val.count < 2 || !nameString.lowercased().hasSuffix(val.lowercased()) {
-                return val.capitlizeFirstLetter
+                return val.capitalizeFirstLetter
             }
             return nil
         }
 
-        let genericTypeNames = self.genericTypeParams.map { $0.name.capitlizeFirstLetter + $0.type.displayName }
+        let genericTypeNames = self.genericTypeParams.map { $0.name.capitalizeFirstLetter + $0.type.displayName }
         args.append(contentsOf: genericTypeNames)
 
         args.append(contentsOf: paramTypes.map(path: \.displayName))
