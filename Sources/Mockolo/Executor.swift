@@ -152,7 +152,7 @@ struct Executor: ParsableCommand {
 
         srcDirs = self.sourceDirs.map(fullPath)
 
-        // If source file list exists, source files value will be overriden (see the usage in setupArguments above)
+        // If source file list exists, source files value will be overridden (see the usage in setupArguments above)
         if let srcList = sourceFileList {
             let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
             srcs = text?.components(separatedBy: "\n").filter{!$0.isEmpty}.map(fullPath) ?? []
