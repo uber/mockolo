@@ -262,8 +262,8 @@ This will generate the following mock output:
 
 ```swift
 public class FooMock: Foo {
-    typealias T = AnyObject // overriden
-    typealias U = StringProtocol // overriden
+    typealias T = AnyObject // overridden
+    typealias U = StringProtocol // overridden
     typealias W = Any // default placeholder type for typealias
     ...
 }

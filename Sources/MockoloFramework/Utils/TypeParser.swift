@@ -169,7 +169,7 @@ public final class `Type` {
     }
 
     var displayName: String {
-        return typeName.displayableComponents.map{$0 == .unknownVal ? "" : $0.capitlizeFirstLetter}.joined()
+        return typeName.displayableComponents.map{$0 == .unknownVal ? "" : $0.capitalizeFirstLetter}.joined()
     }
 
     var isIdentifier: Bool {
