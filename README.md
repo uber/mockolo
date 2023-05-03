@@ -361,6 +361,28 @@ public class FooMock: Foo {
 }
 ```
 
+Warning: If you would like to send a custom data event via `Publisher`, it is hard to specify default value from mockolo this is why `PassthroughSubject` is used insteaad of `CurrentValueSubject` regardless of your specification.
+As a solution, you can set a default value via metadata like the following.
+
+```swift
+/// @mockable(combine: fooPublisher = CurrentValueSubject; default = CustomType())
+public protocol Foo {
+    var fooPublisher: AnyPublisher<CustomType, CustomError> { get }
+}
+```
+
+This will generate:
+
+```swift
+public class FooMock: Foo {
+    public init() { }
+
+
+    public var fooPublisher: AnyPublisher<CustomType, CustomError> { return self.fooPublisherSubject.eraseToAnyPublisher() }
+    public private(set) var fooPublisherSubject = CurrentValueSubject<CustomType, CustomError>(CustomType())
+}
+```
+ 
 You can also connect an AnyPublisher to a property within the protocol.
 
 For example:
