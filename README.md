@@ -361,8 +361,9 @@ public class FooMock: Foo {
 }
 ```
 
-Warning: If you would like to send a custom data event via `Publisher`, it is hard to specify default value from mockolo this is why `PassthroughSubject` is used insteaad of `CurrentValueSubject` regardless of your specification.
-As a solution, you can set a default value via metadata like the following.
+Warning: If you would like to send a value of custom type via `Publisher`, it is hard to decide default value from mockolo.
+This is why `PassthroughSubject` is used instead of `CurrentValueSubject` regardless of your specification.
+As a solution, please set a default value via metadata like the following.
 
 ```swift
 /// @mockable(combine: fooPublisher = CurrentValueSubject; default = CustomType())
