@@ -147,8 +147,8 @@ extension VariableModel {
             var combineSubjectType = combineType ?? .passthroughSubject
 
             var defaultValue: String? = ""
-            if case .currentValueSubject = combineSubjectType {
-                defaultValue = subjectDefaultValue
+            if case let .currentValueSubject(defaultValueFromMetadata) = combineSubjectType {
+                defaultValue = defaultValueFromMetadata ?? subjectDefaultValue
             }
 
             // Unable to generate default value for this CurrentValueSubject. Default back to PassthroughSubject.

@@ -103,7 +103,7 @@ final class EntityNodeSubContainer {
 
 public enum CombineType {
     case passthroughSubject
-    case currentValueSubject
+    case currentValueSubject(defaultValueFromMetadata: String?)
     case property(wrapper: String, name: String)
 
     var typeName: String {

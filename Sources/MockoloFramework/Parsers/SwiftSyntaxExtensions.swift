@@ -743,7 +743,7 @@ extension Trivia {
 
             ret.combineTypes = ret.combineTypes ?? [String: CombineType]()
 
-            let currentValueSubjectStr = CombineType.currentValueSubject.typeName.lowercased()
+            let currentValueSubjectStr = CombineType.currentValueSubject(defaultValueFromMetadata: nil).typeName.lowercased()
             for pair in arguments {
                 if pair.value.hasPrefix("@") {
                     let parts = pair.value.split(separator: " ")
@@ -754,7 +754,8 @@ extension Trivia {
                 }
 
                 if pair.value.lowercased() == currentValueSubjectStr {
-                    ret.combineTypes?[pair.key] = .currentValueSubject
+                    let defaultValue = arguments["default"]
+                    ret.combineTypes?[pair.key] = .currentValueSubject(defaultValueFromMetadata: defaultValue)
                 } else {
                     ret.combineTypes?[pair.key] = .passthroughSubject
                 }

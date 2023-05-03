@@ -337,7 +337,11 @@ public final class `Type` {
     ///  if "nil", type is optional
     ///  if "non-nil", type is non-optional
     ///  if "", type is String, with an empty string value
-    func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
+    func defaultVal(
+        with overrides: [String: String]? = nil,
+        overrideKey: String = "",
+        isInitParam: Bool = false
+    ) -> String? {
 
         if let val = cachedDefaultVal {
             return val
@@ -366,7 +370,11 @@ public final class `Type` {
         return nil
     }
 
-    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?, String?) {
+    func parseRxVar(
+        overrides: [String: String]?,
+        overrideKey: String,
+        isInitParam: Bool
+    ) -> (String?, String?, String?) {
         if typeName.hasPrefix(String.observableLeftAngleBracket) || typeName.hasPrefix(String.rxObservableLeftAngleBracket),
             let range = typeName.range(of: String.observableLeftAngleBracket), let lastIdx = typeName.lastIndex(of: ">") {
             let typeParamStr = typeName[range.upperBound..<lastIdx]
