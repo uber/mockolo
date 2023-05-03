@@ -247,3 +247,20 @@ public class FooMock: Foo {
     }
 }
 """
+
+let combineDefaultSubjectProtocol = """
+/// \(String.mockAnnotation)(combine: myCustomTypePublisher = CurrentValueSubject; default = MyCustomType(value: "foo"))
+public protocol FooDefaultSubjectValue {
+    var myCustomTypePublisher: AnyPublisher<MyCustomType?, Error> { get }
+}
+"""
+
+let combineDefaultSubjectProtocolMock = """
+public class FooDefaultSubjectValueMock: FooDefaultSubjectValue {
+    public init() { }
+
+
+    public var myCustomTypePublisher: AnyPublisher<MyCustomType?, Error> { return self.myCustomTypePublisherSubject.eraseToAnyPublisher() }
+    public private(set) var myCustomTypePublisherSubject = CurrentValueSubject<MyCustomType?, Error>(MyCustomType(value: "foo"))
+}
+"""
