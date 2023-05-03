@@ -392,7 +392,7 @@ public final class `Type` {
             } else if subjectKind == String.replaySubject {
                 underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)\(String.replaySubjectCreate)"
             } else if subjectKind == String.behaviorSubject {
-                if let val = Type(String(typeParamStr)).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+                if let val = Type(String(typeParamStr)).defaultSingularVal(overrides: overrides, overrideKey: overrideKey) {
                     underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
                 }
             }
@@ -404,7 +404,7 @@ public final class `Type` {
     private func parseDefaultVal(isInitParam: Bool) -> String? {
         let arg = self
 
-        if let val = defaultSingularVal(isInitParam: isInitParam) {
+        if let val = defaultSingularVal() {
             return val
         }
 
@@ -422,7 +422,7 @@ public final class `Type` {
             if sub == "," || sub == ":" || sub == "(" || sub == ")" || sub == "=" || sub == " " || sub == "" {
                 vals.append(sub)
             } else {
-                if let val = Type(sub).defaultSingularVal(isInitParam: isInitParam) {
+                if let val = Type(sub).defaultSingularVal() {
                     vals.append(val)
                 } else {
                     return nil
@@ -440,7 +440,10 @@ public final class `Type` {
         return nil
     }
 
-    private func defaultSingularVal(isInitParam: Bool = false, overrides: [String: String]? = nil, overrideKey: String = "") -> String? {
+    private func defaultSingularVal(
+        overrides: [String: String]? = nil,
+        overrideKey: String = ""
+    ) -> String? {
         let arg = self
 
         if arg.isOptional {

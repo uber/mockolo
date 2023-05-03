@@ -689,11 +689,11 @@ final class EntityVisitor: SyntaxVisitor {
 }
 
 extension Trivia {
-    // This parses arguments in annotation which can be used to override certain types.
-    //
-    // E.g. given /// @mockable(typealias: T = Any; U = AnyObject), it returns
-    // a dictionary: [T: Any, U: AnyObject] which will be used to override inhertied types
-    // of typealias decls for T and U.
+    /// This parses arguments in annotation which can be used to override certain types.
+    ///
+    /// E.g. given `/// @mockable(typealias: T = Any; U = AnyObject)`,
+    /// it returns a dictionary: `[T: Any, U: AnyObject]` which will be used to override inhertied types
+    /// of typealias decls for T and U.
     private func metadata(with annotation: String, in val: String) -> AnnotationMetadata? {
         guard val.contains(annotation) else {
             return nil
