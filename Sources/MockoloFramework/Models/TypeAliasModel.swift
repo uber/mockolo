@@ -49,7 +49,7 @@ final class TypeAliasModel: Model {
         if let val = overrideTypes?[self.name] {
             self.type  = Type(val)
         } else {
-            self.type = typeName.isEmpty ? Type(String.any) : Type(typeName)
+            self.type = typeName.isEmpty ? Type(String.anyType) : Type(typeName)
         }
     }
 
