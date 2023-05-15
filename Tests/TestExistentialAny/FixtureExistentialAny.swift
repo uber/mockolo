@@ -2,18 +2,17 @@ let existentialAny = """
 /// \(String.mockAnnotation)
 protocol ExistentialAny {
     var foo: P { get }
-    var bar: any P { get }
+    var bar: any R<Int> { get }
     var baz: any P & Q { get }
-    var qux: (any P) -> any P & Q { get }
+    var qux: (any P) -> any P { get }
 }
 """
 
 let existentialAnyMock =
 """
-
 class ExistentialAnyMock: ExistentialAny {
     init() { }
-    init(foo: P, bar: any P, baz: any P & Q, qux: @escaping (any P) -> any P & Q) {
+    init(foo: P, bar: any R<Int>, baz: any P & Q, qux: @escaping (any P) -> any P) {
         self._foo = foo
         self._bar = bar
         self._baz = baz
@@ -29,8 +28,8 @@ class ExistentialAnyMock: ExistentialAny {
     }
 
     private(set) var barSetCallCount = 0
-    private var _bar: (any P)!  { didSet { barSetCallCount += 1 } }
-    var bar: any P {
+    private var _bar: (any R<Int>)!  { didSet { barSetCallCount += 1 } }
+    var bar: any R<Int> {
         get { return _bar }
         set { _bar = newValue }
     }
@@ -43,8 +42,8 @@ class ExistentialAnyMock: ExistentialAny {
     }
 
     private(set) var quxSetCallCount = 0
-    private var _qux: ((any P) -> any P & Q)!  { didSet { quxSetCallCount += 1 } }
-    var qux: (any P) -> any P & Q {
+    private var _qux: ((any P) -> any P)!  { didSet { quxSetCallCount += 1 } }
+    var qux: (any P) -> any P {
         get { return _qux }
         set { _qux = newValue }
     }
