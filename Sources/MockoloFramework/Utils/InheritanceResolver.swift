@@ -56,7 +56,7 @@ func lookupEntities(key: String,
         if declType == .protocolType { // TODO: remove this once parent protocol (current decl = classtype) handling is resolved.
             // If the protocol inherits other protocols, look up their entities as well.
             for parent in current.entityNode.inheritedTypes {
-                if parent != .class, parent != .any, parent != .anyObject {
+                if parent != .class, parent != .anyType, parent != .anyObject {
                     let (parentModels, parentProcessedModels, parentAttributes, parentPaths, parentPathToContents) = lookupEntities(key: parent, declType: declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
