@@ -17,40 +17,20 @@
 
 import Foundation
 
-public extension Sequence {
-    
-    func compactMap<T>(path: KeyPath<Element, T?>) -> [T] {
-        return compactMap { (element) -> T? in
-            element[keyPath: path]
-        }
-    }
-    func map<T>(path: KeyPath<Element, T>) -> [T] {
-        return map { (element) -> T in
-            element[keyPath: path]
-        }
-    }
-    
-    func filter(path: KeyPath<Element, Bool>) -> [Element] {
-        return filter { (element) -> Bool in
-            element[keyPath: path]
-        }
-    }
-    
-    func sorted<T>(path: KeyPath<Element, T>) -> [Element] where T: Comparable {
+extension Sequence {
+    func sorted<T>(path: (Element) -> T) -> [Element] where T: Comparable {
         return sorted { (lhs, rhs) -> Bool in
-            lhs[keyPath: path] < rhs[keyPath: path]
+            path(lhs) < path(rhs)
         }
     }
 
-    func sorted<T, U>(path: KeyPath<Element, T>, fallback: KeyPath<Element, U>) -> [Element] where T: Comparable, U: Comparable {
+    func sorted<T, U>(path: (Element) -> T, fallback: (Element) -> U) -> [Element] where T: Comparable, U: Comparable {
         return sorted { (lhs, rhs) -> Bool in
-            if lhs[keyPath: path] == rhs[keyPath: path] {
-                return lhs[keyPath: fallback] < rhs[keyPath: fallback]
+            if path(lhs) == path(rhs) {
+                return fallback(lhs) < fallback(rhs)
             }
 
-            return lhs[keyPath: path] < rhs[keyPath: path]
+            return path(lhs) < path(rhs)
         }
     }
 }
-
-
