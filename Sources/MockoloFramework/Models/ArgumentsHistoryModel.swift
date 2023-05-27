@@ -24,7 +24,7 @@ final class ArgumentsHistoryModel: Model {
         self.suffix = suffix
         self.isHistoryAnnotated = isHistoryAnnotated
 
-        self.capturableParamNames = capturables.map(path: \.name)
+        self.capturableParamNames = capturables.map(\.name.safeName)
         self.capturableParamTypes = capturables.map(path: \.type)
         
         let genericTypeNameList = genericTypeParams.map(path: \.name)
