@@ -52,7 +52,7 @@ struct ResolvedEntity {
         // Named params in init should be unique. Add a duplicate param check to ensure it.
         let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
 
-        let curVarNames = curVarsSorted.map(path: \.name)
+        let curVarNames = curVarsSorted.map(\.name)
         let parentVars = processed.filter {!curVarNames.contains($0.name)}
         let parentVarsSorted = parentVars.sorted(path: \.offset, fallback: \.name)
         let result = [curVarsSorted, parentVarsSorted].flatMap{$0}
