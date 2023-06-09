@@ -229,3 +229,39 @@ class NetworkingMock: Networking {
 }
 """
 
+let funcDuplicateSignatureDifferentWhereClause = """
+/// \(String.mockAnnotation)
+protocol Storing {
+   func connect<T>(adapter: T) where T: Adapter
+   func connect<T>(adapter: T) where T: KeyedAdapter
+}
+"""
+
+let funcDuplicateSignatureDifferentWhereClauseMock = """
+class StoringMock: Storing {
+    init() { }
+
+
+    private(set) var connectCallCount = 0
+    var connectHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: Adapter {
+        connectCallCount += 1
+        if let connectHandler = connectHandler {
+            connectHandler(adapter)
+        }
+        
+    }
+
+    private(set) var connectAdapterCallCount = 0
+    var connectAdapterHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: KeyedAdapter {
+        connectAdapterCallCount += 1
+        if let connectAdapterHandler = connectAdapterHandler {
+            connectAdapterHandler(adapter)
+        }
+        
+    }
+}
+
+
+"""

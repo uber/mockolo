@@ -79,7 +79,8 @@ final class MethodModel: Model {
 
         let genericTypeNames = self.genericTypeParams.map { $0.name.capitalizeFirstLetter + $0.type.displayName }
         args.append(contentsOf: genericTypeNames)
-
+        let genericWhereClause = self.genericWhereClause?.replacingOccurrences(of: " ", with: "_") ?? ""
+        args.append(genericWhereClause)
         args.append(contentsOf: paramTypes.map(\.displayName))
         var displayType = self.type.displayName
         let capped = min(displayType.count, 32)
