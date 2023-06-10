@@ -122,6 +122,9 @@ final class MethodModel: Model {
         displayType.removeLast(displayType.count-capped)
         args.append(displayType)
         args.append(self.staticKind)
+        if let genericWhereClause {
+            args.append(genericWhereClauseToSignatureComponent)
+        }
         let ret = args.filter{ arg in !arg.isEmpty }
         return ret
     }()
