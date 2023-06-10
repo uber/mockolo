@@ -21,6 +21,11 @@ class GenericFuncTests: MockoloTestCase {
         verify(srcContent: funcDuplicateSignatureDifferentWhereClause,
                dstContent: funcDuplicateSignatureDifferentWhereClauseMock)
     }
+    
+    func testWhereClauseWithSameSignatureAndEqualityConstraints() {
+        verify(srcContent: funcDuplicateSignatureDifferentWhereClauseEquality,
+               dstContent: funcDuplicateSignatureDifferentWhereClauseEqualityMock)
+    }
 }
 
 

@@ -190,6 +190,11 @@ extension String {
         }
         return !argsMap.isEmpty ? argsMap : nil
     }
+    
+    func deletingPrefix(_ prefix: String) -> String {
+        guard self.hasPrefix(prefix) else { return self }
+        return String(self.dropFirst(prefix.count))
+    }
 }
 
 let separatorsForDisplay = CharacterSet(charactersIn: "<>[] :,()_-.&@#!{}@+\"\'")

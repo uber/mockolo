@@ -234,6 +234,8 @@ let funcDuplicateSignatureDifferentWhereClause = """
 protocol Storing {
    func connect<T>(adapter: T) where T: Adapter
    func connect<T>(adapter: T) where T: KeyedAdapter
+   func connect<T>(adapter: T) where T: KeyedAdapter2
+   func connect<T>(adapter: T) where T: KeyedAdapter3
 }
 """
 
@@ -261,7 +263,82 @@ class StoringMock: Storing {
         }
         
     }
+
+    private(set) var connectAdapterTCallCount = 0
+    var connectAdapterTHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: KeyedAdapter2 {
+        connectAdapterTCallCount += 1
+        if let connectAdapterTHandler = connectAdapterTHandler {
+            connectAdapterTHandler(adapter)
+        }
+        
+    }
+
+    private(set) var connectAdapterTTKeyedAdapter3CallCount = 0
+    var connectAdapterTTKeyedAdapter3Handler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: KeyedAdapter3 {
+        connectAdapterTTKeyedAdapter3CallCount += 1
+        if let connectAdapterTTKeyedAdapter3Handler = connectAdapterTTKeyedAdapter3Handler {
+            connectAdapterTTKeyedAdapter3Handler(adapter)
+        }
+        
+    }
 }
+"""
+
+let funcDuplicateSignatureDifferentWhereClauseEquality = """
+/// \(String.mockAnnotation)
+protocol Storing<S: Sequence> {
+   func connect<T>(adapter: T) where T: Adapter, T.Element == S.Element
+   func connect<T>(adapter: T) where T: KeyedAdapter, T.Element == S.Element
+   func connect<T>(adapter: T) where T: KeyedAdapter2, T.Element == S.Element
+   func connect<T>(adapter: T) where T: KeyedAdapter3, T.Element == S.Element
+}
+"""
+
+let funcDuplicateSignatureDifferentWhereClauseEqualityMock = """
+class StoringMock: Storing {
+    init() { }
 
 
+    private(set) var connectCallCount = 0
+    var connectHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: Adapter, T.Element == S.Element {
+        connectCallCount += 1
+        if let connectHandler = connectHandler {
+            connectHandler(adapter)
+        }
+        
+    }
+
+    private(set) var connectAdapterCallCount = 0
+    var connectAdapterHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: KeyedAdapter, T.Element == S.Element {
+        connectAdapterCallCount += 1
+        if let connectAdapterHandler = connectAdapterHandler {
+            connectAdapterHandler(adapter)
+        }
+        
+    }
+
+    private(set) var connectAdapterTCallCount = 0
+    var connectAdapterTHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: KeyedAdapter2, T.Element == S.Element {
+        connectAdapterTCallCount += 1
+        if let connectAdapterTHandler = connectAdapterTHandler {
+            connectAdapterTHandler(adapter)
+        }
+        
+    }
+
+    private(set) var connectAdapterTTKeyedAdapter3TElementSElementCallCount = 0
+    var connectAdapterTTKeyedAdapter3TElementSElementHandler: ((Any) -> ())?
+    func connect<T>(adapter: T)  where T: KeyedAdapter3, T.Element == S.Element {
+        connectAdapterTTKeyedAdapter3TElementSElementCallCount += 1
+        if let connectAdapterTTKeyedAdapter3TElementSElementHandler = connectAdapterTTKeyedAdapter3TElementSElementHandler {
+            connectAdapterTTKeyedAdapter3TElementSElementHandler(adapter)
+        }
+        
+    }
+}
 """
