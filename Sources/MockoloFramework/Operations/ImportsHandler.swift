@@ -11,7 +11,8 @@ func handleImports(pathToImportsMap: ImportMap,
                    pathToContentMap: [(String, Data, Int64)],
                    customImports: [String]?,
                    excludeImports: [String]?,
-                   testableImports: [String]?) -> String {
+                   testableImports: [String]?,
+                   relevantPaths: [String]) -> String {
 
     var importLines = [String: [String]]()
     let defaultKey = ""
@@ -19,7 +20,8 @@ func handleImports(pathToImportsMap: ImportMap,
         importLines[defaultKey] = []
     }
 
-    for (_, importMap) in pathToImportsMap {
+    for (path, importMap) in pathToImportsMap {
+        guard relevantPaths.contains(path) else { continue }
         for (k, v) in importMap {
             if importLines[k] == nil {
                 importLines[k] = []
