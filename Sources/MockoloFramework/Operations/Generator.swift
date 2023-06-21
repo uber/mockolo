@@ -59,6 +59,7 @@ public func generate(sourceDirs: [String],
     var annotatedProtocolMap = [String: Entity]()
     var pathToContentMap = [(String, Data, Int64)]()
     var pathToImportsMap = ImportMap()
+    var relevantPaths = [String]()
 
     signpost_begin(name: "Process input")
     let t0 = CFAbsoluteTimeGetCurrent()
@@ -121,6 +122,7 @@ public func generate(sourceDirs: [String],
                          completion: { container in
                             pathToContentMap.append(contentsOf: container.imports)
                             resolvedEntities.append(container.entity)
+                            relevantPaths.append(contentsOf: container.paths)
     })
     signpost_end(name: "Generate models")
     let t3 = CFAbsoluteTimeGetCurrent()
@@ -149,7 +151,8 @@ public func generate(sourceDirs: [String],
                                 pathToContentMap: pathToContentMap,
                                 customImports: customImports,
                                 excludeImports: excludeImports,
-                                testableImports: testableImports)
+                                testableImports: testableImports,
+                                relevantPaths: relevantPaths)
 
     let result = try write(candidates: candidates,
                        header: header,
