@@ -15,7 +15,8 @@
 //
 
 import Foundation
-import SwiftSyntax
+@_spi(RawSyntax) import SwiftSyntax
+@_spi(Diagnostics) import SwiftParser
 
 extension Int {
     var tab: String {
@@ -119,7 +120,9 @@ extension String {
     }
 
     var safeName: String {
-        if let token = TokenKind(keyword: self), token.isKeyword {
+        var text = self
+        if let keyword = text.withSyntaxText(Keyword.init),
+           TokenKind.keyword(keyword).isLexerClassifiedKeyword {
             return "`\(self)`"
         }
         return self

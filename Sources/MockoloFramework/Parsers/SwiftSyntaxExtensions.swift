@@ -33,7 +33,7 @@ extension SyntaxProtocol {
 
 extension AttributeListSyntax {
     var trimmedDescription: String? {
-        return self.withoutTrivia().description.trimmingCharacters(in: .whitespacesAndNewlines)
+        return self.trimmed.description.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
 
@@ -42,7 +42,7 @@ extension ModifierListSyntax {
         for modifier in self {
             for token in modifier.tokens(viewMode: .sourceAccurate) {
                 switch token.tokenKind {
-                case .publicKeyword, .internalKeyword, .privateKeyword, .fileprivateKeyword:
+                case .keyword(.public), .keyword(.internal), .keyword(.private), .keyword(.fileprivate):
                     return token.text
                 default:
                     // For some reason openKeyword option is not available in TokenKind so need to address separately
@@ -57,7 +57,7 @@ extension ModifierListSyntax {
     }
 
     var isStatic: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .staticKeyword }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.static) }.count > 0
     }
 
     var isRequired: Bool {
@@ -77,11 +77,11 @@ extension ModifierListSyntax {
     }
 
     var isPrivate: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .privateKeyword || $0.tokenKind == .fileprivateKeyword }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.private) || $0.tokenKind == .keyword(.fileprivate) }.count > 0
     }
 
     var isPublic: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .publicKeyword }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.public) }.count > 0
     }
 }
 
@@ -125,19 +125,13 @@ extension MemberDeclListItemSyntax {
     }
 
     private func validateInit(_ initDecl: InitializerDeclSyntax, _ declType: DeclType, processed: Bool) -> Bool {
-        var isRequired = false
-        if let modifiers = initDecl.modifiers {
-            isRequired = modifiers.isRequired
-        }
+        let modifiers = initDecl.modifiers
+        let isRequired = modifiers.isRequired
         if processed {
             return isRequired
         }
-        var isConvenience = false
-        var isPrivate = false
-        if let modifiers = initDecl.modifiers {
-            isConvenience = modifiers.isConvenience
-            isPrivate = modifiers.isPrivate
-        }
+        let isConvenience = modifiers.isConvenience
+        let isPrivate = modifiers.isPrivate
 
         if isConvenience || isPrivate {
             return false
@@ -157,35 +151,35 @@ extension MemberDeclListItemSyntax {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
                 if let item = varMember.models(with: acl, declType: declType, metadata: metadata, processed: processed).first {
-                    return (item, varMember.attributes?.trimmedDescription, false)
+                    return (item, varMember.attributes.trimmedDescription, false)
                 }
             }
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
                 let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
-                return (item, funcMember.attributes?.trimmedDescription, false)
+                return (item, funcMember.attributes.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
             if validateMember(subscriptMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
                 let item = subscriptMember.model(with: acl, declType: declType, processed: processed)
-                return (item, subscriptMember.attributes?.trimmedDescription, false)
+                return (item, subscriptMember.attributes.trimmedDescription, false)
             }
         } else if let initMember = self.decl.as(InitializerDeclSyntax.self) {
             if validateInit(initMember, declType, processed: processed) {
                 let acl = memberAcl(initMember.modifiers, encloserAcl, declType)
                 let item = initMember.model(with: acl, declType: declType, processed: processed)
-                return (item, initMember.attributes?.trimmedDescription, true)
+                return (item, initMember.attributes.trimmedDescription, true)
             }
         } else if let patMember = self.decl.as(AssociatedtypeDeclSyntax.self) {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declType)
             let item = patMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
-            return (item, patMember.attributes?.trimmedDescription, false)
+            return (item, patMember.attributes.trimmedDescription, false)
         } else if let taMember = self.decl.as(TypealiasDeclSyntax.self) {
             let acl = memberAcl(taMember.modifiers, encloserAcl, declType)
             let item = taMember.model(with: acl, declType: declType, overrides: metadata?.typeAliases, processed: processed)
-            return (item, taMember.attributes?.trimmedDescription, false)
+            return (item, taMember.attributes.trimmedDescription, false)
         } else if let ifMacroMember = self.decl.as(IfConfigDeclSyntax.self) {
             let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declType: declType, metadata: metadata, processed: processed)
             return (item, attr, initFlag)
@@ -264,7 +258,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     var accessLevel: String {
-        return self.modifiers?.acl ?? ""
+        return self.modifiers.acl ?? ""
     }
 
     var declType: DeclType {
@@ -272,7 +266,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     var isPrivate: Bool {
-        return self.modifiers?.isPrivate ?? false
+        return self.modifiers.isPrivate ?? false
     }
 
     var inheritedTypes: [String] {
@@ -280,7 +274,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     var attributesDescription: String {
-        self.attributes?.trimmedDescription ?? ""
+        self.attributes.trimmedDescription ?? ""
     }
 
     var offset: Int64 {
@@ -288,7 +282,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia?.annotationMetadata(with: annotation)
+        return leadingTrivia.annotationMetadata(with: annotation)
     }
 
     var hasBlankInit: Bool {
@@ -307,7 +301,7 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     var accessLevel: String {
-        return self.modifiers?.acl ?? ""
+        return self.modifiers.acl ?? ""
     }
 
     var declType: DeclType {
@@ -319,7 +313,7 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     var attributesDescription: String {
-        self.attributes?.trimmedDescription ?? ""
+        self.attributes.trimmedDescription ?? ""
     }
 
     var offset: Int64 {
@@ -327,15 +321,15 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     var isFinal: Bool {
-        return self.modifiers?.isFinal ?? false
+        return self.modifiers.isFinal ?? false
     }
 
     var isPrivate: Bool {
-        return self.modifiers?.isPrivate ?? false
+        return self.modifiers.isPrivate ?? false
     }
 
     var isPublic: Bool {
-        return self.modifiers?.isPublic ?? false
+        return self.modifiers.isPublic ?? false
     }
 
     var hasBlankInit: Bool {
@@ -343,7 +337,7 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia?.annotationMetadata(with: annotation)
+        return leadingTrivia.annotationMetadata(with: annotation)
     }
 
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
@@ -354,10 +348,7 @@ extension ClassDeclSyntax: EntityNode {
 extension VariableDeclSyntax {
     func models(with acl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> [Model] {
         // Detect whether it's static
-        var isStatic = false
-        if let modifiers = self.modifiers {
-            isStatic = modifiers.isStatic
-        }
+        let isStatic = self.modifiers.isStatic
 
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
@@ -391,10 +382,7 @@ extension VariableDeclSyntax {
 
 extension SubscriptDeclSyntax {
     func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
-        var isStatic = false
-        if let modifiers = self.modifiers {
-            isStatic = modifiers.isStatic
-        }
+        let isStatic = self.modifiers.isStatic
 
         let params = self.indices.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
@@ -424,10 +412,7 @@ extension SubscriptDeclSyntax {
 extension FunctionDeclSyntax {
 
     func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
-        var isStatic = false
-        if let modifiers = self.modifiers {
-            isStatic = modifiers.isStatic
-        }
+        let isStatic = self.modifiers.isStatic
 
         let params = self.signature.input.parameterList.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.genericParameterList.compactMap { $0.model(inInit: false) } ?? []
@@ -441,8 +426,8 @@ extension FunctionDeclSyntax {
                                     genericTypeParams: genericTypeParams,
                                     genericWhereClause: genericWhereClause,
                                     params: params,
-                                    throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text,
-                                    asyncOrReasync: self.signature.asyncOrReasyncKeyword?.text,
+                                    throwsOrRethrows: self.signature.effectSpecifiers?.throwsSpecifier?.text,
+                                    asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
                                     isStatic: isStatic,
                                     offset: self.offset,
                                     length: self.length,
@@ -459,13 +444,10 @@ extension InitializerDeclSyntax {
         if declType == .protocolType {
             return true
         } else if declType == .classType {
-            if let modifiers = self.modifiers {
-
-                if modifiers.isConvenience {
-                    return false
-                }
-                return modifiers.isRequired
+            if modifiers.isConvenience {
+                return false
             }
+            return modifiers.isRequired
         }
         return false
     }
@@ -485,8 +467,8 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: self.signature.throwsOrRethrowsKeyword?.text,
-                           asyncOrReasync: self.signature.asyncOrReasyncKeyword?.text,
+                           throwsOrRethrows: self.signature.effectSpecifiers?.throwsSpecifier?.text,
+                           asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
@@ -518,22 +500,21 @@ extension FunctionParameterSyntax {
         var label = ""
         var name = ""
         // Get label and name of args
-        if let first = self.firstName?.text {
-            if let second = self.secondName?.text {
+        let first = self.firstName.text
+        if let second = self.secondName?.text {
+            label = first
+            name = second
+        } else {
+            if first == "_" {
                 label = first
-                name = second
+                name = first + "arg"
             } else {
-                if first == "_" {
-                    label = first
-                    name = first + "arg"
-                } else {
-                    name = first
-                }
+                name = first
             }
         }
 
         // Variadic args are not detected in the parser so need to manually look up
-        var type = self.type?.description ?? ""
+        var type = self.type.description ?? ""
         if self.description.contains(type + "...") {
             type.append("...")
         }
@@ -644,11 +625,9 @@ final class EntityVisitor: SyntaxVisitor {
 
     private func visitImpl(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
         for cl in node.clauses {
-            var macroName = ""
-            if let ifmacro = cl.condition?.as(IdentifierExprSyntax.self) {
-                macroName = ifmacro.identifier.text
-            } else if let expr = cl.condition?.as(FunctionCallExprSyntax.self) {
-                macroName = expr.description
+            let macroName: String
+            if let conditionDescription = cl.condition?.trimmedDescription {
+                macroName = conditionDescription
             } else {
                 return .visitChildren
             }
@@ -662,14 +641,14 @@ final class EntityVisitor: SyntaxVisitor {
                         if imports[key] == nil {
                             imports[key] = []
                         }
-                        imports[key]?.append(importItem.description.trimmingCharacters(in: .whitespacesAndNewlines))
+                        imports[key]?.append(importItem.trimmedDescription)
 
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
                         let key = macroName
                         if imports[key] == nil {
                             imports[key] = []
                         }
-                        imports[key]?.append(nested.description.trimmingCharacters(in: .whitespacesAndNewlines))
+                        imports[key]?.append(nested.trimmedDescription)
                     } else {
                         return .visitChildren
                     }
