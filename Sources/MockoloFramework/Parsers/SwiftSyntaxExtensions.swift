@@ -253,8 +253,8 @@ extension IfConfigDeclSyntax {
 }
 
 extension ProtocolDeclSyntax: EntityNode {
-    var name: String {
-        return identifier.text
+    var nameText: String {
+        return name.text
     }
 
     var accessLevel: String {
@@ -296,8 +296,8 @@ extension ProtocolDeclSyntax: EntityNode {
 
 extension ClassDeclSyntax: EntityNode {
 
-    var name: String {
-        return identifier.text
+    var nameText: String {
+        return name.text
     }
 
     var accessLevel: String {
@@ -592,7 +592,7 @@ final class EntityVisitor: SyntaxVisitor {
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
 
     private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        if node.name.hasSuffix("Mock") {
+        if node.nameText.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
             if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
                 entities.append(ent)

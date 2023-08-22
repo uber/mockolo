@@ -80,7 +80,7 @@ struct ResolvedEntityContainer {
 }
 
 protocol EntityNode {
-    var name: String { get }
+    var nameText: String { get }
     var accessLevel: String { get }
     var attributesDescription: String { get }
     var declType: DeclType { get }
