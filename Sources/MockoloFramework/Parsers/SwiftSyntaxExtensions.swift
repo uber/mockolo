@@ -42,13 +42,14 @@ extension DeclModifierListSyntax {
         for modifier in self {
             for token in modifier.tokens(viewMode: .sourceAccurate) {
                 switch token.tokenKind {
-                case .keyword(.public), .keyword(.internal), .keyword(.private), .keyword(.fileprivate):
+                case .keyword(.private),
+                        .keyword(.fileprivate),
+                        .keyword(.internal),
+                        .keyword(.package),
+                        .keyword(.public),
+                        .keyword(.open):
                     return token.text
                 default:
-                    // For some reason openKeyword option is not available in TokenKind so need to address separately
-                    if token.text == String.open {
-                        return token.text
-                    }
                     return ""
                 }
             }
