@@ -23,6 +23,15 @@ func write(candidates: [(String, Int64)],
            imports: String,
            to outputFilePath: String) throws -> String {
 
+    guard !candidates.isEmpty else {
+        let wasDeleted = try deleteFileIfExists(path: outputFilePath)
+        if wasDeleted {
+            log("Removing file \(outputFilePath) which became empty", level: .info)
+        } else {
+            log("Skipping creating empty \(outputFilePath)", level: .info)
+        }
+        return ""
+    }
     let entities = candidates
         .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
             if left.1 == right.1 {
@@ -50,3 +59,12 @@ func write(candidates: [(String, Int64)],
     return ret
 }
 
+private func deleteFileIfExists(path: String) throws -> Bool {
+    let fileManager = FileManager.default
+    if fileManager.fileExists(atPath: path) {
+        try fileManager.removeItem(atPath: path)
+        return true
+    } else {
+        return false
+    }
+}
