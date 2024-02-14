@@ -11,7 +11,7 @@ let package = Package(
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
         ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", exact: "508.0.0"),
+        .package(url: "https://github.com/apple/swift-syntax.git", exact: "509.0.0"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.2"),
     ],
     targets: [

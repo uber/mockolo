@@ -67,7 +67,7 @@ public func generate(sourceDirs: [String],
     if let mockFilePaths = mockFilePaths, !mockFilePaths.isEmpty {
         parser.parseProcessedDecls(mockFilePaths, fileMacro: macro) { (elements, imports) in
                                     elements.forEach { element in
-                                        parentMocks[element.entityNode.name] = element
+                                        parentMocks[element.entityNode.nameText] = element
                                     }
                                     
                                     if let imports = imports {
@@ -92,9 +92,9 @@ public func generate(sourceDirs: [String],
                       fileMacro: macro,
                       declType: declType) { (elements, imports) in
                         elements.forEach { element in
-                            protocolMap[element.entityNode.name] = element
+                            protocolMap[element.entityNode.nameText] = element
                             if element.isAnnotated {
-                                annotatedProtocolMap[element.entityNode.name] = element
+                                annotatedProtocolMap[element.entityNode.nameText] = element
                             }
                         }
                         if let imports = imports {
