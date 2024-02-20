@@ -61,15 +61,29 @@ struct ResolvedEntity {
 
 
     func model() -> Model {
-        return ClassModel(identifier: key,
-                          acl: entity.entityNode.accessLevel,
-                          declType: entity.entityNode.declType,
-                          attributes: attributes,
-                          offset: entity.entityNode.offset,
-                          metadata: entity.metadata,
-                          initParamCandidates: initParamCandidates,
-                          declaredInits: declaredInits,
-                          entities: uniqueModels)
+        let objectType = entity.metadata?.objectType
+        switch objectType {
+        case .class, .none:
+            return ClassModel(identifier: key,
+                              acl: entity.entityNode.accessLevel,
+                              declType: entity.entityNode.declType,
+                              attributes: attributes,
+                              offset: entity.entityNode.offset,
+                              metadata: entity.metadata,
+                              initParamCandidates: initParamCandidates,
+                              declaredInits: declaredInits,
+                              entities: uniqueModels)
+        case .actor:
+            return ActorModel(identifier: key,
+                              acl: entity.entityNode.accessLevel,
+                              declType: entity.entityNode.declType,
+                              attributes: attributes,
+                              offset: entity.entityNode.offset,
+                              metadata: entity.metadata,
+                              initParamCandidates: initParamCandidates,
+                              declaredInits: declaredInits,
+                              entities: uniqueModels)
+        }
     }
 }
 
@@ -119,8 +133,9 @@ public enum CombineType {
 }
 
 /// Contains arguments to annotation
-/// e.g. @mockable(module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true; modifiers: someVar = weak; combine: fooPublisher = CurrentValueSubject; otherPublisher = @Published otherProperty, override: name = FooMock)
+/// e.g. @mockable(objectType: class; module: prefix = Foo; typealias: T = Any; U = String; rx: barStream = PublishSubject; history: bazFunc = true; modifiers: someVar = weak; combine: fooPublisher = CurrentValueSubject; otherPublisher = @Published otherProperty, override: name = FooMock)
 struct AnnotationMetadata {
+    var objectType: ObjectType?
     var nameOverride: String?
     var module: String?
     var typeAliases: [String: String]?
@@ -174,6 +189,11 @@ public final class Entity {
         self.metadata = metadata
         self.isProcessed = isProcessed
     }
+}
+
+enum ObjectType: String {
+    case `class` = "class"
+    case `actor` = "actor"
 }
 
 enum Modifier: String {
