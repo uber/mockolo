@@ -106,6 +106,11 @@ extension InheritanceClauseSyntax {
         } else if let compositionType = type.as(CompositionTypeSyntax.self) {
             // example: `protocol A: B & C {}`
             return compositionType.elements.map(\.type).map(parseElementType(type:)).flatMap { $0 }
+        } else if let attributedType = type.as(AttributedTypeSyntax.self) {
+            // example: `protocol A: @unchecked B {}`
+            if let baseType = attributedType.baseType.as(IdentifierTypeSyntax.self) {
+                return [baseType.name.text]
+            }
         }
         return []
     }

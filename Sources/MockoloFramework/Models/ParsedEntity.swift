@@ -22,6 +22,7 @@ struct ResolvedEntity {
     let entity: Entity
     let uniqueModels: [(String, Model)]
     let attributes: [String]
+    let inheritedTypes: [String]
 
     var declaredInits: [MethodModel] {
         return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
@@ -64,6 +65,7 @@ struct ResolvedEntity {
         return ClassModel(identifier: key,
                           acl: entity.entityNode.accessLevel,
                           declType: entity.entityNode.declType,
+                          inheritedTypes: inheritedTypes,
                           attributes: attributes,
                           offset: entity.entityNode.offset,
                           metadata: entity.metadata,

@@ -22,6 +22,7 @@ extension ClassModel {
                             accessLevel: String,
                             attribute: String,
                             declType: DeclType,
+                            inheritedTypes: [String],
                             metadata: AnnotationMetadata?,
                             useTemplateFunc: Bool,
                             useMockObservable: Bool,
@@ -79,6 +80,11 @@ extension ClassModel {
         
         let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declType: declType, overrides: metadata?.varTypes)
 
+        var inheritedTypesStr = ""
+        for inheritedType in inheritedTypes {
+            inheritedTypesStr += ", " + inheritedType
+        }
+
         var body = ""
         if !typealiasTemplate.isEmpty {
             body += "\(typealiasTemplate)\n"
@@ -93,7 +99,7 @@ extension ClassModel {
         let finalStr = mockFinal ? "\(String.final) " : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)class \(name): \(moduleDot)\(identifier) {
+        \(acl)\(finalStr)class \(name): \(moduleDot)\(identifier)\(inheritedTypesStr) {
         \(body)
         }
         """
