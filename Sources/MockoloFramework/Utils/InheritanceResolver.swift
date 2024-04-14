@@ -49,7 +49,7 @@ func lookupEntities(key: String,
         if !current.isProcessed {
             attributes.append(contentsOf: sub.attributes)
         }
-        inheritedTypes = inheritedTypes.union(current.entityNode.inheritedTypes)
+        inheritedTypes.formUnion(current.entityNode.inheritedTypes)
         if let data = current.data {
             pathToContents.append((current.filepath, data, current.entityNode.offset))
         }
@@ -64,7 +64,7 @@ func lookupEntities(key: String,
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
                     attributes.append(contentsOf: parentAttributes)
-                    inheritedTypes = inheritedTypes.union(parentInheritedTypes)
+                    inheritedTypes.formUnion(parentInheritedTypes)
                     paths.append(contentsOf: parentPaths)
                     pathToContents.append(contentsOf:parentPathToContents)
                 }
