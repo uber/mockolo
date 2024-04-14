@@ -1,6 +1,3 @@
-import Foundation
-
-
 class SendableTests: MockoloTestCase {
     func testSendableProtocol() {
         verify(srcContent: sendableProtocol,

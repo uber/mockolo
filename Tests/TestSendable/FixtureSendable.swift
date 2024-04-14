@@ -1,8 +1,6 @@
 import MockoloFramework
 
 let sendableProtocol = """
-import Foundation
-
 /// \(String.mockAnnotation)
 public protocol SendableProtocol: Sendable {
     func update(arg: Int) -> String
@@ -11,7 +9,7 @@ public protocol SendableProtocol: Sendable {
 
 let sendableProtocolMock = """
 
-import Foundation
+
 
 public class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
     public init() { }
@@ -31,8 +29,6 @@ public class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
 """
 
 let uncheckedSendableClass = """
-import Foundation
-
 /// \(String.mockAnnotation)
 public class UncheckedSendableClass: @unchecked Sendable {
     func update(arg: Int) -> String
@@ -41,7 +37,7 @@ public class UncheckedSendableClass: @unchecked Sendable {
 
 let uncheckedSendableClassMock = """
 
-import Foundation
+
 
 public class UncheckedSendableClassMock: UncheckedSendableClass, @unchecked Sendable {
     public init() { }
@@ -61,8 +57,6 @@ public class UncheckedSendableClassMock: UncheckedSendableClass, @unchecked Send
 """
 
 let confirmedSendableProtocol = """
-import Foundation
-
 public protocol SendableSendable: Sendable {
     func update(arg: Int) -> String
 }
@@ -74,7 +68,7 @@ public protocol ConfirmedSendableProtocol: SendableSendable {
 
 let confirmedSendableProtocolMock = """
 
-import Foundation
+
 
 public class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol, @unchecked Sendable {
     public init() { }
