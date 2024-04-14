@@ -80,10 +80,8 @@ extension ClassModel {
         
         let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declType: declType, overrides: metadata?.varTypes)
 
-        var inheritedTypesStr = ""
-        for inheritedType in inheritedTypes {
-            inheritedTypesStr += ", " + inheritedType
-        }
+        var inheritedTypes = inheritedTypes
+        inheritedTypes.insert("\(moduleDot)\(identifier)", at: 0)
 
         var body = ""
         if !typealiasTemplate.isEmpty {
@@ -99,7 +97,7 @@ extension ClassModel {
         let finalStr = mockFinal ? "\(String.final) " : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)class \(name): \(moduleDot)\(identifier)\(inheritedTypesStr) {
+        \(acl)\(finalStr)class \(name): \(inheritedTypes.joined(separator: ", ")) {
         \(body)
         }
         """
