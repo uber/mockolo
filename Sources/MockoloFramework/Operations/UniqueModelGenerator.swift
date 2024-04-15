@@ -35,8 +35,8 @@ private func generateUniqueModels(key: String,
                                   protocolMap: [String: Entity],
                                   inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
     
-    let (models, processedModels, attributes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
-    
+    let (models, processedModels, attributes, inheritedTypes, paths, pathToContentList) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
     let processedElements = processedModels.compactMap { (element: Model) -> (String, Model)? in
@@ -65,8 +65,13 @@ private func generateUniqueModels(key: String,
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
 
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
-    
-    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes)
-    
+
+    var mockInheritedTypes = [String]()
+    if inheritedTypes.contains(.sendable) {
+        mockInheritedTypes.append(.uncheckedSendable)
+    }
+
+    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, inheritedTypes: mockInheritedTypes)
+
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }

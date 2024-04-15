@@ -24,11 +24,12 @@ final class ClassModel: Model {
     let accessLevel: String
     let identifier: String
     let declType: DeclType
+    let inheritedTypes: [String]
     let entities: [(String, Model)]
     let initParamCandidates: [VariableModel]
     let declaredInits: [MethodModel]
     let metadata: AnnotationMetadata?
-    
+
     var modelType: ModelType {
         return .class
     }
@@ -36,6 +37,7 @@ final class ClassModel: Model {
     init(identifier: String,
          acl: String,
          declType: DeclType,
+         inheritedTypes: [String],
          attributes: [String],
          offset: Int64,
          metadata: AnnotationMetadata?,
@@ -46,6 +48,7 @@ final class ClassModel: Model {
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
         self.type = Type(.class)
         self.declType = declType
+        self.inheritedTypes = inheritedTypes
         self.entities = entities
         self.declaredInits = declaredInits
         self.initParamCandidates = initParamCandidates
@@ -71,6 +74,7 @@ final class ClassModel: Model {
             accessLevel: accessLevel,
             attribute: attribute,
             declType: declType,
+            inheritedTypes: inheritedTypes,
             metadata: metadata,
             useTemplateFunc: useTemplateFunc,
             useMockObservable: useMockObservable,

@@ -23,18 +23,20 @@ import Foundation
 /// @param protocolMap Used to look up the current entity and its inheritance types
 /// @param inheritanceMap Used to look up inherited types if not contained in protocolMap
 /// @returns a list of models representing sub-entities of the current entity, a list of models processed in dependent mock files if exists,
-///          cumulated attributes, and a map of filepaths and file contents (used for import lines lookup later).
+///          cumulated attributes, cumulated inherited types, and a map of filepaths and file contents (used for import lines lookup later).
 func lookupEntities(key: String,
                     declType: DeclType,
                     protocolMap: [String: Entity],
-                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], [String], [(String, Data, Int64)]) {
-    
+                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], Set<String>, [String], [(String, Data, Int64)]) {
+
     // Used to keep track of types to be mocked
     var models = [Model]()
     // Used to keep track of types that were already mocked
     var processedModels = [Model]()
     // Gather attributes declared in current or parent protocols
     var attributes = [String]()
+    // Gather inherited types declared in current or parent protocols
+    var inheritedTypes = Set<String>()
     // Gather filepaths and contents used for imports
     var pathToContents = [(String, Data, Int64)]()
     // Gather filepaths used for imports
@@ -47,6 +49,7 @@ func lookupEntities(key: String,
         if !current.isProcessed {
             attributes.append(contentsOf: sub.attributes)
         }
+        inheritedTypes.formUnion(current.entityNode.inheritedTypes)
         if let data = current.data {
             pathToContents.append((current.filepath, data, current.entityNode.offset))
         }
@@ -57,10 +60,11 @@ func lookupEntities(key: String,
             // If the protocol inherits other protocols, look up their entities as well.
             for parent in current.entityNode.inheritedTypes {
                 if parent != .class, parent != .anyType, parent != .anyObject {
-                    let (parentModels, parentProcessedModels, parentAttributes, parentPaths, parentPathToContents) = lookupEntities(key: parent, declType: declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+                    let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths, parentPathToContents) = lookupEntities(key: parent, declType: declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
                     attributes.append(contentsOf: parentAttributes)
+                    inheritedTypes.formUnion(parentInheritedTypes)
                     paths.append(contentsOf: parentPaths)
                     pathToContents.append(contentsOf:parentPathToContents)
                 }
@@ -79,7 +83,7 @@ func lookupEntities(key: String,
         paths.append(parentMock.filepath)
     }
     
-    return (models, processedModels, attributes, paths, pathToContents)
+    return (models, processedModels, attributes, inheritedTypes, paths, pathToContents)
 }
 
 

@@ -95,6 +95,8 @@ extension String {
     static let `escaping` = "@escaping"
     static let autoclosure = "@autoclosure"
     static let name = "name"
+    static let sendable = "Sendable"
+    static let uncheckedSendable = "@unchecked Sendable"
     static public let mockAnnotation = "@mockable"
     static public let mockObservable = "@MockObservable"
     static public let poundIf = "#if "
