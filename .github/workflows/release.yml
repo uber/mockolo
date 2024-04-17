@@ -5,32 +5,58 @@ on:
   release:
     types: [published]
 
+env:
+  SWIFT_VERSION: "5.10"
+
 jobs:
-  build-release:
+  build:
     name: Build for ${{ matrix.destination.name }}
     runs-on: ${{ matrix.destination.os }}
     strategy:
       matrix:
         destination:
           - { name: "ubuntu-x86_64", os: ubuntu-20.04 }
-          - { name: "ubuntu-aarch64", os: ubuntu-20.04, container: "arm64v8/ubuntu:latest" }
           - { name: "macos-universal", os: macos-12 }
     container: ${{ matrix.destination.container }}
     steps:
     - uses: swift-actions/setup-swift@v2
       with:
-        swift-version: "5.10"
+        swift-version: ${{ env.SWIFT_VERSION }}
     - uses: actions/checkout@v4
     - name: Create the binary
-      run: ./install-script.sh -s . -t mockolo -d . -o mockolo.${{ matrix.destination.name }}.tar.gz
+      run: ./install-script.sh -s . -t mockolo -d . -o mockolo.tar.gz
     - name: Upload the binary
       uses: actions/upload-artifact@v4
       with:
+        path: mockolo.tar.gz
         name: mockolo.${{ matrix.destination.name }}
-        path: mockolo.${{ matrix.destination.name }}.tar.gz
+
+  build-with-qemu:
+    name: Build for${{ matrix.destination.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        destination:
+          - { name: "ubuntu-aarch64" }
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - uses: actions/checkout@v4
+      - name: Create the binary
+        run: |
+          docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work swift:${{ env.SWIFT_VERSION }} \
+            ./install-script.sh -s . -t mockolo -d /work -o mockolo.tar.gz
+      - name: Upload the binary
+        uses: actions/upload-artifact@v4
+        with:
+          path: mockolo.tar.gz
+          name: mockolo.${{ matrix.destination.name }}
 
   check-portability:
-    needs: build-release
+    needs: build
     name: TestRun on ${{ matrix.destination.os }}
     runs-on: ${{ matrix.destination.os }}
     strategy:
@@ -51,9 +77,33 @@ jobs:
     - name: Run the binary
       run: ./mockolo --version
 
+  check-portability-with-qemu:
+    needs: build-with-qemu
+    name: TestRun on ${{ matrix.destination.os }}
+    runs-on: ${{ matrix.destination.os }}
+    strategy:
+      matrix:
+        destination:
+          - { name: "ubuntu-aarch64", tag: "ubuntu/latest" }
+    steps:
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: mockolo.${{ matrix.destination.name }}
+    - name: Unpack the binary
+      run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
+    - name: Run the binary
+      run: |
+        docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work ${{ matrix.destination.tag }} \
+          ./mockolo --version
+
   deploy-binary:
     if: ${{ github.event_name == 'release' }}
-    needs: check-portability
+    needs: [check-portability, check-portability-with-qemu]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4
