@@ -24,15 +24,15 @@ jobs:
         swift-version: ${{ env.SWIFT_VERSION }}
     - uses: actions/checkout@v4
     - name: Create the binary
-      run: ./install-script.sh -s . -t mockolo -d . -o mockolo.tar.gz
+      run: ./install-script.sh -s . -t mockolo -d . -o mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Upload the binary
       uses: actions/upload-artifact@v4
       with:
-        path: mockolo.tar.gz
+        path: mockolo.${{ matrix.destination.name }}.tar.gz
         name: mockolo.${{ matrix.destination.name }}
 
   build-with-qemu:
-    name: Build for${{ matrix.destination.name }}
+    name: Build for ${{ matrix.destination.name }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -48,11 +48,11 @@ jobs:
       - name: Create the binary
         run: |
           docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work swift:${{ env.SWIFT_VERSION }} \
-            ./install-script.sh -s . -t mockolo -d /work -o mockolo.tar.gz
+            ./install-script.sh -s . -t mockolo -d /work -o mockolo.${{ matrix.destination.name }}.tar.gz
       - name: Upload the binary
         uses: actions/upload-artifact@v4
         with:
-          path: mockolo.tar.gz
+          path: mockolo.${{ matrix.destination.name }}.tar.gz
           name: mockolo.${{ matrix.destination.name }}
 
   check-portability:
