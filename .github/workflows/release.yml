@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  workflow_dispatch:
   release:
     types: [published]
 
@@ -51,6 +52,7 @@ jobs:
       run: ./mockolo --version
 
   deploy-binary:
+    if: ${{ github.event_name == 'release' }}
     needs: check-portability
     runs-on: ubuntu-latest
     steps:
