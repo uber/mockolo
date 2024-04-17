@@ -9,7 +9,7 @@ Usage: -s/--source-dir [source dir], -t/--target [name of target to build/instal
     exit
 }
 
-if [[ $1 == "" ]] 
+if [[ $1 == "" ]]
 then
 showhelp
 fi
@@ -46,7 +46,7 @@ case $key in
     -h|--help)
     showhelp
     ;;
-    *) 
+    *)
     showhelp
     ;;
 esac
@@ -65,7 +65,7 @@ echo "OUTPUT FILE = ${OUTFILE}"
 cd "$SRCDIR"
 rm -rf .build
 case $(uname -s) in
-    Linux*)     swift build --static-swift-stdlib -c release --arch arm64 --arch x86_64
+    Linux*)     swift build --static-swift-stdlib -c release
                 cd .build/release;;
     Darwin*)    swift build -c release --arch arm64 --arch x86_64
                 cd .build/apple/Products/Release;;
