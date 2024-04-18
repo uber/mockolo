@@ -57,14 +57,13 @@ jobs:
 
   check-portability:
     needs: build
-    name: TestRun on ${{ matrix.destination.os }}
+    name: TestRun on ${{ matrix.destination.os }} for ${{ matrix.destination.name }}
     runs-on: ${{ matrix.destination.os }}
     strategy:
       matrix:
         destination:
           - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
           - { name: "ubuntu-x86_64", os: ubuntu-20.04 }
-          - { name: "ubuntu-aarch64", os: ubuntu-20.04, container: "arm64v8/ubuntu:latest" }
           - { name: "macos-universal", os: macos-14 }
           - { name: "macos-universal", os: macos-13 }
           - { name: "macos-universal", os: macos-12 }
@@ -80,7 +79,7 @@ jobs:
   check-portability-with-qemu:
     needs: build-with-qemu
     name: TestRun on ${{ matrix.destination.os }}
-    runs-on: ${{ matrix.destination.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         destination:
