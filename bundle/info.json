@@ -1,0 +1,23 @@
+{
+    "schemaVersion": "1.0",
+    "artifacts": {
+        "mockolo": {
+            "version": "__VERSION__",
+            "type": "executable",
+            "variants": [
+                {
+                    "path": "mockolo/macos/mockolo",
+                    "supportedTriples": ["x86_64-apple-macosx", "arm64-apple-macosx"]
+                },
+                {
+                    "path": "mockolo/ubuntu/x86_64-unknown-linux-gnu/mockolo",
+                    "supportedTriples": ["x86_64-unknown-linux-gnu"]
+                },
+                {
+                    "path": "mockolo/ubuntu/aarch64-unknown-linux-gnu/mockolo",
+                    "supportedTriples": ["aarch64-unknown-linux-gnu"]
+                }
+            ]
+        }
+    }
+}

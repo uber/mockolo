@@ -100,9 +100,32 @@ jobs:
         docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work ${{ matrix.destination.tag }} \
           ./mockolo --version
 
+  make-artifact-bundle:
+    needs: [build, build-with-qemu]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+      - run: bundle/make_artifactbundle.sh ${{ github.event.release.tag_name || github.ref_name }}
+
+      - name: Upload artifact bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: mockolo.artifactbundle.zip
+          path: mockolo.artifactbundle.zip
+
+      - name: Compute checksum
+        run: swift package compute-checksum mockolo.artifactbundle.zip > mockolo.artifactbundle.zip.checksum
+
+      - name: Upload checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: mockolo.artifactbundle.zip.checksum
+          path: mockolo.artifactbundle.zip.checksum
+
   deploy-binary:
     if: ${{ github.event_name == 'release' }}
-    needs: [check-portability, check-portability-with-qemu]
+    needs: [check-portability, check-portability-with-qemu, make-artifact-bundle]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4
@@ -113,3 +136,5 @@ jobs:
           mockolo.ubuntu-x86_64.tar.gz
           mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
+          mockolo.artifactbundle.zip
+          mockolo.artifactbundle.zip.checksum
