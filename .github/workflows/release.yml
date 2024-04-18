@@ -16,7 +16,7 @@ jobs:
       matrix:
         destination:
           - { name: "ubuntu-x86_64", os: ubuntu-20.04 }
-          - { name: "macos-universal", os: macos-12 }
+          - { name: "macos-universal", os: macos-14 }
     container: ${{ matrix.destination.container }}
     steps:
     - uses: swift-actions/setup-swift@v2
