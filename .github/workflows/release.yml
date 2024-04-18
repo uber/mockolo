@@ -103,6 +103,8 @@ jobs:
   make-artifact-bundle:
     needs: [build, build-with-qemu]
     runs-on: ubuntu-latest
+    outputs:
+      checksum: ${{ steps.checksum.outputs.checksum }}
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -115,13 +117,8 @@ jobs:
           path: mockolo.artifactbundle.zip
 
       - name: Compute checksum
-        run: swift package compute-checksum mockolo.artifactbundle.zip > mockolo.artifactbundle.zip.checksum
-
-      - name: Upload checksum
-        uses: actions/upload-artifact@v4
-        with:
-          name: mockolo.artifactbundle.zip.checksum
-          path: mockolo.artifactbundle.zip.checksum
+        id: checksum
+        run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
 
   deploy-binary:
     if: ${{ github.event_name == 'release' }}
@@ -132,9 +129,17 @@ jobs:
     - name: Deploy the binary
       uses: softprops/action-gh-release@v2
       with:
+        body: |
+          ```swift
+          .binaryTarget(
+            name: "mockolo",
+            url: "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/mockolo.artifactbundle.zip",
+            checksum: "${{ needs.make-artifact-bundle.outputs.checksum }}"
+          ),
+          ```
+        append_body: true
         files: |
           mockolo.ubuntu-x86_64.tar.gz
           mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
-          mockolo.artifactbundle.zip.checksum
