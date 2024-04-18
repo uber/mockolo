@@ -42,12 +42,72 @@ Option 2: [Homebrew](https://brew.sh/)
 $ brew install mockolo
 ```
 
-Option 3: Use the binary
+Option 3: Use as Build Tools Plugin with [Swift Package Manager](https://swift.org/package-manager/)
+
+Add binaryTarget and plugin definition to your `Package.swift`.
+Binary url and checksum can be found in the [releases](https://github.com/uber/mockolo/releases) page.
+
+```swift
+targets: [
+    ...
+    .plugin(
+        name: "RunMockolo",
+        capability: .buildTool(),
+        dependencies: [.target(name: "mockolo")]
+    ),
+    .binaryTarget(
+        name: "mockolo",
+        url: "...",
+        checksum: "..."
+    ),
+```
+
+Implement the plugin and specify necessary directories in the arguments.
+
+- `Plugins/RunMockolo/RunMockoloPlugin.swift`
+
+```swift
+import PackagePlugin
+
+@main struct RunMockoloPlugin: BuildToolPlugin {
+    func createBuildCommands(context: PluginContext, target: Target) async throws -> [Command] {
+        let generatedSourcePath = context.pluginWorkDirectory.appending("GeneratedMocks.swift")
+        let packageRoot = context.package.directory
+
+        return [
+            .prebuildCommand(
+                displayName: "Run mockolo",
+                executable: try context.tool(named: "mockolo").path,
+                arguments: [
+                    "-s", packageRoot.appending("Sources", "MyModule").string,
+                    "-d", generatedSourcePath,
+                ],
+                outputFilesDirectory: context.pluginWorkDirectory
+            ),
+        ]
+    }
+}
+```
+
+Finally, add the plugin to the target requiring mockolo.
+
+```swift
+.target(
+    name: "MyTarget",
+    dependencies: [
+        ...
+    ],
+    plugins: [
+        .plugin(name: "RunMockolo"),
+    ]
+),
+```
+
+Option 4: Use the binary
 
   Go to the Release tab and download/install the binary directly.
 
-
-Option 4: Clone and build/run
+Option 5: Clone and build/run
 
 ```
 $ git clone https://github.com/uber/mockolo.git
@@ -57,20 +117,6 @@ $ .build/release/mockolo -h  // see commandline input options below
 ```
 
 To call mockolo from any location, copy the executable into a directory that is part of your `PATH` environment variable.
-
-
-To check out a specific version,
-
-```
-$ git tag -l
-$ git checkout [tag]
-```
-
-To use Xcode to build and run,
-
-```
-$ swift package generate-xcodeproj
-```
 
 ## Run
 
