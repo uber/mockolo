@@ -129,6 +129,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4
+      with:
+        merge-multiple: true
     - name: Deploy the binary
       uses: softprops/action-gh-release@v2
       with:
