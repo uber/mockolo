@@ -83,7 +83,8 @@ jobs:
     strategy:
       matrix:
         destination:
-          - { name: "ubuntu-aarch64", tag: "ubuntu:latest" }
+          - { name: "ubuntu-aarch64", tag: "ubuntu:20.04" }
+          - { name: "ubuntu-aarch64", tag: "ubuntu:22.04" }
     steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
