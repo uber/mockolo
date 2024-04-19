@@ -12,17 +12,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-12, macos-13, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
     steps:
-      - uses: swift-actions/setup-swift@v1
-        if: runner.os == 'Linux'
-        with:
-          swift-version: "5.8"
       - name: Checkout
-        uses: actions/checkout@v3
-      - name: Build
-        run: swift build
-      - name: Test
-        run: swift test -c release
+        uses: actions/checkout@v4
+      - name: Build and Test
+        run: swift test
         env:
           CI: 1
