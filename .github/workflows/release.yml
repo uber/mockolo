@@ -47,7 +47,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Create the binary
         run: |
-          docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work swift:${{ env.SWIFT_VERSION }} \
+          docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work swift:${{ env.SWIFT_VERSION }}-focal \
             ./install-script.sh -s . -t mockolo -d /work -o mockolo.${{ matrix.destination.name }}.tar.gz
       - name: Upload the binary
         uses: actions/upload-artifact@v4
@@ -78,7 +78,7 @@ jobs:
 
   check-portability-with-qemu:
     needs: build-with-qemu
-    name: TestRun on ${{ matrix.destination.os }}
+    name: TestRun on ${{ matrix.destination.tag }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
