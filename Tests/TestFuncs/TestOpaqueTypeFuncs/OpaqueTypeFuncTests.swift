@@ -11,4 +11,9 @@ class OpaqueTypeFuncTests: MockoloTestCase {
         verify(srcContent: someMultiParameterOptionalType,
                dstContent: someMultiParameterOptionalTypeMock)
     }
+    
+    func testOpaqueTypeAsReturnTypeFuncs() {
+        verify(srcContent: closureReturningSomeType,
+               dstContent: closureReturningSomeTypeMock)
+    }
 }

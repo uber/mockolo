@@ -600,6 +600,9 @@ public final class `Type` {
         var ret = typeName
         if let closureRng = closureRng {
             let left = ret[ret.startIndex..<closureRng.lowerBound]
+            let right = ret[closureRng.lowerBound..<ret.endIndex]
+            ret = left + right.replacingOccurrences(of: String.some, with: String.any)
+            
             for item in typeParamList {
                 if isEscaping, left.literalComponents.contains(item) {
                     ret = String.anyType
