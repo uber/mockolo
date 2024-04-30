@@ -93,7 +93,7 @@ public class OpaqueTypeWithMultiTypeProtocolMock: OpaqueTypeWithMultiTypeProtoco
 let closureReturningSomeType = """
 /// \(String.mockAnnotation)
 protocol ProtocolReturningOpaqueTypeInClosureProtocol {
-    func register(router: @autoclosure @escaping () -> (some Error))
+    func register(router: @autoclosure @escaping () -> (some MyAwesomeType))
 }
 """
 
@@ -106,8 +106,8 @@ class ProtocolReturningOpaqueTypeInClosureProtocolMock: ProtocolReturningOpaqueT
 
 
     private(set) var registerCallCount = 0
-    var registerHandler: ((@autoclosure @escaping () -> (any Error)) -> ())?
-    func register(router: @autoclosure @escaping () -> (some Error))  {
+    var registerHandler: ((@autoclosure @escaping () -> (any MyAwesomeType)) -> ())?
+    func register(router: @autoclosure @escaping () -> (some MyAwesomeType))  {
         registerCallCount += 1
         if let registerHandler = registerHandler {
             registerHandler(router())
