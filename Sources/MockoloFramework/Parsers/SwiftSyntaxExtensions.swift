@@ -163,19 +163,19 @@ extension MemberBlockItemSyntax {
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declType)
-                let item = funcMember.model(with: acl, declType: declType, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
+                let item = funcMember.model(with: acl, declType: declType, metadata: metadata, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
                 return (item, funcMember.attributes.trimmedDescription, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
             if validateMember(subscriptMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declType)
-                let item = subscriptMember.model(with: acl, declType: declType, processed: processed)
+                let item = subscriptMember.model(with: acl, declType: declType, metadata: metadata, processed: processed)
                 return (item, subscriptMember.attributes.trimmedDescription, false)
             }
         } else if let initMember = self.decl.as(InitializerDeclSyntax.self) {
             if validateInit(initMember, declType, processed: processed) {
                 let acl = memberAcl(initMember.modifiers, encloserAcl, declType)
-                let item = initMember.model(with: acl, declType: declType, processed: processed)
+                let item = initMember.model(with: acl, declType: declType, metadata: metadata, processed: processed)
                 return (item, initMember.attributes.trimmedDescription, true)
             }
         } else if let patMember = self.decl.as(AssociatedTypeDeclSyntax.self) {
@@ -387,7 +387,7 @@ extension VariableDeclSyntax {
 }
 
 extension SubscriptDeclSyntax {
-    func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> Model {
         let isStatic = self.modifiers.isStatic
 
         let params = self.parameterClause.parameters.compactMap { $0.model(inInit: false, declType: declType) }
@@ -410,6 +410,7 @@ extension SubscriptDeclSyntax {
                                          funcsWithArgsHistory: [],
                                          customModifiers: [:],
                                          modelDescription: self.description,
+                                         globalActorAttribute: metadata?.asyncFunctionGlobalActorOverride,
                                          processed: processed)
         return subscriptModel
     }
@@ -417,12 +418,14 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
 
-    func model(with acl: String, declType: DeclType, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, metadata: AnnotationMetadata?, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
         let isStatic = self.modifiers.isStatic
 
         let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
+
+        let asyncOrReasync = self.signature.effectSpecifiers?.asyncSpecifier?.text
 
         let funcmodel = MethodModel(name: self.name.description,
                                     typeName: self.signature.returnClause?.type.description ?? "",
@@ -433,13 +436,14 @@ extension FunctionDeclSyntax {
                                     genericWhereClause: genericWhereClause,
                                     params: params,
                                     throwsOrRethrows: self.signature.effectSpecifiers?.throwsSpecifier?.text,
-                                    asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
+                                    asyncOrReasync: asyncOrReasync,
                                     isStatic: isStatic,
                                     offset: self.offset,
                                     length: self.length,
                                     funcsWithArgsHistory: funcsWithArgsHistory ?? [],
                                     customModifiers: customModifiers ?? [:],
                                     modelDescription: self.description,
+                                    globalActorAttribute: asyncOrReasync != nil ? metadata?.asyncFunctionGlobalActorOverride : nil,
                                     processed: processed)
         return funcmodel
     }
@@ -458,7 +462,7 @@ extension InitializerDeclSyntax {
         return false
     }
 
-    func model(with acl: String, declType: DeclType, processed: Bool) -> Model {
+    func model(with acl: String, declType: DeclType, metadata: AnnotationMetadata?, processed: Bool) -> Model {
         let requiredInit = isRequired(with: declType)
 
         let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: true, declType: declType) }
@@ -481,6 +485,7 @@ extension InitializerDeclSyntax {
                            funcsWithArgsHistory: [],
                            customModifiers: [:],
                            modelDescription: self.description,
+                           globalActorAttribute: metadata?.asyncFunctionGlobalActorOverride,
                            processed: processed)
     }
 
@@ -707,6 +712,7 @@ extension Trivia {
         if let arguments = parseArguments(argsStr, identifier: .overrideColon) {
 
             ret.nameOverride = arguments[.name]
+            ret.asyncFunctionGlobalActorOverride = arguments[.asyncFunctionGlobalActor]
         }
         if let arguments = parseArguments(argsStr, identifier: .rxColon) {
 
