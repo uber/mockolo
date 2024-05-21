@@ -424,6 +424,32 @@ This will generate:
 public class FooMock: FooProtocol { ... }
 ```
 
+To override the actor used for a mock's async functions:
+```swift
+/// @mockable(override: asyncFunctionGlobalActor = MainActor)
+public protocol FooProtocol {
+    func asyncFunction() async -> Bool
+}
+```
+
+This will generate:
+```swift
+public class FooProtocolMock: FooProtocol {
+    public init() { }
+
+
+    public private(set) var asyncFunctionCallCount = 0
+    public var asyncFunctionHandler: (() async -> (Bool))?
+    @MainActor public func asyncFunction() async -> Bool {
+        asyncFunctionCallCount += 1
+        if let asyncFunctionHandler = asyncFunctionHandler {
+            return await asyncFunctionHandler()
+        }
+        return false
+    }
+}
+```
+
 ## Used libraries
 
 [SwiftSyntax](https://github.com/apple/swift-syntax) |

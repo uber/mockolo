@@ -30,7 +30,7 @@ final class MethodModel: Model {
     var offset: Int64
     let length: Int64
     let accessLevel: String
-    var attributes: [String]? = nil
+    let attribute: String
     let genericTypeParams: [ParamModel]
     var genericWhereClause: String? = nil
     let params: [ParamModel]
@@ -175,6 +175,7 @@ final class MethodModel: Model {
          funcsWithArgsHistory: [String],
          customModifiers: [String: Modifier],
          modelDescription: String?,
+         globalActorAttribute: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
@@ -192,6 +193,7 @@ final class MethodModel: Model {
         self.customModifiers = customModifiers
         self.modelDescription = modelDescription
         self.accessLevel = acl
+        self.attribute = globalActorAttribute.map { "@\($0)" } ?? ""
     }
 
     var fullName: String {
@@ -237,6 +239,7 @@ final class MethodModel: Model {
                                          params: params,
                                          returnType: type,
                                          accessLevel: accessLevel,
+                                         attribute: attribute,
                                          suffix: suffix,
                                          argsHistory: argsHistory,
                                          handler: handler(encloser: encloser))

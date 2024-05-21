@@ -31,6 +31,7 @@ extension MethodModel {
                              params: [ParamModel],
                              returnType: Type,
                              accessLevel: String,
+                             attribute: String,
                              suffix: String,
                              argsHistory: ArgumentsHistoryModel?,
                              handler: ClosureModel?) -> String {
@@ -39,6 +40,7 @@ extension MethodModel {
         let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
 
         let acl = accessLevel.isEmpty ? "" : accessLevel+" "
+        let attribute = attribute.isEmpty ? "" : attribute+" "
         let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
         let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
         var genericWhereStr = ""
@@ -148,7 +150,7 @@ extension MethodModel {
             template = """
             \(template)
             \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-            \(1.tab)\(acl)\(staticStr)\(overrideStr)\(modifierTypeStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr)\(genericWhereStr) {
+            \(1.tab)\(attribute)\(acl)\(staticStr)\(overrideStr)\(modifierTypeStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr)\(genericWhereStr) {
             \(wrapped)
             \(1.tab)}
             """
