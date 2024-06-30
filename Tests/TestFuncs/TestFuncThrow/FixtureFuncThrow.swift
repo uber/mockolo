@@ -110,8 +110,8 @@ enum FuncError: Error {
 
 /// \(String.mockAnnotation)
 protocol FuncTypedThrow {
-	func f1(arg: Int) throws(any Error) -> String
-	func f2(arg: Int) throws(any Error)
+	func f1(arg: Int) throws(any LocalizedError) -> String
+	func f2(arg: Int) throws(any LocalizedError)
 	func f3(arg: Int) throws(FuncError) -> String
 	func f4(arg: Int) throws(FuncError)
 }
@@ -126,8 +126,8 @@ class FuncTypedThrowMock: FuncTypedThrow {
 
 
 	private(set) var f1CallCount = 0
-	var f1Handler: ((Int) throws(any Error) -> (String))?
-	func f1(arg: Int) throws(any Error) -> String {
+	var f1Handler: ((Int) throws(any LocalizedError) -> (String))?
+	func f1(arg: Int) throws(any LocalizedError) -> String {
 		f1CallCount += 1
 		if let f1Handler = f1Handler {
 			return try f1Handler(arg)
@@ -136,8 +136,8 @@ class FuncTypedThrowMock: FuncTypedThrow {
 	}
 
 	private(set) var f2CallCount = 0
-	var f2Handler: ((Int) throws(any Error) -> ())?
-	func f2(arg: Int) throws(any Error)  {
+	var f2Handler: ((Int) throws(any LocalizedError) -> ())?
+	func f2(arg: Int) throws(any LocalizedError)  {
 		f2CallCount += 1
 		if let f2Handler = f2Handler {
 			try f2Handler(arg)
