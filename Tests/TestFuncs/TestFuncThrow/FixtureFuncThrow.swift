@@ -1,16 +1,6 @@
 import MockoloFramework
 
 
-let funcThrow2 = """
-import Foundation
-
-/// \(String.mockAnnotation)
-protocol FuncThrow {
-func update<T>(arg1: T, arg2: () throws -> T) rethrows -> T
-func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
-}
-"""
-
 let funcThrow = """
 import Foundation
 
@@ -106,6 +96,70 @@ class FuncThrowMock: FuncThrow {
         }
         fatalError("updateArg1Handler returns can't have a default value thus its handler must be set")
     }
+}
+
+
+"""
+
+let funcTypedThrow = """
+import Foundation
+
+/// \(String.mockAnnotation)
+protocol FuncTypedThrow {
+	func f1(arg: Int) throws(any LocalizedError) -> String
+	func f2(arg: Int) throws(any LocalizedError)
+	func f3(arg: Int) throws(SomeError) -> String
+	func f4(arg: Int) throws(SomeError)
+}
+"""
+let funcTypedThrowMock = """
+
+import Foundation
+
+
+class FuncTypedThrowMock: FuncTypedThrow {
+	init() { }
+
+
+	private(set) var f1CallCount = 0
+	var f1Handler: ((Int) throws(any LocalizedError) -> (String))?
+	func f1(arg: Int) throws(any LocalizedError) -> String {
+		f1CallCount += 1
+		if let f1Handler = f1Handler {
+			return try f1Handler(arg)
+		}
+		return ""
+	}
+
+	private(set) var f2CallCount = 0
+	var f2Handler: ((Int) throws(any LocalizedError) -> ())?
+	func f2(arg: Int) throws(any LocalizedError)  {
+		f2CallCount += 1
+		if let f2Handler = f2Handler {
+			try f2Handler(arg)
+		}
+
+	}
+
+	private(set) var f3CallCount = 0
+	var f3Handler: ((Int) throws(SomeError) -> (String))?
+	func f3(arg: Int) throws(SomeError) -> String {
+		f3CallCount += 1
+		if let f3Handler = f3Handler {
+			return try f3Handler(arg)
+		}
+		return ""
+	}
+
+	private(set) var f4CallCount = 0
+	var f4Handler: ((Int) throws(SomeError) -> ())?
+	func f4(arg: Int) throws(SomeError)  {
+		f4CallCount += 1
+		if let f4Handler = f4Handler {
+			try f4Handler(arg)
+		}
+
+	}
 }
 
 
