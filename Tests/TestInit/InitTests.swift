@@ -41,4 +41,11 @@ class InitTests: MockoloTestCase {
             dstContent: initWithSameParamNameButDifferentTypeMock
         )
     }
+
+	func testThrowableInit() {
+		verify(
+			srcContent: throwableInit,
+			dstContent: throwableInitMock
+		)
+	}
 }
