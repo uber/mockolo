@@ -100,3 +100,71 @@ class FuncThrowMock: FuncThrow {
 
 
 """
+
+let funcTypedThrow = """
+import Foundation
+
+enum FuncError: Error {
+	case foo
+}
+
+/// \(String.mockAnnotation)
+protocol FuncTypedThrow {
+	func f1(arg: Int) throws(any Error) -> String
+	func f2(arg: Int) throws(any Error)
+	func f3(arg: Int) throws(FuncError) -> String
+	func f4(arg: Int) throws(FuncError)
+}
+"""
+let funcTypedThrowMock = """
+
+import Foundation
+
+
+class FuncTypedThrowMock: FuncTypedThrow {
+	init() { }
+
+
+	private(set) var f1CallCount = 0
+	var f1Handler: ((Int) throws(any Error) -> (String))?
+	func f1(arg: Int) throws(any Error) -> String {
+		f1CallCount += 1
+		if let f1Handler = f1Handler {
+			return try f1Handler(arg)
+		}
+		return ""
+	}
+
+	private(set) var f2CallCount = 0
+	var f2Handler: ((Int) throws(any Error) -> ())?
+	func f2(arg: Int) throws(any Error)  {
+		f2CallCount += 1
+		if let f2Handler = f2Handler {
+			try f2Handler(arg)
+		}
+
+	}
+
+	private(set) var f3CallCount = 0
+	var f3Handler: ((Int) throws(FuncError) -> (String))?
+	func f3(arg: Int) throws(FuncError) -> String {
+		f3CallCount += 1
+		if let f3Handler = f3Handler {
+			return try f3Handler(arg)
+		}
+		return ""
+	}
+
+	private(set) var f4CallCount = 0
+	var f4Handler: ((Int) throws(FuncError) -> ())?
+	func f4(arg: Int) throws(FuncError)  {
+		f4CallCount += 1
+		if let f4Handler = f4Handler {
+			try f4Handler(arg)
+		}
+
+	}
+}
+
+
+"""
