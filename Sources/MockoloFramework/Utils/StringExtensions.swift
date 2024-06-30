@@ -108,10 +108,10 @@ extension String {
     ///
     """
 
-
     var hasThrowsOrRethrows: Bool {
         return components(separatedBy: .whitespaces).contains { component in
-            return component == .throws || component == .rethrows
+            let hasTypedThrow = hasPrefix(String.throws.withLeftParen) && hasSuffix(")")
+            return component == .throws || hasTypedThrow || component == .rethrows
         }
     }
 

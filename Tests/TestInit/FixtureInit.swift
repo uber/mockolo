@@ -330,11 +330,31 @@ class MyProtocolMock: MyProtocol {
 let throwableInit = """
 /// \(String.mockAnnotation)
 protocol MyProtocol {
-	init(param: String) throws(SomeError)
+    init(param: String) throws
 }
 """
 
 let throwableInitMock = """
+
+
+
+class MyProtocolMock: MyProtocol {
+    private var _param: String!
+    init() { }
+    required init(param: String = "") throws {
+        self._param = param
+    }
+}
+"""
+
+let typedThrowableInit = """
+/// \(String.mockAnnotation)
+protocol MyProtocol {
+	init(param: String) throws(SomeError)
+}
+"""
+
+let typedThrowableInitMock = """
 
 
 

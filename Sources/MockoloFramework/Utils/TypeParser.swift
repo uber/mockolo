@@ -510,6 +510,25 @@ public final class `Type` {
         return mutableArg
     }
 
+    /// Parse throws clause from suffix and return typed-throw's type.
+    ///
+    /// - Returns: if typed-throw is used, returns its concrete type, unless returns nil.
+    static func extractTypedThrow(
+        suffix: String
+    ) -> String? {
+        return suffix
+            .components(separatedBy: .whitespaces)
+            .compactMap { clause in
+                guard let prefixRange = clause.range(of: "\(String.throws)(") else {
+                    return nil
+                }
+                let endIndex = clause.dropLast().endIndex
+                return String(
+                    clause[prefixRange.upperBound..<endIndex]
+                )
+            }
+            .first
+    }
 
     static func toClosureType(with params: [Type], typeParams: [String], suffix: String, returnType: Type, encloser: String) -> Type {
 
@@ -558,9 +577,18 @@ public final class `Type` {
             displayableReturnType = "(\(displayableReturnType))"
         }
 
+        let hasThrowsOrRethrows = suffix.hasThrowsOrRethrows
+        let typedThrowTypeName = extractTypedThrow(suffix: suffix)
+
+        let thrownSuffix: String = if let typedThrowTypeName {
+            "\(String.throws)(\(typedThrowTypeName))"
+        } else {
+            String.throws
+        }
+
         let suffixStr = [
             suffix.hasAsync ? String.async + " " : nil,
-            suffix.hasThrowsOrRethrows ? String.throws + " " : nil,
+            hasThrowsOrRethrows ? thrownSuffix + " " : nil,
         ].compactMap { $0 }.joined()
 
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"

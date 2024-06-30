@@ -432,7 +432,7 @@ extension FunctionDeclSyntax {
                                     genericTypeParams: genericTypeParams,
                                     genericWhereClause: genericWhereClause,
                                     params: params,
-									throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.throwsSpecifier.text,
+									throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.text,
                                     asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
                                     isStatic: isStatic,
                                     offset: self.offset,
@@ -473,7 +473,7 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-						   throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.throwsSpecifier.text,
+						   throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.text,
                            asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
                            isStatic: false,
                            offset: self.offset,
@@ -567,6 +567,17 @@ extension TypeAliasDeclSyntax {
                               modelDescription: self.description,
                               useDescription: true,
                               processed: processed)
+    }
+}
+
+extension ThrowsClauseSyntax {
+
+    var text: String {
+        if let type {
+            "\(throwsSpecifier.text)(\(type.description))"
+        } else {
+            throwsSpecifier.text
+        }
     }
 }
 
