@@ -558,9 +558,18 @@ public final class `Type` {
             displayableReturnType = "(\(displayableReturnType))"
         }
 
+		let hasThrowsOrRethrows = suffix.hasThrowsOrRethrows
+		let typedThrowTypeName = suffix.typedThrowTypeName
+
+		let thrownSuffix: String = if typedThrowTypeName.isNotEmpty {
+			"\(String.throws)(\(typedThrowTypeName))"
+		} else {
+			String.throws
+		}
+
         let suffixStr = [
             suffix.hasAsync ? String.async + " " : nil,
-            suffix.hasThrowsOrRethrows ? String.throws + " " : nil,
+			hasThrowsOrRethrows ? thrownSuffix + " " : nil,
         ].compactMap { $0 }.joined()
 
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
