@@ -110,31 +110,31 @@ extension String {
 
     var hasThrowsOrRethrows: Bool {
         return components(separatedBy: .whitespaces).contains { component in
-			let hasTypedThrow = hasPrefix(String.throws.withLeftParen)
-			return component == .throws || hasTypedThrow || component == .rethrows
-		}
+            let hasTypedThrow = hasPrefix(String.throws.withLeftParen)
+            return component == .throws || hasTypedThrow || component == .rethrows
+        }
     }
 
-	/// Extract Error type in typed-throw.
-	///
-	/// - Note: Because any keyword can appear, it was hard to split by whitespace.
-	/// 
-	/// - ex
-	/// 	```
-	/// 	throws(any LocalizedError)
-	/// 	↓ should extract
-	/// 	any LocalizedError
-	/// 	```
-	var typedThrowTypeName: String {
-		let pattern = #"throws\((?<thrownType>.+)\)"#
-		guard let regex = try? Regex(pattern, as: (Substring, thrownType: Substring).self) else {
-			return ""
-		}
-		guard let match = firstMatch(of: regex) else {
-			return ""
-		}
-		return String(match.output.thrownType)
-	}
+    /// Extract Error type in typed-throw.
+    ///
+    /// - Note: Because any keyword can appear, it was hard to split by whitespace.
+    ///
+    /// - ex
+    /// 	```
+    /// 	throws(any LocalizedError)
+    /// 	↓ should extract
+    /// 	any LocalizedError
+    /// 	```
+    var typedThrowTypeName: String {
+        let pattern = #"throws\((?<thrownType>.+)\)"#
+        guard let regex = try? Regex(pattern, as: (Substring, thrownType: Substring).self) else {
+            return ""
+        }
+        guard let match = firstMatch(of: regex) else {
+            return ""
+        }
+        return String(match.output.thrownType)
+    }
 
     var hasAsync: Bool {
         return components(separatedBy: .whitespaces).contains { component in

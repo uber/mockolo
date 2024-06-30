@@ -6,10 +6,10 @@ class FuncThrowTests: MockoloTestCase {
                dstContent: funcThrowMock)
     }
 
-	func testTypedThrows() {
-		verify(
-			srcContent: funcTypedThrow,
-			dstContent: funcTypedThrowMock
-		)
-	}
+    func testTypedThrows() {
+        verify(
+            srcContent: funcTypedThrow,
+            dstContent: funcTypedThrowMock
+        )
+    }
 }

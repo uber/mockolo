@@ -570,6 +570,17 @@ extension TypeAliasDeclSyntax {
     }
 }
 
+extension ThrowsClauseSyntax {
+
+    var text: String {
+        if let type {
+            "\(throwsSpecifier.text)(\(type.description))"
+        } else {
+            throwsSpecifier.text
+        }
+    }
+}
+
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
     var imports: [String: [String]] = [:]
@@ -795,15 +806,4 @@ extension Trivia {
         }
         return nil
     }
-}
-
-extension ThrowsClauseSyntax {
-
-	var text: String {
-		if let type {
-			"\(throwsSpecifier.text)(\(type.description))"
-		} else {
-			throwsSpecifier.text
-		}
-	}
 }

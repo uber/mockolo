@@ -42,10 +42,10 @@ class InitTests: MockoloTestCase {
         )
     }
 
-	func testThrowableInit() {
-		verify(
-			srcContent: throwableInit,
-			dstContent: throwableInitMock
-		)
-	}
+    func testThrowableInit() {
+        verify(
+            srcContent: throwableInit,
+            dstContent: throwableInitMock
+        )
+    }
 }
