@@ -4,14 +4,14 @@ import PackageDescription
 let package = Package(
     name: "Mockolo",
     platforms: [
-        .macOS(.v12),
+        .macOS(.v13),
     ],
     products: [
         .executable(name: "mockolo", targets: ["Mockolo"]),
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-syntax.git", from: "510.0.1"),
+        .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.0-prerelease-2024-06-12"),
         .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.2.2"),
     ],
     targets: [
