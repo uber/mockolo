@@ -1,16 +1,6 @@
 import MockoloFramework
 
 
-let funcThrow2 = """
-import Foundation
-
-/// \(String.mockAnnotation)
-protocol FuncThrow {
-func update<T>(arg1: T, arg2: () throws -> T) rethrows -> T
-func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
-}
-"""
-
 let funcThrow = """
 import Foundation
 
