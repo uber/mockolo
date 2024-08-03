@@ -574,7 +574,7 @@ extension ThrowsClauseSyntax {
 
     var text: String {
         if let type {
-            "\(throwsSpecifier.text)(\(type.description))"
+            "\(throwsSpecifier.text)(\(type))"
         } else {
             throwsSpecifier.text
         }
