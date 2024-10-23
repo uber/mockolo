@@ -25,12 +25,11 @@ jobs:
       uses: vapor/swiftly-action@v0.1
       with:
         toolchain: ${{ env.SWIFT_VERSION }}
-    - if: startsWith(matrix.destination.name, 'macos')
-      run: sudo xcode-select -s /Applications/Xcode_16.app
-
     - if: startsWith(matrix.destination.name, 'linux')
       name: Install swift sdk
       run: swift sdk install ${{ env.SWIFT_SDK_URL }} --checksum ${{ env.SWIFT_SDK_CHECKSUM }}
+    - if: startsWith(matrix.destination.name, 'macos')
+      run: sudo xcode-select -s /Applications/Xcode_16.app
 
     - uses: actions/checkout@v4
     - name: Create the binary
