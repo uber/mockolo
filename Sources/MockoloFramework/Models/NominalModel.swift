@@ -16,7 +16,7 @@
 
 import Foundation
 
-final class ClassModel: Model {
+final class NominalModel: Model {
     var name: String
     var offset: Int64
     var type: SwiftType
@@ -31,7 +31,7 @@ final class ClassModel: Model {
     let metadata: AnnotationMetadata?
 
     var modelType: ModelType {
-        return .class
+        return .nominal
     }
     
     init(identifier: String,

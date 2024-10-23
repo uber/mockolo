@@ -62,7 +62,7 @@ struct ResolvedEntity {
 
 
     func model() -> Model {
-        return ClassModel(identifier: key,
+        return NominalModel(identifier: key,
                           acl: entity.entityNode.accessLevel,
                           declType: entity.entityNode.declType,
                           inheritedTypes: inheritedTypes,

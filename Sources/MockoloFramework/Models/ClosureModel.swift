@@ -27,7 +27,7 @@ final class ClosureModel: Model {
     let suffix: String
 
     var modelType: ModelType {
-        return .class
+        return .closure
     }
 
     

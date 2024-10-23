@@ -16,7 +16,7 @@
 
 import Foundation
 
-extension ClassModel {
+extension NominalModel {
     func applyClassTemplate(name: String,
                             identifier: String,
                             accessLevel: String,

@@ -10,7 +10,7 @@ final class ArgumentsHistoryModel: Model {
     let isHistoryAnnotated: Bool
 
     var modelType: ModelType {
-        return .class
+        return .argumentsHistory
     }
 
     init?(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: String) {
