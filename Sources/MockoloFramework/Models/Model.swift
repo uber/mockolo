@@ -42,7 +42,7 @@ public protocol Model {
     var isStatic: Bool { get }
 
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
-    var type: Type { get set }
+    var type: SwiftType { get set }
 
     /// Offset where this type is declared
     var offset: Int64 { get set }

@@ -20,7 +20,7 @@ final class ParamModel: Model {
     var name: String
     var offset: Int64
     var length: Int64
-    var type: Type
+    var type: SwiftType
     let label: String
     let isGeneric: Bool
     let inInit: Bool
@@ -40,7 +40,7 @@ final class ParamModel: Model {
     
     init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool, offset: Int64, length: Int64) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
+        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         let labelStr = label.trimmingCharacters(in: .whitespaces)
         self.label = name != labelStr ? labelStr : ""
         self.offset = offset
@@ -77,9 +77,9 @@ final class ParamModel: Model {
     /// ```
     func asInitVarDecl(eraseType: Bool) -> String? {
         if self.inInit, self.needVarDecl {
-            let type: `Type`
+            let type: SwiftType
             if eraseType {
-                type = Type(.anyType)
+                type = SwiftType(.anyType)
             } else {
                 type = self.type
             }

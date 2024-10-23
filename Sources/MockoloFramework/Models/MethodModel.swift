@@ -26,7 +26,7 @@ final class MethodModel: Model {
     var filePath: String = ""
     var data: Data? = nil
     var name: String
-    var type: Type
+    var type: SwiftType
     var offset: Int64
     let length: Int64
     let accessLevel: String
@@ -177,7 +177,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
+        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         self.suffix = [asyncOrReasync, throwsOrRethrows].compactMap { $0 }.joined(separator: " ")
         self.offset = offset
         self.length = length

@@ -19,7 +19,7 @@ import Foundation
 final class ClassModel: Model {
     var name: String
     var offset: Int64
-    var type: Type
+    var type: SwiftType
     let attribute: String
     let accessLevel: String
     let identifier: String
@@ -46,7 +46,7 @@ final class ClassModel: Model {
          entities: [(String, Model)]) {
         self.identifier = identifier 
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
-        self.type = Type(.class)
+        self.type = SwiftType(.class)
         self.declType = declType
         self.inheritedTypes = inheritedTypes
         self.entities = entities

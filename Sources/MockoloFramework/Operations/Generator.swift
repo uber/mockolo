@@ -112,7 +112,7 @@ public func generate(sourceDirs: [String],
     typeKeyList.forEach { (t: String) in
         typeKeys[t] = "\(t)Mock()"
     }
-    Type.customTypeMap = typeKeys
+    SwiftType.customTypeMap = typeKeys
 
     signpost_begin(name: "Generate models")
     log("Resolve inheritance and generate unique entity models...", level: .info)

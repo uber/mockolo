@@ -2,11 +2,11 @@ import Foundation
 
 final class ArgumentsHistoryModel: Model {
     var name: String
-    var type: Type
+    var type: SwiftType
     var offset: Int64 = .max
     let suffix: String
     let capturableParamNames: [String]
-    let capturableParamTypes: [Type]
+    let capturableParamTypes: [SwiftType]
     let isHistoryAnnotated: Bool
 
     var modelType: ModelType {
@@ -28,7 +28,7 @@ final class ArgumentsHistoryModel: Model {
         self.capturableParamTypes = capturables.map(\.type)
         
         let genericTypeNameList = genericTypeParams.map(\.name)
-        self.type = Type.toArgumentsHistoryType(with: capturableParamTypes, typeParams: genericTypeNameList)
+        self.type = SwiftType.toArgumentsHistoryType(with: capturableParamTypes, typeParams: genericTypeNameList)
     }
     
     func enable(force: Bool) -> Bool {

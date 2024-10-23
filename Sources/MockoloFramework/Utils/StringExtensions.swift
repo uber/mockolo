@@ -165,10 +165,10 @@ extension String {
 
 
     func canBeInitParam(type: String, isStatic: Bool) -> Bool {
-        return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))
+        return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: SwiftType(type)))
     }
 
-    func isGenerated(type: Type) -> Bool {
+    func isGenerated(type: SwiftType) -> Bool {
           return self.hasPrefix(.underlyingVarPrefix) ||
               self.hasSuffix(.setCallCountSuffix) ||
               self.hasSuffix(.callCountSuffix) ||

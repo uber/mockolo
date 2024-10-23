@@ -19,7 +19,7 @@ import Foundation
 final class IfMacroModel: Model {
     var name: String
     var offset: Int64
-    var type: Type
+    var type: SwiftType
     let entities: [Model]
     
     var modelType: ModelType {
@@ -36,7 +36,7 @@ final class IfMacroModel: Model {
         self.name = name
         self.entities = entities
         self.offset = offset
-        self.type = Type(name)
+        self.type = SwiftType(name)
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {

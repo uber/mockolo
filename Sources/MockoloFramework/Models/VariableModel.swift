@@ -2,7 +2,7 @@ import Foundation
 
 final class VariableModel: Model {
     var name: String
-    var type: Type
+    var type: SwiftType
     var offset: Int64
     let accessLevel: String
     let attributes: [String]?
@@ -48,7 +48,7 @@ final class VariableModel: Model {
          combineType: CombineType?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = Type(typeName.trimmingCharacters(in: .whitespaces))
+        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         self.offset = offset
         self.isStatic = isStatic
         self.shouldOverride = encloserType == .classType
