@@ -10,11 +10,11 @@
                     "supportedTriples": ["x86_64-apple-macosx", "arm64-apple-macosx"]
                 },
                 {
-                    "path": "mockolo/ubuntu/x86_64-unknown-linux-gnu/mockolo",
+                    "path": "mockolo/linux/x86_64-unknown-linux-gnu/mockolo",
                     "supportedTriples": ["x86_64-unknown-linux-gnu"]
                 },
                 {
-                    "path": "mockolo/ubuntu/aarch64-unknown-linux-gnu/mockolo",
+                    "path": "mockolo/linux/aarch64-unknown-linux-gnu/mockolo",
                     "supportedTriples": ["aarch64-unknown-linux-gnu"]
                 }
             ]

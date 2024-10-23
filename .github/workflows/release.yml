@@ -6,7 +6,9 @@ on:
     types: [published]
 
 env:
-  SWIFT_VERSION: "5.10"
+  SWIFT_VERSION: "6.0"
+  SWIFT_SDK_URL: https://download.swift.org/swift-6.0.1-release/static-sdk/swift-6.0.1-RELEASE/swift-6.0.1-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz
+  SWIFT_SDK_CHECKSUM: d4f46ba40e11e697387468e18987ee622908bc350310d8af54eb5e17c2ff5481
 
 jobs:
   build:
@@ -15,13 +17,17 @@ jobs:
     strategy:
       matrix:
         destination:
-          - { name: "ubuntu-x86_64", os: ubuntu-20.04 }
-          - { name: "macos-universal", os: macos-14 }
-    container: ${{ matrix.destination.container }}
+          - { name: "linux-aarch64", os: ubuntu-latest }
+          - { name: "linux-x86_64", os: ubuntu-latest }
+          - { name: "macos-universal", os: macos-latest }
     steps:
-    - uses: swift-actions/setup-swift@v2
+    - uses: vapor/swiftly-action@v0.1
       with:
-        swift-version: ${{ env.SWIFT_VERSION }}
+        toolchain: ${{ env.SWIFT_VERSION }}
+    - if: startsWith(matrix.destination.name, 'linux')
+      name: Install swift sdk
+      run: swift sdk install ${{ env.SWIFT_SDK_URL }} --checksum ${{ env.SWIFT_SDK_CHECKSUM }}
+
     - uses: actions/checkout@v4
     - name: Create the binary
       run: ./install-script.sh -s . -t mockolo -d . -o mockolo.${{ matrix.destination.name }}.tar.gz
@@ -31,30 +37,6 @@ jobs:
         path: mockolo.${{ matrix.destination.name }}.tar.gz
         name: mockolo.${{ matrix.destination.name }}
 
-  build-with-qemu:
-    name: Build for ${{ matrix.destination.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        destination:
-          - { name: "ubuntu-aarch64" }
-    steps:
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - uses: actions/checkout@v4
-      - name: Create the binary
-        run: |
-          docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work swift:${{ env.SWIFT_VERSION }}-focal \
-            ./install-script.sh -s . -t mockolo -d /work -o mockolo.${{ matrix.destination.name }}.tar.gz
-      - name: Upload the binary
-        uses: actions/upload-artifact@v4
-        with:
-          path: mockolo.${{ matrix.destination.name }}.tar.gz
-          name: mockolo.${{ matrix.destination.name }}
-
   check-portability:
     needs: build
     name: TestRun on ${{ matrix.destination.os }} for ${{ matrix.destination.name }}
@@ -62,6 +44,7 @@ jobs:
     strategy:
       matrix:
         destination:
+          - { name: "ubuntu-x86_64", os: ubuntu-24.04 }
           - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
           - { name: "ubuntu-x86_64", os: ubuntu-20.04 }
           - { name: "macos-universal", os: macos-14 }
@@ -77,7 +60,7 @@ jobs:
       run: ./mockolo --version
 
   check-portability-with-qemu:
-    needs: build-with-qemu
+    needs: build
     name: TestRun on ${{ matrix.destination.tag }}
     runs-on: ubuntu-latest
     strategy:
@@ -85,6 +68,7 @@ jobs:
         destination:
           - { name: "ubuntu-aarch64", tag: "ubuntu:20.04" }
           - { name: "ubuntu-aarch64", tag: "ubuntu:22.04" }
+          - { name: "ubuntu-aarch64", tag: "ubuntu:24.04" }
     steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
@@ -102,7 +86,7 @@ jobs:
           ./mockolo --version
 
   make-artifact-bundle:
-    needs: [build, build-with-qemu]
+    needs: [build]
     runs-on: ubuntu-latest
     outputs:
       checksum: ${{ steps.checksum.outputs.checksum }}
@@ -145,7 +129,7 @@ jobs:
           ```
         append_body: true
         files: |
-          mockolo.ubuntu-x86_64.tar.gz
-          mockolo.ubuntu-aarch64.tar.gz
+          mockolo.linux-x86_64.tar.gz
+          mockolo.linux-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
