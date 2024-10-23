@@ -22,6 +22,7 @@ fileprivate var validIdentifierChars: CharacterSet = {
     return valid
 }()
 
+/// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
 public final class SwiftType {
     let typeName: String
     let cast: String?
