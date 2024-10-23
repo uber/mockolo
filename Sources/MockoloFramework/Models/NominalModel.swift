@@ -35,6 +35,7 @@ final class NominalModel: Model {
     }
     
     init(identifier: String,
+         type: SwiftType,
          acl: String,
          declType: DeclType,
          inheritedTypes: [String],
@@ -46,7 +47,7 @@ final class NominalModel: Model {
          entities: [(String, Model)]) {
         self.identifier = identifier 
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
-        self.type = SwiftType(.class)
+        self.type = type
         self.declType = declType
         self.inheritedTypes = inheritedTypes
         self.entities = entities
@@ -68,7 +69,7 @@ final class NominalModel: Model {
         enableFuncArgsHistory: Bool = false,
         disableCombineDefaultValues: Bool = false
     ) -> String? {
-        return applyClassTemplate(
+        return applyNominalTemplate(
             name: name,
             identifier: self.identifier,
             accessLevel: accessLevel,

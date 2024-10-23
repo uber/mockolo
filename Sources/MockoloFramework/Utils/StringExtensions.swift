@@ -39,6 +39,8 @@ extension String {
     static let `static` = "static"
     static let importSpace = "import "
     static public let `class` = "class"
+    static let `actor` = "actor"
+    static let actorProtocol = "Actor"
     static public let `final` = "final"
     static let override = "override"
     static let privateSet = "private(set)"

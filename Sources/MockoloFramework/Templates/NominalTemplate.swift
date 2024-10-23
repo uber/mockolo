@@ -17,22 +17,22 @@
 import Foundation
 
 extension NominalModel {
-    func applyClassTemplate(name: String,
-                            identifier: String,
-                            accessLevel: String,
-                            attribute: String,
-                            declType: DeclType,
-                            inheritedTypes: [String],
-                            metadata: AnnotationMetadata?,
-                            useTemplateFunc: Bool,
-                            useMockObservable: Bool,
-                            allowSetCallCount: Bool,
-                            mockFinal: Bool,
-                            enableFuncArgsHistory: Bool,
-                            disableCombineDefaultValues: Bool,
-                            initParamCandidates: [VariableModel],
-                            declaredInits: [MethodModel],
-                            entities: [(String, Model)]) -> String {
+    func applyNominalTemplate(name: String,
+                              identifier: String,
+                              accessLevel: String,
+                              attribute: String,
+                              declType: DeclType,
+                              inheritedTypes: [String],
+                              metadata: AnnotationMetadata?,
+                              useTemplateFunc: Bool,
+                              useMockObservable: Bool,
+                              allowSetCallCount: Bool,
+                              mockFinal: Bool,
+                              enableFuncArgsHistory: Bool,
+                              disableCombineDefaultValues: Bool,
+                              initParamCandidates: [VariableModel],
+                              declaredInits: [MethodModel],
+                              entities: [(String, Model)]) -> String {
 
         processCombineAliases(entities: entities)
         
@@ -97,7 +97,7 @@ extension NominalModel {
         let finalStr = mockFinal ? "\(String.final) " : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)class \(name): \(inheritedTypes.joined(separator: ", ")) {
+        \(acl)\(finalStr)\(type.typeName) \(name): \(inheritedTypes.joined(separator: ", ")) {
         \(body)
         }
         """
