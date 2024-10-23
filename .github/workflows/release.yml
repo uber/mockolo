@@ -21,9 +21,13 @@ jobs:
           - { name: "linux-x86_64", os: ubuntu-latest }
           - { name: "macos-universal", os: macos-latest }
     steps:
-    - uses: vapor/swiftly-action@v0.1
+    - if: startsWith(matrix.destination.name, 'linux')
+      uses: vapor/swiftly-action@v0.1
       with:
         toolchain: ${{ env.SWIFT_VERSION }}
+    - if: startsWith(matrix.destination.name, 'macos')
+      run: sudo xcode-select -s /Applications/Xcode_16.app
+
     - if: startsWith(matrix.destination.name, 'linux')
       name: Install swift sdk
       run: swift sdk install ${{ env.SWIFT_SDK_URL }} --checksum ${{ env.SWIFT_SDK_CHECKSUM }}
