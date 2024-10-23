@@ -21,7 +21,7 @@ extension NominalModel {
                               identifier: String,
                               accessLevel: String,
                               attribute: String,
-                              declType: DeclType,
+                              declTypeOfMockAnnotatedBaseType: DeclType,
                               inheritedTypes: [String],
                               metadata: AnnotationMetadata?,
                               useTemplateFunc: Bool,
@@ -65,7 +65,7 @@ extension NominalModel {
         .joined(separator: "\n")
         
         var typealiasTemplate = ""
-        let addAcl = declType == .protocolType ? acl : ""
+        let addAcl = declTypeOfMockAnnotatedBaseType == .protocolType ? acl : ""
         if let typealiasWhitelist = typealiases {
             typealiasTemplate = typealiasWhitelist.map { (arg: (key: String, value: [String])) -> String in
                 let joinedType = arg.value.sorted().joined(separator: " & ")
@@ -78,7 +78,7 @@ extension NominalModel {
             moduleDot = moduleName + "."
         }
         
-        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declType: declType, overrides: metadata?.varTypes)
+        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declTypeOfMockAnnotatedBaseType: declTypeOfMockAnnotatedBaseType, overrides: metadata?.varTypes)
 
         var inheritedTypes = inheritedTypes
         inheritedTypes.insert("\(moduleDot)\(identifier)", at: 0)
@@ -97,7 +97,7 @@ extension NominalModel {
         let finalStr = mockFinal ? "\(String.final) " : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)\(type.typeName) \(name): \(inheritedTypes.joined(separator: ", ")) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(inheritedTypes.joined(separator: ", ")) {
         \(body)
         }
         """
@@ -109,7 +109,7 @@ extension NominalModel {
         initParamCandidates: [VariableModel],
         declaredInits: [MethodModel],
         acl: String,
-        declType: DeclType,
+        declTypeOfMockAnnotatedBaseType: DeclType,
         overrides: [String: String]?
     ) -> String {
         
@@ -122,7 +122,7 @@ extension NominalModel {
             needBlankInit = true
             needParamedInit = false
         } else {
-            if declType == .protocolType {
+            if declTypeOfMockAnnotatedBaseType == .protocolType {
                 needParamedInit = !initParamCandidates.isEmpty
                 needBlankInit = true
 

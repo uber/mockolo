@@ -64,9 +64,9 @@ struct ResolvedEntity {
 
     func model() -> Model {
         return NominalModel(identifier: key,
-                            type: SwiftType(inheritsActorProtocol ? .actor : .class),
                             acl: entity.entityNode.accessLevel,
-                            declType: entity.entityNode.declType,
+                            declTypeOfMockAnnotatedBaseType: entity.entityNode.declType,
+                            declKind: inheritsActorProtocol ? .actor : .class,
                             inheritedTypes: inheritedTypes,
                             attributes: attributes,
                             offset: entity.entityNode.offset,
