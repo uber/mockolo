@@ -46,11 +46,12 @@ jobs:
     name: TestRun on ${{ matrix.destination.os }} for ${{ matrix.destination.name }}
     runs-on: ${{ matrix.destination.os }}
     strategy:
+      fail-fast: false
       matrix:
         destination:
-          - { name: "ubuntu-x86_64", os: ubuntu-24.04 }
-          - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
-          - { name: "ubuntu-x86_64", os: ubuntu-20.04 }
+          - { name: "linux-x86_64", os: ubuntu-24.04 }
+          - { name: "linux-x86_64", os: ubuntu-22.04 }
+          - { name: "linux-x86_64", os: ubuntu-20.04 }
           - { name: "macos-universal", os: macos-14 }
           - { name: "macos-universal", os: macos-13 }
           - { name: "macos-universal", os: macos-12 }
@@ -68,11 +69,12 @@ jobs:
     name: TestRun on ${{ matrix.destination.tag }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         destination:
-          - { name: "ubuntu-aarch64", tag: "ubuntu:20.04" }
-          - { name: "ubuntu-aarch64", tag: "ubuntu:22.04" }
-          - { name: "ubuntu-aarch64", tag: "ubuntu:24.04" }
+          - { name: "linux-aarch64", tag: "ubuntu:24.04" }
+          - { name: "linux-aarch64", tag: "ubuntu:22.04" }
+          - { name: "linux-aarch64", tag: "ubuntu:20.04" }
     steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
