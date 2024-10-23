@@ -57,7 +57,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v4
       with:
-        name: mockolo.${{ matrix.destination.name }}
+        name: mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Unpack the binary
       run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Run the binary
@@ -82,7 +82,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: mockolo.${{ matrix.destination.name }}
+        name: mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Unpack the binary
       run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Run the binary
