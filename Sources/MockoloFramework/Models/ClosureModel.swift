@@ -18,20 +18,20 @@ import Foundation
 
 final class ClosureModel: Model {
     var name: String
-    var type: Type
+    var type: SwiftType
     var offset: Int64 = .max
-    let funcReturnType: Type
+    let funcReturnType: SwiftType
     let genericTypeNames: [String]
     let paramNames: [String]
-    let paramTypes: [Type]
+    let paramTypes: [SwiftType]
     let suffix: String
 
     var modelType: ModelType {
-        return .class
+        return .closure
     }
 
     
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [Type], suffix: String, returnType: Type, encloser: String) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], suffix: String, returnType: SwiftType, encloser: String) {
         self.name = name + .handlerSuffix
         self.suffix = suffix
         let genericTypeNameList = genericTypeParams.map(\.name)
@@ -39,7 +39,7 @@ final class ClosureModel: Model {
         self.paramNames = paramNames
         self.paramTypes = paramTypes
         self.funcReturnType = returnType
-        self.type = Type.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType, encloser: encloser)
+        self.type = SwiftType.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType, encloser: encloser)
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {

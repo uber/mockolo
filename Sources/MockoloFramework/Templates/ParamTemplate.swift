@@ -19,7 +19,7 @@ import Foundation
 extension ParamModel {
     func applyParamTemplate(name: String,
                             label: String,
-                            type: Type,
+                            type: SwiftType,
                             inInit: Bool) -> String {
         var result = name
         if !label.isEmpty {
@@ -35,7 +35,7 @@ extension ParamModel {
         return result
     }
 
-    func applyVarTemplate(type: `Type`) -> String {
+    func applyVarTemplate(type: SwiftType) -> String {
         assert(!type.isUnknown)
         let vardecl = "\(1.tab)private var \(underlyingName): \(type.underlyingType)"
         return vardecl

@@ -19,7 +19,7 @@ import Foundation
 extension VariableModel {
 
     func applyVariableTemplate(name: String,
-                               type: Type,
+                               type: SwiftType,
                                encloser: String,
                                isStatic: Bool,
                                customModifiers: [String: Modifier]?,
@@ -82,7 +82,7 @@ extension VariableModel {
     }
 
     func applyCombineVariableTemplate(name: String,
-                                      type: Type,
+                                      type: SwiftType,
                                       encloser: String,
                                       shouldOverride: Bool,
                                       isStatic: Bool,
@@ -105,7 +105,7 @@ extension VariableModel {
             let nextIndex = typeParamStr.index(after: lastCommaIndex)
             errorTypeStr = String(typeParamStr[nextIndex..<typeParamStr.endIndex]).trimmingCharacters(in: .whitespaces)
         }
-        let subjectType = Type(subjectTypeStr)
+        let subjectType = SwiftType(subjectTypeStr)
         let subjectDefaultValue = subjectType.defaultVal()
         let staticSpace = isStatic ? "\(String.static) " : ""
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
@@ -168,7 +168,7 @@ extension VariableModel {
     }
 
     func applyRxVariableTemplate(name: String,
-                                 type: Type,
+                                 type: SwiftType,
                                  encloser: String,
                                  rxTypes: [String: String]?,
                                  shouldOverride: Bool,

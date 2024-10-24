@@ -39,6 +39,8 @@ extension String {
     static let `static` = "static"
     static let importSpace = "import "
     static public let `class` = "class"
+    static let `actor` = "actor"
+    static let actorProtocol = "Actor"
     static public let `final` = "final"
     static let override = "override"
     static let privateSet = "private(set)"
@@ -165,10 +167,10 @@ extension String {
 
 
     func canBeInitParam(type: String, isStatic: Bool) -> Bool {
-        return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: Type(type)))
+        return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: SwiftType(type)))
     }
 
-    func isGenerated(type: Type) -> Bool {
+    func isGenerated(type: SwiftType) -> Bool {
           return self.hasPrefix(.underlyingVarPrefix) ||
               self.hasSuffix(.setCallCountSuffix) ||
               self.hasSuffix(.callCountSuffix) ||

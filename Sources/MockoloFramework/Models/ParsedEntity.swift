@@ -23,6 +23,7 @@ struct ResolvedEntity {
     let uniqueModels: [(String, Model)]
     let attributes: [String]
     let inheritedTypes: [String]
+    var inheritsActorProtocol: Bool
 
     var declaredInits: [MethodModel] {
         return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
@@ -62,16 +63,17 @@ struct ResolvedEntity {
 
 
     func model() -> Model {
-        return ClassModel(identifier: key,
-                          acl: entity.entityNode.accessLevel,
-                          declType: entity.entityNode.declType,
-                          inheritedTypes: inheritedTypes,
-                          attributes: attributes,
-                          offset: entity.entityNode.offset,
-                          metadata: entity.metadata,
-                          initParamCandidates: initParamCandidates,
-                          declaredInits: declaredInits,
-                          entities: uniqueModels)
+        return NominalModel(identifier: key,
+                            acl: entity.entityNode.accessLevel,
+                            declTypeOfMockAnnotatedBaseType: entity.entityNode.declType,
+                            declKind: inheritsActorProtocol ? .actor : .class,
+                            inheritedTypes: inheritedTypes,
+                            attributes: attributes,
+                            offset: entity.entityNode.offset,
+                            metadata: entity.metadata,
+                            initParamCandidates: initParamCandidates,
+                            declaredInits: declaredInits,
+                            entities: uniqueModels)
     }
 }
 
