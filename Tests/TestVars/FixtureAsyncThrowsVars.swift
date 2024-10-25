@@ -59,3 +59,29 @@ public class AsyncThrowsVarsMock: AsyncThrowsVars {
 }
 """
 
+let throwsNeverVars = """
+/// \(String.mockAnnotation)
+protocol P {
+    var foo: Int { get throws(Never) }
+}
+"""
+
+let throwsNeverVarsMock = """
+class PMock: P {
+    init() { }
+    init(foo: Int = 0) {
+        self.fooHandler = { foo }
+    }
+
+
+    var fooHandler: (() throws(Never) -> Int)?
+    var foo: Int {
+        get throws(Never) {
+            if let fooHandler = fooHandler {
+                return fooHandler()
+            }
+            return 0
+        }
+    }
+}
+"""
