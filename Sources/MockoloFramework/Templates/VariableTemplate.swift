@@ -108,6 +108,7 @@ extension VariableModel {
 
         case .computed(let effects):
             return """
+
             \(1.tab)\(acl)\(staticSpace)var \(name)Handler: (() \(effects.syntax)-> \(type.typeName))?
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
             \(2.tab)get \(effects.syntax){ \(effects.callerMarkers)\(name)Handler!() }

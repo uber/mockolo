@@ -147,8 +147,8 @@ extension NominalModel {
         if needParamedInit {
             var paramsAssign = ""
             let params = initParamCandidates
-                .map { (element: Model) -> String in
-                    if let val =  element.type.defaultVal(with: overrides, overrideKey: element.name, isInitParam: true) {
+                .map { (element: VariableModel) -> String in
+                    if let val = element.type.defaultVal(with: overrides, overrideKey: element.name, isInitParam: true) {
                         return "\(element.name): \(element.type.typeName) = \(val)"
                     }
                     var prefix = ""
@@ -158,13 +158,16 @@ extension NominalModel {
                         }
                     }
                     return "\(element.name): \(prefix)\(element.type.typeName)"
-            }
-            .joined(separator: ", ")
+                }
+                .joined(separator: ", ")
 
-            
-            paramsAssign = initParamCandidates.map { p in
-                return "\(2.tab)self.\(p.underlyingName) = \(p.name.safeName)"
-                
+            paramsAssign = initParamCandidates.map { (element: VariableModel) in
+                switch element.storageType {
+                case .stored:
+                    return "\(2.tab)self.\(element.underlyingName) = \(element.name.safeName)"
+                case .computed:
+                    return "\(2.tab)self.\(element.name)Handler = { \(element.name.safeName) }"
+                }
             }.joined(separator: "\n")
             
             initTemplate = """

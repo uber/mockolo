@@ -26,14 +26,17 @@ public class AsyncThrowsVarsMock: AsyncThrowsVars {
 
     public static private(set) var getAndSetSetCallCount = 0
     public static var getAndSet: Int = 0 { didSet { getAndSetSetCallCount += 1 } }
+
     public var getAndThrowsHandler: (() throws -> Int)?
     public var getAndThrows: Int {
         get throws { try getAndThrowsHandler!() }
     }
+
     public static var getAndAsyncHandler: (() async -> Int)?
     public static var getAndAsync: Int {
         get async { await getAndAsyncHandler!() }
     }
+
     public var getAndAsyncAndThrowsHandler: (() async throws(any Error) -> Int)?
     public var getAndAsyncAndThrows: Int {
         get async throws(any Error) { try await getAndAsyncAndThrowsHandler!() }
