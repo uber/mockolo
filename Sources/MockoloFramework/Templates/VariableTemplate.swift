@@ -107,11 +107,27 @@ extension VariableModel {
             return template
 
         case .computed(let effects):
+            let body = (ClosureModel(
+                name: "",
+                genericTypeParams: [],
+                paramNames: [],
+                paramTypes: [],
+                isAsync: effects.isAsync,
+                throwing: effects.throwing,
+                returnType: type,
+                encloser: ""
+            ).render(with: name, encloser: "") ?? "")
+                .split(separator: "\n")
+                .map { "\(1.tab)\($0)" }
+                .joined(separator: "\n")
+
             return """
 
-            \(1.tab)\(acl)\(staticSpace)var \(name)Handler: (() \(effects.syntax)-> \(type.typeName))?
+            \(1.tab)\(acl)\(staticSpace)var \(name)\(String.handlerSuffix): (() \(effects.syntax)-> \(type.typeName))?
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
-            \(2.tab)get \(effects.syntax){ \(effects.callerMarkers)\(name)Handler!() }
+            \(2.tab)get \(effects.syntax){
+            \(body)
+            \(2.tab)}
             \(1.tab)}
             """
         }
@@ -346,26 +362,23 @@ extension VariableModel.GetterEffects {
         if isAsync {
             clauses.append(.async)
         }
-        switch `throws` {
-        case .throwing(let errorType):
-            if let errorType {
-                clauses.append("\(String.throws)(\(errorType))")
-            } else {
-                clauses.append(.throws)
-            }
+        switch throwing {
         case .none:
             break
+        case .any:
+            clauses.append(.throws)
+        case .rethrows:
+            clauses.append(.rethrows)
+        case .typed(let errorType):
+            clauses.append("\(String.throws)(\(errorType))")
         }
         return clauses.map { "\($0) " }.joined()
     }
 
     fileprivate var callerMarkers: String {
         var clauses: [String] = []
-        switch `throws` {
-        case .throwing:
+        if throwing.hasError {
             clauses.append(.try)
-        case .none:
-            break
         }
         if isAsync {
             clauses.append(.await)

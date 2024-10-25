@@ -3,12 +3,8 @@ import Foundation
 final class VariableModel: Model {
     struct GetterEffects: Equatable {
         var isAsync: Bool
-        enum ThrowsType: Equatable {
-            case throwing(errorType: String?)
-            case none
-        }
-        var `throws`: ThrowsType
-        static let empty: GetterEffects = .init(isAsync: false, throws: .none)
+        var throwing: ThrowingKind
+        static let empty: GetterEffects = .init(isAsync: false, throwing: .none)
     }
 
     enum MockStorageType {

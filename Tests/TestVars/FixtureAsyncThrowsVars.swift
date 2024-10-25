@@ -5,8 +5,8 @@ let asyncThrowsVars = """
 public protocol AsyncThrowsVars {
     var getOnly: Int { get }
     static var getAndSet: Int { get set }
-    var getAndThrows: Int { get throws }
-    static var getAndAsync: Int { get async }
+    var getAndThrows: MyValue { get throws }
+    static var getAndAsync: MyValue { get async }
     var getAndAsyncAndThrows: Int { get async throws(any Error) }
 }
 """
@@ -14,7 +14,7 @@ public protocol AsyncThrowsVars {
 let asyncThrowsVarsMock = """
 public class AsyncThrowsVarsMock: AsyncThrowsVars {
     public init() { }
-    public init(getOnly: Int = 0, getAndThrows: Int = 0, getAndAsyncAndThrows: Int = 0) {
+    public init(getOnly: Int = 0, getAndThrows: MyValue, getAndAsyncAndThrows: Int = 0) {
         self.getOnly = getOnly
         self.getAndThrowsHandler = { getAndThrows }
         self.getAndAsyncAndThrowsHandler = { getAndAsyncAndThrows }
@@ -27,19 +27,34 @@ public class AsyncThrowsVarsMock: AsyncThrowsVars {
     public static private(set) var getAndSetSetCallCount = 0
     public static var getAndSet: Int = 0 { didSet { getAndSetSetCallCount += 1 } }
 
-    public var getAndThrowsHandler: (() throws -> Int)?
-    public var getAndThrows: Int {
-        get throws { try getAndThrowsHandler!() }
+    public var getAndThrowsHandler: (() throws -> MyValue)?
+    public var getAndThrows: MyValue {
+        get throws {
+            if let getAndThrowsHandler = getAndThrowsHandler {
+                return try getAndThrowsHandler()
+            }
+            fatalError("getAndThrowsHandler returns can't have a default value thus its handler must be set")
+        }
     }
 
-    public static var getAndAsyncHandler: (() async -> Int)?
-    public static var getAndAsync: Int {
-        get async { await getAndAsyncHandler!() }
+    public static var getAndAsyncHandler: (() async -> MyValue)?
+    public static var getAndAsync: MyValue {
+        get async {
+            if let getAndAsyncHandler = getAndAsyncHandler {
+                return await getAndAsyncHandler()
+            }
+            fatalError("getAndAsyncHandler returns can't have a default value thus its handler must be set")
+        }
     }
 
     public var getAndAsyncAndThrowsHandler: (() async throws(any Error) -> Int)?
     public var getAndAsyncAndThrows: Int {
-        get async throws(any Error) { try await getAndAsyncAndThrowsHandler!() }
+        get async throws(any Error) {
+            if let getAndAsyncAndThrowsHandler = getAndAsyncAndThrowsHandler {
+                return try await getAndAsyncAndThrowsHandler()
+            }
+            return 0
+        }
     }
 }
 """

@@ -38,7 +38,8 @@ final class MethodModel: Model {
     var modelDescription: String? = nil
     var isStatic: Bool
     let shouldOverride: Bool
-    let suffix: String
+    let isAsync: Bool
+    let throwing: ThrowingKind
     let kind: MethodKind
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
@@ -134,8 +135,7 @@ final class MethodModel: Model {
         let ret = ArgumentsHistoryModel(name: name,
                                         genericTypeParams: genericTypeParams,
                                         params: params,
-                                        isHistoryAnnotated: funcsWithArgsHistory.contains(name),
-                                        suffix: suffix)
+                                        isHistoryAnnotated: funcsWithArgsHistory.contains(name))
 
         return ret
     }()
@@ -151,7 +151,8 @@ final class MethodModel: Model {
                                genericTypeParams: genericTypeParams,
                                paramNames: paramNames,
                                paramTypes: paramTypes,
-                               suffix: suffix,
+                               isAsync: isAsync,
+                               throwing: throwing,
                                returnType: type,
                                encloser: encloser)
 
@@ -167,8 +168,8 @@ final class MethodModel: Model {
          genericTypeParams: [ParamModel],
          genericWhereClause: String?,
          params: [ParamModel],
-         throwsOrRethrows: String?,
-         asyncOrReasync: String?,
+         isAsync: Bool,
+         throwing: ThrowingKind,
          isStatic: Bool,
          offset: Int64,
          length: Int64,
@@ -178,7 +179,8 @@ final class MethodModel: Model {
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
-        self.suffix = [asyncOrReasync, throwsOrRethrows].compactMap { $0 }.joined(separator: " ")
+        self.isAsync = isAsync
+        self.throwing = throwing
         self.offset = offset
         self.length = length
         self.kind = kind
@@ -237,7 +239,6 @@ final class MethodModel: Model {
                                          params: params,
                                          returnType: type,
                                          accessLevel: accessLevel,
-                                         suffix: suffix,
                                          argsHistory: argsHistory,
                                          handler: handler(encloser: encloser))
         return result

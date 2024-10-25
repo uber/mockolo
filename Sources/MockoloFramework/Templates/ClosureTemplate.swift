@@ -18,11 +18,8 @@ import Foundation
 
 extension ClosureModel {
     func applyClosureTemplate(name: String,
-                              type: SwiftType,
-                              genericTypeNames: [String],
                               paramVals: [String]?,
                               paramTypes: [SwiftType]?,
-                              suffix: String,
                               returnDefaultType: SwiftType) -> String {
         
         var handlerParamValsStr = ""
@@ -46,8 +43,8 @@ extension ClosureModel {
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
         
         let prefix = [
-            suffix.hasThrowsOrRethrows ? String.try + " " : nil,
-            suffix.hasAsync ? String.await + " " : nil,
+            throwing.hasError ? String.try + " " : nil,
+            isAsync ? String.await + " " : nil,
         ].compactMap { $0 }.joined()
         
         let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "

@@ -48,6 +48,7 @@ extension String {
     static let unknownVal = "Unknown"
     static let prefix = "prefix"
     static let anyType = "Any"
+    static let neverType = "Never"
     static let any = "any"
     static let some = "some"
     static let anyObject = "AnyObject"
@@ -111,12 +112,14 @@ extension String {
     """
 
 
+    @available(*, deprecated)
     var hasThrowsOrRethrows: Bool {
         return components(separatedBy: .whitespaces).contains { component in
             return component == .throws || component == .rethrows
         }
     }
 
+    @available(*, deprecated)
     var hasAsync: Bool {
         return components(separatedBy: .whitespaces).contains { component in
             return component == .async
