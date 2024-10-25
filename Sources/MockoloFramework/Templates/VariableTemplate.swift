@@ -371,27 +371,4 @@ extension VariableModel.GetterEffects {
         }
         return clauses.map { "\($0) " }.joined()
     }
-
-    fileprivate func handlerType(typeName: String) -> String {
-//        if self == .empty {
-//            return nil
-//        }
-
-        var clauses: [String] = []
-        if isAsync {
-            clauses.append(.async)
-        }
-        switch `throws` {
-        case .throwing(let errorType):
-            if let errorType {
-                clauses.append("\(String.throws)(\(errorType))")
-            } else {
-                clauses.append(.throws)
-            }
-        case .none:
-            break
-        }
-
-        return "(() \(clauses.map { "\($0) " }.joined())-> \(typeName))?"
-    }
 }

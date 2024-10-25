@@ -11,7 +11,7 @@ final class VariableModel: Model {
         static let empty: GetterEffects = .init(isAsync: false, throws: .none)
     }
 
-    enum /* Mock */StorageType {
+    enum MockStorageType {
         case stored(needsSetCount: Bool)
         case computed(GetterEffects)
     }
@@ -28,7 +28,7 @@ final class VariableModel: Model {
     var filePath: String = ""
     var isStatic = false
     var shouldOverride = false
-    let storageType: StorageType
+    let storageType: MockStorageType
     var rxTypes: [String: String]?
     var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
@@ -56,7 +56,7 @@ final class VariableModel: Model {
          acl: String?,
          encloserType: DeclType,
          isStatic: Bool,
-         storageType: StorageType,
+         storageType: MockStorageType,
          canBeInitParam: Bool,
          offset: Int64,
          rxTypes: [String: String]?,

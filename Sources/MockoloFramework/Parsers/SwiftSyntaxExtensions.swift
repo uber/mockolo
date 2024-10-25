@@ -368,7 +368,7 @@ extension VariableDeclSyntax {
                 typeName = vtype
             }
 
-            let storageType: VariableModel.StorageType
+            let storageType: VariableModel.MockStorageType
             switch v.accessorBlock?.accessors {
             case .accessors(let accessorDecls):
                 if accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
