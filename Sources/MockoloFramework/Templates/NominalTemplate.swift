@@ -166,7 +166,7 @@ extension NominalModel {
                 case .stored:
                     return "\(2.tab)self.\(element.underlyingName) = \(element.name.safeName)"
                 case .computed:
-                    return "\(2.tab)self.\(element.name)Handler = { \(element.name.safeName) }"
+                    return "\(2.tab)self.\(element.name)\(String.handlerSuffix) = { \(element.name.safeName) }"
                 }
             }.joined(separator: "\n")
             

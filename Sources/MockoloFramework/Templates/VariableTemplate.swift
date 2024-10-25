@@ -77,8 +77,7 @@ extension VariableModel {
             switch accessorBlockItems.count {
             case 0: accessorBlock = ""
             case 1: accessorBlock = " { \(accessorBlockItems[0]) }"
-            default:
-                accessorBlock = """
+            default: accessorBlock = """
                  {
                 \(accessorBlockItems.map { "\(2.tab)\($0)" }.joined(separator: "\n"))
                 \(1.tab)}
