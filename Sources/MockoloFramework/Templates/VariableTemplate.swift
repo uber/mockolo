@@ -58,48 +58,62 @@ extension VariableModel {
         }
 
         let staticSpace = isStatic ? "\(String.static) " : ""
-        let setCallCountVarDecl = hasSetter ? """
-        \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-        """ : ""
-        var accessorBlockItems: [String] = []
-        if hasSetter {
-            let didSetBlock = """
-            didSet { \(underlyingSetCallCount) += 1 }
-            """
-            accessorBlockItems.append(didSetBlock)
-        }
-        let accessorBlock: String
-        switch accessorBlockItems.count {
-        case 0: accessorBlock = ""
-        case 1: accessorBlock = " { \(accessorBlockItems[0]) }"
-        default:
-            accessorBlock = """
-             {
-            \(accessorBlockItems.map { "\(2.tab)\($0)" }.joined(separator: "\n"))
-            \(1.tab)}
-            """
-        }
 
-        let template: String
-        if underlyingVarDefaultVal == nil {
-            template = """
+        switch storageType {
+        case .stored(let needSetCount):
+            let setCallCountVarDecl = needSetCount ? """
+            \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
+            """ : ""
 
-            \(setCallCountVarDecl)
-            \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal)\(accessorBlock)
+            var accessorBlockItems: [String] = []
+            if needSetCount {
+                let didSetBlock = """
+                didSet { \(underlyingSetCallCount) += 1 }
+                """
+                accessorBlockItems.append(didSetBlock)
+            }
+
+            let accessorBlock: String
+            switch accessorBlockItems.count {
+            case 0: accessorBlock = ""
+            case 1: accessorBlock = " { \(accessorBlockItems[0]) }"
+            default:
+                accessorBlock = """
+                 {
+                \(accessorBlockItems.map { "\(2.tab)\($0)" }.joined(separator: "\n"))
+                \(1.tab)}
+                """
+            }
+
+            let template: String
+            if underlyingVarDefaultVal == nil {
+                template = """
+                
+                \(setCallCountVarDecl)
+                \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal)\(accessorBlock)
+                \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
+                \(2.tab)get { return \(underlyingName) }
+                \(2.tab)set { \(underlyingName) = newValue }
+                \(1.tab)}
+                """
+            } else {
+                template = """
+                
+                \(setCallCountVarDecl)
+                \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
+                """
+            }
+
+            return template
+
+        case .computed(let effects):
+            return """
+            \(1.tab)\(acl)\(staticSpace)var \(name)Handler: (() \(effects.syntax)-> \(type.typeName))?
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
-            \(2.tab)get { return \(underlyingName) }
-            \(2.tab)set { \(underlyingName) = newValue }
+            \(2.tab)get \(effects.syntax){ \(effects.callerMarkers)\(name)Handler!() }
             \(1.tab)}
             """
-        } else {
-            template = """
-
-            \(setCallCountVarDecl)
-            \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
-            """
         }
-
-        return template
     }
 
     func applyCombineVariableTemplate(name: String,
@@ -325,4 +339,59 @@ extension VariableModel {
     }
 }
 
+extension VariableModel.GetterEffects {
+    fileprivate var syntax: String {
+        var clauses: [String] = []
+        if isAsync {
+            clauses.append(.async)
+        }
+        switch `throws` {
+        case .throwing(let errorType):
+            if let errorType {
+                clauses.append("\(String.throws)(\(errorType))")
+            } else {
+                clauses.append(.throws)
+            }
+        case .none:
+            break
+        }
+        return clauses.map { "\($0) " }.joined()
+    }
 
+    fileprivate var callerMarkers: String {
+        var clauses: [String] = []
+        switch `throws` {
+        case .throwing:
+            clauses.append(.try)
+        case .none:
+            break
+        }
+        if isAsync {
+            clauses.append(.await)
+        }
+        return clauses.map { "\($0) " }.joined()
+    }
+
+    fileprivate func handlerType(typeName: String) -> String {
+//        if self == .empty {
+//            return nil
+//        }
+
+        var clauses: [String] = []
+        if isAsync {
+            clauses.append(.async)
+        }
+        switch `throws` {
+        case .throwing(let errorType):
+            if let errorType {
+                clauses.append("\(String.throws)(\(errorType))")
+            } else {
+                clauses.append(.throws)
+            }
+        case .none:
+            break
+        }
+
+        return "(() \(clauses.map { "\($0) " }.joined())-> \(typeName))?"
+    }
+}

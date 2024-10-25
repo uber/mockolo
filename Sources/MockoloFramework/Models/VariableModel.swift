@@ -1,9 +1,19 @@
 import Foundation
 
 final class VariableModel: Model {
-    enum GetterEffect: Hashable {
-        case async
-        case `throws`(errorType: String?)
+    struct GetterEffects: Equatable {
+        var isAsync: Bool
+        enum ThrowsType: Equatable {
+            case throwing(errorType: String?)
+            case none
+        }
+        var `throws`: ThrowsType
+        static let empty: GetterEffects = .init(isAsync: false, throws: .none)
+    }
+
+    enum /* Mock */StorageType {
+        case stored(needsSetCount: Bool)
+        case computed(GetterEffects)
     }
 
     var name: String
@@ -18,8 +28,7 @@ final class VariableModel: Model {
     var filePath: String = ""
     var isStatic = false
     var shouldOverride = false
-    let getterEffects: Set<GetterEffect>
-    let hasSetter: Bool
+    let storageType: StorageType
     var rxTypes: [String: String]?
     var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
@@ -47,8 +56,7 @@ final class VariableModel: Model {
          acl: String?,
          encloserType: DeclType,
          isStatic: Bool,
-         getterEffects: Set<GetterEffect>,
-         hasSetter: Bool,
+         storageType: StorageType,
          canBeInitParam: Bool,
          offset: Int64,
          rxTypes: [String: String]?,
@@ -60,8 +68,7 @@ final class VariableModel: Model {
         self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         self.offset = offset
         self.isStatic = isStatic
-        self.getterEffects = getterEffects
-        self.hasSetter = hasSetter
+        self.storageType = storageType
         self.shouldOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed

@@ -368,23 +368,36 @@ extension VariableDeclSyntax {
                 typeName = vtype
             }
 
-            let hasSetter: Bool
-            var getterEffects = Set<VariableModel.GetterEffect>()
+            let storageType: VariableModel.StorageType
             switch v.accessorBlock?.accessors {
             case .accessors(let accessorDecls):
-                if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
-                    if getterDecl.effectSpecifiers?.asyncSpecifier != nil {
-                        getterEffects.insert(.async)
+                if accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
+                    storageType = .stored(needsSetCount: true)
+                } else if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+                    if getterDecl.body == nil { // is protoccol
+                        var getterEffects = VariableModel.GetterEffects.empty
+                        if getterDecl.effectSpecifiers?.asyncSpecifier != nil {
+                            getterEffects.isAsync = true
+                        }
+                        if let `throws` = getterDecl.effectSpecifiers?.throwsClause {
+                            getterEffects.throws = .throwing(errorType: `throws`.type?.trimmedDescription)
+                        }
+                        if getterEffects == .empty {
+                            storageType = .stored(needsSetCount: false)
+                        } else {
+                            storageType = .computed(getterEffects)
+                        }
+                    } else { // is class
+                        storageType = .computed(.empty)
                     }
-                    if let `throws` = getterDecl.effectSpecifiers?.throwsClause {
-                        getterEffects.insert(.throws(errorType: `throws`.type?.trimmedDescription))
-                    }
+                } else {
+                    // will never happens
+                    storageType = .stored(needsSetCount: false) // fallback
                 }
-                hasSetter = accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) })
             case .getter:
-                hasSetter = false
+                storageType = .computed(.empty)
             case nil:
-                hasSetter = true
+                storageType = .stored(needsSetCount: true)
             }
 
             let varmodel = VariableModel(name: name,
@@ -392,8 +405,7 @@ extension VariableDeclSyntax {
                                          acl: acl,
                                          encloserType: declType,
                                          isStatic: isStatic,
-                                         getterEffects: getterEffects,
-                                         hasSetter: hasSetter,
+                                         storageType: storageType,
                                          canBeInitParam: potentialInitParam,
                                          offset: v.offset,
                                          rxTypes: metadata?.varTypes,
