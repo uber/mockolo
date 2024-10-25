@@ -111,21 +111,6 @@ extension String {
     ///
     """
 
-
-    @available(*, deprecated)
-    var hasThrowsOrRethrows: Bool {
-        return components(separatedBy: .whitespaces).contains { component in
-            return component == .throws || component == .rethrows
-        }
-    }
-
-    @available(*, deprecated)
-    var hasAsync: Bool {
-        return components(separatedBy: .whitespaces).contains { component in
-            return component == .async
-        }
-    }
-
     var safeName: String {
         var text = self
         if let keyword = text.withSyntaxText(Keyword.init),
