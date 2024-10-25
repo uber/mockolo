@@ -36,7 +36,7 @@ final class VariableModel: Model {
     }
 
     var underlyingName: String {
-        if isStatic || type.defaultVal() == nil {
+        if type.defaultVal() == nil {
             return "_\(name)"
         }
         return name

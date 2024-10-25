@@ -13,6 +13,7 @@ public protocol NonSimpleVars {
     var voidHandler: (() -> ()) { get }
     var hasDot: ModuleX.SomeType? { get }
     static var someVal: String { get }
+    static var someVal2: String { get set }
 }
 """
 
@@ -41,11 +42,10 @@ public class NonSimpleVarsMock: NonSimpleVars {
     public var hasDot: ModuleX.SomeType? = nil
 
 
-    static private var _someVal: String = ""
-    public static var someVal: String {
-        get { return _someVal }
-        set { _someVal = newValue }
-    }
+    public static var someVal: String = ""
+
+    public static private(set) var someVal2SetCallCount = 0
+    public static var someVal2: String = "" { didSet { someVal2SetCallCount += 1 } }
 }
 
 """

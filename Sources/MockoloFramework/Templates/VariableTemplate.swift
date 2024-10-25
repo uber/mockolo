@@ -48,7 +48,6 @@ extension VariableModel {
         }
 
         let privateSetSpace = allowSetCallCount ? "" :  "\(String.privateSet) "
-        let setCallCountStmt = "\(underlyingSetCallCount) += 1"
 
         let modifierTypeStr: String
         if let customModifiers = self.customModifiers,
@@ -65,7 +64,7 @@ extension VariableModel {
         var accessorBlockItems: [String] = []
         if hasSetter {
             let didSetBlock = """
-            didSet { \(setCallCountStmt) }
+            didSet { \(underlyingSetCallCount) += 1 }
             """
             accessorBlockItems.append(didSetBlock)
         }
@@ -82,7 +81,7 @@ extension VariableModel {
         }
 
         let template: String
-        if isStatic || underlyingVarDefaultVal == nil {
+        if underlyingVarDefaultVal == nil {
             template = """
 
             \(setCallCountVarDecl)
@@ -96,7 +95,7 @@ extension VariableModel {
             template = """
 
             \(setCallCountVarDecl)
-            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
+            \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
             """
         }
 
