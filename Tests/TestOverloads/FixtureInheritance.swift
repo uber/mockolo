@@ -111,8 +111,8 @@ class TestProtocolMock: TestProtocol {
     }
 
 
-    private(set) var someBoolSetCallCount = 0
-    var someBool: Bool = false { didSet { someBoolSetCallCount += 1 } }
+
+    var someBool: Bool = false
 
     private(set) var doSomethingCallCount = 0
     var doSomethingHandler: (() -> ())?

@@ -58,13 +58,35 @@ extension VariableModel {
             modifierTypeStr = ""
         }
 
-        var template = ""
+        let staticSpace = isStatic ? "\(String.static) " : ""
+        let setCallCountVarDecl = hasSetter ? """
+        \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
+        """ : ""
+        var accessorBlockItems: [String] = []
+        if hasSetter {
+            let didSetBlock = """
+            didSet { \(setCallCountStmt) }
+            """
+            accessorBlockItems.append(didSetBlock)
+        }
+        let accessorBlock: String
+        switch accessorBlockItems.count {
+        case 0: accessorBlock = ""
+        case 1: accessorBlock = " { \(accessorBlockItems[0]) }"
+        default:
+            accessorBlock = """
+             {
+            \(accessorBlockItems.map { "\(2.tab)\($0)" }.joined(separator: "\n"))
+            \(1.tab)}
+            """
+        }
+
+        let template: String
         if isStatic || underlyingVarDefaultVal == nil {
-            let staticSpace = isStatic ? "\(String.static) " : ""
             template = """
 
-            \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal) { didSet { \(setCallCountStmt) } }
+            \(setCallCountVarDecl)
+            \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal)\(accessorBlock)
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
             \(2.tab)get { return \(underlyingName) }
             \(2.tab)set { \(underlyingName) = newValue }
@@ -73,8 +95,8 @@ extension VariableModel {
         } else {
             template = """
 
-            \(1.tab)\(acl)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
+            \(setCallCountVarDecl)
+            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
             """
         }
 

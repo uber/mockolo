@@ -23,8 +23,8 @@ actor FooMock: Foo {
         }
         fatalError("fooHandler returns can't have a default value thus its handler must be set")
     }
-    private(set) var barSetCallCount = 0
-    var bar: Int = 0 { didSet { barSetCallCount += 1 } }
+
+    var bar: Int = 0
 }
 """
 
@@ -48,8 +48,7 @@ actor FooMock: Foo {
     }
 
 
-    private(set) var barSetCallCount = 0
-    var bar: Int = 0 { didSet { barSetCallCount += 1 } }
+    var bar: Int = 0
 
     private(set) var bazCallCount = 0
     var bazHandler: ((String) async -> (Int))?

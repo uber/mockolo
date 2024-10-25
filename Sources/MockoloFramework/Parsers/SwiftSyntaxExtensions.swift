@@ -368,11 +368,32 @@ extension VariableDeclSyntax {
                 typeName = vtype
             }
 
+            let hasSetter: Bool
+            var getterEffects = Set<VariableModel.GetterEffect>()
+            switch v.accessorBlock?.accessors {
+            case .accessors(let accessorDecls):
+                if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+                    if getterDecl.effectSpecifiers?.asyncSpecifier != nil {
+                        getterEffects.insert(.async)
+                    }
+                    if let `throws` = getterDecl.effectSpecifiers?.throwsClause {
+                        getterEffects.insert(.throws(errorType: `throws`.type?.trimmedDescription))
+                    }
+                }
+                hasSetter = accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) })
+            case .getter:
+                hasSetter = false
+            case nil:
+                hasSetter = true
+            }
+
             let varmodel = VariableModel(name: name,
                                          typeName: typeName,
                                          acl: acl,
                                          encloserType: declType,
                                          isStatic: isStatic,
+                                         getterEffects: getterEffects,
+                                         hasSetter: hasSetter,
                                          canBeInitParam: potentialInitParam,
                                          offset: v.offset,
                                          rxTypes: metadata?.varTypes,

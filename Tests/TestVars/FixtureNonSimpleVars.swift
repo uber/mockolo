@@ -29,19 +29,19 @@ public class NonSimpleVarsMock: NonSimpleVars {
     }
     public private(set) var dictSetCallCount = 0
     public var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
-    public private(set) var closureVarSetCallCount = 0
-    public var closureVar: ((_ arg: String) -> Void)? = nil { didSet { closureVarSetCallCount += 1 } }
-    public private(set) var voidHandlerSetCallCount = 0
-    private var _voidHandler: ((() -> ()))!  { didSet { voidHandlerSetCallCount += 1 } }
+
+    public var closureVar: ((_ arg: String) -> Void)? = nil
+
+    private var _voidHandler: ((() -> ()))!
     public var voidHandler: (() -> ()) {
         get { return _voidHandler }
         set { _voidHandler = newValue }
     }
-    public private(set) var hasDotSetCallCount = 0
-    public var hasDot: ModuleX.SomeType? = nil { didSet { hasDotSetCallCount += 1 } }
 
-    public static private(set) var someValSetCallCount = 0
-    static private var _someVal: String = "" { didSet { someValSetCallCount += 1 } }
+    public var hasDot: ModuleX.SomeType? = nil
+
+
+    static private var _someVal: String = ""
     public static var someVal: String {
         get { return _someVal }
         set { _someVal = newValue }
