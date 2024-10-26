@@ -14,22 +14,17 @@
 //  limitations under the License.
 //
 
-enum ThrowingKind: Equatable {
-    case none
-    case any
-    case `rethrows`
-    case typed(errorType: String)
-
-    var hasError: Bool {
+extension ThrowingKind {
+    func applyThrowingTemplate() -> String? {
         switch self {
         case .none:
-            return false
+            return nil
         case .any:
-            return true
+            return .throws
         case .rethrows:
-            return true
+            return .rethrows
         case .typed(let errorType):
-            return errorType != .neverType && errorType != "Swift.\(String.neverType)"
+            return "\(String.throws)(\(errorType))"
         }
     }
 }
