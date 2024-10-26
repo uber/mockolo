@@ -60,7 +60,9 @@ extension MethodModel {
 
             let suffixStr = [
                 isAsync ? String.async : nil,
-                throwing.applyThrowingTemplate(),
+                throwing.applyThrowingTemplate(
+                    fromClosureTemplate: false
+                ),
             ].compactMap { $0 }.joined(separator: " ") + " "
             let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
             let staticStr = isStatic ? String.static + " " : ""

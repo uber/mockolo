@@ -200,7 +200,9 @@ extension NominalModel {
                 let paramDeclsStr = m.params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
                 let suffixStr = [
                     m.isAsync ? String.async : nil,
-                    m.throwing.applyThrowingTemplate(),
+                    m.throwing.applyThrowingTemplate(
+                        fromClosureTemplate: false
+                    ),
                 ].compactMap { $0 }.joined(separator: " ") + " "
 
                 if override {

@@ -15,13 +15,19 @@
 //
 
 extension ThrowingKind {
-    func applyThrowingTemplate() -> String? {
+    func applyThrowingTemplate(
+        fromClosureTemplate: Bool
+    ) -> String {
         switch self {
         case .none:
-            return nil
+            return ""
         case .any:
             return .throws
         case .rethrows:
+            if fromClosureTemplate {
+                // if this method is called to render closure, rethrows should be replaced with throws.
+                return .throws
+            }
             return .rethrows
         case .typed(let errorType):
             return "\(String.throws)(\(errorType))"
