@@ -122,9 +122,9 @@ extension VariableModel {
 
             return """
 
-            \(1.tab)\(acl)\(staticSpace)var \(name)\(String.handlerSuffix): (() \(effects.syntax)-> \(type.typeName))?
+            \(1.tab)\(acl)\(staticSpace)var \(name)\(String.handlerSuffix): (() \(effects.applyTemplate())-> \(type.typeName))?
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
-            \(2.tab)get \(effects.syntax){
+            \(2.tab)get \(effects.applyTemplate()){
             \(body)
             \(2.tab)}
             \(1.tab)}
@@ -356,20 +356,13 @@ extension VariableModel {
 }
 
 extension VariableModel.GetterEffects {
-    fileprivate var syntax: String {
+    fileprivate func applyTemplate() -> String {
         var clauses: [String] = []
         if isAsync {
             clauses.append(.async)
         }
-        switch throwing {
-        case .none:
-            break
-        case .any:
-            clauses.append(.throws)
-        case .rethrows:
-            clauses.append(.rethrows)
-        case .typed(let errorType):
-            clauses.append("\(String.throws)(\(errorType))")
+        if let throwSyntax = throwing.applyThrowingTemplate() {
+            clauses.append(throwSyntax)
         }
         return clauses.map { "\($0) " }.joined()
     }
