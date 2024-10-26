@@ -10,6 +10,8 @@ protocol FuncThrow {
     func f2(arg: Int) throws
     func f3(arg: Int) throws(SomeError)
     func f4(arg: Int) throws(SomeError) -> String
+    func f5() throws (MyError)
+    func f6() async throws (any Error)
     func g1(arg: (Int) throws -> ())
                 throws -> String
     func g2(arg: (Int) throws -> ()) throws
@@ -21,7 +23,6 @@ protocol FuncThrow {
 
 let funcThrowMock =
 """
-
 import Foundation
 
 
@@ -56,7 +57,7 @@ class FuncThrowMock: FuncThrow {
         if let f3Handler = f3Handler {
             try f3Handler(arg)
         }
-
+        
     }
 
     private(set) var f4CallCount = 0
@@ -67,6 +68,26 @@ class FuncThrowMock: FuncThrow {
             return try f4Handler(arg)
         }
         return ""
+    }
+
+    private(set) var f5CallCount = 0
+    var f5Handler: (() throws(MyError) -> ())?
+    func f5() throws(MyError)  {
+        f5CallCount += 1
+        if let f5Handler = f5Handler {
+            try f5Handler()
+        }
+        
+    }
+
+    private(set) var f6CallCount = 0
+    var f6Handler: (() async throws(any Error) -> ())?
+    func f6() async throws(any Error)  {
+        f6CallCount += 1
+        if let f6Handler = f6Handler {
+            try await f6Handler()
+        }
+        
     }
 
     private(set) var g1CallCount = 0
