@@ -4,7 +4,6 @@ let klass =
 """
 /// \(String.mockAnnotation)
 public class Low: Mid {
-
     var name: String = "k2"
 
     required init(arg: String) {
@@ -32,7 +31,6 @@ public class Low: Mid {
     }
 
     override func bar() {
-        
     }
 
     func foo() -> Int {
@@ -40,7 +38,10 @@ public class Low: Mid {
     }
 
     private func omg() {
+    }
 
+    var isOpen: Bool {
+        return true
     }
 }
 
@@ -56,7 +57,7 @@ public class High {
     required init(orderId: Int) {
         self.order = orderId
     }
-     init(orderId: Int, loc: String) {
+    init(orderId: Int, loc: String) {
         self.order = orderId
     }
     var order: Int
@@ -142,12 +143,21 @@ public class LowMock: Low {
         }
         return 0
     }
+
+    var isOpenHandler: (() -> Bool)?
+    override var isOpen: Bool {
+        get {
+            if let isOpenHandler = isOpenHandler {
+                return isOpenHandler()
+            }
+            return false
+        }
+    }
 }
 
 """
 
 let klassLongerMock = """
-
 public class LowMock: Low {
     override init(i: Int = 0) {
         super.init(i: i)
@@ -184,6 +194,16 @@ public class LowMock: Low {
             return fooHandler()
         }
         return 0
+    }
+
+    var isOpenHandler: (() -> Bool)?
+    override var isOpen: Bool {
+        get {
+            if let isOpenHandler = isOpenHandler {
+                return isOpenHandler()
+            }
+            return false
+        }
     }
 }
 
