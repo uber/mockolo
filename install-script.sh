@@ -65,7 +65,7 @@ echo "OUTPUT FILE = ${OUTFILE}"
 cd "$SRCDIR"
 rm -rf .build
 case $(uname -s) in
-    Linux*)     swift build --static-swift-stdlib -c release
+    Linux*)     swift build -c release --swift-sdk $(uname -p)-swift-linux-musl
                 cd .build/release;;
     Darwin*)    swift build -c release --arch arm64 --arch x86_64
                 cd .build/apple/Products/Release;;

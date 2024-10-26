@@ -19,7 +19,7 @@ import Foundation
 final class TypeAliasModel: Model {
     var filePath: String = ""
     var name: String
-    var type: Type
+    var type: SwiftType
     var offset: Int64 = .max
     var length: Int64
     var typeOffset: Int64 = 0
@@ -47,9 +47,9 @@ final class TypeAliasModel: Model {
         self.addAcl = encloserType == .protocolType && !processed
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
-            self.type  = Type(val)
+            self.type  = SwiftType(val)
         } else {
-            self.type = typeName.isEmpty ? Type(String.anyType) : Type(typeName)
+            self.type = typeName.isEmpty ? SwiftType(String.anyType) : SwiftType(typeName)
         }
     }
 

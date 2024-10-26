@@ -16,23 +16,23 @@
 
 import Foundation
 
-extension ClassModel {
-    func applyClassTemplate(name: String,
-                            identifier: String,
-                            accessLevel: String,
-                            attribute: String,
-                            declType: DeclType,
-                            inheritedTypes: [String],
-                            metadata: AnnotationMetadata?,
-                            useTemplateFunc: Bool,
-                            useMockObservable: Bool,
-                            allowSetCallCount: Bool,
-                            mockFinal: Bool,
-                            enableFuncArgsHistory: Bool,
-                            disableCombineDefaultValues: Bool,
-                            initParamCandidates: [VariableModel],
-                            declaredInits: [MethodModel],
-                            entities: [(String, Model)]) -> String {
+extension NominalModel {
+    func applyNominalTemplate(name: String,
+                              identifier: String,
+                              accessLevel: String,
+                              attribute: String,
+                              declTypeOfMockAnnotatedBaseType: DeclType,
+                              inheritedTypes: [String],
+                              metadata: AnnotationMetadata?,
+                              useTemplateFunc: Bool,
+                              useMockObservable: Bool,
+                              allowSetCallCount: Bool,
+                              mockFinal: Bool,
+                              enableFuncArgsHistory: Bool,
+                              disableCombineDefaultValues: Bool,
+                              initParamCandidates: [VariableModel],
+                              declaredInits: [MethodModel],
+                              entities: [(String, Model)]) -> String {
 
         processCombineAliases(entities: entities)
         
@@ -65,7 +65,7 @@ extension ClassModel {
         .joined(separator: "\n")
         
         var typealiasTemplate = ""
-        let addAcl = declType == .protocolType ? acl : ""
+        let addAcl = declTypeOfMockAnnotatedBaseType == .protocolType ? acl : ""
         if let typealiasWhitelist = typealiases {
             typealiasTemplate = typealiasWhitelist.map { (arg: (key: String, value: [String])) -> String in
                 let joinedType = arg.value.sorted().joined(separator: " & ")
@@ -78,7 +78,7 @@ extension ClassModel {
             moduleDot = moduleName + "."
         }
         
-        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declType: declType, overrides: metadata?.varTypes)
+        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declTypeOfMockAnnotatedBaseType: declTypeOfMockAnnotatedBaseType, overrides: metadata?.varTypes)
 
         var inheritedTypes = inheritedTypes
         inheritedTypes.insert("\(moduleDot)\(identifier)", at: 0)
@@ -97,7 +97,7 @@ extension ClassModel {
         let finalStr = mockFinal ? "\(String.final) " : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)class \(name): \(inheritedTypes.joined(separator: ", ")) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(inheritedTypes.joined(separator: ", ")) {
         \(body)
         }
         """
@@ -109,7 +109,7 @@ extension ClassModel {
         initParamCandidates: [VariableModel],
         declaredInits: [MethodModel],
         acl: String,
-        declType: DeclType,
+        declTypeOfMockAnnotatedBaseType: DeclType,
         overrides: [String: String]?
     ) -> String {
         
@@ -122,7 +122,7 @@ extension ClassModel {
             needBlankInit = true
             needParamedInit = false
         } else {
-            if declType == .protocolType {
+            if declTypeOfMockAnnotatedBaseType == .protocolType {
                 needParamedInit = !initParamCandidates.isEmpty
                 needBlankInit = true
 

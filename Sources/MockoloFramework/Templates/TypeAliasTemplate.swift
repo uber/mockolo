@@ -18,7 +18,7 @@ import Foundation
 
 extension TypeAliasModel {
     func applyTypealiasTemplate(name: String,
-                                type: Type,
+                                type: SwiftType,
                                 acl: String) -> String {
         var aclStr = acl
         if !aclStr.isEmpty {

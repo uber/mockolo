@@ -29,7 +29,7 @@ extension MethodModel {
                              genericTypeParams: [ParamModel],
                              genericWhereClause: String?,
                              params: [ParamModel],
-                             returnType: Type,
+                             returnType: SwiftType,
                              accessLevel: String,
                              suffix: String,
                              argsHistory: ArgumentsHistoryModel?,

@@ -71,7 +71,14 @@ private func generateUniqueModels(key: String,
         mockInheritedTypes.append(.uncheckedSendable)
     }
 
-    let resolvedEntity = ResolvedEntity(key: key, entity: entity, uniqueModels: uniqueModels, attributes: attributes, inheritedTypes: mockInheritedTypes)
+    let resolvedEntity = ResolvedEntity(
+        key: key,
+        entity: entity,
+        uniqueModels: uniqueModels,
+        attributes: attributes,
+        inheritedTypes: mockInheritedTypes,
+        inheritsActorProtocol: inheritedTypes.contains(.actorProtocol)
+    )
 
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths, imports: pathToContentList)
 }

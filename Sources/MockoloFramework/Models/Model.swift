@@ -17,7 +17,14 @@
 import Foundation
 
 public enum ModelType {
-    case variable, method, typeAlias, parameter, macro, `class`
+    case variable
+    case method
+    case typeAlias
+    case parameter
+    case macro
+    case nominal
+    case argumentsHistory
+    case closure
 }
 
 /// Represents a model for an entity such as var, func, class, etc.
@@ -42,7 +49,7 @@ public protocol Model {
     var isStatic: Bool { get }
 
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
-    var type: Type { get set }
+    var type: SwiftType { get set }
 
     /// Offset where this type is declared
     var offset: Int64 { get set }

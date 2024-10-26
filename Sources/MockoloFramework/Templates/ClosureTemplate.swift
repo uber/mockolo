@@ -18,12 +18,12 @@ import Foundation
 
 extension ClosureModel {
     func applyClosureTemplate(name: String,
-                              type: Type,
+                              type: SwiftType,
                               genericTypeNames: [String],
                               paramVals: [String]?,
-                              paramTypes: [Type]?,
+                              paramTypes: [SwiftType]?,
                               suffix: String,
-                              returnDefaultType: Type) -> String {
+                              returnDefaultType: SwiftType) -> String {
         
         var handlerParamValsStr = ""
         if let paramVals = paramVals, let paramTypes = paramTypes {
@@ -64,7 +64,7 @@ extension ClosureModel {
     }
     
     
-    private func renderReturnDefaultStatement(name: String, type: Type) -> String {
+    private func renderReturnDefaultStatement(name: String, type: SwiftType) -> String {
         guard !type.isUnknown else { return "" }
         
         let result = type.defaultVal() ?? String.fatalError
@@ -79,7 +79,7 @@ extension ClosureModel {
     }
 
     private func renderOptionalGenericClosure(
-        argType: Type,
+        argType: SwiftType,
         argName: String
     ) -> String? {
         let literalComponents = argType.typeName.literalComponents
