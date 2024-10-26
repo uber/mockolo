@@ -15,8 +15,16 @@
 //
 
 extension ThrowingKind {
+    /// if this method is called to render handler for closure, rethrows should be replaced with throws.
+    ///
+    /// - example:
+    ///     ```
+    ///     // handler shouldn't use rethrows, instead use throws
+    ///     var fooHandler: (() -> throws -> Void) throws -> Void
+    ///     func foo(bar: () throws -> Void) rethrows -> Void
+    ///     ```
     func applyThrowingTemplate(
-        fromClosureTemplate: Bool
+        appliesforClosureHandler: Bool
     ) -> String {
         switch self {
         case .none:
@@ -24,8 +32,7 @@ extension ThrowingKind {
         case .any:
             return .throws
         case .rethrows:
-            if fromClosureTemplate {
-                // if this method is called to render closure, rethrows should be replaced with throws.
+            if appliesforClosureHandler {
                 return .throws
             }
             return .rethrows

@@ -566,7 +566,7 @@ public final class SwiftType {
 
         let suffixStr = [
             isAsync ? String.async + " " : nil,
-            throwing.applyThrowingTemplate(fromClosureTemplate: true) + " ",
+            throwing.applyThrowingTemplate(appliesforClosureHandler: true) + " ",
         ].compactMap { $0 }.joined()
 
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"

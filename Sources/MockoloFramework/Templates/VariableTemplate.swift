@@ -361,7 +361,7 @@ extension VariableModel.GetterEffects {
         if isAsync {
             clauses.append(.async)
         }
-        let throwing = self.throwing.applyThrowingTemplate(fromClosureTemplate: false)
+        let throwing = self.throwing.applyThrowingTemplate(appliesforClosureHandler: false)
         if throwing.isNotEmpty {
             clauses.append(throwing)
         }

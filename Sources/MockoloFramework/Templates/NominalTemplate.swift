@@ -201,7 +201,7 @@ extension NominalModel {
                 let suffixStr = [
                     m.isAsync ? String.async : nil,
                     m.throwing.applyThrowingTemplate(
-                        fromClosureTemplate: false
+                        appliesforClosureHandler: false
                     ),
                 ].compactMap { $0 }.joined(separator: " ") + " "
 

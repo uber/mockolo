@@ -61,7 +61,7 @@ extension MethodModel {
             let suffixStr = [
                 isAsync ? String.async : nil,
                 throwing.applyThrowingTemplate(
-                    fromClosureTemplate: false
+                    appliesforClosureHandler: false
                 ),
             ].compactMap { $0 }.joined(separator: " ") + " "
             let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
