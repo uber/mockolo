@@ -370,7 +370,7 @@ import Foundation
 
 /// \(String.mockAnnotation)
 protocol NonSimpleFuncs {
-func pass<T>(handler: @autoclosure () -> Int) rethrows -> T
+func pass<T>(handler: @autoclosure () -> Int) throws -> T
 }
 """
 
@@ -385,7 +385,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 
     private(set) var passCallCount = 0
     var passHandler: ((@autoclosure () -> Int) throws -> (Any))?
-    func pass<T>(handler: @autoclosure () -> Int) rethrows -> T {
+    func pass<T>(handler: @autoclosure () -> Int) throws -> T {
         passCallCount += 1
         if let passHandler = passHandler {
             return try passHandler(handler()) as! T

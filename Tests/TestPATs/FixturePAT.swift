@@ -152,8 +152,8 @@ public class SomeTypeMock: SomeType {
         self._key = key
     }
     public typealias Key = String
-    public private(set) var keySetCallCount = 0
-    private var _key: Key!  { didSet { keySetCallCount += 1 } }
+    
+    private var _key: Key!
     public var key: Key {
         get { return _key }
         set { _key = newValue }

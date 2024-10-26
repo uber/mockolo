@@ -110,7 +110,7 @@ public class FooMock: Foo {
 
 let sameNameVarFunc = """
 /// \(String.mockAnnotation)
-public protocol Bar: class {
+public protocol Bar: AnyObject {
 var talk: Int { get }
 }
 
@@ -131,8 +131,8 @@ public class BarMock: Bar {
         self.talk = talk
         
     }
-    public private(set) var talkSetCallCount = 0
-    public var talk: Int = 0 { didSet { talkSetCallCount += 1 } }
+
+    public var talk: Int = 0
 }
 
 public class FooMock: Foo {
@@ -144,8 +144,8 @@ public class FooMock: Foo {
         self.talk = talk
         
     }
-    public private(set) var talkSetCallCount = 0
-    public var talk: Int = 0 { didSet { talkSetCallCount += 1 } }
+
+    public var talk: Int = 0
     public private(set) var talkDismissCallCount = 0
     public var talkDismissHandler: ((Bool) -> ())?
     public func talk(_ dismiss: Bool)  {

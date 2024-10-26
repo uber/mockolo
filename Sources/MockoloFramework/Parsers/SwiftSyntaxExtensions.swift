@@ -368,11 +368,44 @@ extension VariableDeclSyntax {
                 typeName = vtype
             }
 
+            let storageType: VariableModel.MockStorageType
+            switch v.accessorBlock?.accessors {
+            case .accessors(let accessorDecls):
+                if accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
+                    storageType = .stored(needsSetCount: true)
+                } else if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+                    if getterDecl.body == nil { // is protoccol
+                        var getterEffects = VariableModel.GetterEffects.empty
+                        if getterDecl.effectSpecifiers?.asyncSpecifier != nil {
+                            getterEffects.isAsync = true
+                        }
+                        if let `throws` = getterDecl.effectSpecifiers?.throwsClause {
+                            getterEffects.throwing = .init(`throws`)
+                        }
+                        if getterEffects == .empty {
+                            storageType = .stored(needsSetCount: false)
+                        } else {
+                            storageType = .computed(getterEffects)
+                        }
+                    } else { // is class
+                        storageType = .computed(.empty)
+                    }
+                } else {
+                    // will never happens
+                    storageType = .stored(needsSetCount: false) // fallback
+                }
+            case .getter:
+                storageType = .computed(.empty)
+            case nil:
+                storageType = .stored(needsSetCount: true)
+            }
+
             let varmodel = VariableModel(name: name,
                                          typeName: typeName,
                                          acl: acl,
                                          encloserType: declType,
                                          isStatic: isStatic,
+                                         storageType: storageType,
                                          canBeInitParam: potentialInitParam,
                                          offset: v.offset,
                                          rxTypes: metadata?.varTypes,
@@ -402,8 +435,8 @@ extension SubscriptDeclSyntax {
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
                                          params: params,
-                                         throwsOrRethrows: nil,
-                                         asyncOrReasync: nil,
+                                         isAsync: false,
+                                         throwing: .none,
                                          isStatic: isStatic,
                                          offset: self.offset,
                                          length: self.length,
@@ -432,8 +465,8 @@ extension FunctionDeclSyntax {
                                     genericTypeParams: genericTypeParams,
                                     genericWhereClause: genericWhereClause,
                                     params: params,
-                                    throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.throwsSpecifier.text,
-                                    asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
+                                    isAsync: self.signature.effectSpecifiers?.asyncSpecifier != nil,
+                                    throwing: .init(self.signature.effectSpecifiers?.throwsClause),
                                     isStatic: isStatic,
                                     offset: self.offset,
                                     length: self.length,
@@ -473,8 +506,8 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.throwsSpecifier.text,
-                           asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
+                           isAsync: self.signature.effectSpecifiers?.asyncSpecifier != nil,
+                           throwing: .init(self.signature.effectSpecifiers?.throwsClause),
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
@@ -794,5 +827,23 @@ extension Trivia {
             }
         }
         return nil
+    }
+}
+
+extension ThrowingKind {
+    fileprivate init(_ syntax: ThrowsClauseSyntax?) {
+        guard let syntax else {
+            self = .none
+            return
+        }
+        if syntax.throwsSpecifier.tokenKind == .keyword(.rethrows) {
+            self = .rethrows
+        } else {
+            if let type = syntax.type {
+                self = .typed(errorType: type.trimmedDescription)
+            } else {
+                self = .any
+            }
+        }
     }
 }

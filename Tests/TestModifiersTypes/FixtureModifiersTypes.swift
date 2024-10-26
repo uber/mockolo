@@ -17,8 +17,7 @@ class FooMock: Foo {
     }
 
 
-    private(set) var listenerSetCallCount = 0
-    weak var listener: AnyObject? = nil { didSet { listenerSetCallCount += 1 } }
+    weak var listener: AnyObject? = nil
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
@@ -60,8 +59,8 @@ class FooMock: Foo {
     }
 
 
-    private(set) var listenerSetCallCount = 0
-    dynamic var listener: AnyObject? = nil { didSet { listenerSetCallCount += 1 } }
+
+    dynamic var listener: AnyObject? = nil
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
@@ -103,8 +102,8 @@ class FooMock: Foo {
     }
 
 
-    private(set) var listenerSetCallCount = 0
-    var listener: AnyObject? = nil { didSet { listenerSetCallCount += 1 } }
+
+    var listener: AnyObject? = nil
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?

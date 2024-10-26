@@ -17,8 +17,8 @@ class TaskRoutingMock: Foo.TaskRouting {
     init(bar: String = "") {
         self.bar = bar
     }
-    private(set) var barSetCallCount = 0
-    var bar: String = "" { didSet { barSetCallCount += 1 } }
+
+    var bar: String = ""
     private(set) var bazCallCount = 0
     var bazHandler: (() -> (Double))?
     func baz() -> Double {

@@ -27,25 +27,25 @@ public class FooMock: Foo {
         self.someBar = someBar
     }
 
-    public private(set) var someBehaviorSetCallCount = 0
-    private var _someBehavior: BehaviorSubject<String>!  { didSet { someBehaviorSetCallCount += 1 } }
+
+    private var _someBehavior: BehaviorSubject<String>!
     public var someBehavior: BehaviorSubject<String> {
         get { return _someBehavior }
         set { _someBehavior = newValue }
     }
 
-    public private(set) var someReplySetCallCount = 0
-    public var someReply: ReplaySubject<String> = ReplaySubject<String>.create(bufferSize: 1) { didSet { someReplySetCallCount += 1 } }
 
-    public private(set) var someVariableSetCallCount = 0
-    private var _someVariable: Variable<Bool>!  { didSet { someVariableSetCallCount += 1 } }
+    public var someReply: ReplaySubject<String> = ReplaySubject<String>.create(bufferSize: 1)
+
+
+    private var _someVariable: Variable<Bool>!
     public var someVariable: Variable<Bool> {
         get { return _someVariable }
         set { _someVariable = newValue }
     }
 
-    public private(set) var someBarSetCallCount = 0
-    public var someBar: Bar = BarMock() { didSet { someBarSetCallCount += 1 } }
+
+    public var someBar: Bar = BarMock()
 }
 """
 

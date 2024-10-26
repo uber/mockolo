@@ -24,31 +24,36 @@ final class ClosureModel: Model {
     let genericTypeNames: [String]
     let paramNames: [String]
     let paramTypes: [SwiftType]
-    let suffix: String
+    let isAsync: Bool
+    let throwing: ThrowingKind
 
     var modelType: ModelType {
         return .closure
     }
-
     
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], suffix: String, returnType: SwiftType, encloser: String) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType, encloser: String) {
         self.name = name + .handlerSuffix
-        self.suffix = suffix
+        self.isAsync = isAsync
+        self.throwing = throwing
         let genericTypeNameList = genericTypeParams.map(\.name)
         self.genericTypeNames = genericTypeNameList
         self.paramNames = paramNames
         self.paramTypes = paramTypes
         self.funcReturnType = returnType
-        self.type = SwiftType.toClosureType(with: paramTypes, typeParams: genericTypeNameList, suffix: suffix, returnType: returnType, encloser: encloser)
+        self.type = SwiftType.toClosureType(
+            params: paramTypes,
+            typeParams: genericTypeNameList,
+            isAsync: isAsync,
+            throwing: throwing,
+            returnType: returnType,
+            encloser: encloser
+        )
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
         return applyClosureTemplate(name: identifier + .handlerSuffix,
-                                    type: type,
-                                    genericTypeNames: genericTypeNames,
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,
-                                    suffix: suffix,
                                     returnDefaultType: funcReturnType)
     }
 }
