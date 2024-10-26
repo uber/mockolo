@@ -38,7 +38,7 @@ final class MethodModel: Model {
     var modelDescription: String? = nil
     var isStatic: Bool
     let shouldOverride: Bool
-    let suffix: String
+    let suffix: FunctionSuffixClause?
     let kind: MethodKind
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
@@ -167,8 +167,8 @@ final class MethodModel: Model {
          genericTypeParams: [ParamModel],
          genericWhereClause: String?,
          params: [ParamModel],
-         throwsOrRethrows: String?,
-         asyncOrReasync: String?,
+         throwsOrRethrows: FunctionThrowsSuffix?,
+         asyncOrReasync: FunctionAsyncSuffix?,
          isStatic: Bool,
          offset: Int64,
          length: Int64,
@@ -178,7 +178,10 @@ final class MethodModel: Model {
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
-        self.suffix = [asyncOrReasync, throwsOrRethrows].compactMap { $0 }.joined(separator: " ")
+        self.suffix = FunctionSuffixClause(
+            throwsSuffix: throwsOrRethrows,
+            asyncSuffix: asyncOrReasync
+        )
         self.offset = offset
         self.length = length
         self.kind = kind
@@ -241,5 +244,44 @@ final class MethodModel: Model {
                                          argsHistory: argsHistory,
                                          handler: handler(encloser: encloser))
         return result
+    }
+}
+
+/// throws, rethrows
+///
+/// if throws clause has a type information, the associated value `type` is not `nil`.
+struct FunctionThrowsSuffix {
+    let isRethrows: Bool
+    let type: String?
+}
+
+/// async, reasync
+struct FunctionAsyncSuffix {
+    var isReasync: Bool
+
+    var text: String {
+        isReasync ? String.reasync : String.async
+    }
+
+    var description: String {
+        text
+    }
+}
+
+/// Function Suffix Clause such as async / throws.
+///
+/// Since the support of typed throw, it is necessary to prepare a type that represents suffix in place of String type
+/// due to the swift syntax's complexity.
+struct FunctionSuffixClause {
+    var throwsSuffix: FunctionThrowsSuffix?
+    var asyncSuffix: FunctionAsyncSuffix?
+
+
+    init?(throwsSuffix: FunctionThrowsSuffix? = nil, asyncSuffix: FunctionAsyncSuffix? = nil) {
+        if throwsSuffix == nil, asyncSuffix == nil {
+            return nil
+        }
+        self.throwsSuffix = throwsSuffix
+        self.asyncSuffix = asyncSuffix
     }
 }

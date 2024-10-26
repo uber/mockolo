@@ -423,24 +423,33 @@ extension FunctionDeclSyntax {
         let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
+        let asyncSpecifier = self.signature.effectSpecifiers?.asyncSpecifier
+        let throwsClause = self.signature.effectSpecifiers?.throwsClause
 
-        let funcmodel = MethodModel(name: self.name.description,
-                                    typeName: self.signature.returnClause?.type.description ?? "",
-                                    kind: .funcKind,
-                                    encloserType: declType,
-                                    acl: acl,
-                                    genericTypeParams: genericTypeParams,
-                                    genericWhereClause: genericWhereClause,
-                                    params: params,
-                                    throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.throwsSpecifier.text,
-                                    asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
-                                    isStatic: isStatic,
-                                    offset: self.offset,
-                                    length: self.length,
-                                    funcsWithArgsHistory: funcsWithArgsHistory ?? [],
-                                    customModifiers: customModifiers ?? [:],
-                                    modelDescription: self.description,
-                                    processed: processed)
+        let funcmodel = MethodModel(
+            name: self.name.description,
+            typeName: self.signature.returnClause?.type.description ?? "",
+            kind: .funcKind,
+            encloserType: declType,
+            acl: acl,
+            genericTypeParams: genericTypeParams,
+            genericWhereClause: genericWhereClause,
+            params: params,
+            throwsOrRethrows: throwsClause != nil ? FunctionThrowsSuffix(
+                    isRethrows: throwsClause!.throwsSpecifier.text == String.rethrows,
+                    type: throwsClause!.type?.description
+                ) : nil,
+            asyncOrReasync: asyncSpecifier != nil ? FunctionAsyncSuffix(
+                isReasync: asyncSpecifier!.text == String.rethrows
+            ) : nil,
+            isStatic: isStatic,
+            offset: self.offset,
+            length: self.length,
+            funcsWithArgsHistory: funcsWithArgsHistory ?? [],
+            customModifiers: customModifiers ?? [:],
+            modelDescription: self.description,
+            processed: processed
+        )
         return funcmodel
     }
 }
@@ -464,6 +473,8 @@ extension InitializerDeclSyntax {
         let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: true) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
+        let asyncSpecifier = self.signature.effectSpecifiers?.asyncSpecifier
+        let throwsClause = self.signature.effectSpecifiers?.throwsClause
 
         return MethodModel(name: "init",
                            typeName: "",
@@ -473,8 +484,14 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: self.signature.effectSpecifiers?.throwsClause?.throwsSpecifier.text,
-                           asyncOrReasync: self.signature.effectSpecifiers?.asyncSpecifier?.text,
+                           throwsOrRethrows: throwsClause != nil ?
+                           FunctionThrowsSuffix(
+                                   isRethrows: throwsClause!.throwsSpecifier.text == String.rethrows,
+                                   type: throwsClause!.type?.description
+                               ) : nil,
+                           asyncOrReasync: asyncSpecifier != nil ? FunctionAsyncSuffix(
+                            isReasync: asyncSpecifier!.text == String.rethrows
+                           ) : nil,
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,

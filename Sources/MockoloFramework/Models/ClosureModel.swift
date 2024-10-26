@@ -24,14 +24,14 @@ final class ClosureModel: Model {
     let genericTypeNames: [String]
     let paramNames: [String]
     let paramTypes: [SwiftType]
-    let suffix: String
+    let suffix: FunctionSuffixClause?
 
     var modelType: ModelType {
         return .closure
     }
 
     
-    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], suffix: String, returnType: SwiftType, encloser: String) {
+    init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], suffix: FunctionSuffixClause?, returnType: SwiftType, encloser: String) {
         self.name = name + .handlerSuffix
         self.suffix = suffix
         let genericTypeNameList = genericTypeParams.map(\.name)

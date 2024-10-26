@@ -195,7 +195,7 @@ extension NominalModel {
                 let genericTypeDeclsStr = m.genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
                 let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
                 let paramDeclsStr = m.params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
-                let suffixStr = m.suffix.isEmpty ? "" : "\(m.suffix) "
+                let suffixStr = m.suffix == nil ? "" : "\(m.suffix!.applyFunctionSuffixTemplate(forClosureTemplate: false)) "
 
                 if override {
                     let paramsList = m.params.map { param in

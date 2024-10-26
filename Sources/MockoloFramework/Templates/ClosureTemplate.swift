@@ -22,7 +22,7 @@ extension ClosureModel {
                               genericTypeNames: [String],
                               paramVals: [String]?,
                               paramTypes: [SwiftType]?,
-                              suffix: String,
+                              suffix: FunctionSuffixClause?,
                               returnDefaultType: SwiftType) -> String {
         
         var handlerParamValsStr = ""
@@ -46,8 +46,8 @@ extension ClosureModel {
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
         
         let prefix = [
-            suffix.hasThrowsOrRethrows ? String.try + " " : nil,
-            suffix.hasAsync ? String.await + " " : nil,
+            suffix?.throwsSuffix != nil ? String.try + " " : nil,
+            suffix?.asyncSuffix != nil ? String.await + " " : nil,
         ].compactMap { $0 }.joined()
         
         let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "

@@ -4,7 +4,7 @@ final class ArgumentsHistoryModel: Model {
     var name: String
     var type: SwiftType
     var offset: Int64 = .max
-    let suffix: String
+    let suffix: FunctionSuffixClause?
     let capturableParamNames: [String]
     let capturableParamTypes: [SwiftType]
     let isHistoryAnnotated: Bool
@@ -13,7 +13,7 @@ final class ArgumentsHistoryModel: Model {
         return .argumentsHistory
     }
 
-    init?(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: String) {
+    init?(name: String, genericTypeParams: [ParamModel], params: [ParamModel], isHistoryAnnotated: Bool, suffix: FunctionSuffixClause?) {
         // Value contains closure is not supported.
         let capturables = params.filter { !$0.type.hasClosure && !$0.type.isEscaping && !$0.type.isAutoclosure }
         guard !capturables.isEmpty else {
