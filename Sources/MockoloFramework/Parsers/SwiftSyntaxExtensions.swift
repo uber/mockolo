@@ -380,11 +380,7 @@ extension VariableDeclSyntax {
                             getterEffects.isAsync = true
                         }
                         if let `throws` = getterDecl.effectSpecifiers?.throwsClause {
-                            if let throwsType = `throws`.type {
-                                getterEffects.throwing = .typed(errorType: throwsType.trimmedDescription)
-                            } else {
-                                getterEffects.throwing = .any
-                            }
+                            getterEffects.throwing = .init(`throws`)
                         }
                         if getterEffects == .empty {
                             storageType = .stored(needsSetCount: false)
