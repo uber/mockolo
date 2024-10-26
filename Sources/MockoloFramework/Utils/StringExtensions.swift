@@ -32,7 +32,6 @@ extension String {
     static let `throws` = "throws"
     static let `rethrows` = "rethrows"
     static let async = "async"
-    static let reasync = "reasync"
     static let await = "await"
     static let `inout` = "inout"
     static let hasBlankInit = "_hasBlankInit"
