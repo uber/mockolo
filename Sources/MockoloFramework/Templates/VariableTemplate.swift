@@ -48,7 +48,6 @@ extension VariableModel {
         }
 
         let privateSetSpace = allowSetCallCount ? "" :  "\(String.privateSet) "
-        let setCallCountStmt = "\(underlyingSetCallCount) += 1"
 
         let modifierTypeStr: String
         if let customModifiers = self.customModifiers,
@@ -58,27 +57,79 @@ extension VariableModel {
             modifierTypeStr = ""
         }
 
-        var template = ""
-        if isStatic || underlyingVarDefaultVal == nil {
-            let staticSpace = isStatic ? "\(String.static) " : ""
-            template = """
+        let staticSpace = isStatic ? "\(String.static) " : ""
 
+        switch storageType {
+        case .stored(let needSetCount):
+            let setCallCountVarDecl = needSetCount ? """
             \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal) { didSet { \(setCallCountStmt) } }
+            """ : ""
+
+            var accessorBlockItems: [String] = []
+            if needSetCount {
+                let didSetBlock = """
+                didSet { \(underlyingSetCallCount) += 1 }
+                """
+                accessorBlockItems.append(didSetBlock)
+            }
+
+            let accessorBlock: String
+            switch accessorBlockItems.count {
+            case 0: accessorBlock = ""
+            case 1: accessorBlock = " { \(accessorBlockItems[0]) }"
+            default: accessorBlock = """
+                 {
+                \(accessorBlockItems.map { "\(2.tab)\($0)" }.joined(separator: "\n"))
+                \(1.tab)}
+                """
+            }
+
+            let template: String
+            if underlyingVarDefaultVal == nil {
+                template = """
+                
+                \(setCallCountVarDecl)
+                \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal)\(accessorBlock)
+                \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
+                \(2.tab)get { return \(underlyingName) }
+                \(2.tab)set { \(underlyingName) = newValue }
+                \(1.tab)}
+                """
+            } else {
+                template = """
+                
+                \(setCallCountVarDecl)
+                \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
+                """
+            }
+
+            return template
+
+        case .computed(let effects):
+            let body = (ClosureModel(
+                name: "",
+                genericTypeParams: [],
+                paramNames: [],
+                paramTypes: [],
+                isAsync: effects.isAsync,
+                throwing: effects.throwing,
+                returnType: type,
+                encloser: ""
+            ).render(with: name, encloser: "") ?? "")
+                .split(separator: "\n")
+                .map { "\(1.tab)\($0)" }
+                .joined(separator: "\n")
+
+            return """
+
+            \(1.tab)\(acl)\(staticSpace)var \(name)\(String.handlerSuffix): (() \(effects.syntax)-> \(type.typeName))?
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
-            \(2.tab)get { return \(underlyingName) }
-            \(2.tab)set { \(underlyingName) = newValue }
+            \(2.tab)get \(effects.syntax){
+            \(body)
+            \(2.tab)}
             \(1.tab)}
             """
-        } else {
-            template = """
-
-            \(1.tab)\(acl)\(privateSetSpace)var \(underlyingSetCallCount) = 0
-            \(1.tab)\(propertyWrapper)\(acl)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal) { didSet { \(setCallCountStmt) } }
-            """
         }
-
-        return template
     }
 
     func applyCombineVariableTemplate(name: String,
@@ -304,4 +355,33 @@ extension VariableModel {
     }
 }
 
+extension VariableModel.GetterEffects {
+    fileprivate var syntax: String {
+        var clauses: [String] = []
+        if isAsync {
+            clauses.append(.async)
+        }
+        switch throwing {
+        case .none:
+            break
+        case .any:
+            clauses.append(.throws)
+        case .rethrows:
+            clauses.append(.rethrows)
+        case .typed(let errorType):
+            clauses.append("\(String.throws)(\(errorType))")
+        }
+        return clauses.map { "\($0) " }.joined()
+    }
 
+    fileprivate var callerMarkers: String {
+        var clauses: [String] = []
+        if throwing.hasError {
+            clauses.append(.try)
+        }
+        if isAsync {
+            clauses.append(.await)
+        }
+        return clauses.map { "\($0) " }.joined()
+    }
+}

@@ -511,9 +511,15 @@ public final class SwiftType {
         return mutableArg
     }
 
-    static func toClosureType(with params: [SwiftType], typeParams: [String], suffix: FunctionSuffixClause?, returnType: SwiftType, encloser: String) -> SwiftType {
 
-
+    static func toClosureType(
+        params: [SwiftType],
+        typeParams: [String],
+        isAsync: Bool,
+        throwing: ThrowingKind,
+        returnType: SwiftType,
+        encloser: String
+    ) -> SwiftType {
         let displayableParamTypes = params.map { (subtype: SwiftType) -> String in
             return subtype.processTypeParams(with: typeParams)
         }
@@ -558,7 +564,10 @@ public final class SwiftType {
             displayableReturnType = "(\(displayableReturnType))"
         }
 
-        let suffixStr = suffix != nil ? "\(suffix!.applyFunctionSuffixTemplate(forClosureTemplate: true)) " : ""
+        let suffixStr = [
+            isAsync ? String.async + " " : nil,
+            throwing.hasError ? String.throws + " " : nil,
+        ].compactMap { $0 }.joined()
 
         let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
         return SwiftType(typeStr, cast: returnTypeCast)

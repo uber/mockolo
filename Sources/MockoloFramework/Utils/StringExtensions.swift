@@ -49,6 +49,7 @@ extension String {
     static let unknownVal = "Unknown"
     static let prefix = "prefix"
     static let anyType = "Any"
+    static let neverType = "Never"
     static let any = "any"
     static let some = "some"
     static let anyObject = "AnyObject"

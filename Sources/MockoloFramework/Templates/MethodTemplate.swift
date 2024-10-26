@@ -31,7 +31,6 @@ extension MethodModel {
                              params: [ParamModel],
                              returnType: SwiftType,
                              accessLevel: String,
-                             suffix: FunctionSuffixClause?,
                              argsHistory: ArgumentsHistoryModel?,
                              handler: ClosureModel?) -> String {
         var template = ""
@@ -59,14 +58,17 @@ extension MethodModel {
             let handlerVarType = handler.type.typeName // ?? "Any"
             let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
 
-            let suffixStr = suffix == nil ? "" : "\(suffix!.applyFunctionSuffixTemplate(forClosureTemplate: false)) "
+            let suffixStr = [
+                isAsync ? String.async : nil,
+                throwing.syntax,
+            ].compactMap { $0 }.joined(separator: " ") + " "
             let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
             let staticStr = isStatic ? String.static + " " : ""
             let keyword = isSubscript ? "" : "func "
             var body = ""
 
             if useTemplateFunc {
-                let callMockFunc = suffix?.throwsSuffix == nil && (handler.type.cast?.isEmpty ?? false)
+                let callMockFunc = !throwing.hasError && (handler.type.cast?.isEmpty ?? false)
                 if callMockFunc {
                     let handlerParamValsStr = params.map { (arg) -> String in
                         if arg.type.typeName.hasPrefix(String.autoclosure) {

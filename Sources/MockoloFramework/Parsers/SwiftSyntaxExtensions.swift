@@ -368,11 +368,48 @@ extension VariableDeclSyntax {
                 typeName = vtype
             }
 
+            let storageType: VariableModel.MockStorageType
+            switch v.accessorBlock?.accessors {
+            case .accessors(let accessorDecls):
+                if accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
+                    storageType = .stored(needsSetCount: true)
+                } else if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
+                    if getterDecl.body == nil { // is protoccol
+                        var getterEffects = VariableModel.GetterEffects.empty
+                        if getterDecl.effectSpecifiers?.asyncSpecifier != nil {
+                            getterEffects.isAsync = true
+                        }
+                        if let `throws` = getterDecl.effectSpecifiers?.throwsClause {
+                            if let throwsType = `throws`.type {
+                                getterEffects.throwing = .typed(errorType: throwsType.trimmedDescription)
+                            } else {
+                                getterEffects.throwing = .any
+                            }
+                        }
+                        if getterEffects == .empty {
+                            storageType = .stored(needsSetCount: false)
+                        } else {
+                            storageType = .computed(getterEffects)
+                        }
+                    } else { // is class
+                        storageType = .computed(.empty)
+                    }
+                } else {
+                    // will never happens
+                    storageType = .stored(needsSetCount: false) // fallback
+                }
+            case .getter:
+                storageType = .computed(.empty)
+            case nil:
+                storageType = .stored(needsSetCount: true)
+            }
+
             let varmodel = VariableModel(name: name,
                                          typeName: typeName,
                                          acl: acl,
                                          encloserType: declType,
                                          isStatic: isStatic,
+                                         storageType: storageType,
                                          canBeInitParam: potentialInitParam,
                                          offset: v.offset,
                                          rxTypes: metadata?.varTypes,
@@ -402,8 +439,8 @@ extension SubscriptDeclSyntax {
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
                                          params: params,
-                                         throwsOrRethrows: nil,
-                                         asyncOrReasync: nil,
+                                         isAsync: false,
+                                         throwing: .none,
                                          isStatic: isStatic,
                                          offset: self.offset,
                                          length: self.length,
@@ -423,33 +460,24 @@ extension FunctionDeclSyntax {
         let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: false, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
-        let asyncSpecifier = self.signature.effectSpecifiers?.asyncSpecifier
-        let throwsClause = self.signature.effectSpecifiers?.throwsClause
 
-        let funcmodel = MethodModel(
-            name: self.name.description,
-            typeName: self.signature.returnClause?.type.description ?? "",
-            kind: .funcKind,
-            encloserType: declType,
-            acl: acl,
-            genericTypeParams: genericTypeParams,
-            genericWhereClause: genericWhereClause,
-            params: params,
-            throwsOrRethrows: throwsClause != nil ? FunctionThrowsSuffix(
-                    isRethrows: throwsClause!.throwsSpecifier.text == String.rethrows,
-                    type: throwsClause!.type?.description
-                ) : nil,
-            asyncOrReasync: asyncSpecifier != nil ? FunctionAsyncSuffix(
-                isReasync: asyncSpecifier!.text == String.rethrows
-            ) : nil,
-            isStatic: isStatic,
-            offset: self.offset,
-            length: self.length,
-            funcsWithArgsHistory: funcsWithArgsHistory ?? [],
-            customModifiers: customModifiers ?? [:],
-            modelDescription: self.description,
-            processed: processed
-        )
+        let funcmodel = MethodModel(name: self.name.description,
+                                    typeName: self.signature.returnClause?.type.description ?? "",
+                                    kind: .funcKind,
+                                    encloserType: declType,
+                                    acl: acl,
+                                    genericTypeParams: genericTypeParams,
+                                    genericWhereClause: genericWhereClause,
+                                    params: params,
+                                    isAsync: self.signature.effectSpecifiers?.asyncSpecifier != nil,
+                                    throwing: .init(self.signature.effectSpecifiers?.throwsClause),
+                                    isStatic: isStatic,
+                                    offset: self.offset,
+                                    length: self.length,
+                                    funcsWithArgsHistory: funcsWithArgsHistory ?? [],
+                                    customModifiers: customModifiers ?? [:],
+                                    modelDescription: self.description,
+                                    processed: processed)
         return funcmodel
     }
 }
@@ -473,8 +501,6 @@ extension InitializerDeclSyntax {
         let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: true, declType: declType) }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: true) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
-        let asyncSpecifier = self.signature.effectSpecifiers?.asyncSpecifier
-        let throwsClause = self.signature.effectSpecifiers?.throwsClause
 
         return MethodModel(name: "init",
                            typeName: "",
@@ -484,14 +510,8 @@ extension InitializerDeclSyntax {
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,
                            params: params,
-                           throwsOrRethrows: throwsClause != nil ?
-                           FunctionThrowsSuffix(
-                                   isRethrows: throwsClause!.throwsSpecifier.text == String.rethrows,
-                                   type: throwsClause!.type?.description
-                               ) : nil,
-                           asyncOrReasync: asyncSpecifier != nil ? FunctionAsyncSuffix(
-                            isReasync: asyncSpecifier!.text == String.rethrows
-                           ) : nil,
+                           isAsync: self.signature.effectSpecifiers?.asyncSpecifier != nil,
+                           throwing: .init(self.signature.effectSpecifiers?.throwsClause),
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
@@ -811,5 +831,23 @@ extension Trivia {
             }
         }
         return nil
+    }
+}
+
+extension ThrowingKind {
+    fileprivate init(_ syntax: ThrowsClauseSyntax?) {
+        guard let syntax else {
+            self = .none
+            return
+        }
+        if syntax.throwsSpecifier.tokenKind == .keyword(.rethrows) {
+            self = .rethrows
+        } else {
+            if let type = syntax.type {
+                self = .typed(errorType: type.trimmedDescription)
+            } else {
+                self = .any
+            }
+        }
     }
 }

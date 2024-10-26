@@ -38,7 +38,8 @@ final class MethodModel: Model {
     var modelDescription: String? = nil
     var isStatic: Bool
     let shouldOverride: Bool
-    let suffix: FunctionSuffixClause?
+    let isAsync: Bool
+    let throwing: ThrowingKind
     let kind: MethodKind
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
@@ -134,8 +135,7 @@ final class MethodModel: Model {
         let ret = ArgumentsHistoryModel(name: name,
                                         genericTypeParams: genericTypeParams,
                                         params: params,
-                                        isHistoryAnnotated: funcsWithArgsHistory.contains(name),
-                                        suffix: suffix)
+                                        isHistoryAnnotated: funcsWithArgsHistory.contains(name))
 
         return ret
     }()
@@ -151,7 +151,8 @@ final class MethodModel: Model {
                                genericTypeParams: genericTypeParams,
                                paramNames: paramNames,
                                paramTypes: paramTypes,
-                               suffix: suffix,
+                               isAsync: isAsync,
+                               throwing: throwing,
                                returnType: type,
                                encloser: encloser)
 
@@ -167,8 +168,8 @@ final class MethodModel: Model {
          genericTypeParams: [ParamModel],
          genericWhereClause: String?,
          params: [ParamModel],
-         throwsOrRethrows: FunctionThrowsSuffix?,
-         asyncOrReasync: FunctionAsyncSuffix?,
+         isAsync: Bool,
+         throwing: ThrowingKind,
          isStatic: Bool,
          offset: Int64,
          length: Int64,
@@ -178,10 +179,8 @@ final class MethodModel: Model {
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
         self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
-        self.suffix = FunctionSuffixClause(
-            throwsSuffix: throwsOrRethrows,
-            asyncSuffix: asyncOrReasync
-        )
+        self.isAsync = isAsync
+        self.throwing = throwing
         self.offset = offset
         self.length = length
         self.kind = kind
@@ -240,44 +239,8 @@ final class MethodModel: Model {
                                          params: params,
                                          returnType: type,
                                          accessLevel: accessLevel,
-                                         suffix: suffix,
                                          argsHistory: argsHistory,
                                          handler: handler(encloser: encloser))
         return result
-    }
-}
-
-/// throws, rethrows
-///
-/// if throws clause has a type information, the associated value `type` is not `nil`.
-struct FunctionThrowsSuffix {
-    let isRethrows: Bool
-    let type: String?
-}
-
-/// async, reasync
-struct FunctionAsyncSuffix {
-    var isReasync: Bool
-
-    var text: String {
-        isReasync ? String.reasync : String.async
-    }
-}
-
-/// Function Suffix Clause such as async / throws.
-///
-/// Since the support of typed throw, it is necessary to prepare a type that represents suffix in place of String type
-/// due to the swift syntax's complexity.
-struct FunctionSuffixClause {
-    var throwsSuffix: FunctionThrowsSuffix?
-    var asyncSuffix: FunctionAsyncSuffix?
-
-
-    init?(throwsSuffix: FunctionThrowsSuffix? = nil, asyncSuffix: FunctionAsyncSuffix? = nil) {
-        if throwsSuffix == nil, asyncSuffix == nil {
-            return nil
-        }
-        self.throwsSuffix = throwsSuffix
-        self.asyncSuffix = asyncSuffix
     }
 }

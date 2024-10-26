@@ -23,4 +23,14 @@ class VarTests: MockoloTestCase {
                dstContent: simpleVarsAllowCallCountMock,
                allowSetCallCount: true)
     }
+
+    func testAsyncThrows() {
+        verify(srcContent: asyncThrowsVars,
+               dstContent: asyncThrowsVarsMock)
+    }
+
+    func testThrowsNever() {
+        verify(srcContent: throwsNeverVars,
+               dstContent: throwsNeverVarsMock)
+    }
 }

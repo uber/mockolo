@@ -1,6 +1,17 @@
 import Foundation
 
 final class VariableModel: Model {
+    struct GetterEffects: Equatable {
+        var isAsync: Bool
+        var throwing: ThrowingKind
+        static let empty: GetterEffects = .init(isAsync: false, throwing: .none)
+    }
+
+    enum MockStorageType {
+        case stored(needsSetCount: Bool)
+        case computed(GetterEffects)
+    }
+
     var name: String
     var type: SwiftType
     var offset: Int64
@@ -13,6 +24,7 @@ final class VariableModel: Model {
     var filePath: String = ""
     var isStatic = false
     var shouldOverride = false
+    let storageType: MockStorageType
     var rxTypes: [String: String]?
     var customModifiers: [String: Modifier]?
     var modelDescription: String? = nil
@@ -29,7 +41,7 @@ final class VariableModel: Model {
     }
 
     var underlyingName: String {
-        if isStatic || type.defaultVal() == nil {
+        if type.defaultVal() == nil {
             return "_\(name)"
         }
         return name
@@ -40,6 +52,7 @@ final class VariableModel: Model {
          acl: String?,
          encloserType: DeclType,
          isStatic: Bool,
+         storageType: MockStorageType,
          canBeInitParam: Bool,
          offset: Int64,
          rxTypes: [String: String]?,
@@ -51,6 +64,7 @@ final class VariableModel: Model {
         self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         self.offset = offset
         self.isStatic = isStatic
+        self.storageType = storageType
         self.shouldOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed
