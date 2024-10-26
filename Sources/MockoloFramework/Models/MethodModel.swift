@@ -262,10 +262,6 @@ struct FunctionAsyncSuffix {
     var text: String {
         isReasync ? String.reasync : String.async
     }
-
-    var description: String {
-        text
-    }
 }
 
 /// Function Suffix Clause such as async / throws.

@@ -587,17 +587,6 @@ extension TypeAliasDeclSyntax {
     }
 }
 
-extension ThrowsClauseSyntax {
-
-    var text: String {
-        if let type {
-            "\(throwsSpecifier.text)(\(type))"
-        } else {
-            throwsSpecifier.text
-        }
-    }
-}
-
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
     var imports: [String: [String]] = [:]
