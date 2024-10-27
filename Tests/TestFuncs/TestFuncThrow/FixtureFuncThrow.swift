@@ -1,16 +1,6 @@
 import MockoloFramework
 
 
-let funcThrow2 = """
-import Foundation
-
-/// \(String.mockAnnotation)
-protocol FuncThrow {
-func update<T>(arg1: T, arg2: () throws -> T) rethrows -> T
-func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
-}
-"""
-
 let funcThrow = """
 import Foundation
 
@@ -18,10 +8,15 @@ import Foundation
 protocol FuncThrow {
     func f1(arg: Int) throws -> String
     func f2(arg: Int) throws
+    func f3(arg: Int) throws(SomeError)
+    func f4(arg: Int) throws(SomeError) -> String
+    func f5() throws (MyError)
+    func f6() async throws (any Error)
     func g1(arg: (Int) throws -> ())
                 throws -> String
     func g2(arg: (Int) throws -> ()) throws
     func h(arg: (Int) throws -> ()) rethrows -> String
+    func h2(arg: (Int) throws(SomeError) -> ()) rethrows -> String
     func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
     func update<T>(arg1: T, arg2: () throws -> T) rethrows -> T
 }
@@ -29,7 +24,6 @@ protocol FuncThrow {
 
 let funcThrowMock =
 """
-
 import Foundation
 
 
@@ -53,6 +47,46 @@ class FuncThrowMock: FuncThrow {
         f2CallCount += 1
         if let f2Handler = f2Handler {
             try f2Handler(arg)
+        }
+        
+    }
+
+    private(set) var f3CallCount = 0
+    var f3Handler: ((Int) throws(SomeError) -> ())?
+    func f3(arg: Int) throws(SomeError)  {
+        f3CallCount += 1
+        if let f3Handler = f3Handler {
+            try f3Handler(arg)
+        }
+        
+    }
+
+    private(set) var f4CallCount = 0
+    var f4Handler: ((Int) throws(SomeError) -> (String))?
+    func f4(arg: Int) throws(SomeError) -> String {
+        f4CallCount += 1
+        if let f4Handler = f4Handler {
+            return try f4Handler(arg)
+        }
+        return ""
+    }
+
+    private(set) var f5CallCount = 0
+    var f5Handler: (() throws(MyError) -> ())?
+    func f5() throws(MyError)  {
+        f5CallCount += 1
+        if let f5Handler = f5Handler {
+            try f5Handler()
+        }
+        
+    }
+
+    private(set) var f6CallCount = 0
+    var f6Handler: (() async throws(any Error) -> ())?
+    func f6() async throws(any Error)  {
+        f6CallCount += 1
+        if let f6Handler = f6Handler {
+            try await f6Handler()
         }
         
     }
@@ -83,6 +117,16 @@ class FuncThrowMock: FuncThrow {
         hCallCount += 1
         if let hHandler = hHandler {
             return try hHandler(arg)
+        }
+        return ""
+    }
+
+    private(set) var h2CallCount = 0
+    var h2Handler: (((Int) throws(SomeError) -> ()) throws -> (String))?
+    func h2(arg: (Int) throws(SomeError) -> ()) rethrows -> String {
+        h2CallCount += 1
+        if let h2Handler = h2Handler {
+            return try h2Handler(arg)
         }
         return ""
     }
