@@ -32,6 +32,8 @@ final class ClosureModel: Model {
     }
     
     init(name: String, genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType, encloser: String) {
+        // In the mock's call handler, rethrows is unavailable.
+        let throwing = throwing.coerceRethrowsToThrows
         self.name = name + .handlerSuffix
         self.isAsync = isAsync
         self.throwing = throwing

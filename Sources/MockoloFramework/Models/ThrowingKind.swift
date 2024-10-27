@@ -33,3 +33,13 @@ enum ThrowingKind: Equatable {
         }
     }
 }
+
+extension ThrowingKind {
+    /// Replace rethrows with throws.
+    var coerceRethrowsToThrows: ThrowingKind {
+        if case .rethrows = self {
+            return .any
+        }
+        return self
+    }
+}
