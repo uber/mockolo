@@ -16,6 +16,7 @@ protocol FuncThrow {
                 throws -> String
     func g2(arg: (Int) throws -> ()) throws
     func h(arg: (Int) throws -> ()) rethrows -> String
+    func h2(arg: (Int) throws(SomeError) -> ()) rethrows -> String
     func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U))
     func update<T>(arg1: T, arg2: () throws -> T) rethrows -> T
 }
@@ -116,6 +117,16 @@ class FuncThrowMock: FuncThrow {
         hCallCount += 1
         if let hHandler = hHandler {
             return try hHandler(arg)
+        }
+        return ""
+    }
+
+    private(set) var h2CallCount = 0
+    var h2Handler: (((Int) throws(SomeError) -> ()) throws -> (String))?
+    func h2(arg: (Int) throws(SomeError) -> ()) rethrows -> String {
+        h2CallCount += 1
+        if let h2Handler = h2Handler {
+            return try h2Handler(arg)
         }
         return ""
     }
