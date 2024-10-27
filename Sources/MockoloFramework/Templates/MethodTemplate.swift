@@ -58,10 +58,10 @@ extension MethodModel {
             let handlerVarType = handler.type.typeName // ?? "Any"
             let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
 
-            let suffixStr = [
-                isAsync ? String.async : nil,
-                throwing.applyThrowingTemplate(),
-            ].compactMap { $0 }.joined(separator: " ") + " "
+            let suffixStr = applyFunctionSuffixTemplate(
+                isAsync: isAsync,
+                throwing: throwing
+            )
             let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName)"
             let staticStr = isStatic ? String.static + " " : ""
             let keyword = isSubscript ? "" : "func "
