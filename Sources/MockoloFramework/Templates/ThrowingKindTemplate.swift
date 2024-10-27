@@ -15,10 +15,10 @@
 //
 
 extension ThrowingKind {
-    func applyThrowingTemplate() -> String {
+    func applyThrowingTemplate() -> String? {
         switch self {
         case .none:
-            return ""
+            return nil
         case .any:
             return .throws
         case .rethrows:

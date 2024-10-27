@@ -361,8 +361,8 @@ extension VariableModel.GetterEffects {
         if isAsync {
             clauses.append(.async)
         }
-        if throwing.applyThrowingTemplate().isNotEmpty {
-            clauses.append(throwing.applyThrowingTemplate())
+        if let throwSyntax = throwing.applyThrowingTemplate() {
+            clauses.append(throwSyntax)
         }
         return clauses.map { "\($0) " }.joined()
     }
