@@ -363,8 +363,8 @@ public final class SwiftType {
             return cachedDefaultVal
         }
 
-        // There is no "existential any" to the customTypeMap key.
-        if let val = SwiftType.customTypeMap?[typeName.removingExistentialAny] {
+        // There is no "existential any" to the customDefaultValueMap key.
+        if let val = SwiftType.customDefaultValueMap?[typeName.removingExistentialAny] {
             cachedDefaultVal = val
             return val
         }
@@ -466,7 +466,7 @@ public final class SwiftType {
             return "\(arg.typeName)()"
         }
 
-        if let val = SwiftType.defaultTypeValueMap[arg.typeName] {
+        if let val = SwiftType.defaultValueMap[arg.typeName] {
             return val
         }
         return nil
@@ -640,7 +640,7 @@ public final class SwiftType {
         }
     }
 
-    public static var customTypeMap: [String: String]?
+    public static var customDefaultValueMap: [String: String]?
 
     private let bracketPrefixTypes = ["Array", "Set", "Dictionary"]
     private let rxTypes = [String.publishSubject : "()",
@@ -656,7 +656,7 @@ public final class SwiftType {
     }
 
 
-    private static let defaultTypeValueMap =
+    private static let defaultValueMap =
         ["Int": "0",
          "Int8": "0",
          "Int16": "0",
