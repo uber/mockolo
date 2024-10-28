@@ -85,6 +85,7 @@ struct ResolvedEntityContainer {
 
 protocol EntityNode {
     var nameText: String { get }
+    var mayHaveGlobalActor: Bool { get }
     var accessLevel: String { get }
     var attributesDescription: String { get }
     var declType: DeclType { get }

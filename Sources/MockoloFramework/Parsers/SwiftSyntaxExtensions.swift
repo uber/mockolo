@@ -263,6 +263,10 @@ extension ProtocolDeclSyntax: EntityNode {
         return name.text
     }
 
+    var mayHaveGlobalActor: Bool {
+        return attributes.mayHaveGlobalActor
+    }
+
     var accessLevel: String {
         return self.modifiers.acl 
     }
@@ -304,6 +308,10 @@ extension ClassDeclSyntax: EntityNode {
 
     var nameText: String {
         return name.text
+    }
+
+    var mayHaveGlobalActor: Bool {
+        return attributes.mayHaveGlobalActor
     }
 
     var accessLevel: String {
@@ -348,6 +356,25 @@ extension ClassDeclSyntax: EntityNode {
 
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.memberBlock.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
+    }
+}
+
+extension AttributeListSyntax {
+    fileprivate var mayHaveGlobalActor: Bool {
+        let wellKnownGlobalActor: Set<String> = [.mainActor]
+        return self.contains { element in
+            switch element {
+            case .attribute(let attribute):
+                return wellKnownGlobalActor.contains(attribute.attributeName.trimmedDescription)
+            case .ifConfigDecl(let ifConfig):
+                return ifConfig.clauses.contains { clause in
+                    if case .attributes(let attributes) = clause.elements {
+                        return attributes.mayHaveGlobalActor
+                    }
+                    return false
+                }
+            }
+        }
     }
 }
 

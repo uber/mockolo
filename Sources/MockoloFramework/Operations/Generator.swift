@@ -108,10 +108,13 @@ public func generate(sourceDirs: [String],
     log("Took", t2-t1, level: .verbose)
     
     let typeKeyList = [
-        parentMocks.compactMap {
-            $0.key.components(separatedBy: "Mock").first
+        parentMocks.compactMap { (key, value) -> String? in
+            if value.entityNode.mayHaveGlobalActor {
+                return nil
+            }
+            return key.components(separatedBy: "Mock").first
         },
-        annotatedProtocolMap.map(\.key)
+        annotatedProtocolMap.filter { !$0.value.entityNode.mayHaveGlobalActor }.map(\.key)
     ]
         .flatMap { $0 }
         .map { typeName in

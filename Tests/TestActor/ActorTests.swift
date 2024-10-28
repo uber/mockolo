@@ -8,4 +8,9 @@ final class ActorTests: MockoloTestCase {
         verify(srcContent: parentProtocolInheritsActor,
                dstContent: parentProtocolInheritsActorMock)
     }
+
+    func testGlobalActorProtocol() {
+        verify(srcContent: globalActorProtocol,
+               dstContent: globalActorProtocolMock)
+    }
 }
