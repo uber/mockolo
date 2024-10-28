@@ -5,4 +5,9 @@ class ExistentialAnyTests: MockoloTestCase {
         verify(srcContent: existentialAny,
                dstContent: existentialAnyMock)
     }
+
+    func testExistentialAnyDefaultTypeMap() {
+        verify(srcContent: existentialAnyDefaultTypeMap,
+               dstContent: existentialAnyDefaultTypeMapMock)
+    }
 }

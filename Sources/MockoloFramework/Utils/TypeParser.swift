@@ -364,7 +364,8 @@ public final class SwiftType {
             return cachedDefaultVal
         }
 
-        if let val = SwiftType.customTypeMap?[typeName] {
+        // There is no "existential any" to the customTypeMap key.
+        if let val = SwiftType.customTypeMap?[typeName.removingExistentialAny] {
             cachedDefaultVal = val
             return val
         }

@@ -45,3 +45,37 @@ class ExistentialAnyMock: ExistentialAny {
     }
 }
 """
+
+let existentialAnyDefaultTypeMap = """
+/// \(String.mockAnnotation)
+protocol SomeProtocol {
+}
+
+/// \(String.mockAnnotation)
+protocol UseSomeProtocol {
+    func foo() -> any SomeProtocol
+}
+"""
+
+let existentialAnyDefaultTypeMapMock = """
+class SomeProtocolMock: SomeProtocol {
+    init() { }
+
+
+}
+
+class UseSomeProtocolMock: UseSomeProtocol {
+    init() { }
+
+
+    private(set) var fooCallCount = 0
+    var fooHandler: (()  -> (any SomeProtocol))?
+    func foo()  -> any SomeProtocol {
+        fooCallCount += 1
+        if let fooHandler = fooHandler {
+            return fooHandler()
+        }
+        return SomeProtocolMock() 
+    }
+}
+"""

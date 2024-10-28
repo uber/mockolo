@@ -64,15 +64,14 @@ extension ClosureModel {
     private func renderReturnDefaultStatement(name: String, type: SwiftType) -> String {
         guard !type.isUnknown else { return "" }
         
-        let result = type.defaultVal() ?? String.fatalError
-        
-        if result.isEmpty {
-            return ""
+        if let result = type.defaultVal() {
+            if result.isEmpty {
+                return ""
+            }
+            return  "return \(result)"
         }
-        if result.contains(String.fatalError) {
-            return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-        }
-        return  "return \(result)"
+
+        return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
     }
 
     private func renderOptionalGenericClosure(

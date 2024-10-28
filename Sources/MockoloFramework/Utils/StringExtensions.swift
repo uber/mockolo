@@ -120,6 +120,15 @@ extension String {
         return self
     }
 
+    var removingExistentialAny: String {
+        var typeName = self
+        if typeName.hasPrefix(.any) {
+            typeName.removeFirst(String.any.count)
+            typeName = typeName.trimmingCharacters(in: .whitespaces)
+        }
+        return typeName
+    }
+
     var withSpace: String {
         return "\(self) "
     }

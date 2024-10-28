@@ -107,12 +107,18 @@ public func generate(sourceDirs: [String],
     let t2 = CFAbsoluteTimeGetCurrent()
     log("Took", t2-t1, level: .verbose)
     
-    let typeKeyList = [parentMocks.compactMap {$0.key.components(separatedBy: "Mock").first}, annotatedProtocolMap.map {$0.key}].flatMap{$0}
-    var typeKeys = [String: String]()
-    typeKeyList.forEach { (t: String) in
-        typeKeys[t] = "\(t)Mock()"
-    }
-    SwiftType.customTypeMap = typeKeys
+    let typeKeyList = [
+        parentMocks.compactMap {
+            $0.key.components(separatedBy: "Mock").first
+        },
+        annotatedProtocolMap.map(\.key)
+    ]
+        .flatMap { $0 }
+        .map { typeName in
+            // nameOverride does not work correctly but it giving up.
+            return (typeName, "\(typeName)Mock()")
+        }
+    SwiftType.customTypeMap = [String: String](typeKeyList, uniquingKeysWith: { $1 })
 
     signpost_begin(name: "Generate models")
     log("Resolve inheritance and generate unique entity models...", level: .info)
