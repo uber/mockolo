@@ -9,10 +9,19 @@ let nestedProtocol = """
 
     weak var delegate: Delegate? 
 }
+
+extension AAA {
+    actor BBB {
+        /// \(String.mockAnnotation)
+        protocol CCC {
+        }
+    }
+}
 """
 
 let nestedProtocolMock = """
 extension FooView {
+    
     class DelegateMock: Delegate {
         init() { }
 
@@ -26,6 +35,14 @@ extension FooView {
             }
             
         }
+    }
+}
+extension AAA.BBB {
+    
+    class CCCMock: CCC {
+        init() { }
+    
+    
     }
 }
 """

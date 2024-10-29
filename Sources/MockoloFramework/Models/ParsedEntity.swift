@@ -64,6 +64,7 @@ struct ResolvedEntity {
 
     func model() -> Model {
         return NominalModel(identifier: key,
+                            namespaces: entity.entityNode.namespaces,
                             acl: entity.entityNode.accessLevel,
                             declTypeOfMockAnnotatedBaseType: entity.entityNode.declType,
                             declKind: inheritsActorProtocol ? .actor : .class,
@@ -84,6 +85,7 @@ struct ResolvedEntityContainer {
 }
 
 protocol EntityNode {
+    var namespaces: [String] { get }
     var nameText: String { get }
     var accessLevel: String { get }
     var attributesDescription: String { get }

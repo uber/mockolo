@@ -190,6 +190,17 @@ extension String {
         guard self.hasPrefix(prefix) else { return self }
         return String(self.dropFirst(prefix.count))
     }
+
+    func addingIndent(_ tabs: Int) -> String {
+        self.split(separator: "\n")
+            .map { line in
+                if line.isEmpty {
+                    return ""
+                }
+                return "\(tabs.tab)\(line)"
+            }
+            .joined(separator: "\n")
+    }
 }
 
 let separatorsForDisplay = CharacterSet(charactersIn: "<>[] :,()_-.&@#!{}@+\"\'")

@@ -259,6 +259,10 @@ extension IfConfigDeclSyntax {
 }
 
 extension ProtocolDeclSyntax: EntityNode {
+    var namespaces: [String] {
+        return findNamespaces(parent: parent)
+    }
+
     var nameText: String {
         return name.text
     }
@@ -301,6 +305,9 @@ extension ProtocolDeclSyntax: EntityNode {
 }
 
 extension ClassDeclSyntax: EntityNode {
+    var namespaces: [String] {
+        return findNamespaces(parent: parent)
+    }
 
     var nameText: String {
         return name.text
@@ -349,6 +356,29 @@ extension ClassDeclSyntax: EntityNode {
     func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.memberBlock.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
     }
+}
+
+fileprivate func findNamespaces(parent: Syntax?) -> [String] {
+    guard let parent else {
+        return []
+    }
+    return sequence(first: parent, next: \.parent)
+        .reversed()
+        .compactMap { element in
+            if let decl = element.as(StructDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(EnumDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(ClassDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(ActorDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(ExtensionDeclSyntax.self) {
+                return decl.extendedType.trimmedDescription
+            } else {
+                return nil
+            }
+        }
 }
 
 extension VariableDeclSyntax {
