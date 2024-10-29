@@ -363,7 +363,6 @@ fileprivate func findNamespaces(parent: Syntax?) -> [String] {
         return []
     }
     return sequence(first: parent, next: \.parent)
-        .reversed()
         .compactMap { element in
             if let decl = element.as(StructDeclSyntax.self) {
                 return decl.name.trimmedDescription
@@ -379,6 +378,7 @@ fileprivate func findNamespaces(parent: Syntax?) -> [String] {
                 return nil
             }
         }
+        .reversed()
 }
 
 extension VariableDeclSyntax {
