@@ -618,9 +618,7 @@ final class EntityVisitor: SyntaxVisitor {
         super.init(viewMode: .sourceAccurate)
     }
 
-    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
         if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
             entities.append(ent)
@@ -628,9 +626,7 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
-    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.nameText.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
             if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
@@ -644,12 +640,10 @@ final class EntityVisitor: SyntaxVisitor {
                 }
             }
         }
-        return .skipChildren
+        return .visitChildren
     }
 
-    override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
             let desc = node.importKeyword.text + " " + ret
             if imports[""] == nil {
@@ -657,12 +651,10 @@ final class EntityVisitor: SyntaxVisitor {
             }
             imports[""]?.append(desc)
         }
-        return .visitChildren
+        return .skipChildren
     }
 
-    override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
         for cl in node.clauses {
             let macroName: String
             if let conditionDescription = cl.condition?.trimmedDescription {
@@ -697,11 +689,15 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
-    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    
+    override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
 
-    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
 }
