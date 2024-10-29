@@ -91,7 +91,7 @@ protocol EntityNode {
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
 final class EntityNodeSubContainer {
@@ -139,7 +139,6 @@ public typealias ImportMap = [String: [String: [String]]]
 /// Metadata for a type being mocked
 public final class Entity {
     var filepath: String = ""
-    var data: Data? = nil
     let entityNode: EntityNode
     let isProcessed: Bool
     let metadata: AnnotationMetadata?
@@ -150,7 +149,6 @@ public final class Entity {
 
     static func node(with entityNode: EntityNode,
                      filepath: String,
-                     data: Data? = nil,
                      isPrivate: Bool,
                      isFinal: Bool,
                      metadata: AnnotationMetadata?,
@@ -160,7 +158,6 @@ public final class Entity {
 
         let node = Entity(entityNode: entityNode,
                           filepath: filepath,
-                          data: data,
                           metadata: metadata,
                           isProcessed: processed)
 
@@ -169,12 +166,10 @@ public final class Entity {
 
     init(entityNode: EntityNode,
          filepath: String = "",
-         data: Data? = nil,
          metadata: AnnotationMetadata?,
          isProcessed: Bool) {
         self.entityNode = entityNode
         self.filepath = filepath
-        self.data = data
         self.metadata = metadata
         self.isProcessed = isProcessed
     }

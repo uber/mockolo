@@ -295,7 +295,7 @@ extension ProtocolDeclSyntax: EntityNode {
         return false
     }
 
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.memberBlock.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed)
     }
 }
@@ -346,7 +346,7 @@ extension ClassDeclSyntax: EntityNode {
         return leadingTrivia.annotationMetadata(with: annotation)
     }
 
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.memberBlock.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
     }
 }
