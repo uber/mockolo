@@ -29,3 +29,45 @@ extension FooView {
     }
 }
 """
+
+let nestedProtocolInGeneric = """
+actor Foo<T> {
+    /// \(String.mockAnnotation)
+    protocol NG1 {
+        func requirement() -> Int
+    }
+}
+
+enum Bar<T> {
+    struct Baz {
+        /// \(String.mockAnnotation)
+        protocol NG2 {
+            func requirement() -> Int
+        }
+    }
+}
+
+/// \(String.mockAnnotation)
+protocol OK<T> {
+    associatedtype T
+    func requirement() -> T
+}
+"""
+
+let nestedProtocolInGenericMock = """
+class OKMock: OK {
+    init() { }
+
+    typealias T = Any
+
+    private(set) var requirementCallCount = 0
+    var requirementHandler: (()  -> (T))?
+    func requirement()  -> T {
+        requirementCallCount += 1
+        if let requirementHandler = requirementHandler {
+            return requirementHandler()
+        }
+        fatalError("requirementHandler returns can't have a default value thus its handler must be set")
+    }
+}
+"""

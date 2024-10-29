@@ -626,6 +626,14 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
+
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
+
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.nameText.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
@@ -640,16 +648,17 @@ final class EntityVisitor: SyntaxVisitor {
                 }
             }
         }
-        return .visitChildren
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
+
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
     }
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
             let desc = node.importKeyword.text + " " + ret
-            if imports[""] == nil {
-                imports[""] = []
-            }
-            imports[""]?.append(desc)
+            imports["", default: []].append(desc)
         }
         return .skipChildren
     }

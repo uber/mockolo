@@ -8,4 +8,9 @@ class NamespacesTests: MockoloTestCase {
         verify(srcContent: nestedProtocol,
                dstContent: nestedProtocolMock)
     }
+
+    func testNestedProtocolInGeneric() {
+        verify(srcContent: nestedProtocolInGeneric,
+               dstContent: nestedProtocolInGenericMock)
+    }
 }
