@@ -259,6 +259,10 @@ extension IfConfigDeclSyntax {
 }
 
 extension ProtocolDeclSyntax: EntityNode {
+    var namespaces: [String] {
+        return findNamespaces(parent: parent)
+    }
+
     var nameText: String {
         return name.text
     }
@@ -295,12 +299,15 @@ extension ProtocolDeclSyntax: EntityNode {
         return false
     }
 
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.memberBlock.members.memberData(with: accessLevel, declType: declType, metadata: metadata, processed: isProcessed)
     }
 }
 
 extension ClassDeclSyntax: EntityNode {
+    var namespaces: [String] {
+        return findNamespaces(parent: parent)
+    }
 
     var nameText: String {
         return name.text
@@ -346,9 +353,32 @@ extension ClassDeclSyntax: EntityNode {
         return leadingTrivia.annotationMetadata(with: annotation)
     }
 
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, data: Data?, isProcessed: Bool) -> EntityNodeSubContainer {
+    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
         return self.memberBlock.members.memberData(with: accessLevel, declType: declType, metadata: nil, processed: isProcessed)
     }
+}
+
+fileprivate func findNamespaces(parent: Syntax?) -> [String] {
+    guard let parent else {
+        return []
+    }
+    return sequence(first: parent, next: \.parent)
+        .compactMap { element in
+            if let decl = element.as(StructDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(EnumDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(ClassDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(ActorDeclSyntax.self) {
+                return decl.name.trimmedDescription
+            } else if let decl = element.as(ExtensionDeclSyntax.self) {
+                return decl.extendedType.trimmedDescription
+            } else {
+                return nil
+            }
+        }
+        .reversed()
 }
 
 extension VariableDeclSyntax {
@@ -618,9 +648,7 @@ final class EntityVisitor: SyntaxVisitor {
         super.init(viewMode: .sourceAccurate)
     }
 
-    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
         if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
             entities.append(ent)
@@ -628,9 +656,15 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
-    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
+    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
 
-    private func visitImpl(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
+
+    override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
         if node.nameText.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
             if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
@@ -644,25 +678,22 @@ final class EntityVisitor: SyntaxVisitor {
                 }
             }
         }
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
+
+    override func visit(_ node: ActorDeclSyntax) -> SyntaxVisitorContinueKind {
+        return node.genericParameterClause != nil ? .skipChildren : .visitChildren
+    }
+
+    override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
+        if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
+            let desc = node.importKeyword.text + " " + ret
+            imports["", default: []].append(desc)
+        }
         return .skipChildren
     }
 
-    override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
-            let desc = node.importKeyword.text + " " + ret
-            if imports[""] == nil {
-                imports[""] = []
-            }
-            imports[""]?.append(desc)
-        }
-        return .visitChildren
-    }
-
-    override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind { visitImpl(node) }
-
-    private func visitImpl(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
         for cl in node.clauses {
             let macroName: String
             if let conditionDescription = cl.condition?.trimmedDescription {
@@ -697,11 +728,15 @@ final class EntityVisitor: SyntaxVisitor {
         return .skipChildren
     }
 
-    override func visit(_ node: StructDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
+        return .skipChildren
+    }
+    
+    override func visit(_ node: FunctionDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
 
-    override func visit(_ node: EnumDeclSyntax) -> SyntaxVisitorContinueKind {
+    override func visit(_ node: VariableDeclSyntax) -> SyntaxVisitorContinueKind {
         return .skipChildren
     }
 }

@@ -22,6 +22,7 @@ final class NominalModel: Model {
         case `actor`
     }
 
+    let namespaces: [String]
     var name: String
     var offset: Int64
     var type: SwiftType
@@ -41,6 +42,7 @@ final class NominalModel: Model {
     }
     
     init(identifier: String,
+         namespaces: [String],
          acl: String,
          declTypeOfMockAnnotatedBaseType: DeclType,
          declKind: NominalTypeDeclKind,
@@ -54,6 +56,7 @@ final class NominalModel: Model {
         self.identifier = identifier 
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
         self.type = SwiftType(self.name)
+        self.namespaces = namespaces
         self.declTypeOfMockAnnotatedBaseType = declTypeOfMockAnnotatedBaseType
         self.declKind = declKind
         self.inheritedTypes = inheritedTypes
