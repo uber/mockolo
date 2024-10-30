@@ -44,15 +44,12 @@ func lookupEntities(key: String,
 
     // Look up the mock entities of a protocol specified by the name.
     if let current = protocolMap[key] {
-        let sub = current.entityNode.subContainer(metadata: current.metadata, declType: declType, path: current.filepath, data: current.data, isProcessed: current.isProcessed)
+        let sub = current.entityNode.subContainer(metadata: current.metadata, declType: declType, path: current.filepath, isProcessed: current.isProcessed)
         models.append(contentsOf: sub.members)
         if !current.isProcessed {
             attributes.append(contentsOf: sub.attributes)
         }
         inheritedTypes.formUnion(current.entityNode.inheritedTypes)
-        if let data = current.data {
-            pathToContents.append((current.filepath, data, current.entityNode.offset))
-        }
         paths.append(current.filepath)
         
         
@@ -72,13 +69,10 @@ func lookupEntities(key: String,
         }
     } else if let parentMock = inheritanceMap["\(key)Mock"], declType == .protocolType {
         // If the parent protocol is not in the protocol map, look it up in the input parent mocks map.
-        let sub = parentMock.entityNode.subContainer(metadata: parentMock.metadata, declType: declType, path: parentMock.filepath, data: parentMock.data, isProcessed: parentMock.isProcessed)
+        let sub = parentMock.entityNode.subContainer(metadata: parentMock.metadata, declType: declType, path: parentMock.filepath, isProcessed: parentMock.isProcessed)
         processedModels.append(contentsOf: sub.members)
         if !parentMock.isProcessed {
             attributes.append(contentsOf: sub.attributes)
-        }
-        if let data = parentMock.data {
-            pathToContents.append((parentMock.filepath, data, parentMock.entityNode.offset))
         }
         paths.append(parentMock.filepath)
     }

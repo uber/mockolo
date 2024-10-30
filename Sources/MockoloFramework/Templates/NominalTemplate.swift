@@ -101,8 +101,16 @@ extension NominalModel {
         \(body)
         }
         """
-        
-        return template
+
+        if namespaces.isEmpty {
+            return template
+        } else {
+            return """
+            extension \(namespaces.joined(separator: ".")) {
+            \(template.addingIndent(1))
+            }
+            """
+        }
     }
     
     private func extraInitsIfNeeded(

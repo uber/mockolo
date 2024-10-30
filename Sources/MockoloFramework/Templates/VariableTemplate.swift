@@ -116,9 +116,7 @@ extension VariableModel {
                 returnType: type,
                 encloser: ""
             ).render(with: name, encloser: "") ?? "")
-                .split(separator: "\n")
-                .map { "\(1.tab)\($0)" }
-                .joined(separator: "\n")
+                .addingIndent(1)
 
             return """
 
