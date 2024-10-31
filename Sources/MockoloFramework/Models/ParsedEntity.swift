@@ -29,14 +29,6 @@ struct ResolvedEntity {
         return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
     }
 
-    var hasDeclaredEmptyInit: Bool {
-        return !declaredInits.filter { $0.params.isEmpty }.isEmpty
-    }
-
-    var declaredInitParams: [ParamModel] {
-        return declaredInits.map { $0.params }.flatMap{$0}
-    }
-
     var initParamCandidates: [VariableModel] {
         return sortedInitVars(
             in: uniqueModels.compactMap{ $0.1 as? VariableModel }
@@ -60,7 +52,6 @@ struct ResolvedEntity {
         let result = [curVarsSorted, parentVarsSorted].flatMap{$0}
         return result
     }
-
 
     func model() -> Model {
         return NominalModel(identifier: key,
