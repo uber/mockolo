@@ -35,8 +35,6 @@ public protocol Model {
     /// Fully qualified identifier
     var fullName: String { get }
 
-    var underlyingName: String { get }
-
     /// Type of this model
     var modelType: ModelType { get }
 
@@ -64,27 +62,9 @@ public protocol Model {
     /// @param level The verbosity level
     /// @returns a unique name given the verbosity (default is name)
     func name(by level: Int) -> String
-
-
-    func isEqual(_ other: Model) -> Bool
-
-    func isLessThan(_ other: Model) -> Bool
 }
 
 extension Model {
-    func isEqual(_ other: Model) -> Bool {
-        return self.fullName == other.fullName &&
-            self.type.typeName == other.type.typeName &&
-            self.modelType == other.modelType
-    }
-
-    func isLessThan(_ other: Model) -> Bool {
-        if self.offset == other.offset {
-            return self.name < other.name
-        }
-        return self.offset < other.offset
-    }
-
     func name(by level: Int) -> String {
         return name
     }
@@ -93,12 +73,7 @@ extension Model {
         return name
     }
 
-    var underlyingName: String {
-        return name.safeName
-    }
-
     var processed: Bool {
         return false
     }
 }
-
