@@ -30,7 +30,7 @@ public enum ModelType {
 /// Represents a model for an entity such as var, func, class, etc.
 public protocol Model {
     /// Identifier
-    var name: String { get set }
+    var name: String { get }
 
     /// Fully qualified identifier
     var fullName: String { get }
@@ -52,7 +52,7 @@ public protocol Model {
     var type: SwiftType { get set }
 
     /// Offset where this type is declared
-    var offset: Int64 { get set }
+    var offset: Int64 { get }
 
     /// Applies a corresponding template to this model to output mocks
     func render(with identifier: String,
