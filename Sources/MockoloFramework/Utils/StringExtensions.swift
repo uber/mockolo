@@ -100,6 +100,7 @@ extension String {
     static let name = "name"
     static let sendable = "Sendable"
     static let uncheckedSendable = "@unchecked Sendable"
+    static let mainActor = "MainActor"
     static public let mockAnnotation = "@mockable"
     static public let mockObservable = "@MockObservable"
     static public let poundIf = "#if "
@@ -118,6 +119,15 @@ extension String {
             return "`\(self)`"
         }
         return self
+    }
+
+    var removingExistentialAny: String {
+        var typeName = self
+        if typeName.hasPrefix(.any) {
+            typeName.removeFirst(String.any.count)
+            typeName = typeName.trimmingCharacters(in: .whitespaces)
+        }
+        return typeName
     }
 
     var withSpace: String {

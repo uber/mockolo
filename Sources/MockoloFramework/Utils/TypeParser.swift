@@ -343,7 +343,6 @@ public final class SwiftType {
     ///  if "non-nil", type is non-optional
     ///  if "", type is String, with an empty string value
     func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
-
         if let val = cachedDefaultVal {
             return val
         }
@@ -364,7 +363,8 @@ public final class SwiftType {
             return cachedDefaultVal
         }
 
-        if let val = SwiftType.customTypeMap?[typeName] {
+        // There is no "existential any" to the customDefaultValueMap key.
+        if let val = SwiftType.customDefaultValueMap?[typeName.removingExistentialAny] {
             cachedDefaultVal = val
             return val
         }
@@ -466,7 +466,7 @@ public final class SwiftType {
             return "\(arg.typeName)()"
         }
 
-        if let val = SwiftType.defaultTypeValueMap[arg.typeName] {
+        if let val = SwiftType.defaultValueMap[arg.typeName] {
             return val
         }
         return nil
@@ -640,7 +640,7 @@ public final class SwiftType {
         }
     }
 
-    public static var customTypeMap: [String: String]?
+    public static var customDefaultValueMap: [String: String]?
 
     private let bracketPrefixTypes = ["Array", "Set", "Dictionary"]
     private let rxTypes = [String.publishSubject : "()",
@@ -656,7 +656,7 @@ public final class SwiftType {
     }
 
 
-    private static let defaultTypeValueMap =
+    private static let defaultValueMap =
         ["Int": "0",
          "Int8": "0",
          "Int16": "0",
@@ -676,6 +676,7 @@ public final class SwiftType {
          "TimeInterval": "0.0",
          "NSTimeInterval": "0.0",
          "PublishSubject": "PublishSubject()",
+         "Data": "Data()",
          "Date": "Date()",
          "NSDate": "NSDate()",
          "CGRect": ".zero",
@@ -685,14 +686,10 @@ public final class SwiftType {
          "UIColor": ".black",
          "UIFont": ".systemFont(ofSize: 12)",
          "UIImage": "UIImage()",
-         "UIView": "UIView(frame: .zero)",
-         "UIViewController": "UIViewController()",
-         "UICollectionView": "UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewLayout())",
-         "UICollectionViewLayout": "UICollectionViewLayout()",
-         "UIScrollView": "UIScrollView()",
          "UIScrollViewKeyboardDismissMode": ".interactive",
          "UIAccessibilityTraits": ".none",
          "Void": "Void",
+         "()": "()",
          "URL": "URL(fileURLWithPath: \"\")",
          "NSURL": "NSURL(fileURLWithPath: \"\")",
          "UUID": "UUID()",
