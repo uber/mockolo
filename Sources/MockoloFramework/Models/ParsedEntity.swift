@@ -26,7 +26,11 @@ struct ResolvedEntity {
     var inheritsActorProtocol: Bool
 
     var declaredInits: [MethodModel] {
-        return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
+        return uniqueModels.compactMap { (_, model) in
+            guard let model = model as? MethodModel,
+                  model.isInitializer else { return nil }
+            return model
+        }
     }
 
     var initParamCandidates: [VariableModel] {

@@ -43,11 +43,6 @@ public protocol Model {
     /// Indicates whether mock generation for this model has been processed
     var processed: Bool { get }
 
-    /// Indicates whether this model maps to an init method
-    var isInitializer: Bool { get }
-
-    var isStatic: Bool { get }
-
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
     var type: SwiftType { get set }
 
@@ -102,15 +97,7 @@ extension Model {
         return name.safeName
     }
 
-    var isStatic: Bool {
-        return false
-    }
-
     var processed: Bool {
-        return false
-    }
-
-    var isInitializer: Bool {
         return false
     }
 }

@@ -47,7 +47,7 @@ extension NominalModel {
                 if model.modelType == .variable, model.name == String.hasBlankInit {
                     return nil
                 }
-                if model.modelType == .method, model.isInitializer, !model.processed {
+                if model.modelType == .method, let model = model as? MethodModel, model.isInitializer, !model.processed {
                     return nil
                 }
                 if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues) {
