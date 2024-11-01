@@ -145,20 +145,14 @@ final class MethodModel: Model {
             return nil
         }
 
-        let paramNames = self.params.map(\.name)
-        let paramTypes = self.params.map(\.type)
-        let ret = ClosureModel(name: name,
-                               genericTypeParams: genericTypeParams,
-                               paramNames: paramNames,
-                               paramTypes: paramTypes,
-                               isAsync: isAsync,
-                               throwing: throwing,
-                               returnType: type,
-                               encloser: encloser)
-
-        return ret
+        return ClosureModel(genericTypeParams: genericTypeParams,
+                            paramNames: params.map(\.name),
+                            paramTypes: params.map(\.type),
+                            isAsync: isAsync,
+                            throwing: throwing,
+                            returnType: type,
+                            encloser: encloser)
     }
-
 
     init(name: String,
          typeName: String,
