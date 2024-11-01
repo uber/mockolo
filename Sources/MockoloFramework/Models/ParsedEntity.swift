@@ -76,7 +76,6 @@ struct ResolvedEntity {
 struct ResolvedEntityContainer {
     let entity: ResolvedEntity
     let paths: [String]
-    let imports: [(String, Data, Int64)]
 }
 
 protocol EntityNode {

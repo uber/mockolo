@@ -57,7 +57,6 @@ public func generate(sourceDirs: [String],
     var parentMocks = [String: Entity]()
     var protocolMap = [String: Entity]()
     var annotatedProtocolMap = [String: Entity]()
-    var pathToContentMap = [(String, Data, Int64)]()
     var pathToImportsMap = ImportMap()
     var relevantPaths = [String]()
 
@@ -129,7 +128,6 @@ public func generate(sourceDirs: [String],
                          annotatedProtocolMap: annotatedProtocolMap,
                          inheritanceMap: parentMocks,
                          completion: { container in
-                            pathToContentMap.append(contentsOf: container.imports)
                             resolvedEntities.append(container.entity)
                             relevantPaths.append(contentsOf: container.paths)
     })
@@ -157,7 +155,6 @@ public func generate(sourceDirs: [String],
     log("Write the mock results and import lines to", outputFilePath, level: .info)
 
     let imports = handleImports(pathToImportsMap: pathToImportsMap,
-                                pathToContentMap: pathToContentMap,
                                 customImports: customImports,
                                 excludeImports: excludeImports,
                                 testableImports: testableImports,

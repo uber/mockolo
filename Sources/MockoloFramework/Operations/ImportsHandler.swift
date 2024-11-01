@@ -8,7 +8,6 @@
 import Foundation
 
 func handleImports(pathToImportsMap: ImportMap,
-                   pathToContentMap: [(String, Data, Int64)],
                    customImports: [String]?,
                    excludeImports: [String]?,
                    testableImports: [String]?,
@@ -33,16 +32,6 @@ func handleImports(pathToImportsMap: ImportMap,
             } else {
                 importLines[k]?.append(contentsOf: v)
             }
-        }
-    }
-
-    for (_, filecontent, offset) in pathToContentMap {
-        let v = filecontent.findImportLines(at: offset)
-        if let ex = excludeImports {
-            let filtered = v.filter{ !ex.contains($0.moduleNameInImport) }
-            importLines[defaultKey]?.append(contentsOf: filtered)
-        } else {
-            importLines[defaultKey]?.append(contentsOf: v)
         }
     }
 

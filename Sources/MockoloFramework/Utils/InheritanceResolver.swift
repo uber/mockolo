@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-import Foundation
+import Algorithms
 
 /// Used to resolve inheritance, uniquify duplicate entities, and compute potential init params.
 
@@ -27,7 +27,7 @@ import Foundation
 func lookupEntities(key: String,
                     declType: DeclType,
                     protocolMap: [String: Entity],
-                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], Set<String>, [String], [(String, Data, Int64)]) {
+                    inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], Set<String>, [String]) {
 
     // Used to keep track of types to be mocked
     var models = [Model]()
@@ -37,8 +37,6 @@ func lookupEntities(key: String,
     var attributes = [String]()
     // Gather inherited types declared in current or parent protocols
     var inheritedTypes = Set<String>()
-    // Gather filepaths and contents used for imports
-    var pathToContents = [(String, Data, Int64)]()
     // Gather filepaths used for imports
     var paths = [String]()
 
@@ -57,13 +55,12 @@ func lookupEntities(key: String,
             // If the protocol inherits other protocols, look up their entities as well.
             for parent in current.entityNode.inheritedTypes {
                 if parent != .class, parent != .anyType, parent != .anyObject {
-                    let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths, parentPathToContents) = lookupEntities(key: parent, declType: declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+                    let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths) = lookupEntities(key: parent, declType: declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
                     attributes.append(contentsOf: parentAttributes)
                     inheritedTypes.formUnion(parentInheritedTypes)
                     paths.append(contentsOf: parentPaths)
-                    pathToContents.append(contentsOf:parentPathToContents)
                 }
             }
         }
@@ -77,7 +74,7 @@ func lookupEntities(key: String,
         paths.append(parentMock.filepath)
     }
     
-    return (models, processedModels, attributes, inheritedTypes, paths, pathToContents)
+    return (models, processedModels, attributes, inheritedTypes, paths)
 }
 
 
@@ -96,8 +93,8 @@ private func uniquifyDuplicates(group: [String: [Model]],
     
     var bufferNameByLevelVisited = [String: Model]()
     var bufferFullNameVisited = [String]()
-    group.forEach { (key: String, models: [Model]) in
-        if let nameByLevelVisited = nameByLevelVisited, nameByLevelVisited[key] != nil {
+    for (key, models) in group {
+        if let nameByLevelVisited, nameByLevelVisited[key] != nil {
             // An entity with the given key already exists, so look up a more verbose name for these entities
             let subgroup = Dictionary(grouping: models, by: { (modelElement: Model) -> String in
                 return modelElement.name(by: level + 1)
@@ -106,14 +103,11 @@ private func uniquifyDuplicates(group: [String: [Model]],
                 bufferFullNameVisited.append(contentsOf: fullNameVisited)
             }
             let subresult = uniquifyDuplicates(group: subgroup, level: level+1, nameByLevelVisited: bufferNameByLevelVisited, fullNameVisited: bufferFullNameVisited)
-            bufferNameByLevelVisited.merge(subresult, uniquingKeysWith: { (bufferElement: Model, subresultElement: Model) -> Model in
-                return subresultElement
-            })
+            bufferNameByLevelVisited.merge(subresult, uniquingKeysWith: { $1 })
         } else {
             // Check if full name has been looked up
-            let visited = models.filter {fullNameVisited.contains($0.fullName)}.compactMap{$0}
-            let unvisited = models.filter {!fullNameVisited.contains($0.fullName)}.compactMap{$0}
-            
+            let (unvisited, visited) = models.partitioned(by: { fullNameVisited.contains($0.fullName) })
+
             if let first = unvisited.first {
                 // If not, add it to the fullname map to keep track of duplicates
                 if !visited.isEmpty {
@@ -131,9 +125,7 @@ private func uniquifyDuplicates(group: [String: [Model]],
                 })
                 
                 let subresult = uniquifyDuplicates(group: subgroup, level: level+1, nameByLevelVisited: bufferNameByLevelVisited, fullNameVisited: bufferFullNameVisited)
-                bufferNameByLevelVisited.merge(subresult, uniquingKeysWith: { (bufferElement: Model, addedElement: Model) -> Model in
-                    return addedElement
-                })
+                bufferNameByLevelVisited.merge(subresult, uniquingKeysWith: { $1 })
             }
         }
     }
