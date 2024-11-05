@@ -18,8 +18,12 @@
 ///
 /// Suffix consists of async and throws.
 func applyFunctionSuffixTemplate(isAsync: Bool, throwing: ThrowingKind) -> String {
-    [
-        isAsync ? String.async : nil,
-        throwing.applyThrowingTemplate(),
-    ].compactMap { $0 }.joined(separator: " ") + " "
+    var keywords = [String]()
+    if isAsync {
+        keywords.append(.async)
+    }
+    if let throwing = throwing.applyThrowingTemplate() {
+        keywords.append(throwing)
+    }
+    return keywords.map { "\($0) " }.joined()
 }
