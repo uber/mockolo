@@ -28,7 +28,7 @@ public enum ModelType {
 }
 
 /// Represents a model for an entity such as var, func, class, etc.
-public protocol Model {
+protocol Model: AnyObject {
     /// Identifier
     var name: String { get }
 
@@ -42,7 +42,7 @@ public protocol Model {
     var processed: Bool { get }
 
     /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
-    var type: SwiftType { get set }
+    var type: SwiftType { get }
 
     /// Offset where this type is declared
     var offset: Int64 { get }

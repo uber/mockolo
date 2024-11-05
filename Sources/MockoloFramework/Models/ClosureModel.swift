@@ -19,7 +19,8 @@ import Foundation
 final class ClosureModel: Model {
     var type: SwiftType
     let name: String = "" // closure type cannot have a name
-    var offset: Int64 = .max
+    let offset: Int64 = .max
+
     let funcReturnType: SwiftType
     let genericTypeNames: [String]
     let paramNames: [String]

@@ -23,24 +23,24 @@ public enum MethodKind: Equatable {
 }
 
 final class MethodModel: Model {
-    var filePath: String = ""
-    var data: Data? = nil
-    var name: String
-    var type: SwiftType
-    var offset: Int64
-    let length: Int64
+    let name: String
+    let returnType: SwiftType
+    var type: SwiftType {
+        return returnType
+    }
     let accessLevel: String
-    var attributes: [String]? = nil
+    let kind: MethodKind
+    let offset: Int64
+    let length: Int64
     let genericTypeParams: [ParamModel]
-    var genericWhereClause: String? = nil
+    let genericWhereClause: String?
     let params: [ParamModel]
     let processed: Bool
-    var modelDescription: String? = nil
-    var isStatic: Bool
+    let modelDescription: String?
+    let isStatic: Bool
     let shouldOverride: Bool
     let isAsync: Bool
     let throwing: ThrowingKind
-    let kind: MethodKind
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
     var modelType: ModelType {
@@ -172,7 +172,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
+        self.returnType = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         self.isAsync = isAsync
         self.throwing = throwing
         self.offset = offset

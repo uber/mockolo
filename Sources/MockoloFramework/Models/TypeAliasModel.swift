@@ -17,20 +17,17 @@
 import Foundation
 
 final class TypeAliasModel: Model {
-    var filePath: String = ""
-    var name: String
-    var type: SwiftType
-    var offset: Int64 = .max
-    var length: Int64
-    var typeOffset: Int64 = 0
-    var typeLength: Int64 = 0
+    let name: String
+    let type: SwiftType
+    let offset: Int64
+    let length: Int64
     let accessLevel: String
     let processed: Bool
-    var useDescription: Bool = false
-    var modelDescription: String? = nil
+    let useDescription: Bool
+    let modelDescription: String?
     let overrideTypes: [String: String]?
-    var addAcl: Bool = false
-    
+    let addAcl: Bool
+
     var modelType: ModelType {
         return .typeAlias
     }

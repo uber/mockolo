@@ -170,7 +170,7 @@ extension NominalModel {
                 .joined(separator: ", ")
 
             paramsAssign = initParamCandidates.map { (element: VariableModel) in
-                switch element.storageType {
+                switch element.storageKind {
                 case .stored:
                     return "\(2.tab)self.\(element.underlyingName) = \(element.name.safeName)"
                 case .computed:

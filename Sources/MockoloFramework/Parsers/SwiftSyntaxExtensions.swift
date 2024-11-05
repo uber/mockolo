@@ -414,16 +414,16 @@ extension VariableDeclSyntax {
             var potentialInitParam = false
 
             // Get the type info and whether it can be a var param for an initializer
-            if let vtype = v.typeAnnotation?.type.description.trimmingCharacters(in: .whitespaces) {
+            if let vtype = v.typeAnnotation?.type.trimmedDescription {
                 potentialInitParam = name.canBeInitParam(type: vtype, isStatic: isStatic)
                 typeName = vtype
             }
 
-            let storageType: VariableModel.MockStorageType
+            let storageKind: VariableModel.MockStorageKind
             switch v.accessorBlock?.accessors {
             case .accessors(let accessorDecls):
                 if accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
-                    storageType = .stored(needsSetCount: true)
+                    storageKind = .stored(needsSetCount: true)
                 } else if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
                     if getterDecl.body == nil { // is protoccol
                         var getterEffects = VariableModel.GetterEffects.empty
@@ -434,37 +434,36 @@ extension VariableDeclSyntax {
                             getterEffects.throwing = .init(`throws`)
                         }
                         if getterEffects == .empty {
-                            storageType = .stored(needsSetCount: false)
+                            storageKind = .stored(needsSetCount: false)
                         } else {
-                            storageType = .computed(getterEffects)
+                            storageKind = .computed(getterEffects)
                         }
                     } else { // is class
-                        storageType = .computed(.empty)
+                        storageKind = .computed(.empty)
                     }
                 } else {
                     // will never happens
-                    storageType = .stored(needsSetCount: false) // fallback
+                    storageKind = .stored(needsSetCount: false) // fallback
                 }
             case .getter:
-                storageType = .computed(.empty)
+                storageKind = .computed(.empty)
             case nil:
-                storageType = .stored(needsSetCount: true)
+                storageKind = .stored(needsSetCount: true)
             }
 
-            let varmodel = VariableModel(name: name,
-                                         typeName: typeName,
-                                         acl: acl,
-                                         encloserType: declType,
-                                         isStatic: isStatic,
-                                         storageType: storageType,
-                                         canBeInitParam: potentialInitParam,
-                                         offset: v.offset,
-                                         rxTypes: metadata?.varTypes,
-                                         customModifiers: metadata?.modifiers,
-                                         modelDescription: self.description,
-                                         combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
-                                         processed: processed)
-            return varmodel
+            return VariableModel(name: name,
+                                 type: SwiftType(typeName),
+                                 acl: acl,
+                                 encloserType: declType,
+                                 isStatic: isStatic,
+                                 storageKind: storageKind,
+                                 canBeInitParam: potentialInitParam,
+                                 offset: v.offset,
+                                 rxTypes: metadata?.varTypes,
+                                 customModifiers: metadata?.modifiers,
+                                 modelDescription: self.description,
+                                 combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
+                                 processed: processed)
         }
         return varmodels
     }
@@ -575,14 +574,13 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          typeName: self.inheritedType?.description ?? "",
+                          type: SwiftType(self.inheritedType?.trimmedDescription ?? ""),
                           isGeneric: true,
                           inInit: inInit,
-                          needVarDecl: false,
+                          needsVarDecl: false,
                           offset: self.offset,
                           length: self.length)
     }
-
 }
 
 extension FunctionParameterSyntax {
@@ -603,18 +601,17 @@ extension FunctionParameterSyntax {
             }
         }
 
-        // Variadic args are not detected in the parser so need to manually look up
-        var type = self.type.description 
-        if self.description.contains(type + "...") {
+        var type = self.type.trimmedDescription
+        if ellipsis != nil {
             type.append("...")
         }
 
         return ParamModel(label: label,
                           name: name,
-                          typeName: type,
+                          type: SwiftType(type),
                           isGeneric: false,
                           inInit: inInit,
-                          needVarDecl: declType == .protocolType,
+                          needsVarDecl: declType == .protocolType,
                           offset: self.offset,
                           length: self.length)
     }

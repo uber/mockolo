@@ -17,37 +17,32 @@
 import Foundation
 
 final class ParamModel: Model {
-    var name: String
-    var offset: Int64
-    var length: Int64
-    var type: SwiftType
-    let label: String
-    let isGeneric: Bool
-    let inInit: Bool
-    let needVarDecl: Bool
-
-    var isStatic: Bool {
-        return false
+    internal init(label: String, name: String, type: SwiftType, isGeneric: Bool, inInit: Bool, needsVarDecl: Bool, offset: Int64, length: Int64) {
+        self.label = label
+        self.name = name
+        self.type = type
+        self.isGeneric = isGeneric
+        self.inInit = inInit
+        self.needsVarDecl = needsVarDecl
+        self.offset = offset
+        self.length = length
     }
     
+    let label: String
+    let name: String
+    let type: SwiftType
+    let isGeneric: Bool
+    let inInit: Bool
+    let needsVarDecl: Bool
+    let offset: Int64
+    let length: Int64
+
     var modelType: ModelType {
         return .parameter
     }
 
     var fullName: String {
         return label + "_" + name
-    }
-    
-    init(label: String = "", name: String, typeName: String, isGeneric: Bool = false, inInit: Bool = false, needVarDecl: Bool, offset: Int64, length: Int64) {
-        self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
-        let labelStr = label.trimmingCharacters(in: .whitespaces)
-        self.label = name != labelStr ? labelStr : ""
-        self.offset = offset
-        self.length = length
-        self.isGeneric = isGeneric
-        self.inInit = inInit
-        self.needVarDecl = needVarDecl
     }
     
     var underlyingName: String {
@@ -76,7 +71,7 @@ final class ParamModel: Model {
     ///     }
     /// ```
     func asInitVarDecl(eraseType: Bool) -> String? {
-        if self.inInit, self.needVarDecl {
+        if self.inInit, self.needsVarDecl {
             let type: SwiftType
             if eraseType {
                 type = SwiftType(.anyType)
