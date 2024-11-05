@@ -1,8 +1,17 @@
 //
-//  SwiftSyntaxExtensions.swift
-//  MockoloFramework
+//  Copyright (c) 2018. Uber Technologies
 //
-//  Created by Ellie Shin on 10/29/19.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 //
 
 import Foundation
@@ -30,12 +39,6 @@ extension SyntaxProtocol {
     }
 }
 
-extension AttributeListSyntax {
-    var trimmedDescription: String? {
-        return self.trimmed.description.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
 extension DeclModifierListSyntax {
     var acl: String {
         for modifier in self {
@@ -57,31 +60,31 @@ extension DeclModifierListSyntax {
     }
 
     var isStatic: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.static) }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.tokenKind == .keyword(.static) }
     }
 
     var isRequired: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.required }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.required }
     }
 
     var isConvenience: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.convenience }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.convenience }
     }
 
     var isOverride: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.override }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.override }
     }
 
     var isFinal: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.final }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.final }
     }
 
     var isPrivate: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.private) || $0.tokenKind == .keyword(.fileprivate) }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.tokenKind == .keyword(.private) || $0.tokenKind == .keyword(.fileprivate) }
     }
 
     var isPublic: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.public) }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.tokenKind == .keyword(.public) }
     }
 }
 
@@ -287,7 +290,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     var attributesDescription: String {
-        self.attributes.trimmedDescription ?? ""
+        self.attributes.trimmedDescription
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
@@ -329,7 +332,7 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     var attributesDescription: String {
-        self.attributes.trimmedDescription ?? ""
+        self.attributes.trimmedDescription
     }
 
     var isFinal: Bool {
