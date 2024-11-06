@@ -87,7 +87,7 @@ protocol EntityNode {
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
-    func subContainer(metadata: AnnotationMetadata?, declType: FindTargetDeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
+    func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
 struct EntityNodeSubContainer {
