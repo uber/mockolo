@@ -58,7 +58,7 @@ private func generateUniqueModels(key: String,
         in: orderedModels,
         exclude: processedLookup,
         fullnames: processedFullNames
-    ).filter {!$0.value.processed}
+    ).filter { !$0.value.processed }
 
     let processedElementsMap = Dictionary(grouping: processedModels) { element in element.fullName }
         .compactMap { (key, value) in value.first }
