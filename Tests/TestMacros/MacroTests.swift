@@ -6,12 +6,14 @@ final class MacroTests: MockoloTestCase {
                dstContent: macroInFuncMock)
     }
 
+#if os(macOS)
     func testMacroInFuncWithOverload() {
         XCTExpectFailure("Resolving overloading in #if is broken.") {
             verify(srcContent: macroInFuncWithOverload,
                    dstContent: macroInFuncWithOverloadMock)
         }
     }
+#endif
 
     func testMacroImports() {
         verify(srcContent: macroImports,
