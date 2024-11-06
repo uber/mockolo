@@ -17,9 +17,6 @@
 final class IfMacroModel: Model {
     let name: String
     let offset: Int64
-    var type: SwiftType {
-        fatalError("unused")
-    }
     let entities: [Model]
 
     var modelType: ModelType {

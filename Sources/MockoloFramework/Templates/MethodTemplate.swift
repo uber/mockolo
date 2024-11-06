@@ -74,7 +74,7 @@ extension MethodModel {
                         return arg.name.safeName
                     }.joined(separator: ", ")
 
-                    let defaultVal = type.defaultVal() // ?? "nil"
+                    let defaultVal = returnType.defaultVal() // ?? "nil"
 
                     var mockReturn = ".error"
                     if returnType.typeName.isEmpty {

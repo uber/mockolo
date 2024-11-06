@@ -41,9 +41,6 @@ protocol Model: AnyObject {
     /// Indicates whether mock generation for this model has been processed
     var processed: Bool { get }
 
-    /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
-    var type: SwiftType { get }
-
     /// Offset where this type is declared
     var offset: Int64 { get }
 

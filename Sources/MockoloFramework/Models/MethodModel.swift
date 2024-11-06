@@ -25,9 +25,6 @@ public enum MethodKind: Equatable {
 final class MethodModel: Model {
     let name: String
     let returnType: SwiftType
-    var type: SwiftType {
-        return returnType
-    }
     let accessLevel: String
     let kind: MethodKind
     let offset: Int64
@@ -118,7 +115,7 @@ final class MethodModel: Model {
             args.append(genericWhereClauseToSignatureComponent)
         }
         args.append(contentsOf: paramTypes.map(\.displayName))
-        var displayType = self.type.displayName
+        var displayType = self.returnType.displayName
         let capped = min(displayType.count, 32)
         displayType.removeLast(displayType.count-capped)
         args.append(displayType)
@@ -150,7 +147,7 @@ final class MethodModel: Model {
                             paramTypes: params.map(\.type),
                             isAsync: isAsync,
                             throwing: throwing,
-                            returnType: type,
+                            returnType: returnType,
                             encloser: encloser)
     }
 
@@ -231,7 +228,7 @@ final class MethodModel: Model {
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
                                          params: params,
-                                         returnType: type,
+                                         returnType: returnType,
                                          accessLevel: accessLevel,
                                          argsHistory: argsHistory,
                                          handler: handler(encloser: encloser))

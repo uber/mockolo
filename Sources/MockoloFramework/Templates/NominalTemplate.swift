@@ -270,21 +270,14 @@ extension NominalModel {
     /// @param models Potentially contains typealias models
     /// @returns A map of typealiases with multiple possible types
     func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
-        let typealiasModels = models.filter{$0.1.modelType == .typeAlias}
-        var aliasMap = [String: [String]]()
-        typealiasModels.forEach { (arg: (key: String, value: Model)) in
-            
-            let alias = arg.value
-            if aliasMap[alias.name] == nil {
-                aliasMap[alias.name] = [alias.type.typeName]
-            } else {
-                if let val = aliasMap[alias.name], !val.contains(alias.type.typeName) {
-                    aliasMap[alias.name]?.append(alias.type.typeName)
-                }
+        var aliasMap = [String: Set<String>]()
+        for (_, model) in models {
+            if let alias = model as? TypeAliasModel {
+                aliasMap[alias.name, default: []].insert(alias.type.typeName)
             }
         }
         let aliasDupes = aliasMap.filter {$0.value.count > 1}
-        return aliasDupes.isEmpty ? nil : aliasDupes
+        return aliasDupes.isEmpty ? nil : aliasDupes.mapValues {$0.sorted()}
     }
 
     // Finds all combine properties that are attempting to use a property wrapper alias
