@@ -26,15 +26,11 @@ struct ResolvedEntity {
     var inheritsActorProtocol: Bool
 
     var declaredInits: [MethodModel] {
-        return uniqueModels.filter {$0.1.isInitializer}.compactMap{ $0.1 as? MethodModel }
-    }
-
-    var hasDeclaredEmptyInit: Bool {
-        return !declaredInits.filter { $0.params.isEmpty }.isEmpty
-    }
-
-    var declaredInitParams: [ParamModel] {
-        return declaredInits.map { $0.params }.flatMap{$0}
+        return uniqueModels.compactMap { (_, model) in
+            guard let model = model as? MethodModel,
+                  model.isInitializer else { return nil }
+            return model
+        }
     }
 
     var initParamCandidates: [VariableModel] {
@@ -61,7 +57,6 @@ struct ResolvedEntity {
         return result
     }
 
-
     func model() -> Model {
         return NominalModel(identifier: key,
                             namespaces: entity.entityNode.namespaces,
@@ -81,7 +76,6 @@ struct ResolvedEntity {
 struct ResolvedEntityContainer {
     let entity: ResolvedEntity
     let paths: [String]
-    let imports: [(String, Data, Int64)]
 }
 
 protocol EntityNode {
@@ -179,7 +173,6 @@ public final class Entity {
 }
 
 enum Modifier: String {
-    case none = ""
     case weak = "weak"
     case dynamic = "dynamic"
 }

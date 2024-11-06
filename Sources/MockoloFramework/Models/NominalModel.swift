@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 final class NominalModel: Model {
     enum NominalTypeDeclKind: String {
         case `class`
@@ -23,9 +21,9 @@ final class NominalModel: Model {
     }
 
     let namespaces: [String]
-    var name: String
-    var offset: Int64
-    var type: SwiftType
+    let name: String
+    let offset: Int64
+    let type: SwiftType
     let attribute: String
     let accessLevel: String
     let identifier: String

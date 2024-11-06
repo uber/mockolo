@@ -23,24 +23,21 @@ public enum MethodKind: Equatable {
 }
 
 final class MethodModel: Model {
-    var filePath: String = ""
-    var data: Data? = nil
-    var name: String
-    var type: SwiftType
-    var offset: Int64
-    let length: Int64
+    let name: String
+    let returnType: SwiftType
     let accessLevel: String
-    var attributes: [String]? = nil
+    let kind: MethodKind
+    let offset: Int64
+    let length: Int64
     let genericTypeParams: [ParamModel]
-    var genericWhereClause: String? = nil
+    let genericWhereClause: String?
     let params: [ParamModel]
     let processed: Bool
-    var modelDescription: String? = nil
-    var isStatic: Bool
+    let modelDescription: String?
+    let isStatic: Bool
     let shouldOverride: Bool
     let isAsync: Bool
     let throwing: ThrowingKind
-    let kind: MethodKind
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
     var modelType: ModelType {
@@ -118,7 +115,7 @@ final class MethodModel: Model {
             args.append(genericWhereClauseToSignatureComponent)
         }
         args.append(contentsOf: paramTypes.map(\.displayName))
-        var displayType = self.type.displayName
+        var displayType = self.returnType.displayName
         let capped = min(displayType.count, 32)
         displayType.removeLast(displayType.count-capped)
         args.append(displayType)
@@ -145,20 +142,14 @@ final class MethodModel: Model {
             return nil
         }
 
-        let paramNames = self.params.map(\.name)
-        let paramTypes = self.params.map(\.type)
-        let ret = ClosureModel(name: name,
-                               genericTypeParams: genericTypeParams,
-                               paramNames: paramNames,
-                               paramTypes: paramTypes,
-                               isAsync: isAsync,
-                               throwing: throwing,
-                               returnType: type,
-                               encloser: encloser)
-
-        return ret
+        return ClosureModel(genericTypeParams: genericTypeParams,
+                            paramNames: params.map(\.name),
+                            paramTypes: params.map(\.type),
+                            isAsync: isAsync,
+                            throwing: throwing,
+                            returnType: returnType,
+                            encloser: encloser)
     }
-
 
     init(name: String,
          typeName: String,
@@ -178,7 +169,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
+        self.returnType = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
         self.isAsync = isAsync
         self.throwing = throwing
         self.offset = offset
@@ -219,7 +210,7 @@ final class MethodModel: Model {
                 }
             }
 
-            if let ret = modelDescription?.trimmingCharacters(in: .newlines) ?? self.data?.toString(offset: offset, length: length) {
+            if let ret = modelDescription?.trimmingCharacters(in: .newlines) {
                 return prefix + ret
             }
             return nil
@@ -237,7 +228,7 @@ final class MethodModel: Model {
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
                                          params: params,
-                                         returnType: type,
+                                         returnType: returnType,
                                          accessLevel: accessLevel,
                                          argsHistory: argsHistory,
                                          handler: handler(encloser: encloser))

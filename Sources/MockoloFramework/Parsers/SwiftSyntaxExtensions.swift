@@ -1,8 +1,17 @@
 //
-//  SwiftSyntaxExtensions.swift
-//  MockoloFramework
+//  Copyright (c) 2018. Uber Technologies
 //
-//  Created by Ellie Shin on 10/29/19.
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
 //
 
 import Foundation
@@ -30,13 +39,6 @@ extension SyntaxProtocol {
     }
 }
 
-
-extension AttributeListSyntax {
-    var trimmedDescription: String? {
-        return self.trimmed.description.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-}
-
 extension DeclModifierListSyntax {
     var acl: String {
         for modifier in self {
@@ -58,31 +60,31 @@ extension DeclModifierListSyntax {
     }
 
     var isStatic: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.static) }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.tokenKind == .keyword(.static) }
     }
 
     var isRequired: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.required }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.required }
     }
 
     var isConvenience: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.convenience }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.convenience }
     }
 
     var isOverride: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.override }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.override }
     }
 
     var isFinal: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.text == String.final }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.text == String.final }
     }
 
     var isPrivate: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.private) || $0.tokenKind == .keyword(.fileprivate) }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.tokenKind == .keyword(.private) || $0.tokenKind == .keyword(.fileprivate) }
     }
 
     var isPublic: Bool {
-        return self.tokens(viewMode: .sourceAccurate).filter {$0.tokenKind == .keyword(.public) }.count > 0
+        return self.tokens(viewMode: .sourceAccurate).contains {$0.tokenKind == .keyword(.public) }
     }
 }
 
@@ -288,11 +290,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     var attributesDescription: String {
-        self.attributes.trimmedDescription ?? ""
-    }
-
-    var offset: Int64 {
-        return Int64(self.position.utf8Offset)
+        self.attributes.trimmedDescription
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
@@ -334,11 +332,7 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     var attributesDescription: String {
-        self.attributes.trimmedDescription ?? ""
-    }
-
-    var offset: Int64 {
-        return Int64(self.position.utf8Offset)
+        self.attributes.trimmedDescription
     }
 
     var isFinal: Bool {
@@ -420,16 +414,16 @@ extension VariableDeclSyntax {
             var potentialInitParam = false
 
             // Get the type info and whether it can be a var param for an initializer
-            if let vtype = v.typeAnnotation?.type.description.trimmingCharacters(in: .whitespaces) {
+            if let vtype = v.typeAnnotation?.type.trimmedDescription {
                 potentialInitParam = name.canBeInitParam(type: vtype, isStatic: isStatic)
                 typeName = vtype
             }
 
-            let storageType: VariableModel.MockStorageType
+            let storageKind: VariableModel.MockStorageKind
             switch v.accessorBlock?.accessors {
             case .accessors(let accessorDecls):
                 if accessorDecls.contains(where: { $0.accessorSpecifier.tokenKind == .keyword(.set) }) {
-                    storageType = .stored(needsSetCount: true)
+                    storageKind = .stored(needsSetCount: true)
                 } else if let getterDecl = accessorDecls.first(where: { $0.accessorSpecifier.tokenKind == .keyword(.get) }) {
                     if getterDecl.body == nil { // is protoccol
                         var getterEffects = VariableModel.GetterEffects.empty
@@ -440,37 +434,36 @@ extension VariableDeclSyntax {
                             getterEffects.throwing = .init(`throws`)
                         }
                         if getterEffects == .empty {
-                            storageType = .stored(needsSetCount: false)
+                            storageKind = .stored(needsSetCount: false)
                         } else {
-                            storageType = .computed(getterEffects)
+                            storageKind = .computed(getterEffects)
                         }
                     } else { // is class
-                        storageType = .computed(.empty)
+                        storageKind = .computed(.empty)
                     }
                 } else {
                     // will never happens
-                    storageType = .stored(needsSetCount: false) // fallback
+                    storageKind = .stored(needsSetCount: false) // fallback
                 }
             case .getter:
-                storageType = .computed(.empty)
+                storageKind = .computed(.empty)
             case nil:
-                storageType = .stored(needsSetCount: true)
+                storageKind = .stored(needsSetCount: true)
             }
 
-            let varmodel = VariableModel(name: name,
-                                         typeName: typeName,
-                                         acl: acl,
-                                         encloserType: declType,
-                                         isStatic: isStatic,
-                                         storageType: storageType,
-                                         canBeInitParam: potentialInitParam,
-                                         offset: v.offset,
-                                         rxTypes: metadata?.varTypes,
-                                         customModifiers: metadata?.modifiers,
-                                         modelDescription: self.description,
-                                         combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
-                                         processed: processed)
-            return varmodel
+            return VariableModel(name: name,
+                                 type: SwiftType(typeName),
+                                 acl: acl,
+                                 encloserType: declType,
+                                 isStatic: isStatic,
+                                 storageKind: storageKind,
+                                 canBeInitParam: potentialInitParam,
+                                 offset: v.offset,
+                                 rxTypes: metadata?.varTypes,
+                                 customModifiers: metadata?.modifiers,
+                                 modelDescription: self.description,
+                                 combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
+                                 processed: processed)
         }
         return varmodels
     }
@@ -581,14 +574,13 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          typeName: self.inheritedType?.description ?? "",
+                          type: SwiftType(self.inheritedType?.trimmedDescription ?? ""),
                           isGeneric: true,
                           inInit: inInit,
-                          needVarDecl: false,
+                          needsVarDecl: false,
                           offset: self.offset,
                           length: self.length)
     }
-
 }
 
 extension FunctionParameterSyntax {
@@ -609,18 +601,17 @@ extension FunctionParameterSyntax {
             }
         }
 
-        // Variadic args are not detected in the parser so need to manually look up
-        var type = self.type.description 
-        if self.description.contains(type + "...") {
+        var type = self.type.trimmedDescription
+        if ellipsis != nil {
             type.append("...")
         }
 
         return ParamModel(label: label,
                           name: name,
-                          typeName: type,
+                          type: SwiftType(type),
                           isGeneric: false,
                           inInit: inInit,
-                          needVarDecl: declType == .protocolType,
+                          needsVarDecl: declType == .protocolType,
                           offset: self.offset,
                           length: self.length)
     }

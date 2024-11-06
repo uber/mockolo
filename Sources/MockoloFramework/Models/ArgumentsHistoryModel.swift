@@ -1,9 +1,9 @@
 import Foundation
 
 final class ArgumentsHistoryModel: Model {
-    var name: String
-    var type: SwiftType
-    var offset: Int64 = .max
+    let name: String
+    let type: SwiftType
+    let offset: Int64 = .max
     let capturableParamNames: [String]
     let capturableParamTypes: [SwiftType]
     let isHistoryAnnotated: Bool

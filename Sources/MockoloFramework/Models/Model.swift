@@ -28,14 +28,12 @@ public enum ModelType {
 }
 
 /// Represents a model for an entity such as var, func, class, etc.
-public protocol Model {
+protocol Model: AnyObject {
     /// Identifier
-    var name: String { get set }
+    var name: String { get }
 
     /// Fully qualified identifier
     var fullName: String { get }
-
-    var underlyingName: String { get }
 
     /// Type of this model
     var modelType: ModelType { get }
@@ -43,16 +41,8 @@ public protocol Model {
     /// Indicates whether mock generation for this model has been processed
     var processed: Bool { get }
 
-    /// Indicates whether this model maps to an init method
-    var isInitializer: Bool { get }
-
-    var isStatic: Bool { get }
-
-    /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
-    var type: SwiftType { get set }
-
     /// Offset where this type is declared
-    var offset: Int64 { get set }
+    var offset: Int64 { get }
 
     /// Applies a corresponding template to this model to output mocks
     func render(with identifier: String,
@@ -69,27 +59,9 @@ public protocol Model {
     /// @param level The verbosity level
     /// @returns a unique name given the verbosity (default is name)
     func name(by level: Int) -> String
-
-
-    func isEqual(_ other: Model) -> Bool
-
-    func isLessThan(_ other: Model) -> Bool
 }
 
 extension Model {
-    func isEqual(_ other: Model) -> Bool {
-        return self.fullName == other.fullName &&
-            self.type.typeName == other.type.typeName &&
-            self.modelType == other.modelType
-    }
-
-    func isLessThan(_ other: Model) -> Bool {
-        if self.offset == other.offset {
-            return self.name < other.name
-        }
-        return self.offset < other.offset
-    }
-
     func name(by level: Int) -> String {
         return name
     }
@@ -98,20 +70,7 @@ extension Model {
         return name
     }
 
-    var underlyingName: String {
-        return name.safeName
-    }
-
-    var isStatic: Bool {
-        return false
-    }
-
     var processed: Bool {
         return false
     }
-
-    var isInitializer: Bool {
-        return false
-    }
 }
-

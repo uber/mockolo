@@ -7,27 +7,27 @@ final class VariableModel: Model {
         static let empty: GetterEffects = .init(isAsync: false, throwing: .none)
     }
 
-    enum MockStorageType {
+    enum MockStorageKind {
         case stored(needsSetCount: Bool)
         case computed(GetterEffects)
     }
 
-    var name: String
-    var type: SwiftType
-    var offset: Int64
+    let name: String
+    let type: SwiftType
+    let offset: Int64
     let accessLevel: String
     let attributes: [String]?
     let encloserType: DeclType
     /// Indicates whether this model can be used as a parameter to an initializer
-    var canBeInitParam: Bool
+    let canBeInitParam: Bool
     let processed: Bool
-    var filePath: String = ""
-    var isStatic = false
-    var shouldOverride = false
-    let storageType: MockStorageType
-    var rxTypes: [String: String]?
-    var customModifiers: [String: Modifier]?
-    var modelDescription: String? = nil
+    let isStatic: Bool
+    let shouldOverride: Bool
+    let storageKind: MockStorageKind
+    let rxTypes: [String: String]?
+    let customModifiers: [String: Modifier]?
+    let modelDescription: String?
+
     var combineType: CombineType?
     var wrapperAliasModel: VariableModel?
     var propertyWrapper: String?
@@ -48,11 +48,11 @@ final class VariableModel: Model {
     }
 
     init(name: String,
-         typeName: String,
+         type: SwiftType,
          acl: String?,
          encloserType: DeclType,
          isStatic: Bool,
-         storageType: MockStorageType,
+         storageKind: MockStorageKind,
          canBeInitParam: Bool,
          offset: Int64,
          rxTypes: [String: String]?,
@@ -60,11 +60,11 @@ final class VariableModel: Model {
          modelDescription: String?,
          combineType: CombineType?,
          processed: Bool) {
-        self.name = name.trimmingCharacters(in: .whitespaces)
-        self.type = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
+        self.name = name
+        self.type = type
         self.offset = offset
         self.isStatic = isStatic
-        self.storageType = storageType
+        self.storageKind = storageKind
         self.shouldOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed

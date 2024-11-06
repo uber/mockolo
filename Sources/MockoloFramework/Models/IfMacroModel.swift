@@ -14,14 +14,11 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 final class IfMacroModel: Model {
-    var name: String
-    var offset: Int64
-    var type: SwiftType
+    let name: String
+    let offset: Int64
     let entities: [Model]
-    
+
     var modelType: ModelType {
         return .macro
     }
@@ -36,7 +33,6 @@ final class IfMacroModel: Model {
         self.name = name
         self.entities = entities
         self.offset = offset
-        self.type = SwiftType(name)
     }
     
     func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {

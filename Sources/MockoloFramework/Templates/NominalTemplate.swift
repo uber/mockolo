@@ -47,7 +47,7 @@ extension NominalModel {
                 if model.modelType == .variable, model.name == String.hasBlankInit {
                     return nil
                 }
-                if model.modelType == .method, model.isInitializer, !model.processed {
+                if model.modelType == .method, let model = model as? MethodModel, model.isInitializer, !model.processed {
                     return nil
                 }
                 if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues) {
@@ -170,7 +170,7 @@ extension NominalModel {
                 .joined(separator: ", ")
 
             paramsAssign = initParamCandidates.map { (element: VariableModel) in
-                switch element.storageType {
+                switch element.storageKind {
                 case .stored:
                     return "\(2.tab)self.\(element.underlyingName) = \(element.name.safeName)"
                 case .computed:
@@ -270,21 +270,14 @@ extension NominalModel {
     /// @param models Potentially contains typealias models
     /// @returns A map of typealiases with multiple possible types
     func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
-        let typealiasModels = models.filter{$0.1.modelType == .typeAlias}
-        var aliasMap = [String: [String]]()
-        typealiasModels.forEach { (arg: (key: String, value: Model)) in
-            
-            let alias = arg.value
-            if aliasMap[alias.name] == nil {
-                aliasMap[alias.name] = [alias.type.typeName]
-            } else {
-                if let val = aliasMap[alias.name], !val.contains(alias.type.typeName) {
-                    aliasMap[alias.name]?.append(alias.type.typeName)
-                }
+        var aliasMap = [String: Set<String>]()
+        for (_, model) in models {
+            if let alias = model as? TypeAliasModel {
+                aliasMap[alias.name, default: []].insert(alias.type.typeName)
             }
         }
         let aliasDupes = aliasMap.filter {$0.value.count > 1}
-        return aliasDupes.isEmpty ? nil : aliasDupes
+        return aliasDupes.isEmpty ? nil : aliasDupes.mapValues {$0.sorted()}
     }
 
     // Finds all combine properties that are attempting to use a property wrapper alias

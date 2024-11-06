@@ -59,7 +59,7 @@ extension VariableModel {
 
         let staticSpace = isStatic ? "\(String.static) " : ""
 
-        switch storageType {
+        switch storageKind {
         case .stored(let needSetCount):
             let setCallCountVarDecl = needSetCount ? """
             \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
@@ -107,7 +107,6 @@ extension VariableModel {
 
         case .computed(let effects):
             let body = (ClosureModel(
-                name: "",
                 genericTypeParams: [],
                 paramNames: [],
                 paramTypes: [],
