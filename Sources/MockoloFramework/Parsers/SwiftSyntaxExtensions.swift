@@ -158,7 +158,7 @@ extension MemberBlockItemSyntax {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declType, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declType)
-                if let item = varMember.models(with: acl, declType: declType, metadata: metadata, processed: processed).first {
+                if let item = varMember.models(with: acl, metadata: metadata, processed: processed).first {
                     return (item, varMember.attributes.trimmedDescription, false)
                 }
             }
@@ -403,7 +403,7 @@ extension AttributeListSyntax {
 }
 
 extension VariableDeclSyntax {
-    func models(with acl: String, declType: FindTargetDeclType, metadata: AnnotationMetadata?, processed: Bool) -> [Model] {
+    func models(with acl: String, metadata: AnnotationMetadata?, processed: Bool) -> [Model] {
         // Detect whether it's static
         let isStatic = self.modifiers.isStatic
 
@@ -454,7 +454,6 @@ extension VariableDeclSyntax {
             return VariableModel(name: name,
                                  type: SwiftType(typeName),
                                  acl: acl,
-                                 encloserType: declType,
                                  isStatic: isStatic,
                                  storageKind: storageKind,
                                  canBeInitParam: potentialInitParam,
@@ -480,7 +479,6 @@ extension SubscriptDeclSyntax {
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
                                          typeName: self.returnClause.type.description,
                                          kind: .subscriptKind,
-                                         encloserType: declType,
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
@@ -510,7 +508,6 @@ extension FunctionDeclSyntax {
         let funcmodel = MethodModel(name: self.name.description,
                                     typeName: self.signature.returnClause?.type.description ?? "",
                                     kind: .funcKind,
-                                    encloserType: declType,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
                                     genericWhereClause: genericWhereClause,
@@ -551,7 +548,6 @@ extension InitializerDeclSyntax {
         return MethodModel(name: "init",
                            typeName: "",
                            kind: .initKind(required: requiredInit, override: declType == .classType),
-                           encloserType: declType,
                            acl: acl,
                            genericTypeParams: genericTypeParams,
                            genericWhereClause: genericWhereClause,

@@ -35,7 +35,6 @@ final class MethodModel: Model {
     let processed: Bool
     let modelDescription: String?
     let isStatic: Bool
-    let shouldOverride: Bool
     let isAsync: Bool
     let throwing: ThrowingKind
     let funcsWithArgsHistory: [String]
@@ -153,7 +152,6 @@ final class MethodModel: Model {
     init(name: String,
          typeName: String,
          kind: MethodKind,
-         encloserType: FindTargetDeclType,
          acl: String,
          genericTypeParams: [ParamModel],
          genericWhereClause: String?,
@@ -175,7 +173,6 @@ final class MethodModel: Model {
         self.length = length
         self.kind = kind
         self.isStatic = isStatic
-        self.shouldOverride = encloserType == .classType
         self.params = params
         self.genericTypeParams = genericTypeParams
         self.genericWhereClause = genericWhereClause

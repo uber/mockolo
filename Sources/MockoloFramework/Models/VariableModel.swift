@@ -17,12 +17,10 @@ final class VariableModel: Model {
     let offset: Int64
     let accessLevel: String
     let attributes: [String]?
-    let encloserType: FindTargetDeclType
     /// Indicates whether this model can be used as a parameter to an initializer
     let canBeInitParam: Bool
     let processed: Bool
     let isStatic: Bool
-    let shouldOverride: Bool
     let storageKind: MockStorageKind
     let rxTypes: [String: String]?
     let customModifiers: [String: Modifier]?
@@ -50,7 +48,6 @@ final class VariableModel: Model {
     init(name: String,
          type: SwiftType,
          acl: String?,
-         encloserType: FindTargetDeclType,
          isStatic: Bool,
          storageKind: MockStorageKind,
          canBeInitParam: Bool,
@@ -65,14 +62,12 @@ final class VariableModel: Model {
         self.offset = offset
         self.isStatic = isStatic
         self.storageKind = storageKind
-        self.shouldOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.rxTypes = rxTypes
         self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
-        self.encloserType = encloserType
         self.modelDescription = modelDescription
         self.combineType = combineType
     }
@@ -84,6 +79,7 @@ final class VariableModel: Model {
         guard let enclosingType = context.enclosingType else {
             return nil
         }
+        let shouldOverride = context.annotatedTypeKind == .class
         if processed {
             guard let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty else {
                 return nil
