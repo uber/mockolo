@@ -135,8 +135,8 @@ extension NominalModel {
                     } else {
                         let list = paramList.sorted(path: \.fullName, fallback: \.name)
                         if list.count > 0, list.count == buffer.count {
-                            let dups = zip(list, buffer).filter {$0.0.fullName == $0.1.fullName}
-                            if !dups.isEmpty {
+                            let hasDuplicates = zip(list, buffer).contains(where: { $0.fullName == $1.fullName })
+                            if hasDuplicates {
                                 needParamedInit = false
                             }
                         }

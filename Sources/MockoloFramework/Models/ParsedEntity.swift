@@ -14,15 +14,15 @@
 //  limitations under the License.
 //
 
-import Foundation
+import Algorithms
 
 /// Metadata containing unique models and potential init params ready to be rendered for output
 struct ResolvedEntity {
-    let key: String
-    let entity: Entity
-    let uniqueModels: [(String, Model)]
-    let attributes: [String]
-    let inheritedTypes: [String]
+    var key: String
+    var entity: Entity
+    var uniqueModels: [(String, Model)]
+    var attributes: [String]
+    var inheritedTypes: [String]
     var inheritsActorProtocol: Bool
 
     var declaredInits: [MethodModel] {
@@ -44,8 +44,7 @@ struct ResolvedEntity {
     ///             processed (already mocked by a previous run if any) models.
     /// @returns A list of init parameter models
     private func sortedInitVars(`in` models: [VariableModel]) -> [VariableModel] {
-        let processed = models.filter {$0.processed && $0.canBeInitParam}
-        let unprocessed = models.filter {!$0.processed && $0.canBeInitParam}
+        let (unprocessed, processed) = models.filter(\.canBeInitParam).partitioned(by: \.processed)
 
         // Named params in init should be unique. Add a duplicate param check to ensure it.
         let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
@@ -74,8 +73,8 @@ struct ResolvedEntity {
 }
 
 struct ResolvedEntityContainer {
-    let entity: ResolvedEntity
-    let paths: [String]
+    var entity: ResolvedEntity
+    var paths: [String]
 }
 
 protocol EntityNode {
