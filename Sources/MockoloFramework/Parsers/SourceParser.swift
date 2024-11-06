@@ -18,7 +18,7 @@ import Foundation
 import SwiftSyntax
 import SwiftParser
 
-public enum DeclType {
+public enum FindTargetDeclType {
     case protocolType, classType, other, all
 }
 
@@ -48,7 +48,7 @@ public class SourceParser {
                            exclusionSuffixes: [String],
                            annotation: String,
                            fileMacro: String?,
-                           declType: DeclType,
+                           declType: FindTargetDeclType,
                            completion: @escaping ([Entity], ImportMap?) -> ()) {
 
         guard !paths.isEmpty else { return }
@@ -67,7 +67,7 @@ public class SourceParser {
                               exclusionSuffixes: [String] = [],
                               annotation: String,
                               fileMacro: String?,
-                              declType: DeclType,
+                              declType: FindTargetDeclType,
                               lock: NSLock?,
                               completion: @escaping ([Entity], ImportMap?) -> ()) {
 

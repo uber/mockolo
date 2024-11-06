@@ -49,7 +49,7 @@ final class MethodModel: Model {
     }
     
     /// This is used to uniquely identify methods with the same signature and different generic requirements
-    var genericWhereClauseToSignatureComponent: String {
+    private var genericWhereClauseToSignatureComponent: String {
         guard let genericWhereClause else {
             return ""
         }
@@ -111,7 +111,7 @@ final class MethodModel: Model {
 
         let genericTypeNames = self.genericTypeParams.map { $0.name.capitalizeFirstLetter + $0.type.displayName }
         args.append(contentsOf: genericTypeNames)
-        if let genericWhereClause {
+        if genericWhereClause != nil {
             args.append(genericWhereClauseToSignatureComponent)
         }
         args.append(contentsOf: paramTypes.map(\.displayName))
@@ -137,7 +137,7 @@ final class MethodModel: Model {
         return ret
     }()
 
-    func handler(encloser: String) -> ClosureModel? {
+    func handler() -> ClosureModel? {
         if isInitializer {
             return nil
         }
@@ -147,14 +147,13 @@ final class MethodModel: Model {
                             paramTypes: params.map(\.type),
                             isAsync: isAsync,
                             throwing: throwing,
-                            returnType: returnType,
-                            encloser: encloser)
+                            returnType: returnType)
     }
 
     init(name: String,
          typeName: String,
          kind: MethodKind,
-         encloserType: DeclType,
+         encloserType: FindTargetDeclType,
          acl: String,
          genericTypeParams: [ParamModel],
          genericWhereClause: String?,
@@ -200,7 +199,11 @@ final class MethodModel: Model {
         return name(by: level - 1) + postfix
     }
 
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool, disableCombineDefaultValues: Bool = false) -> String? {
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        let shouldOverride = context.annotatedTypeKind == .class
         if processed {
             var prefix = shouldOverride  ? "\(String.override) " : ""
 
@@ -216,22 +219,19 @@ final class MethodModel: Model {
             return nil
         }
 
-        let result = applyMethodTemplate(name: name,
-                                         identifier: identifier,
-                                         kind: kind,
-                                         useTemplateFunc: useTemplateFunc,
-                                         allowSetCallCount: allowSetCallCount,
-                                         enableFuncArgsHistory: enableFuncArgsHistory,
-                                         isStatic: isStatic,
-                                         customModifiers: customModifiers,
-                                         isOverride: shouldOverride,
-                                         genericTypeParams: genericTypeParams,
-                                         genericWhereClause: genericWhereClause,
-                                         params: params,
-                                         returnType: returnType,
-                                         accessLevel: accessLevel,
-                                         argsHistory: argsHistory,
-                                         handler: handler(encloser: encloser))
-        return result
+        return applyMethodTemplate(name: name,
+                                   kind: kind,
+                                   arguments: arguments,
+                                   isStatic: isStatic,
+                                   customModifiers: customModifiers,
+                                   isOverride: shouldOverride,
+                                   genericTypeParams: genericTypeParams,
+                                   genericWhereClause: genericWhereClause,
+                                   params: params,
+                                   returnType: returnType,
+                                   accessLevel: accessLevel,
+                                   argsHistory: argsHistory,
+                                   handler: handler(),
+                                   context: context)
     }
 }

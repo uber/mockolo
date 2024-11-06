@@ -25,7 +25,7 @@ import Algorithms
 /// @returns a list of models representing sub-entities of the current entity, a list of models processed in dependent mock files if exists,
 ///          cumulated attributes, cumulated inherited types, and a map of filepaths and file contents (used for import lines lookup later).
 func lookupEntities(key: String,
-                    declType: DeclType,
+                    declType: FindTargetDeclType,
                     protocolMap: [String: Entity],
                     inheritanceMap: [String: Entity]) -> ([Model], [Model], [String], Set<String>, [String]) {
 

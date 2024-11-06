@@ -18,11 +18,8 @@ import Foundation
 
 extension MethodModel {
     func applyMethodTemplate(name: String,
-                             identifier: String,
                              kind: MethodKind,
-                             useTemplateFunc: Bool,
-                             allowSetCallCount: Bool,
-                             enableFuncArgsHistory: Bool,
+                             arguments: GenerationArguments,
                              isStatic: Bool,
                              customModifiers: [String: Modifier]?,
                              isOverride: Bool,
@@ -32,28 +29,32 @@ extension MethodModel {
                              returnType: SwiftType,
                              accessLevel: String,
                              argsHistory: ArgumentsHistoryModel?,
-                             handler: ClosureModel?) -> String {
+                             handler: ClosureModel?,
+                             context: RenderContext) -> String {
+        guard let overloadingResolvedName = context.overloadingResolvedName else {
+            preconditionFailure("context broken")
+        }
         var template = ""
 
         let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
 
         let acl = accessLevel.isEmpty ? "" : accessLevel+" "
-        let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
+        let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render()}.joined(separator: ", ")
         let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
         let genericWhereStr = genericWhereClause.map { "\($0) " } ?? ""
-        let paramDeclsStr = params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
+        let paramDeclsStr = params.compactMap{$0.render()}.joined(separator: ", ")
 
         switch kind {
         case .initKind(_, _):  // ClassTemplate needs to handle this as it needs a context of all the vars
             return ""
         default:
 
-            guard let handler = handler else { return "" }
+            guard let handler else { return "" }
 
-            let callCount = "\(identifier)\(String.callCountSuffix)"
-            let handlerVarName = "\(identifier)\(String.handlerSuffix)"
-            let handlerVarType = handler.type.typeName // ?? "Any"
-            let handlerReturn = handler.render(with: identifier, encloser: "") ?? ""
+            let callCount = "\(overloadingResolvedName)\(String.callCountSuffix)"
+            let handlerVarName = "\(overloadingResolvedName)\(String.handlerSuffix)"
+            let handlerVarType = handler.type(context: context).typeName // ?? "Any"
+            let handlerReturn = handler.render(context: context) ?? ""
 
             let suffixStr = applyFunctionSuffixTemplate(
                 isAsync: isAsync,
@@ -64,8 +65,8 @@ extension MethodModel {
             let keyword = isSubscript ? "" : "func "
             var body = ""
 
-            if useTemplateFunc {
-                let callMockFunc = !throwing.hasError && (handler.type.cast?.isEmpty ?? false)
+            if arguments.useTemplateFunc {
+                let callMockFunc = !throwing.hasError && (handler.type(context: context).cast?.isEmpty ?? false)
                 if callMockFunc {
                     let handlerParamValsStr = params.map { (arg) -> String in
                         if arg.type.typeName.hasPrefix(String.autoclosure) {
@@ -94,8 +95,8 @@ extension MethodModel {
                 \(2.tab)\(callCount) += 1
                 """
 
-                if let argsHistory = argsHistory, argsHistory.enable(force: enableFuncArgsHistory) {
-                    let argsHistoryCapture = argsHistory.render(with: identifier, encloser: "", enableFuncArgsHistory: enableFuncArgsHistory) ?? ""
+                if let argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                    let argsHistoryCapture = argsHistory.render(context: context, arguments: arguments) ?? ""
 
                     body = """
                     \(body)
@@ -127,15 +128,15 @@ extension MethodModel {
             } else {
                 modifierTypeStr = ""
             }
-            let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
+            let privateSetSpace = arguments.allowSetCallCount ? "" : "\(String.privateSet) "
 
             template = """
 
             \(1.tab)\(acl)\(staticStr)\(privateSetSpace)var \(callCount) = 0
             """
 
-            if let argsHistory = argsHistory, argsHistory.enable(force: enableFuncArgsHistory) {
-                let argsHistoryVarName = "\(identifier)\(String.argsHistorySuffix)"
+            if let argsHistory = argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                let argsHistoryVarName = "\(overloadingResolvedName)\(String.argsHistorySuffix)"
                 let argsHistoryVarType = argsHistory.type.typeName
 
                 template = """
@@ -144,7 +145,7 @@ extension MethodModel {
                 """
             }
 
-            template = """
+            return """
             \(template)
             \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
             \(1.tab)\(acl)\(staticStr)\(overrideStr)\(modifierTypeStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr)\(genericWhereStr){
@@ -152,7 +153,5 @@ extension MethodModel {
             \(1.tab)}
             """
         }
-
-        return template
     }
 }

@@ -27,6 +27,18 @@ public enum ModelType {
     case closure
 }
 
+enum NominalTypeDeclKind: String {
+    case `class`
+    case `actor`
+    case `protocol`
+}
+
+struct RenderContext {
+    var overloadingResolvedName: String?
+    var enclosingType: SwiftType?
+    var annotatedTypeKind: NominalTypeDeclKind?
+}
+
 /// Represents a model for an entity such as var, func, class, etc.
 protocol Model: AnyObject {
     /// Identifier
@@ -45,14 +57,9 @@ protocol Model: AnyObject {
     var offset: Int64 { get }
 
     /// Applies a corresponding template to this model to output mocks
-    func render(with identifier: String,
-                encloser: String,
-                useTemplateFunc: Bool,
-                useMockObservable: Bool,
-                allowSetCallCount: Bool,
-                mockFinal: Bool,
-                enableFuncArgsHistory: Bool,
-                disableCombineDefaultValues: Bool
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
     ) -> String?
 
     /// Used to differentiate multiple entities with the same name

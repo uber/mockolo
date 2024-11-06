@@ -17,7 +17,7 @@ final class VariableModel: Model {
     let offset: Int64
     let accessLevel: String
     let attributes: [String]?
-    let encloserType: DeclType
+    let encloserType: FindTargetDeclType
     /// Indicates whether this model can be used as a parameter to an initializer
     let canBeInitParam: Bool
     let processed: Bool
@@ -50,7 +50,7 @@ final class VariableModel: Model {
     init(name: String,
          type: SwiftType,
          acl: String?,
-         encloserType: DeclType,
+         encloserType: FindTargetDeclType,
          isStatic: Bool,
          storageKind: MockStorageKind,
          canBeInitParam: Bool,
@@ -77,7 +77,13 @@ final class VariableModel: Model {
         self.combineType = combineType
     }
 
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        guard let enclosingType = context.enclosingType else {
+            return nil
+        }
         if processed {
             guard let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty else {
                 return nil
@@ -94,36 +100,37 @@ final class VariableModel: Model {
             return prefix + modelDescription
         }
 
-        if !disableCombineDefaultValues {
-            if let combineVar = applyCombineVariableTemplate(name: identifier,
-                                                            type: type,
-                                                            encloser: encloser,
-                                                            shouldOverride: shouldOverride,
-                                                            isStatic: isStatic,
-                                                            accessLevel: accessLevel) {
+        if !arguments.disableCombineDefaultValues {
+            if let combineVar = applyCombineVariableTemplate(name: name,
+                                                             type: type,
+                                                             encloser: enclosingType.typeName,
+                                                             shouldOverride: shouldOverride,
+                                                             isStatic: isStatic,
+                                                             accessLevel: accessLevel) {
                 return combineVar
             }
         }
 
-        if let rxVar = applyRxVariableTemplate(name: identifier,
+        if let rxVar = applyRxVariableTemplate(name: name,
                                                type: type,
-                                               encloser: encloser,
+                                               encloser: enclosingType.typeName,
                                                rxTypes: rxTypes,
                                                shouldOverride: shouldOverride,
-                                               useMockObservable: useMockObservable,
-                                               allowSetCallCount: allowSetCallCount,
+                                               useMockObservable: arguments.useMockObservable,
+                                               allowSetCallCount: arguments.allowSetCallCount,
                                                isStatic: isStatic,
                                                accessLevel: accessLevel) {
             return rxVar
         }
 
-        return applyVariableTemplate(name: identifier,
+        return applyVariableTemplate(name: name,
                                      type: type,
-                                     encloser: encloser,
+                                     encloser: enclosingType.typeName,
                                      isStatic: isStatic,
                                      customModifiers: customModifiers,
-                                     allowSetCallCount: allowSetCallCount,
+                                     allowSetCallCount: arguments.allowSetCallCount,
                                      shouldOverride: shouldOverride,
-                                     accessLevel: accessLevel)
+                                     accessLevel: accessLevel,
+                                     context: context)
     }
 }

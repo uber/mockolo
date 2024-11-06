@@ -33,17 +33,23 @@ final class ArgumentsHistoryModel: Model {
         return force || isHistoryAnnotated
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool, disableCombineDefaultValues: Bool = false) -> String? {
-        guard enable(force: enableFuncArgsHistory) else {
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        guard enable(force: arguments.enableFuncArgsHistory) else {
+            return nil
+        }
+        guard let overloadingResolvedName = context.overloadingResolvedName else {
             return nil
         }
         
         switch capturableParamNames.count {
         case 1:
-            return "\(identifier)\(String.argsHistorySuffix).append(\(capturableParamNames[0]))"
+            return "\(overloadingResolvedName)\(String.argsHistorySuffix).append(\(capturableParamNames[0]))"
         case 2...:
             let paramNamesStr = capturableParamNames.joined(separator: ", ")
-            return "\(identifier)\(String.argsHistorySuffix).append((\(paramNamesStr)))"
+            return "\(overloadingResolvedName)\(String.argsHistorySuffix).append((\(paramNamesStr)))"
         default:
             fatalError("paramNames must not be empty.")
         }

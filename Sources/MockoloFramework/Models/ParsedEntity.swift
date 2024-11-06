@@ -61,7 +61,7 @@ struct ResolvedEntity {
         return NominalModel(identifier: key,
                             namespaces: entity.entityNode.namespaces,
                             acl: entity.entityNode.accessLevel,
-                            declTypeOfMockAnnotatedBaseType: entity.entityNode.declType,
+                            declKindOfMockAnnotatedBaseType: entity.entityNode.declKind,
                             declKind: inheritsActorProtocol ? .actor : .class,
                             inheritedTypes: inheritedTypes,
                             attributes: attributes,
@@ -84,22 +84,17 @@ protocol EntityNode {
     var mayHaveGlobalActor: Bool { get }
     var accessLevel: String { get }
     var attributesDescription: String { get }
-    var declType: DeclType { get }
+    var declKind: NominalTypeDeclKind { get }
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
+    func subContainer(metadata: AnnotationMetadata?, declType: FindTargetDeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
-final class EntityNodeSubContainer {
-    let attributes: [String]
-    let members: [Model]
-    let hasInit: Bool
-    init(attributes: [String], members: [Model], hasInit: Bool) {
-        self.attributes = attributes
-        self.members = members
-        self.hasInit = hasInit
-    }
+struct EntityNodeSubContainer {
+    var attributes: [String]
+    var members: [Model]
+    var hasInit: Bool
 }
 
 public enum CombineType {
@@ -129,6 +124,23 @@ struct AnnotationMetadata {
     var funcsWithArgsHistory: [String]?
     var modifiers: [String: Modifier]?
     var combineTypes: [String: CombineType]?
+}
+
+struct GenerationArguments {
+    var useTemplateFunc: Bool
+    var useMockObservable: Bool
+    var allowSetCallCount: Bool
+    var mockFinal: Bool
+    var enableFuncArgsHistory: Bool
+    var disableCombineDefaultValues: Bool
+    static let `default` = GenerationArguments(
+        useTemplateFunc: false,
+        useMockObservable: false,
+        allowSetCallCount: false,
+        mockFinal: false,
+        enableFuncArgsHistory: false,
+        disableCombineDefaultValues: false
+    )
 }
 
 public typealias ImportMap = [String: [String: [String]]]

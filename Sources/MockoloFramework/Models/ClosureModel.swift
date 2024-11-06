@@ -17,7 +17,6 @@
 import Foundation
 
 final class ClosureModel: Model {
-    var type: SwiftType
     let name: String = "" // closure type cannot have a name
     let offset: Int64 = .max
 
@@ -32,28 +31,37 @@ final class ClosureModel: Model {
         return .closure
     }
 
-    init(genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType, encloser: String) {
+    init(genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType) {
         // In the mock's call handler, rethrows is unavailable.
         let throwing = throwing.coerceRethrowsToThrows
         self.isAsync = isAsync
         self.throwing = throwing
-        let genericTypeNameList = genericTypeParams.map(\.name)
-        self.genericTypeNames = genericTypeNameList
+        self.genericTypeNames = genericTypeParams.map(\.name)
         self.paramNames = paramNames
         self.paramTypes = paramTypes
         self.funcReturnType = returnType
-        self.type = SwiftType.toClosureType(
+    }
+
+    func type(context: RenderContext) -> SwiftType {
+        return SwiftType.toClosureType(
             params: paramTypes,
-            typeParams: genericTypeNameList,
+            typeParams: genericTypeNames,
             isAsync: isAsync,
             throwing: throwing,
-            returnType: returnType,
-            encloser: encloser
+            returnType: funcReturnType,
+            encloser: context.enclosingType!
         )
     }
-    
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
-        return applyClosureTemplate(name: identifier + .handlerSuffix,
+
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments = .default
+    ) -> String? {
+        guard let overloadingResolvedName = context.overloadingResolvedName else {
+            return nil
+        }
+        return applyClosureTemplate(type: type(context: context),
+                                    name: overloadingResolvedName + .handlerSuffix,
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,
                                     returnDefaultType: funcReturnType)
