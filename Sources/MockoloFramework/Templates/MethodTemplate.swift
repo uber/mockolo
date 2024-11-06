@@ -17,23 +17,11 @@
 import Foundation
 
 extension MethodModel {
-    func applyMethodTemplate(name: String,
-                             kind: MethodKind,
+    func applyMethodTemplate(overloadingResolvedName: String,
                              arguments: GenerationArguments,
-                             isStatic: Bool,
-                             customModifiers: [String: Modifier]?,
                              isOverride: Bool,
-                             genericTypeParams: [ParamModel],
-                             genericWhereClause: String?,
-                             params: [ParamModel],
-                             returnType: SwiftType,
-                             accessLevel: String,
-                             argsHistory: ArgumentsHistoryModel?,
                              handler: ClosureModel?,
                              context: RenderContext) -> String {
-        guard let overloadingResolvedName = context.overloadingResolvedName else {
-            preconditionFailure("context broken")
-        }
         var template = ""
 
         let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
@@ -122,8 +110,7 @@ extension MethodModel {
 
             let overrideStr = isOverride ? "\(String.override) " : ""
             let modifierTypeStr: String
-            if let customModifiers = customModifiers,
-            let customModifier: Modifier = customModifiers[name] {
+            if let customModifier: Modifier = customModifiers[name] {
                 modifierTypeStr = customModifier.rawValue + " "
             } else {
                 modifierTypeStr = ""

@@ -219,18 +219,13 @@ final class MethodModel: Model {
             return nil
         }
 
-        return applyMethodTemplate(name: name,
-                                   kind: kind,
+        guard let overloadingResolvedName = context.overloadingResolvedName else {
+            return nil
+        }
+
+        return applyMethodTemplate(overloadingResolvedName: overloadingResolvedName,
                                    arguments: arguments,
-                                   isStatic: isStatic,
-                                   customModifiers: customModifiers,
                                    isOverride: shouldOverride,
-                                   genericTypeParams: genericTypeParams,
-                                   genericWhereClause: genericWhereClause,
-                                   params: params,
-                                   returnType: returnType,
-                                   accessLevel: accessLevel,
-                                   argsHistory: argsHistory,
                                    handler: handler(),
                                    context: context)
     }
