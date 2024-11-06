@@ -42,14 +42,14 @@ final class ClosureModel: Model {
         self.funcReturnType = returnType
     }
 
-    func type(context: RenderContext) -> SwiftType {
+    func type(enclosingType: SwiftType) -> SwiftType {
         return SwiftType.toClosureType(
             params: paramTypes,
             typeParams: genericTypeNames,
             isAsync: isAsync,
             throwing: throwing,
             returnType: funcReturnType,
-            encloser: context.enclosingType!
+            encloser: enclosingType
         )
     }
 
@@ -57,10 +57,11 @@ final class ClosureModel: Model {
         context: RenderContext,
         arguments: GenerationArguments = .default
     ) -> String? {
-        guard let overloadingResolvedName = context.overloadingResolvedName else {
+        guard let overloadingResolvedName = context.overloadingResolvedName,
+              let enclosingType = context.enclosingType else {
             return nil
         }
-        return applyClosureTemplate(type: type(context: context),
+        return applyClosureTemplate(type: type(enclosingType: enclosingType),
                                     name: overloadingResolvedName + .handlerSuffix,
                                     paramVals: paramNames,
                                     paramTypes: paramTypes,

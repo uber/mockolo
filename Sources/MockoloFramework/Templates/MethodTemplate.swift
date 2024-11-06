@@ -37,11 +37,11 @@ extension MethodModel {
             return ""
         default:
 
-            guard let handler else { return "" }
+            guard let handler, let enclosingType = context.enclosingType else { return "" }
 
             let callCount = "\(overloadingResolvedName)\(String.callCountSuffix)"
             let handlerVarName = "\(overloadingResolvedName)\(String.handlerSuffix)"
-            let handlerVarType = handler.type(context: context).typeName // ?? "Any"
+            let handlerVarType = handler.type(enclosingType: enclosingType).typeName // ?? "Any"
             let handlerReturn = handler.render(context: context) ?? ""
 
             let suffixStr = applyFunctionSuffixTemplate(
@@ -54,7 +54,7 @@ extension MethodModel {
             var body = ""
 
             if arguments.useTemplateFunc {
-                let callMockFunc = !throwing.hasError && (handler.type(context: context).cast?.isEmpty ?? false)
+                let callMockFunc = !throwing.hasError && (handler.type(enclosingType: enclosingType).cast?.isEmpty ?? false)
                 if callMockFunc {
                     let handlerParamValsStr = params.map { (arg) -> String in
                         if arg.type.typeName.hasPrefix(String.autoclosure) {
