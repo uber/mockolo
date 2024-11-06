@@ -146,10 +146,10 @@ public typealias ImportMap = [String: [String: [String]]]
 
 /// Metadata for a type being mocked
 public final class Entity {
-    var filepath: String = ""
     let entityNode: EntityNode
-    let isProcessed: Bool
+    let filepath: String
     let metadata: AnnotationMetadata?
+    let isProcessed: Bool
 
     var isAnnotated: Bool {
         return metadata != nil
@@ -164,16 +164,14 @@ public final class Entity {
 
         guard !isPrivate, !isFinal else {return nil}
 
-        let node = Entity(entityNode: entityNode,
-                          filepath: filepath,
-                          metadata: metadata,
-                          isProcessed: processed)
-
-        return node
+        return Entity(entityNode: entityNode,
+                      filepath: filepath,
+                      metadata: metadata,
+                      isProcessed: processed)
     }
 
     init(entityNode: EntityNode,
-         filepath: String = "",
+         filepath: String,
          metadata: AnnotationMetadata?,
          isProcessed: Bool) {
         self.entityNode = entityNode
