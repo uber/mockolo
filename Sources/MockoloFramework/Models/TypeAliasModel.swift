@@ -58,7 +58,7 @@ final class TypeAliasModel: Model {
 
     func render(
         context: RenderContext,
-        arguments: GenerationArguments
+        arguments: GenerationArguments = .default
     ) -> String? {
         let addAcl = context.annotatedTypeKind == .protocol && !processed
         if processed || useDescription, let modelDescription = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines) {
