@@ -17,12 +17,10 @@ final class VariableModel: Model {
     let offset: Int64
     let accessLevel: String
     let attributes: [String]?
-    let encloserType: DeclType
     /// Indicates whether this model can be used as a parameter to an initializer
     let canBeInitParam: Bool
     let processed: Bool
     let isStatic: Bool
-    let shouldOverride: Bool
     let storageKind: MockStorageKind
     let rxTypes: [String: String]?
     let customModifiers: [String: Modifier]?
@@ -50,7 +48,6 @@ final class VariableModel: Model {
     init(name: String,
          type: SwiftType,
          acl: String?,
-         encloserType: DeclType,
          isStatic: Bool,
          storageKind: MockStorageKind,
          canBeInitParam: Bool,
@@ -65,19 +62,24 @@ final class VariableModel: Model {
         self.offset = offset
         self.isStatic = isStatic
         self.storageKind = storageKind
-        self.shouldOverride = encloserType == .classType
         self.canBeInitParam = canBeInitParam
         self.processed = processed
         self.rxTypes = rxTypes
         self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
         self.attributes = nil
-        self.encloserType = encloserType
         self.modelDescription = modelDescription
         self.combineType = combineType
     }
 
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        guard let enclosingType = context.enclosingType else {
+            return nil
+        }
+        let shouldOverride = context.annotatedTypeKind == .class
         if processed {
             guard let modelDescription = modelDescription?.trimmingCharacters(in: .newlines), !modelDescription.isEmpty else {
                 return nil
@@ -94,36 +96,37 @@ final class VariableModel: Model {
             return prefix + modelDescription
         }
 
-        if !disableCombineDefaultValues {
-            if let combineVar = applyCombineVariableTemplate(name: identifier,
-                                                            type: type,
-                                                            encloser: encloser,
-                                                            shouldOverride: shouldOverride,
-                                                            isStatic: isStatic,
-                                                            accessLevel: accessLevel) {
+        if !arguments.disableCombineDefaultValues {
+            if let combineVar = applyCombineVariableTemplate(name: name,
+                                                             type: type,
+                                                             encloser: enclosingType.typeName,
+                                                             shouldOverride: shouldOverride,
+                                                             isStatic: isStatic,
+                                                             accessLevel: accessLevel) {
                 return combineVar
             }
         }
 
-        if let rxVar = applyRxVariableTemplate(name: identifier,
+        if let rxVar = applyRxVariableTemplate(name: name,
                                                type: type,
-                                               encloser: encloser,
+                                               encloser: enclosingType.typeName,
                                                rxTypes: rxTypes,
                                                shouldOverride: shouldOverride,
-                                               useMockObservable: useMockObservable,
-                                               allowSetCallCount: allowSetCallCount,
+                                               useMockObservable: arguments.useMockObservable,
+                                               allowSetCallCount: arguments.allowSetCallCount,
                                                isStatic: isStatic,
                                                accessLevel: accessLevel) {
             return rxVar
         }
 
-        return applyVariableTemplate(name: identifier,
+        return applyVariableTemplate(name: name,
                                      type: type,
-                                     encloser: encloser,
+                                     encloser: enclosingType.typeName,
                                      isStatic: isStatic,
                                      customModifiers: customModifiers,
-                                     allowSetCallCount: allowSetCallCount,
+                                     allowSetCallCount: arguments.allowSetCallCount,
                                      shouldOverride: shouldOverride,
-                                     accessLevel: accessLevel)
+                                     accessLevel: accessLevel,
+                                     context: context)
     }
 }

@@ -518,7 +518,7 @@ public final class SwiftType {
         isAsync: Bool,
         throwing: ThrowingKind,
         returnType: SwiftType,
-        encloser: String
+        encloser: SwiftType
     ) -> SwiftType {
         let displayableParamTypes = params.map { (subtype: SwiftType) -> String in
             return subtype.processTypeParams(with: typeParams)
@@ -553,7 +553,7 @@ public final class SwiftType {
         }
 
          if returnType.isSelf {
-            displayableReturnType = encloser
+             displayableReturnType = encloser.typeName
             returnTypeCast = " as! " + String.`Self`
         }
 

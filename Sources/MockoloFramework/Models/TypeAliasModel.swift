@@ -26,13 +26,12 @@ final class TypeAliasModel: Model {
     let useDescription: Bool
     let modelDescription: String?
     let overrideTypes: [String: String]?
-    let addAcl: Bool
 
     var modelType: ModelType {
         return .typeAlias
     }
 
-    init(name: String, typeName: String, acl: String?, encloserType: DeclType, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
+    init(name: String, typeName: String, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
         self.name = name
         self.accessLevel = acl ?? ""
         self.offset = offset
@@ -41,7 +40,6 @@ final class TypeAliasModel: Model {
         self.modelDescription = modelDescription
         self.overrideTypes = overrideTypes
         self.useDescription = useDescription
-        self.addAcl = encloserType == .protocolType && !processed
         // If there's an override typealias value, set it to type
         if let val = overrideTypes?[self.name] {
             self.type  = SwiftType(val)
@@ -53,12 +51,16 @@ final class TypeAliasModel: Model {
     var fullName: String {
         return self.name + self.type.displayName
     }
-    
+
     func name(by level: Int) -> String {
         return fullName
     }
-    
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
+
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments = .default
+    ) -> String? {
+        let addAcl = context.annotatedTypeKind == .protocol && !processed
         if processed || useDescription, let modelDescription = modelDescription?.trimmingCharacters(in: .whitespacesAndNewlines) {
             if addAcl {
                 return "\(1.tab)\(accessLevel) \(modelDescription)"

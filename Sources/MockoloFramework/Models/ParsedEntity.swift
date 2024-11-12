@@ -14,15 +14,15 @@
 //  limitations under the License.
 //
 
-import Foundation
+import Algorithms
 
 /// Metadata containing unique models and potential init params ready to be rendered for output
 struct ResolvedEntity {
-    let key: String
-    let entity: Entity
-    let uniqueModels: [(String, Model)]
-    let attributes: [String]
-    let inheritedTypes: [String]
+    var key: String
+    var entity: Entity
+    var uniqueModels: [(String, Model)]
+    var attributes: [String]
+    var inheritedTypes: [String]
     var inheritsActorProtocol: Bool
 
     var declaredInits: [MethodModel] {
@@ -44,8 +44,7 @@ struct ResolvedEntity {
     ///             processed (already mocked by a previous run if any) models.
     /// @returns A list of init parameter models
     private func sortedInitVars(`in` models: [VariableModel]) -> [VariableModel] {
-        let processed = models.filter {$0.processed && $0.canBeInitParam}
-        let unprocessed = models.filter {!$0.processed && $0.canBeInitParam}
+        let (unprocessed, processed) = models.filter(\.canBeInitParam).partitioned(by: \.processed)
 
         // Named params in init should be unique. Add a duplicate param check to ensure it.
         let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
@@ -61,7 +60,7 @@ struct ResolvedEntity {
         return NominalModel(identifier: key,
                             namespaces: entity.entityNode.namespaces,
                             acl: entity.entityNode.accessLevel,
-                            declTypeOfMockAnnotatedBaseType: entity.entityNode.declType,
+                            declKindOfMockAnnotatedBaseType: entity.entityNode.declKind,
                             declKind: inheritsActorProtocol ? .actor : .class,
                             inheritedTypes: inheritedTypes,
                             attributes: attributes,
@@ -74,8 +73,8 @@ struct ResolvedEntity {
 }
 
 struct ResolvedEntityContainer {
-    let entity: ResolvedEntity
-    let paths: [String]
+    var entity: ResolvedEntity
+    var paths: [String]
 }
 
 protocol EntityNode {
@@ -84,22 +83,17 @@ protocol EntityNode {
     var mayHaveGlobalActor: Bool { get }
     var accessLevel: String { get }
     var attributesDescription: String { get }
-    var declType: DeclType { get }
+    var declKind: NominalTypeDeclKind { get }
     var inheritedTypes: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
-    func subContainer(metadata: AnnotationMetadata?, declType: DeclType, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
+    func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
-final class EntityNodeSubContainer {
-    let attributes: [String]
-    let members: [Model]
-    let hasInit: Bool
-    init(attributes: [String], members: [Model], hasInit: Bool) {
-        self.attributes = attributes
-        self.members = members
-        self.hasInit = hasInit
-    }
+struct EntityNodeSubContainer {
+    var attributes: [String]
+    var members: [Model]
+    var hasInit: Bool
 }
 
 public enum CombineType {
@@ -131,14 +125,31 @@ struct AnnotationMetadata {
     var combineTypes: [String: CombineType]?
 }
 
+struct GenerationArguments {
+    var useTemplateFunc: Bool
+    var useMockObservable: Bool
+    var allowSetCallCount: Bool
+    var mockFinal: Bool
+    var enableFuncArgsHistory: Bool
+    var disableCombineDefaultValues: Bool
+    static let `default` = GenerationArguments(
+        useTemplateFunc: false,
+        useMockObservable: false,
+        allowSetCallCount: false,
+        mockFinal: false,
+        enableFuncArgsHistory: false,
+        disableCombineDefaultValues: false
+    )
+}
+
 public typealias ImportMap = [String: [String: [String]]]
 
 /// Metadata for a type being mocked
 public final class Entity {
-    var filepath: String = ""
     let entityNode: EntityNode
-    let isProcessed: Bool
+    let filepath: String
     let metadata: AnnotationMetadata?
+    let isProcessed: Bool
 
     var isAnnotated: Bool {
         return metadata != nil
@@ -153,16 +164,14 @@ public final class Entity {
 
         guard !isPrivate, !isFinal else {return nil}
 
-        let node = Entity(entityNode: entityNode,
-                          filepath: filepath,
-                          metadata: metadata,
-                          isProcessed: processed)
-
-        return node
+        return Entity(entityNode: entityNode,
+                      filepath: filepath,
+                      metadata: metadata,
+                      isProcessed: processed)
     }
 
     init(entityNode: EntityNode,
-         filepath: String = "",
+         filepath: String,
          metadata: AnnotationMetadata?,
          isProcessed: Bool) {
         self.entityNode = entityNode

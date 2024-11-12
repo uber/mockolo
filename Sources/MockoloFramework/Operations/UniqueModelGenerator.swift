@@ -34,7 +34,7 @@ private func generateUniqueModels(key: String,
                                   entity: Entity,
                                   protocolMap: [String: Entity],
                                   inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
-    let (models, processedModels, attributes, inheritedTypes, paths) = lookupEntities(key: key, declType: entity.entityNode.declType, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+    let (models, processedModels, attributes, inheritedTypes, paths) = lookupEntities(key: key, declKind: entity.entityNode.declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
 
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
@@ -66,6 +66,7 @@ private func generateUniqueModels(key: String,
     let mockedUniqueEntities = Dictionary(uniqueKeysWithValues: processedElementsMap)
 
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
+        .sorted(path: \.value.offset, fallback: \.key)
 
     var mockInheritedTypes = [String]()
     if inheritedTypes.contains(.sendable) {

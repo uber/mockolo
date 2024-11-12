@@ -270,3 +270,39 @@ class PresentableListenerMock: PresentableListener {
 }
 
 """
+
+let macroInFuncWithOverload = """
+/// \(String.mockAnnotation)
+protocol PresentableListener: AnyObject {
+    #if DEBUG
+    func run(value: Int)
+    func run(value: String)
+    #endif
+}
+"""
+
+let macroInFuncWithOverloadMock = """
+class PresentableListenerMock: PresentableListener {
+    init() { }
+    #if DEBUG
+    private(set) var runCallCount = 0
+    var runHandler: ((Int)  -> ())?
+    func run(value: Int)   {
+        runCallCount += 1
+        if let runHandler = runHandler {
+            runHandler(value)
+        }
+        
+    }
+    private(set) var runValueCallCount = 0
+    var runValueHandler: ((String)  -> ())?
+    func run(value: String)   {
+        runValueCallCount += 1
+        if let runValueHandler = runValueHandler {
+            runValueHandler(value)
+        }
+        
+    }
+    #endif
+}
+"""

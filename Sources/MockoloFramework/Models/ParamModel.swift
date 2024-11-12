@@ -83,7 +83,10 @@ final class ParamModel: Model {
         return nil
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool = false, useMockObservable: Bool = false, allowSetCallCount: Bool = false, mockFinal: Bool = false,  enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
+    func render(
+        context: RenderContext = .init(),
+        arguments: GenerationArguments = .default
+    ) -> String? {
         return applyParamTemplate(name: name, label: label, type: type, inInit: inInit)
     }
 }

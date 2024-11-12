@@ -18,15 +18,20 @@ import Foundation
 
 extension IfMacroModel {
     func applyMacroTemplate(name: String,
-                            useTemplateFunc: Bool,
-                            useMockObservable: Bool,
-                            allowSetCallCount: Bool,
-                            mockFinal: Bool,
-                            enableFuncArgsHistory: Bool,
-                            disableCombineDefaultValues: Bool,
+                            context: RenderContext,
+                            arguments: GenerationArguments,
                             entities: [Model]) -> String {
         let rendered = entities
-            .compactMap {$0.render(with: $0.name, encloser: "", useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount,  mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues) }
+            .compactMap { model in
+                model.render(
+                    context: .init(
+                        overloadingResolvedName: model.name, // FIXME: the name is not resolving overload
+                        enclosingType: context.enclosingType,
+                        annotatedTypeKind: context.annotatedTypeKind
+                    ),
+                    arguments: arguments
+                )
+            }
             .joined(separator: "\n")
         
         let template = """

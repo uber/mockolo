@@ -21,15 +21,9 @@ extension NominalModel {
                               identifier: String,
                               accessLevel: String,
                               attribute: String,
-                              declTypeOfMockAnnotatedBaseType: DeclType,
                               inheritedTypes: [String],
                               metadata: AnnotationMetadata?,
-                              useTemplateFunc: Bool,
-                              useMockObservable: Bool,
-                              allowSetCallCount: Bool,
-                              mockFinal: Bool,
-                              enableFuncArgsHistory: Bool,
-                              disableCombineDefaultValues: Bool,
+                              arguments: GenerationArguments,
                               initParamCandidates: [VariableModel],
                               declaredInits: [MethodModel],
                               entities: [(String, Model)]) -> String {
@@ -39,7 +33,7 @@ extension NominalModel {
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
         let typealiases = typealiasWhitelist(in: entities)
         let renderedEntities = entities
-            .compactMap { (uniqueId: String, model: Model) -> (String, Int64)? in
+            .compactMap { (uniqueId: String, model: Model) -> String? in
                 if model.modelType == .typeAlias, let _ = typealiases?[model.name] {
                     // this case will be handlded by typealiasWhitelist look up later
                     return nil
@@ -50,22 +44,22 @@ extension NominalModel {
                 if model.modelType == .method, let model = model as? MethodModel, model.isInitializer, !model.processed {
                     return nil
                 }
-                if let ret = model.render(with: uniqueId, encloser: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues) {
-                    return (ret, model.offset)
+                if let ret = model.render(
+                    context: .init(
+                        overloadingResolvedName: uniqueId,
+                        enclosingType: type,
+                        annotatedTypeKind: declKindOfMockAnnotatedBaseType
+                    ),
+                    arguments: arguments
+                ) {
+                    return ret
                 }
                 return nil
-        }
-        .sorted { (left: (String, Int64), right: (String, Int64)) -> Bool in
-            if left.1 == right.1 {
-                return left.0 < right.0
             }
-            return left.1 < right.1
-        }
-        .map {$0.0}
-        .joined(separator: "\n")
+            .joined(separator: "\n")
         
         var typealiasTemplate = ""
-        let addAcl = declTypeOfMockAnnotatedBaseType == .protocolType ? acl : ""
+        let addAcl = declKindOfMockAnnotatedBaseType == .protocol ? acl : ""
         if let typealiasWhitelist = typealiases {
             typealiasTemplate = typealiasWhitelist.map { (arg: (key: String, value: [String])) -> String in
                 let joinedType = arg.value.sorted().joined(separator: " & ")
@@ -78,7 +72,7 @@ extension NominalModel {
             moduleDot = moduleName + "."
         }
         
-        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits,  acl: acl, declTypeOfMockAnnotatedBaseType: declTypeOfMockAnnotatedBaseType, overrides: metadata?.varTypes)
+        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits, acl: acl, declKindOfMockAnnotatedBaseType: declKindOfMockAnnotatedBaseType, overrides: metadata?.varTypes)
 
         var inheritedTypes = inheritedTypes
         inheritedTypes.insert("\(moduleDot)\(identifier)", at: 0)
@@ -94,7 +88,7 @@ extension NominalModel {
             body += "\(renderedEntities)"
         }
 
-        let finalStr = mockFinal ? "\(String.final) " : ""
+        let finalStr = arguments.mockFinal ? "\(String.final) " : ""
         let template = """
         \(attribute)
         \(acl)\(finalStr)\(declKind.rawValue) \(name): \(inheritedTypes.joined(separator: ", ")) {
@@ -117,7 +111,7 @@ extension NominalModel {
         initParamCandidates: [VariableModel],
         declaredInits: [MethodModel],
         acl: String,
-        declTypeOfMockAnnotatedBaseType: DeclType,
+        declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
         overrides: [String: String]?
     ) -> String {
         
@@ -130,7 +124,7 @@ extension NominalModel {
             needBlankInit = true
             needParamedInit = false
         } else {
-            if declTypeOfMockAnnotatedBaseType == .protocolType {
+            if declKindOfMockAnnotatedBaseType == .protocol {
                 needParamedInit = !initParamCandidates.isEmpty
                 needBlankInit = true
 
@@ -141,8 +135,8 @@ extension NominalModel {
                     } else {
                         let list = paramList.sorted(path: \.fullName, fallback: \.name)
                         if list.count > 0, list.count == buffer.count {
-                            let dups = zip(list, buffer).filter {$0.0.fullName == $0.1.fullName}
-                            if !dups.isEmpty {
+                            let hasDuplicates = zip(list, buffer).contains(where: { $0.fullName == $1.fullName })
+                            if hasDuplicates {
                                 needParamedInit = false
                             }
                         }
@@ -203,9 +197,9 @@ extension NominalModel {
             if case let .initKind(required, override) = m.kind, !m.processed {
                 let modifier = required ? "\(String.required) " : (override ? "\(String.override) " : "")
                 let mAcl = m.accessLevel.isEmpty ? "" : "\(m.accessLevel) "
-                let genericTypeDeclsStr = m.genericTypeParams.compactMap {$0.render(with: "", encloser: "")}.joined(separator: ", ")
+                let genericTypeDeclsStr = m.genericTypeParams.compactMap {$0.render()}.joined(separator: ", ")
                 let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
-                let paramDeclsStr = m.params.compactMap{$0.render(with: "", encloser: "")}.joined(separator: ", ")
+                let paramDeclsStr = m.params.compactMap{$0.render()}.joined(separator: ", ")
                 let suffixStr = applyFunctionSuffixTemplate(
                     isAsync: m.isAsync,
                     throwing: m.throwing

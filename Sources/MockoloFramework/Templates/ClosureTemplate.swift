@@ -17,7 +17,8 @@
 import Foundation
 
 extension ClosureModel {
-    func applyClosureTemplate(name: String,
+    func applyClosureTemplate(type: SwiftType,
+                              name: String,
                               paramVals: [String]?,
                               paramTypes: [SwiftType]?,
                               returnDefaultType: SwiftType) -> String {

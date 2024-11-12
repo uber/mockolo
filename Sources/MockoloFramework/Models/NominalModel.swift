@@ -15,11 +15,6 @@
 //
 
 final class NominalModel: Model {
-    enum NominalTypeDeclKind: String {
-        case `class`
-        case `actor`
-    }
-
     let namespaces: [String]
     let name: String
     let offset: Int64
@@ -27,7 +22,7 @@ final class NominalModel: Model {
     let attribute: String
     let accessLevel: String
     let identifier: String
-    let declTypeOfMockAnnotatedBaseType: DeclType
+    let declKindOfMockAnnotatedBaseType: NominalTypeDeclKind
     let inheritedTypes: [String]
     let entities: [(String, Model)]
     let initParamCandidates: [VariableModel]
@@ -42,7 +37,7 @@ final class NominalModel: Model {
     init(identifier: String,
          namespaces: [String],
          acl: String,
-         declTypeOfMockAnnotatedBaseType: DeclType,
+         declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
          declKind: NominalTypeDeclKind,
          inheritedTypes: [String],
          attributes: [String],
@@ -55,7 +50,7 @@ final class NominalModel: Model {
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
         self.type = SwiftType(self.name)
         self.namespaces = namespaces
-        self.declTypeOfMockAnnotatedBaseType = declTypeOfMockAnnotatedBaseType
+        self.declKindOfMockAnnotatedBaseType = declKindOfMockAnnotatedBaseType
         self.declKind = declKind
         self.inheritedTypes = inheritedTypes
         self.entities = entities
@@ -68,29 +63,17 @@ final class NominalModel: Model {
     }
     
     func render(
-        with identifier: String,
-        encloser: String,
-        useTemplateFunc: Bool,
-        useMockObservable: Bool,
-        allowSetCallCount: Bool = false,
-        mockFinal: Bool = false,
-        enableFuncArgsHistory: Bool = false,
-        disableCombineDefaultValues: Bool = false
+        context: RenderContext,
+        arguments: GenerationArguments
     ) -> String? {
         return applyNominalTemplate(
             name: name,
             identifier: self.identifier,
             accessLevel: accessLevel,
             attribute: attribute,
-            declTypeOfMockAnnotatedBaseType: declTypeOfMockAnnotatedBaseType,
             inheritedTypes: inheritedTypes,
             metadata: metadata,
-            useTemplateFunc: useTemplateFunc,
-            useMockObservable: useMockObservable,
-            allowSetCallCount: allowSetCallCount,
-            mockFinal: mockFinal,
-            enableFuncArgsHistory: enableFuncArgsHistory,
-            disableCombineDefaultValues: disableCombineDefaultValues,
+            arguments: arguments,
             initParamCandidates: initParamCandidates,
             declaredInits: declaredInits,
             entities: entities

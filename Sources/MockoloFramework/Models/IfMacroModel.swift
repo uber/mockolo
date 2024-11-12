@@ -35,7 +35,15 @@ final class IfMacroModel: Model {
         self.offset = offset
     }
     
-    func render(with identifier: String, encloser: String, useTemplateFunc: Bool, useMockObservable: Bool, allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, disableCombineDefaultValues: Bool = false) -> String? {
-        return applyMacroTemplate(name: name, useTemplateFunc: useTemplateFunc, useMockObservable: useMockObservable, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, disableCombineDefaultValues: disableCombineDefaultValues, entities: entities)
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        return applyMacroTemplate(
+            name: name,
+            context: context,
+            arguments: arguments,
+            entities: entities
+        )
     }
 }

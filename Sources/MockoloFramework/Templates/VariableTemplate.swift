@@ -25,7 +25,8 @@ extension VariableModel {
                                customModifiers: [String: Modifier]?,
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
-                               accessLevel: String) -> String {
+                               accessLevel: String,
+                               context: RenderContext) -> String {
 
         let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
         let underlyingVarDefaultVal = type.defaultVal()
@@ -112,9 +113,12 @@ extension VariableModel {
                 paramTypes: [],
                 isAsync: effects.isAsync,
                 throwing: effects.throwing,
-                returnType: type,
-                encloser: ""
-            ).render(with: name, encloser: "") ?? "")
+                returnType: type
+            ).render(context: .init(
+                overloadingResolvedName: name, // var cannot overload. this is ok
+                enclosingType: context.enclosingType,
+                annotatedTypeKind: context.annotatedTypeKind
+            )) ?? "")
                 .addingIndent(1)
 
             return """
