@@ -94,6 +94,7 @@ extension String {
     static let underlyingVarPrefix = "_"
     static let setCallCountSuffix = "SetCallCount"
     static let callCountSuffix = "CallCount"
+    static let stateSuffix = "State"
     static let initializerLeftParen = "init("
     static let `escaping` = "@escaping"
     static let autoclosure = "@autoclosure"

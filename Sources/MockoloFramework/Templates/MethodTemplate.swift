@@ -22,123 +22,201 @@ extension MethodModel {
                              isOverride: Bool,
                              handler: ClosureModel?,
                              context: RenderContext) -> String {
-        var template = ""
+        if case .initKind = kind {
+            return "" // ClassTemplate needs to handle this as it needs a context of all the vars
+        }
 
-        let returnTypeName = returnType.isUnknown ? "" : returnType.typeName
+        guard let handler, let enclosingType = context.enclosingType else { return "" }
 
-        let acl = accessLevel.isEmpty ? "" : accessLevel+" "
-        let genericTypeDeclsStr = genericTypeParams.compactMap {$0.render()}.joined(separator: ", ")
-        let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
-        let genericWhereStr = genericWhereClause.map { "\($0) " } ?? ""
-        let paramDeclsStr = params.compactMap{$0.render()}.joined(separator: ", ")
+        return Renderer(
+            model: self,
+            context: context,
+            arguments: arguments,
+            overloadingResolvedName: overloadingResolvedName,
+            isOverride: isOverride,
+            handler: handler,
+            enclosingType: enclosingType
+        )
+            .render()
+    }
 
-        switch kind {
-        case .initKind(_, _):  // ClassTemplate needs to handle this as it needs a context of all the vars
-            return ""
-        default:
+    struct Renderer {
+        var model: MethodModel
+        var context: RenderContext
+        var arguments: GenerationArguments
+        var overloadingResolvedName: String
+        var isOverride: Bool
+        var handler: ClosureModel
+        var enclosingType: SwiftType
 
-            guard let handler, let enclosingType = context.enclosingType else { return "" }
-
-            let callCount = "\(overloadingResolvedName)\(String.callCountSuffix)"
-            let handlerVarName = "\(overloadingResolvedName)\(String.handlerSuffix)"
-            let handlerVarType = handler.type(enclosingType: enclosingType).typeName // ?? "Any"
-            let handlerReturn = handler.render(context: context) ?? ""
-
-            let suffixStr = applyFunctionSuffixTemplate(
-                isAsync: isAsync,
-                throwing: throwing
-            )
-            let returnStr = returnTypeName.isEmpty ? "" : "-> \(returnTypeName) "
-            let staticStr = isStatic ? String.static + " " : ""
-            let keyword = isSubscript ? "" : "func "
-            var body = ""
-
-            if arguments.useTemplateFunc {
-                let callMockFunc = !throwing.hasError && (handler.type(enclosingType: enclosingType).cast?.isEmpty ?? false)
-                if callMockFunc {
-                    let handlerParamValsStr = params.map { (arg) -> String in
-                        if arg.type.typeName.hasPrefix(String.autoclosure) {
-                            return arg.name.safeName + "()"
-                        }
-                        return arg.name.safeName
-                    }.joined(separator: ", ")
-
-                    let defaultVal = returnType.defaultVal() // ?? "nil"
-
-                    var mockReturn = ".error"
-                    if returnType.typeName.isEmpty {
-                        mockReturn = ".void"
-                    } else if let val = defaultVal {
-                        mockReturn = ".val(\(val))"
+        func render() -> String {
+            let body: String
+            if arguments.useTemplateFunc
+                && !model.throwing.hasError
+                && (handler.type(enclosingType: enclosingType).cast?.isEmpty ?? false) {
+                let handlerParamValsStr = model.params.map { (arg) -> String in
+                    if arg.type.typeName.hasPrefix(String.autoclosure) {
+                        return arg.name.safeName + "()"
                     }
+                    return arg.name.safeName
+                }.joined(separator: ", ")
 
-                    body = """
-                    \(2.tab)mockFunc(&\(callCount))(\"\(name)\", \(handlerVarName)?(\(handlerParamValsStr)), \(mockReturn))
-                    """
+                let defaultVal = model.returnType.defaultVal() // ?? "nil"
+
+                var mockReturn = ".error"
+                if model.returnType.typeName.isEmpty {
+                    mockReturn = ".void"
+                } else if let val = defaultVal {
+                    mockReturn = ".val(\(val))"
                 }
-            }
 
-            if body.isEmpty {
                 body = """
-                \(2.tab)\(callCount) += 1
+                \(2.tab)mockFunc(&\(callCountVarName))(\"\(model.name)\", \(handlerVarName)?(\(handlerParamValsStr)), \(mockReturn))
                 """
-
-                if let argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+            } else {
+                let argsHistoryCaptureCall: String
+                if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
                     let argsHistoryCapture = argsHistory.render(context: context, arguments: arguments) ?? ""
-
-                    body = """
-                    \(body)
-                    \(2.tab)\(argsHistoryCapture)
-                    """
+                    argsHistoryCaptureCall = "\(2.tab)\(argsHistoryCapture)\n"
+                } else {
+                    argsHistoryCaptureCall = ""
                 }
 
+                let handlerReturn = handler.render(context: context) ?? ""
+
                 body = """
-                \(body)
-                \(handlerReturn)
+                \(2.tab)\(callCountVarName) += 1
+                \(argsHistoryCaptureCall)\(handlerReturn)
                 """
             }
 
-            var wrapped = body
-            if isSubscript {
-                wrapped = """
-                \(2.tab)get {
-                \(body)
-                \(2.tab)}
-                \(2.tab)set { }
-                """
-            }
+            let wrapped = model.isSubscript ? """
+            \(2.tab)get {
+            \(body)
+            \(2.tab)}
+            \(2.tab)set { }
+            """ : body
 
-            let overrideStr = isOverride ? "\(String.override) " : ""
+            let overrideStr = isOverride ? String.override.withSpace : ""
             let modifierTypeStr: String
-            if let customModifier: Modifier = customModifiers[name] {
+            if let customModifier: Modifier = model.customModifiers[model.name] {
                 modifierTypeStr = customModifier.rawValue + " "
             } else {
                 modifierTypeStr = ""
             }
-            let privateSetSpace = arguments.allowSetCallCount ? "" : "\(String.privateSet) "
 
-            template = """
+            let keyword = model.isSubscript ? "" : "func "
+            let genericTypeDeclsStr = model.genericTypeParams.compactMap {$0.render()}.joined(separator: ", ")
+            let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
+            let paramDeclsStr = model.params.compactMap{$0.render()}.joined(separator: ", ")
+            let suffixStr = applyFunctionSuffixTemplate(
+                isAsync: model.isAsync,
+                throwing: model.throwing
+            )
+            let genericWhereStr = model.genericWhereClause.map { "\($0) " } ?? ""
 
-            \(1.tab)\(acl)\(staticStr)\(privateSetSpace)var \(callCount) = 0
-            """
-
-            if let argsHistory = argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
-                let argsHistoryVarName = "\(overloadingResolvedName)\(String.argsHistorySuffix)"
-                let argsHistoryVarType = argsHistory.type.typeName
-
-                template = """
-                \(template)
-                \(1.tab)\(acl)\(staticStr)var \(argsHistoryVarName) = \(argsHistoryVarType)()
-                """
-            }
-
-            return """
-            \(template)
-            \(1.tab)\(acl)\(staticStr)var \(handlerVarName): \(handlerVarType)
-            \(1.tab)\(acl)\(staticStr)\(overrideStr)\(modifierTypeStr)\(keyword)\(name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnStr)\(genericWhereStr){
+            let functionDecl = """
+            \(1.tab)\(declModifiers)\(overrideStr)\(modifierTypeStr)\(keyword)\(model.name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnClause)\(genericWhereStr){
             \(wrapped)
             \(1.tab)}
             """
+
+            let decls: [String?] = [
+                stateVarDecl,
+                callCountVarDecl,
+                argsHistoryVarDecl,
+                handlerVarDecl,
+                functionDecl,
+            ]
+            return "\n" + decls.compactMap { $0 }.joined(separator: "\n")
+        }
+
+        var declModifiers: String {
+            let acl = model.accessLevel.isEmpty ? "" : model.accessLevel.withSpace
+            let staticModifier = model.isStatic ? String.static.withSpace : ""
+            return acl + staticModifier
+        }
+
+        var returnClause: String {
+            let returnTypeName = model.returnType.isUnknown ? "" : model.returnType.typeName
+            return returnTypeName.isEmpty ? "" : "-> \(returnTypeName) "
+        }
+
+        var handlerVarName: String {
+            return overloadingResolvedName + .handlerSuffix
+        }
+
+        var stateVarName: String {
+            return overloadingResolvedName + .stateSuffix
+        }
+
+        var callCountVarName: String {
+            return overloadingResolvedName + .callCountSuffix
+        }
+
+        var argsHistoryVarName: String {
+            return overloadingResolvedName + .argsHistorySuffix
+        }
+
+        var stateVarDecl: String? {
+            guard context.requiresSendable else { return nil }
+
+            let handlerVarType = handler.type(enclosingType: enclosingType).typeName
+            let argumentsTupleType = "TODO"
+            return "\(1.tab)private let \(stateVarName) = MockoloMutex(MockoloHandlerState<\(argumentsTupleType), \(handlerVarType)>())"
+        }
+
+        var callCountVarDecl: String {
+            if !context.requiresSendable {
+                let privateSetSpace = arguments.allowSetCallCount ? "" : "\(String.privateSet) "
+                return "\(1.tab)\(declModifiers)\(privateSetSpace)var \(callCountVarName) = 0"
+            } else {
+                if arguments.allowSetCallCount {
+                    return """
+                    \(1.tab)\(declModifiers)var \(callCountVarName): Int {
+                    \(2.tab)get { \(stateVarName).withLock(\\.callCount) }
+                    \(2.tab)set { \(stateVarName).withLock { $0.callCount = newValue } }
+                    \(1.tab)}
+                    """
+                } else {
+                    return """
+                    \(1.tab)\(declModifiers)var \(callCountVarName): Int {
+                    \(2.tab)return \(stateVarName).withLock(\\.callCount)
+                    \(1.tab)}
+                    """
+                }
+            }
+        }
+
+        var argsHistoryVarDecl: String? {
+            if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                let argsHistoryVarType = argsHistory.type.typeName
+
+                if !context.requiresSendable {
+                    return "\(1.tab)\(declModifiers)var \(argsHistoryVarName) = \(argsHistoryVarType)()"
+                } else {
+                    return """
+                    \(1.tab)\(declModifiers)var \(argsHistoryVarName): \(argsHistoryVarType) {
+                    \(2.tab)return \(stateVarName).withLock(\\.argValues).map(\\.value)
+                    \(1.tab)}
+                    """
+                }
+            }
+            return nil
+        }
+
+        var handlerVarDecl: String {
+            let handlerVarType = handler.type(enclosingType: enclosingType).typeName // ?? "Any"
+            if !context.requiresSendable {
+                return "\(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType)"
+            } else {
+                return """
+                \(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType) {
+                \(2.tab)get { \(stateVarName).withLock(\\.handler) }
+                \(2.tab)set { \(stateVarName).withLock { $0.handler = newValue } }
+                \(1.tab)}
+                """
+            }
         }
     }
 }
