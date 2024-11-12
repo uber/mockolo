@@ -17,7 +17,6 @@
 import Foundation
 
 extension VariableModel {
-
     func applyVariableTemplate(name: String,
                                type: SwiftType,
                                encloser: String,
@@ -27,7 +26,6 @@ extension VariableModel {
                                shouldOverride: Bool,
                                accessLevel: String,
                                context: RenderContext) -> String {
-
         let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
         let underlyingVarDefaultVal = type.defaultVal()
         var underlyingType = type.typeName
@@ -358,14 +356,7 @@ extension VariableModel {
 
 extension VariableModel.GetterEffects {
     fileprivate func applyTemplate() -> String {
-        var clauses: [String] = []
-        if isAsync {
-            clauses.append(.async)
-        }
-        if let throwSyntax = throwing.applyThrowingTemplate() {
-            clauses.append(throwSyntax)
-        }
-        return clauses.map { "\($0) " }.joined()
+        return applyFunctionSuffixTemplate(isAsync: isAsync, throwing: throwing)
     }
 
     fileprivate var callerMarkers: String {
