@@ -23,7 +23,6 @@ struct ResolvedEntity {
     var uniqueModels: [(String, Model)]
     var attributes: [String]
     var inheritedTypes: [String]
-    var inheritsActorProtocol: Bool
 
     var declaredInits: [MethodModel] {
         return uniqueModels.compactMap { (_, model) in
@@ -37,6 +36,10 @@ struct ResolvedEntity {
         return sortedInitVars(
             in: uniqueModels.compactMap{ $0.1 as? VariableModel }
         )
+    }
+
+    var inheritsActorProtocol: Bool {
+        return inheritedTypes.contains(.actorProtocol)
     }
 
     /// Returns models that can be used as parameters to an initializer
@@ -62,7 +65,6 @@ struct ResolvedEntity {
                             acl: entity.entityNode.accessLevel,
                             declKindOfMockAnnotatedBaseType: entity.entityNode.declKind,
                             declKind: inheritsActorProtocol ? .actor : .class,
-                            inheritedTypes: inheritedTypes,
                             attributes: attributes,
                             offset: entity.entityNode.offset,
                             metadata: entity.metadata,

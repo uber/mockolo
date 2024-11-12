@@ -23,7 +23,6 @@ final class NominalModel: Model {
     let accessLevel: String
     let identifier: String
     let declKindOfMockAnnotatedBaseType: NominalTypeDeclKind
-    let inheritedTypes: [String]
     let entities: [(String, Model)]
     let initParamCandidates: [VariableModel]
     let declaredInits: [MethodModel]
@@ -39,7 +38,6 @@ final class NominalModel: Model {
          acl: String,
          declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
          declKind: NominalTypeDeclKind,
-         inheritedTypes: [String],
          attributes: [String],
          offset: Int64,
          metadata: AnnotationMetadata?,
@@ -52,7 +50,6 @@ final class NominalModel: Model {
         self.namespaces = namespaces
         self.declKindOfMockAnnotatedBaseType = declKindOfMockAnnotatedBaseType
         self.declKind = declKind
-        self.inheritedTypes = inheritedTypes
         self.entities = entities
         self.declaredInits = declaredInits
         self.initParamCandidates = initParamCandidates
@@ -71,7 +68,6 @@ final class NominalModel: Model {
             identifier: self.identifier,
             accessLevel: accessLevel,
             attribute: attribute,
-            inheritedTypes: inheritedTypes,
             metadata: metadata,
             arguments: arguments,
             initParamCandidates: initParamCandidates,

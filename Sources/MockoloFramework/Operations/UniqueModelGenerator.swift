@@ -68,18 +68,12 @@ private func generateUniqueModels(key: String,
     let uniqueModels = [mockedUniqueEntities, unmockedUniqueEntities].flatMap {$0}
         .sorted(path: \.value.offset, fallback: \.key)
 
-    var mockInheritedTypes = [String]()
-    if inheritedTypes.contains(.sendable) {
-        mockInheritedTypes.append(.uncheckedSendable)
-    }
-
     let resolvedEntity = ResolvedEntity(
         key: key,
         entity: entity,
         uniqueModels: uniqueModels,
         attributes: attributes,
-        inheritedTypes: mockInheritedTypes,
-        inheritsActorProtocol: inheritedTypes.contains(.actorProtocol)
+        inheritedTypes: inheritedTypes.sorted()
     )
 
     return ResolvedEntityContainer(entity: resolvedEntity, paths: paths)
