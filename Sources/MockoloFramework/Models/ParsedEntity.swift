@@ -59,6 +59,10 @@ struct ResolvedEntity {
         return result
     }
 
+    var requiresSendable: Bool {
+        return inheritedTypes.contains(.sendable) || inheritedTypes.contains(.error)
+    }
+
     func model() -> Model {
         return NominalModel(identifier: key,
                             namespaces: entity.entityNode.namespaces,
@@ -70,7 +74,8 @@ struct ResolvedEntity {
                             metadata: entity.metadata,
                             initParamCandidates: initParamCandidates,
                             declaredInits: declaredInits,
-                            entities: uniqueModels)
+                            entities: uniqueModels,
+                            requiresSendable: requiresSendable)
     }
 }
 

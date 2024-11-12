@@ -37,6 +37,7 @@ struct RenderContext {
     var overloadingResolvedName: String?
     var enclosingType: SwiftType?
     var annotatedTypeKind: NominalTypeDeclKind?
+    var requiresSendable: Bool = false
 }
 
 /// Represents a model for an entity such as var, func, class, etc.

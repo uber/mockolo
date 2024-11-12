@@ -99,7 +99,7 @@ extension String {
     static let autoclosure = "@autoclosure"
     static let name = "name"
     static let sendable = "Sendable"
-    static let uncheckedSendable = "@unchecked Sendable"
+    static let error = "Error"
     static let mainActor = "MainActor"
     static public let mockAnnotation = "@mockable"
     static public let mockObservable = "@MockObservable"

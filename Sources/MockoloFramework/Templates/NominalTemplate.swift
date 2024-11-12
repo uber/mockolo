@@ -47,7 +47,8 @@ extension NominalModel {
                     context: .init(
                         overloadingResolvedName: uniqueId,
                         enclosingType: type,
-                        annotatedTypeKind: declKindOfMockAnnotatedBaseType
+                        annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+                        requiresSendable: requiresSendable
                     ),
                     arguments: arguments
                 ) {

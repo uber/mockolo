@@ -28,6 +28,7 @@ final class NominalModel: Model {
     let declaredInits: [MethodModel]
     let metadata: AnnotationMetadata?
     let declKind: NominalTypeDeclKind
+    let requiresSendable: Bool
 
     var modelType: ModelType {
         return .nominal
@@ -43,8 +44,9 @@ final class NominalModel: Model {
          metadata: AnnotationMetadata?,
          initParamCandidates: [VariableModel],
          declaredInits: [MethodModel],
-         entities: [(String, Model)]) {
-        self.identifier = identifier 
+         entities: [(String, Model)],
+         requiresSendable: Bool) {
+        self.identifier = identifier
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
         self.type = SwiftType(self.name)
         self.namespaces = namespaces
@@ -57,6 +59,7 @@ final class NominalModel: Model {
         self.offset = offset
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessLevel = acl
+        self.requiresSendable = requiresSendable
     }
     
     func render(
