@@ -25,7 +25,8 @@ extension VariableModel {
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String,
-                               context: RenderContext) -> String {
+                               context: RenderContext,
+                               arguments: GenerationArguments) -> String {
         let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
         let underlyingVarDefaultVal = type.defaultVal()
         var underlyingType = type.typeName
@@ -115,7 +116,7 @@ extension VariableModel {
                 overloadingResolvedName: name, // var cannot overload. this is ok
                 enclosingType: context.enclosingType,
                 annotatedTypeKind: context.annotatedTypeKind
-            )) ?? "")
+            ), arguments: arguments) ?? "")
                 .addingIndent(1)
 
             return """

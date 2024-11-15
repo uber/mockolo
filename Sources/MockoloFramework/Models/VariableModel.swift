@@ -127,6 +127,7 @@ final class VariableModel: Model {
                                      allowSetCallCount: arguments.allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel,
-                                     context: context)
+                                     context: context,
+                                     arguments: arguments)
     }
 }

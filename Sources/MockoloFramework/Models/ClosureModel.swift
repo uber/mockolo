@@ -53,7 +53,7 @@ final class ClosureModel: Model {
 
     func render(
         context: RenderContext,
-        arguments: GenerationArguments = .default
+        arguments: GenerationArguments
     ) -> String? {
         guard let overloadingResolvedName = context.overloadingResolvedName,
               let enclosingType = context.enclosingType else {

@@ -72,7 +72,19 @@ extension NominalModel {
             moduleDot = moduleName + "."
         }
         
-        let extraInits = extraInitsIfNeeded(initParamCandidates: initParamCandidates, declaredInits: declaredInits, acl: acl, declKindOfMockAnnotatedBaseType: declKindOfMockAnnotatedBaseType, overrides: metadata?.varTypes)
+        let extraInits = extraInitsIfNeeded(
+            initParamCandidates: initParamCandidates,
+            declaredInits: declaredInits,
+            acl: acl,
+            declKindOfMockAnnotatedBaseType: declKindOfMockAnnotatedBaseType,
+            overrides: metadata?.varTypes,
+            context: .init(
+                enclosingType: type,
+                annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+                requiresSendable: requiresSendable
+            ),
+            arguments: arguments
+        )
 
         var body = ""
         if !typealiasTemplate.isEmpty {
@@ -109,7 +121,9 @@ extension NominalModel {
         declaredInits: [MethodModel],
         acl: String,
         declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
-        overrides: [String: String]?
+        overrides: [String: String]?,
+        context: RenderContext,
+        arguments: GenerationArguments
     ) -> String {
         
         let declaredInitParamsPerInit = declaredInits.map { $0.params }
@@ -194,9 +208,9 @@ extension NominalModel {
             if case let .initKind(required, override) = m.kind, !m.processed {
                 let modifier = required ? "\(String.required) " : (override ? "\(String.override) " : "")
                 let mAcl = m.accessLevel.isEmpty ? "" : "\(m.accessLevel) "
-                let genericTypeDeclsStr = m.genericTypeParams.compactMap {$0.render()}.joined(separator: ", ")
+                let genericTypeDeclsStr = m.genericTypeParams.render(context: context, arguments: arguments)
                 let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
-                let paramDeclsStr = m.params.compactMap{$0.render()}.joined(separator: ", ")
+                let paramDeclsStr = m.params.render(context: context, arguments: arguments)
                 let suffixStr = applyFunctionSuffixTemplate(
                     isAsync: m.isAsync,
                     throwing: m.throwing

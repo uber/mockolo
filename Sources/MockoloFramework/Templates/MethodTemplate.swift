@@ -82,7 +82,7 @@ extension MethodModel {
                     argsHistoryCaptureCall = ""
                 }
 
-                let handlerReturn = handler.render(context: context) ?? ""
+                let handlerReturn = handler.render(context: context, arguments: arguments) ?? ""
 
                 body = """
                 \(2.tab)\(callCountVarName) += 1
@@ -106,9 +106,9 @@ extension MethodModel {
             }
 
             let keyword = model.isSubscript ? "" : "func "
-            let genericTypeDeclsStr = model.genericTypeParams.compactMap {$0.render()}.joined(separator: ", ")
+            let genericTypeDeclsStr = model.genericTypeParams.render(context: context, arguments: arguments)
             let genericTypesStr = genericTypeDeclsStr.isEmpty ? "" : "<\(genericTypeDeclsStr)>"
-            let paramDeclsStr = model.params.compactMap{$0.render()}.joined(separator: ", ")
+            let paramDeclsStr = model.params.render(context: context, arguments: arguments)
             let suffixStr = applyFunctionSuffixTemplate(
                 isAsync: model.isAsync,
                 throwing: model.throwing
