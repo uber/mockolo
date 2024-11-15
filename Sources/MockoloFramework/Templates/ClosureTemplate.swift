@@ -19,28 +19,21 @@ import Foundation
 extension ClosureModel {
     func applyClosureTemplate(type: SwiftType,
                               name: String,
-                              paramVals: [String]?,
-                              paramTypes: [SwiftType]?,
+                              params: [(String, SwiftType)],
                               returnDefaultType: SwiftType) -> String {
-        
-        var handlerParamValsStr = ""
-        if let paramVals = paramVals, let paramTypes = paramTypes {
-            let zipped = zip(paramVals, paramTypes).map { (arg) -> String in
-                let (argName, argType) = arg
-                if argType.isAutoclosure {
-                    return argName.safeName + "()"
-                }
-                if argType.isInOut {
-                    return "&" + argName.safeName
-                }
-                if argType.hasClosure && argType.isOptional,
-                    let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
-                    return renderedClosure
-                }
-                return argName.safeName
+        let handlerParamValsStr = params.map { (argName, argType) -> String in
+            if argType.isAutoclosure {
+                return argName.safeName + "()"
             }
-            handlerParamValsStr = zipped.joined(separator: ", ")
-        }
+            if argType.isInOut {
+                return "&" + argName.safeName
+            }
+            if argType.hasClosure && argType.isOptional,
+               let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
+                return renderedClosure
+            }
+            return argName.safeName
+        }.joined(separator: ", ")
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
         
         let prefix = [

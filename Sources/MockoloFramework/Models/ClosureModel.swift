@@ -22,8 +22,7 @@ final class ClosureModel: Model {
 
     let funcReturnType: SwiftType
     let genericTypeNames: [String]
-    let paramNames: [String]
-    let paramTypes: [SwiftType]
+    let params: [(String, SwiftType)]
     let isAsync: Bool
     let throwing: ThrowingKind
 
@@ -31,20 +30,19 @@ final class ClosureModel: Model {
         return .closure
     }
 
-    init(genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType) {
+    init(genericTypeParams: [ParamModel], params: [(String, SwiftType)], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType) {
         // In the mock's call handler, rethrows is unavailable.
         let throwing = throwing.coerceRethrowsToThrows
         self.isAsync = isAsync
         self.throwing = throwing
         self.genericTypeNames = genericTypeParams.map(\.name)
-        self.paramNames = paramNames
-        self.paramTypes = paramTypes
+        self.params = params
         self.funcReturnType = returnType
     }
 
     func type(enclosingType: SwiftType) -> SwiftType {
         return SwiftType.toClosureType(
-            params: paramTypes,
+            params: params.map(\.1),
             typeParams: genericTypeNames,
             isAsync: isAsync,
             throwing: throwing,
@@ -63,8 +61,7 @@ final class ClosureModel: Model {
         }
         return applyClosureTemplate(type: type(enclosingType: enclosingType),
                                     name: overloadingResolvedName + .handlerSuffix,
-                                    paramVals: paramNames,
-                                    paramTypes: paramTypes,
+                                    params: params,
                                     returnDefaultType: funcReturnType)
     }
 }

@@ -107,8 +107,7 @@ extension VariableModel {
         case .computed(let effects):
             let body = (ClosureModel(
                 genericTypeParams: [],
-                paramNames: [],
-                paramTypes: [],
+                params: [],
                 isAsync: effects.isAsync,
                 throwing: effects.throwing,
                 returnType: type
