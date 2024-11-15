@@ -536,7 +536,7 @@ public final class SwiftType {
         return SwiftType(typeStr, cast: returnTypeCast)
     }
     
-    static func toArgumentsHistoryType(with params: [SwiftType], typeParams: [String]) -> SwiftType {
+    static func toArgumentsCaptureType(with params: [SwiftType], typeParams: [String]) -> SwiftType {
         // Expected only history capturable types.
         let displayableParamTypes = params.compactMap { (subtype: SwiftType) -> String? in
             var processedType = subtype.processTypeParams(with: typeParams)
@@ -554,9 +554,9 @@ public final class SwiftType {
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
 
         if displayableParamTypes.count >= 2 {
-            return SwiftType("[(\(displayableParamStr))]")
+            return SwiftType("(\(displayableParamStr))")
         } else {
-            return SwiftType("[\(displayableParamStr)]")
+            return SwiftType(displayableParamStr)
         }
     }
 

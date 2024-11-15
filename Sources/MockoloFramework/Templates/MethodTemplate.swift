@@ -162,7 +162,12 @@ extension MethodModel {
             guard context.requiresSendable else { return nil }
 
             let handlerVarType = handler.type(enclosingType: enclosingType).typeName
-            let argumentsTupleType = "TODO"
+            let argumentsTupleType: String
+            if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                argumentsTupleType = argsHistory.capturedValueType.typeName
+            } else {
+                argumentsTupleType = .neverType
+            }
             return "\(1.tab)private let \(stateVarName) = MockoloMutex(MockoloHandlerState<\(argumentsTupleType), \(handlerVarType)>())"
         }
 
@@ -190,13 +195,13 @@ extension MethodModel {
 
         var argsHistoryVarDecl: String? {
             if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
-                let argsHistoryVarType = argsHistory.type.typeName
+                let capturedValueType = argsHistory.capturedValueType.typeName
 
                 if !context.requiresSendable {
-                    return "\(1.tab)\(declModifiers)var \(argsHistoryVarName) = \(argsHistoryVarType)()"
+                    return "\(1.tab)\(declModifiers)var \(argsHistoryVarName) = [\(capturedValueType)]()"
                 } else {
                     return """
-                    \(1.tab)\(declModifiers)var \(argsHistoryVarName): \(argsHistoryVarType) {
+                    \(1.tab)\(declModifiers)var \(argsHistoryVarName): [\(capturedValueType)] {
                     \(2.tab)return \(stateVarName).withLock(\\.argValues).map(\\.value)
                     \(1.tab)}
                     """

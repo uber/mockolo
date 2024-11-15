@@ -1,11 +1,24 @@
-import Foundation
+//
+//  Copyright (c) 2018. Uber Technologies
+//
+//  Licensed under the Apache License, Version 2.0 (the "License");
+//  you may not use this file except in compliance with the License.
+//  You may obtain a copy of the License at
+//
+//  http://www.apache.org/licenses/LICENSE-2.0
+//
+//  Unless required by applicable law or agreed to in writing, software
+//  distributed under the License is distributed on an "AS IS" BASIS,
+//  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  See the License for the specific language governing permissions and
+//  limitations under the License.
+//
 
 final class ArgumentsHistoryModel: Model {
     let name: String
-    let type: SwiftType
+    let capturedValueType: SwiftType
     let offset: Int64 = .max
-    let capturableParamNames: [String]
-    let capturableParamTypes: [SwiftType]
+    let capturableParams: [(String, SwiftType)]
     let isHistoryAnnotated: Bool
 
     var modelType: ModelType {
@@ -22,11 +35,10 @@ final class ArgumentsHistoryModel: Model {
         self.name = name + .argsHistorySuffix
         self.isHistoryAnnotated = isHistoryAnnotated
 
-        self.capturableParamNames = capturables.map(\.name.safeName)
-        self.capturableParamTypes = capturables.map(\.type)
+        self.capturableParams = capturables.map { ($0.name.safeName, $0.type) }
         
         let genericTypeNameList = genericTypeParams.map(\.name)
-        self.type = SwiftType.toArgumentsHistoryType(with: capturableParamTypes, typeParams: genericTypeNameList)
+        self.capturedValueType = SwiftType.toArgumentsCaptureType(with: capturableParams.map(\.1), typeParams: genericTypeNameList)
     }
     
     func enable(force: Bool) -> Bool {
@@ -44,11 +56,11 @@ final class ArgumentsHistoryModel: Model {
             return nil
         }
         
-        switch capturableParamNames.count {
+        switch capturableParams.count {
         case 1:
-            return "\(overloadingResolvedName)\(String.argsHistorySuffix).append(\(capturableParamNames[0]))"
+            return "\(overloadingResolvedName)\(String.argsHistorySuffix).append(\(capturableParams[0].0))"
         case 2...:
-            let paramNamesStr = capturableParamNames.joined(separator: ", ")
+            let paramNamesStr = capturableParams.map(\.0).joined(separator: ", ")
             return "\(overloadingResolvedName)\(String.argsHistorySuffix).append((\(paramNamesStr)))"
         default:
             fatalError("paramNames must not be empty.")

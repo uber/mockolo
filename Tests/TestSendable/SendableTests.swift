@@ -1,7 +1,8 @@
 class SendableTests: MockoloTestCase {
     func testSendableProtocol() {
         verify(srcContent: sendableProtocol,
-               dstContent: sendableProtocolMock)
+               dstContent: sendableProtocolMock,
+               enableFuncArgsHistory: true)
     }
 
     func testUncheckedSendableClass() {
