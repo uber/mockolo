@@ -181,6 +181,12 @@ public final class SwiftType {
         if isUnknown {
             return false
         }
+
+        var typeName = typeName
+        if typeName.hasPrefix(.any.withSpace) {
+            typeName.removeFirst(String.any.withSpace.count)
+        }
+
         for scalar in typeName.unicodeScalars {
             if scalar == " " {
                 return false
