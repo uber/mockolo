@@ -97,7 +97,7 @@ extension NominalModel {
             body += "\(renderedEntities)"
         }
 
-        let finalStr = arguments.mockFinal ? "\(String.final) " : ""
+        let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)
         \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(identifier) {
