@@ -37,7 +37,7 @@ class FooMock: Foo {
     }
 
     private(set) var updateArgCallCount = 0
-    var updateArgHandler: ((Int, Float) -> (Int))?
+    var updateArgHandler: ((Int, Float) -> Int)?
     func update(arg: Int, some: Float) -> Int {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
@@ -47,7 +47,7 @@ class FooMock: Foo {
     }
 
     private(set) var updateArgSomeCallCount = 0
-    var updateArgSomeHandler: ((Int, Float) -> (Observable<Int>))?
+    var updateArgSomeHandler: ((Int, Float) -> Observable<Int>)?
     func update(arg: Int, some: Float) -> Observable<Int> {
         updateArgSomeCallCount += 1
         if let updateArgSomeHandler = updateArgSomeHandler {
@@ -67,7 +67,7 @@ class FooMock: Foo {
     }
 
     private(set) var updateArgSomeIntFloatCallCount = 0
-    var updateArgSomeIntFloatHandler: ((Int, Float) -> (Array<String, Float>))?
+    var updateArgSomeIntFloatHandler: ((Int, Float) -> Array<String, Float>)?
     func update(arg: Int, some: Float) -> Array<String, Float> {
         updateArgSomeIntFloatCallCount += 1
         if let updateArgSomeIntFloatHandler = updateArgSomeIntFloatHandler {

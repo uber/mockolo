@@ -18,7 +18,7 @@ public class SimpleFuncMock: SimpleFunc {
 
 
     public private(set) var updateCallCount = 0
-    public var updateHandler: ((Int) -> (String))?
+    public var updateHandler: ((Int) -> String)?
     public func update(arg: Int) -> String {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -40,7 +40,7 @@ public class SimpleFuncMock: SimpleFunc {
 
 
     public var updateCallCount = 0
-    public var updateHandler: ((Int) -> (String))?
+    public var updateHandler: ((Int) -> String)?
     public func update(arg: Int) -> String {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -61,7 +61,7 @@ public class SimpleFuncMock: SimpleFunc {
 
 
     public private(set) var updateCallCount = 0
-    public var updateHandler: ((Int) -> (String))?
+    public var updateHandler: ((Int) -> String)?
     public func update(arg: Int) -> String {
         mockFunc(&updateCallCount)("update", updateHandler?(arg), .val(""))
     }

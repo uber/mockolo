@@ -32,7 +32,7 @@ class FuncThrowMock: FuncThrow {
 
 
     private(set) var f1CallCount = 0
-    var f1Handler: ((Int) throws -> (String))?
+    var f1Handler: ((Int) throws -> String)?
     func f1(arg: Int) throws -> String {
         f1CallCount += 1
         if let f1Handler = f1Handler {
@@ -62,7 +62,7 @@ class FuncThrowMock: FuncThrow {
     }
 
     private(set) var f4CallCount = 0
-    var f4Handler: ((Int) throws(SomeError) -> (String))?
+    var f4Handler: ((Int) throws(SomeError) -> String)?
     func f4(arg: Int) throws(SomeError) -> String {
         f4CallCount += 1
         if let f4Handler = f4Handler {
@@ -92,7 +92,7 @@ class FuncThrowMock: FuncThrow {
     }
 
     private(set) var g1CallCount = 0
-    var g1Handler: (((Int) throws -> ()) throws -> (String))?
+    var g1Handler: (((Int) throws -> ()) throws -> String)?
     func g1(arg: (Int) throws -> ()) throws -> String {
         g1CallCount += 1
         if let g1Handler = g1Handler {
@@ -112,7 +112,7 @@ class FuncThrowMock: FuncThrow {
     }
 
     private(set) var hCallCount = 0
-    var hHandler: (((Int) throws -> ()) throws -> (String))?
+    var hHandler: (((Int) throws -> ()) throws -> String)?
     func h(arg: (Int) throws -> ()) rethrows -> String {
         hCallCount += 1
         if let hHandler = hHandler {
@@ -122,7 +122,7 @@ class FuncThrowMock: FuncThrow {
     }
 
     private(set) var h2CallCount = 0
-    var h2Handler: (((Int) throws(SomeError) -> ()) throws -> (String))?
+    var h2Handler: (((Int) throws(SomeError) -> ()) throws -> String)?
     func h2(arg: (Int) throws(SomeError) -> ()) rethrows -> String {
         h2CallCount += 1
         if let h2Handler = h2Handler {
@@ -132,7 +132,7 @@ class FuncThrowMock: FuncThrow {
     }
 
     private(set) var updateCallCount = 0
-    var updateHandler: ((Any, Any) throws -> (Any))?
+    var updateHandler: ((Any, Any) throws -> Any)?
     func update<T, U>(arg1: T, arg2: @escaping (U) throws -> ()) throws -> ((T) -> (U)) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -142,7 +142,7 @@ class FuncThrowMock: FuncThrow {
     }
 
     private(set) var updateArg1CallCount = 0
-    var updateArg1Handler: ((Any, () throws -> Any) throws -> (Any))?
+    var updateArg1Handler: ((Any, () throws -> Any) throws -> Any)?
     func update<T>(arg1: T, arg2: () throws -> T) rethrows -> T {
         updateArg1CallCount += 1
         if let updateArg1Handler = updateArg1Handler {

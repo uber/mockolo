@@ -33,7 +33,7 @@ class RootBuildableMock: RootBuildable {
 
 
     private(set) var buildCallCount = 0
-    var buildHandler: (()  -> (RootController))?
+    var buildHandler: (() -> RootController)?
     func build()  -> RootController {
         buildCallCount += 1
         if let buildHandler = buildHandler {

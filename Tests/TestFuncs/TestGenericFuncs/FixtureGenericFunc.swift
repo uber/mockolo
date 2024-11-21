@@ -16,7 +16,7 @@ public class GenericProtocolMock: GenericProtocol {
 
 
     public private(set) var nonOptionalCallCount = 0
-    public var nonOptionalHandler: (() -> (Any))?
+    public var nonOptionalHandler: (() -> Any)?
     public func nonOptional<T>() -> T {
         nonOptionalCallCount += 1
         if let nonOptionalHandler = nonOptionalHandler {
@@ -26,7 +26,7 @@ public class GenericProtocolMock: GenericProtocol {
     }
 
     public private(set) var optionalCallCount = 0
-    public var optionalHandler: (() -> (Any?))?
+    public var optionalHandler: (() -> Any?)?
     public func optional<T>() -> T? {
         optionalCallCount += 1
         if let optionalHandler = optionalHandler {
@@ -70,7 +70,7 @@ class GenericFuncMock: GenericFunc {
 
 
     private(set) var containsGenericCallCount = 0
-    var containsGenericHandler: ((Any, Any) -> (Any))?
+    var containsGenericHandler: ((Any, Any) -> Any)?
     func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U)) {
         containsGenericCallCount += 1
         if let containsGenericHandler = containsGenericHandler {
@@ -90,7 +90,7 @@ class GenericFuncMock: GenericFunc {
     }
 
     private(set) var pushCallCount = 0
-    var pushHandler: ((Request, StatusCode.Type?) -> (Any))?
+    var pushHandler: ((Request, StatusCode.Type?) -> Any)?
     func push<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T> {
         pushCallCount += 1
         if let pushHandler = pushHandler {
@@ -100,7 +100,7 @@ class GenericFuncMock: GenericFunc {
     }
 
     private(set) var fetchCallCount = 0
-    var fetchHandler: ((Request, StatusCode.Type?) -> (Any))?
+    var fetchHandler: ((Request, StatusCode.Type?) -> Any)?
     func fetch<T: Body>(_ request: Request, statusErrorCodeType: StatusCode.Type?) -> Observable<T> {
         fetchCallCount += 1
         if let fetchHandler = fetchHandler {
@@ -110,7 +110,7 @@ class GenericFuncMock: GenericFunc {
     }
 
     private(set) var tellCallCount = 0
-    var tellHandler: ((ResponseType, Any) -> (Disposable))?
+    var tellHandler: ((ResponseType, Any) -> Disposable)?
     func tell<BodyType: Body>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable {
         tellCallCount += 1
         if let tellHandler = tellHandler {
@@ -120,7 +120,7 @@ class GenericFuncMock: GenericFunc {
     }
 
     private(set) var tellTypeCallCount = 0
-    var tellTypeHandler: ((ResponseType, Any) -> (Disposable))?
+    var tellTypeHandler: ((ResponseType, Any) -> Disposable)?
     func tell<BodyType: AnotherBody>(_ type: ResponseType, with handler: @escaping (BodyType) -> ()) -> Disposable {
         tellTypeCallCount += 1
         if let tellTypeHandler = tellTypeHandler {
@@ -218,7 +218,7 @@ class NetworkingMock: Networking {
 
 
     private(set) var requestCallCount = 0
-    var requestHandler: ((Any) -> (Any))?
+    var requestHandler: ((Any) -> Any)?
     func request<T>(_ target: T) -> T.ResultType where T: APITarget & Parsable {
         requestCallCount += 1
         if let requestHandler = requestHandler {

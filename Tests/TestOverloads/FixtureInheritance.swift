@@ -46,7 +46,7 @@ public class SimpleChildMock: SimpleChild {
     public private(set) var numberSetCallCount = 0
     public var number: Int = 0 { didSet { numberSetCallCount += 1 } }
     public private(set) var barCallCount = 0
-    public var barHandler: ((Double) -> (Float?))?
+    public var barHandler: ((Double) -> Float?)?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1
         if let barHandler = barHandler {
@@ -68,7 +68,7 @@ public class SimpleParentMock: SimpleParent {
     public private(set) var numberSetCallCount = 0
     public var number: Int = 0 { didSet { numberSetCallCount += 1 } }
     public private(set) var barCallCount = 0
-    public var barHandler: ((Double) -> (Float?))?
+    public var barHandler: ((Double) -> Float?)?
     public func bar(arg: Double) -> Float? {
         barCallCount += 1
         if let barHandler = barHandler {
@@ -128,7 +128,7 @@ class TestProtocolMock: TestProtocol {
     var someInt: Int = 0 { didSet { someIntSetCallCount += 1 } }
 
     private(set) var doSomethingElseCallCount = 0
-    var doSomethingElseHandler: (() -> (Bool))?
+    var doSomethingElseHandler: (() -> Bool)?
     func doSomethingElse() -> Bool {
         doSomethingElseCallCount += 1
         if let doSomethingElseHandler = doSomethingElseHandler {

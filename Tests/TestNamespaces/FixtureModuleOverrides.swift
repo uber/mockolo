@@ -20,7 +20,7 @@ class TaskRoutingMock: Foo.TaskRouting {
 
     var bar: String = ""
     private(set) var bazCallCount = 0
-    var bazHandler: (() -> (Double))?
+    var bazHandler: (() -> Double)?
     func baz() -> Double {
         bazCallCount += 1
         if let bazHandler = bazHandler {

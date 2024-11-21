@@ -72,7 +72,7 @@ class TaskRoutingMock: TaskRouting {
         set { if let val = newValue as? BehaviorSubject<Bool> { attachedRouterSubject = val } else { _attachedRouter = newValue } }
     }
     private(set) var routeToFooCallCount = 0
-    var routeToFooHandler: (() -> (Observable<()>))?
+    var routeToFooHandler: (() -> Observable<()>)?
     func routeToFoo() -> Observable<()> {
         routeToFooCallCount += 1
         if let routeToFooHandler = routeToFooHandler {
