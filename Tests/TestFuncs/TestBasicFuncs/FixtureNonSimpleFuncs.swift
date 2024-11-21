@@ -203,7 +203,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptPathCallCount = 0
-    var subscriptPathHandler: ((String) -> (((Double) -> Float)?))?
+    var subscriptPathHandler: ((String) -> ((Double) -> Float)?)?
     subscript(path: String) -> ((Double) -> Float)? {
         get {
         subscriptPathCallCount += 1
@@ -461,7 +461,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 
 
     private(set) var maxCallCount = 0
-    var maxHandler: ((Int) -> ((() -> Void)?))?
+    var maxHandler: ((Int) -> (() -> Void)?)?
     func max(for: Int) -> (() -> Void)? {
         maxCallCount += 1
         if let maxHandler = maxHandler {
@@ -471,7 +471,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 
     private(set) var maxDoCallCount = 0
-    var maxDoHandler: ((Int) -> ((() -> Void)?))?
+    var maxDoHandler: ((Int) -> (() -> Void)?)?
     func maxDo(do: Int) -> (() -> Void)? {
         maxDoCallCount += 1
         if let maxDoHandler = maxDoHandler {
@@ -481,7 +481,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 
     private(set) var maxInCallCount = 0
-    var maxInHandler: ((Int) -> ((() -> Void)?))?
+    var maxInHandler: ((Int) -> (() -> Void)?)?
     func maxIn(in: Int) -> (() -> Void)? {
         maxInCallCount += 1
         if let maxInHandler = maxInHandler {
@@ -491,7 +491,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 
     private(set) var maxSwitchCallCount = 0
-    var maxSwitchHandler: ((Int) -> ((() -> Void)?))?
+    var maxSwitchHandler: ((Int) -> (() -> Void)?)?
     func maxSwitch(for switch: Int) -> (() -> Void)? {
         maxSwitchCallCount += 1
         if let maxSwitchHandler = maxSwitchHandler {
@@ -501,7 +501,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 
     private(set) var maxExtensionCallCount = 0
-    var maxExtensionHandler: ((Int) -> ((() -> Void)?))?
+    var maxExtensionHandler: ((Int) -> (() -> Void)?)?
     func maxExtension(extension: Int) -> (() -> Void)? {
         maxExtensionCallCount += 1
         if let maxExtensionHandler = maxExtensionHandler {

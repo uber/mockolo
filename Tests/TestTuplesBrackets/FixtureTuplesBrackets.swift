@@ -59,7 +59,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
     }
 
     private(set) var updateObservableItemTypeCallCount = 0
-    var updateObservableItemTypeHandler: (() -> (Observable<(ItemType, ())>))?
+    var updateObservableItemTypeHandler: (() -> Observable<(ItemType, ())>)?
     func update() -> Observable<(ItemType, ())> {
         updateObservableItemTypeCallCount += 1
         if let updateObservableItemTypeHandler = updateObservableItemTypeHandler {
@@ -69,7 +69,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
     }
 
     private(set) var updateObservableItemTypeOptionalCallCount = 0
-    var updateObservableItemTypeOptionalHandler: (() -> (Observable<(ItemType, ())>?))?
+    var updateObservableItemTypeOptionalHandler: (() -> Observable<(ItemType, ())>?)?
     func update() -> Observable<(ItemType, ())>? {
         updateObservableItemTypeOptionalCallCount += 1
         if let updateObservableItemTypeOptionalHandler = updateObservableItemTypeOptionalHandler {
@@ -219,7 +219,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
     }
 
     private(set) var updateDoubleIntFloatStringIntDoubleIntCallCount = 0
-    var updateDoubleIntFloatStringIntDoubleIntHandler: (() -> ((Double, Int, (Float, (String, Int, Double), Int), Float, (Int, String), Array<String>)))?
+    var updateDoubleIntFloatStringIntDoubleIntHandler: (() -> (Double, Int, (Float, (String, Int, Double), Int), Float, (Int, String), Array<String>))?
     func update() -> (Double, Int, (Float, (String, Int, Double), Int), Float, (Int, String), Array<String>) {
         updateDoubleIntFloatStringIntDoubleIntCallCount += 1
         if let updateDoubleIntFloatStringIntDoubleIntHandler = updateDoubleIntFloatStringIntDoubleIntHandler {
@@ -259,7 +259,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
     }
 
     private(set) var updateDictionaryAArrayTUBIntCallCount = 0
-    var updateDictionaryAArrayTUBIntHandler: (() -> ((Dictionary<A, (Array<(T, U)>, B)>, Int)))?
+    var updateDictionaryAArrayTUBIntHandler: (() -> (Dictionary<A, (Array<(T, U)>, B)>, Int))?
     func update() -> (Dictionary<A, (Array<(T, U)>, B)>, Int) {
         updateDictionaryAArrayTUBIntCallCount += 1
         if let updateDictionaryAArrayTUBIntHandler = updateDictionaryAArrayTUBIntHandler {
@@ -268,6 +268,4 @@ class NonSimpleTypesMock: NonSimpleTypes {
         return (Dictionary<A, (Array<(T, U)>, B)>(), 0)
     }
 }
-
-
 """

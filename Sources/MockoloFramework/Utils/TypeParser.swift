@@ -472,46 +472,6 @@ public final class SwiftType {
         return nil
     }
 
-
-
-    // Process substrings containing angled or square brackets by replacing a comma delimiter
-    // with another delimiter (e.g. ;) to make it easier to parse tuples
-    // @param arg The type string to be parsed
-    // @param left The opening bracket character
-    // @param right The closing bracket character
-    // @returns The processed string with a new delimiter
-    func parseBrackets(_ arg: String, type: BracketType) -> String {
-        var left = ""
-        var right = ""
-        switch type {
-        case .angle:
-            left = "<"
-            right = ">"
-        case .square:
-            left = "["
-            right = "]"
-        }
-
-        var mutableArg = arg
-        var nextRange: Range<String.Index>? = nil
-        while let leftRange = mutableArg.range(of: left, options: .caseInsensitive, range: nextRange, locale: nil),
-            let rightRange = mutableArg.range(of: right, options: .caseInsensitive, range: nextRange, locale: nil) {
-                let bound = leftRange.lowerBound..<rightRange.lowerBound
-                let sub = mutableArg[bound]
-                let newsub = sub.replacingOccurrences(of: ",", with: ";")
-                mutableArg = mutableArg.replacingOccurrences(of: sub, with: newsub)
-
-                if let nextIdx = mutableArg.index(rightRange.upperBound, offsetBy: 1, limitedBy: mutableArg.endIndex) {
-                    nextRange = nextIdx..<mutableArg.endIndex
-                } else {
-                    break
-                }
-        }
-
-        return mutableArg
-    }
-
-
     static func toClosureType(
         params: [SwiftType],
         typeParams: [String],
@@ -532,7 +492,7 @@ public final class SwiftType {
         var returnAsStr = ""
         var asSuffix = "!"
         var returnTypeCast = ""
-        if !typeParams.filter({ returnComps.contains($0)}).isEmpty {
+        if typeParams.contains(where: { returnComps.contains($0)}) {
             returnAsStr = returnType.typeName
             if returnType.isOptional {
                 displayableReturnType = .anyType + "?"
@@ -557,10 +517,7 @@ public final class SwiftType {
             returnTypeCast = " as! " + String.`Self`
         }
 
-        let isSimpleTuple = !displayableReturnType.isEmpty
-        && displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
-
-        if !isSimpleTuple {
+        if !(SwiftType(displayableReturnType).isSingular || SwiftType(displayableReturnType).isOptional) {
             displayableReturnType = "(\(displayableReturnType))"
         }
 
