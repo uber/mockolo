@@ -79,8 +79,6 @@ public protocol KeyValueSubscripting {
 
 
 let subscriptsMocks = """
-
-
 class SubscriptProtocolMock: SubscriptProtocol {
     init() { }
 
@@ -88,7 +86,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     typealias Value = Any
 
     static private(set) var subscriptCallCount = 0
-    static var subscriptHandler: ((Int) -> (AnyObject?))?
+    static var subscriptHandler: ((Int) -> AnyObject?)?
     static subscript(key: Int) -> AnyObject? {
         get {
         subscriptCallCount += 1
@@ -101,7 +99,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptKeyCallCount = 0
-    var subscriptKeyHandler: ((Int) -> (AnyObject))?
+    var subscriptKeyHandler: ((Int) -> AnyObject)?
     subscript(_ key: Int) -> AnyObject {
         get {
         subscriptKeyCallCount += 1
@@ -114,7 +112,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptKeyIntCallCount = 0
-    var subscriptKeyIntHandler: ((Int) -> (AnyObject?))?
+    var subscriptKeyIntHandler: ((Int) -> AnyObject?)?
     subscript(key: Int) -> AnyObject? {
         get {
         subscriptKeyIntCallCount += 1
@@ -127,7 +125,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptIndexCallCount = 0
-    var subscriptIndexHandler: ((String) -> (CGImage?))?
+    var subscriptIndexHandler: ((String) -> CGImage?)?
     subscript(index: String) -> CGImage? {
         get {
         subscriptIndexCallCount += 1
@@ -140,7 +138,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptMemoizeKeyCallCount = 0
-    var subscriptMemoizeKeyHandler: ((Int) -> (CGRect?))?
+    var subscriptMemoizeKeyHandler: ((Int) -> CGRect?)?
     subscript(memoizeKey: Int) -> CGRect? {
         get {
         subscriptMemoizeKeyCallCount += 1
@@ -153,7 +151,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptPositionCallCount = 0
-    var subscriptPositionHandler: ((Int) -> (Any))?
+    var subscriptPositionHandler: ((Int) -> Any)?
     subscript(position: Int) -> Any {
         get {
         subscriptPositionCallCount += 1
@@ -166,7 +164,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptIndexStringIndexCallCount = 0
-    var subscriptIndexStringIndexHandler: ((String.Index) -> (Double))?
+    var subscriptIndexStringIndexHandler: ((String.Index) -> Double)?
     subscript(index: String.Index) -> Double {
         get {
         subscriptIndexStringIndexCallCount += 1
@@ -179,7 +177,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptSafeCallCount = 0
-    var subscriptSafeHandler: ((String.Index) -> (Double?))?
+    var subscriptSafeHandler: ((String.Index) -> Double?)?
     subscript(safe index: String.Index) -> Double? {
         get {
         subscriptSafeCallCount += 1
@@ -192,7 +190,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptRangeCallCount = 0
-    var subscriptRangeHandler: ((Range<Int>) -> (String))?
+    var subscriptRangeHandler: ((Range<Int>) -> String)?
     subscript(range: Range<Int>) -> String {
         get {
         subscriptRangeCallCount += 1
@@ -218,7 +216,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptDynamicMemberCallCount = 0
-    var subscriptDynamicMemberHandler: ((Any) -> (Any))?
+    var subscriptDynamicMemberHandler: ((Any) -> Any)?
     subscript<T>(dynamicMember keyPath: ReferenceWritableKeyPath<Double, T>) -> T {
         get {
         subscriptDynamicMemberCallCount += 1
@@ -231,7 +229,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptDynamicMemberTCallCount = 0
-    var subscriptDynamicMemberTHandler: ((Any) -> (Any))?
+    var subscriptDynamicMemberTHandler: ((Any) -> Any)?
     subscript<T>(dynamicMember keyPath: ReferenceWritableKeyPath<String, T>) -> T {
         get {
         subscriptDynamicMemberTCallCount += 1
@@ -244,7 +242,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptDynamicMemberTWritableKeyPathTValueCallCount = 0
-    var subscriptDynamicMemberTWritableKeyPathTValueHandler: ((Any) -> (Value))?
+    var subscriptDynamicMemberTWritableKeyPathTValueHandler: ((Any) -> Value)?
     subscript<T>(dynamicMember keyPath: WritableKeyPath<T, Value>) -> Value {
         get {
         subscriptDynamicMemberTWritableKeyPathTValueCallCount += 1
@@ -257,7 +255,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptParameterCallCount = 0
-    var subscriptParameterHandler: ((Any) -> (Any))?
+    var subscriptParameterHandler: ((Any) -> Any)?
     subscript<T: ExpressibleByIntegerLiteral>(_ parameter: T) -> T {
         get {
         subscriptParameterCallCount += 1
@@ -270,7 +268,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptKeyPathCallCount = 0
-    var subscriptKeyPathHandler: ((Any) -> (Any))?
+    var subscriptKeyPathHandler: ((Any) -> Any)?
     subscript<Value>(keyPath: ReferenceWritableKeyPath<T, Value>) -> Array<Value> {
         get {
         subscriptKeyPathCallCount += 1
@@ -283,7 +281,7 @@ class SubscriptProtocolMock: SubscriptProtocol {
     }
 
     private(set) var subscriptKeyPathOnCallCount = 0
-    var subscriptKeyPathOnHandler: ((Any, T) -> (Any))?
+    var subscriptKeyPathOnHandler: ((Any, T) -> Any)?
     subscript<Value>(keyPath: ReferenceWritableKeyPath<T, Value>, on schedulerType: T) -> Array<Value> {
         get {
         subscriptKeyPathOnCallCount += 1
@@ -303,7 +301,7 @@ public class KeyValueSubscriptingMock: KeyValueSubscripting {
     public typealias Value = Any
 
     public private(set) var subscriptCallCount = 0
-    public var subscriptHandler: ((Key) -> (Value?))?
+    public var subscriptHandler: ((Key) -> Value?)?
     public subscript(key: Key) -> Value? {
         get {
         subscriptCallCount += 1
@@ -316,7 +314,7 @@ public class KeyValueSubscriptingMock: KeyValueSubscripting {
     }
 
     public private(set) var subscriptKeyCallCount = 0
-    public var subscriptKeyHandler: ((Key, @autoclosure () -> Value) -> (Value))?
+    public var subscriptKeyHandler: ((Key, @autoclosure () -> Value) -> Value)?
     public subscript(key: Key, default defaultValue: @autoclosure () -> Value) -> Value {
         get {
         subscriptKeyCallCount += 1
@@ -352,7 +350,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 
 
     private(set) var barCallCount = 0
-    var barHandler: ((String, Int..., [Double]) -> (Float?))?
+    var barHandler: ((String, Int..., [Double]) -> Float?)?
     func bar(_ arg: String, x: Int..., y: [Double]) -> Float? {
         barCallCount += 1
         if let barHandler = barHandler {
@@ -384,7 +382,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 
 
     private(set) var passCallCount = 0
-    var passHandler: ((@autoclosure () -> Int) throws -> (Any))?
+    var passHandler: ((@autoclosure () -> Int) throws -> Any)?
     func pass<T>(handler: @autoclosure () -> Int) throws -> T {
         passCallCount += 1
         if let passHandler = passHandler {
@@ -418,7 +416,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 
 
     private(set) var catCallCount = 0
-    var catHandler: ((String, [String: String]?, () throws -> Any) throws -> (Any))?
+    var catHandler: ((String, [String: String]?, () throws -> Any) throws -> Any)?
     func cat<T>(named arg: String, tags: [String: String]?, closure: () throws -> T) rethrows -> T {
         catCallCount += 1
         if let catHandler = catHandler {
@@ -428,7 +426,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
     }
 
     private(set) var moreCallCount = 0
-    var moreHandler: ((String, [String: String]?, (Any) throws -> ()) throws -> (Any))?
+    var moreHandler: ((String, [String: String]?, (Any) throws -> ()) throws -> Any)?
     func more<T>(named arg: String, tags: [String: String]?, closure: (T) throws -> ()) rethrows -> T {
         moreCallCount += 1
         if let moreHandler = moreHandler {
@@ -535,7 +533,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 
 
     private(set) var returnSelfCallCount = 0
-    var returnSelfHandler: (() -> (NonSimpleFuncsMock))?
+    var returnSelfHandler: (() -> NonSimpleFuncsMock)?
     func returnSelf() -> Self {
         returnSelfCallCount += 1
         if let returnSelfHandler = returnSelfHandler {

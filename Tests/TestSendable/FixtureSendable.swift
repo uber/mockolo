@@ -16,7 +16,7 @@ public class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
 
 
     public private(set) var updateCallCount = 0
-    public var updateHandler: ((Int) -> (String))?
+    public var updateHandler: ((Int) -> String)?
     public func update(arg: Int) -> String {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -44,7 +44,7 @@ public class UncheckedSendableClassMock: UncheckedSendableClass, @unchecked Send
 
 
     private(set) var updateCallCount = 0
-    var updateHandler: ((Int) -> (String))?
+    var updateHandler: ((Int) -> String)?
     override func update(arg: Int) -> String {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -67,15 +67,12 @@ public protocol ConfirmedSendableProtocol: SendableSendable {
 """
 
 let confirmedSendableProtocolMock = """
-
-
-
 public class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol, @unchecked Sendable {
     public init() { }
 
 
     public private(set) var updateCallCount = 0
-    public var updateHandler: ((Int) -> (String))?
+    public var updateHandler: ((Int) -> String)?
     public func update(arg: Int) -> String {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -84,5 +81,4 @@ public class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol, @unchecke
         return ""
     }
 }
-
 """

@@ -28,7 +28,7 @@ class FuncAsyncMock: FuncAsync {
 
 
     private(set) var f1CallCount = 0
-    var f1Handler: ((Int) async -> (String))?
+    var f1Handler: ((Int) async -> String)?
     func f1(arg: Int) async -> String {
         f1CallCount += 1
         if let f1Handler = f1Handler {
@@ -48,7 +48,7 @@ class FuncAsyncMock: FuncAsync {
     }
 
     private(set) var g1CallCount = 0
-    var g1Handler: (((Int) async -> ()) async -> (String))?
+    var g1Handler: (((Int) async -> ()) async -> String)?
     func g1(arg: (Int) async -> ()) async -> String {
         g1CallCount += 1
         if let g1Handler = g1Handler {
@@ -68,7 +68,7 @@ class FuncAsyncMock: FuncAsync {
     }
 
     private(set) var updateCallCount = 0
-    var updateHandler: ((Any, Any) async -> (Any))?
+    var updateHandler: ((Any, Any) async -> Any)?
     func update<T, U>(arg1: T, arg2: @escaping (U) async -> ()) async -> ((T) -> (U)) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
@@ -108,7 +108,7 @@ class FuncAsyncThrowsMock: FuncAsyncThrows {
 
 
     private(set) var f1CallCount = 0
-    var f1Handler: ((Int) async throws -> (String))?
+    var f1Handler: ((Int) async throws -> String)?
     func f1(arg: Int) async throws -> String {
         f1CallCount += 1
         if let f1Handler = f1Handler {
@@ -128,7 +128,7 @@ class FuncAsyncThrowsMock: FuncAsyncThrows {
     }
 
     private(set) var g1CallCount = 0
-    var g1Handler: (((Int) async throws -> ()) async throws -> (String))?
+    var g1Handler: (((Int) async throws -> ()) async throws -> String)?
     func g1(arg: (Int) async throws -> ()) async throws -> String {
         g1CallCount += 1
         if let g1Handler = g1Handler {
@@ -148,7 +148,7 @@ class FuncAsyncThrowsMock: FuncAsyncThrows {
     }
 
     private(set) var updateCallCount = 0
-    var updateHandler: ((Any, Any) async throws -> (Any))?
+    var updateHandler: ((Any, Any) async throws -> Any)?
     func update<T, U>(arg1: T, arg2: @escaping (U) async throws -> ()) async throws -> ((T) -> (U)) {
         updateCallCount += 1
         if let updateHandler = updateHandler {

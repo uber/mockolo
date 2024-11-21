@@ -24,7 +24,7 @@ class FooMock: Foo {
 
 
     private(set) var collectionViewCallCount = 0
-    var collectionViewHandler: ((UICollectionView, Int) -> (String?))?
+    var collectionViewHandler: ((UICollectionView, Int) -> String?)?
     func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String? {
         collectionViewCallCount += 1
         if let collectionViewHandler = collectionViewHandler {
@@ -44,7 +44,7 @@ class FooMock: Foo {
     }
 
     private(set) var collectionViewSizeForItemAtCallCount = 0
-    var collectionViewSizeForItemAtHandler: ((UICollectionView, Int) -> (CGSize))?
+    var collectionViewSizeForItemAtHandler: ((UICollectionView, Int) -> CGSize)?
     func collectionView(_ collectionView: UICollectionView, sizeForItemAt index: Int) -> CGSize {
         collectionViewSizeForItemAtCallCount += 1
         if let collectionViewSizeForItemAtHandler = collectionViewSizeForItemAtHandler {
@@ -74,7 +74,7 @@ class FooMock: Foo {
     }
 
     private(set) var loadImageCallCount = 0
-    var loadImageHandler: ((URL) -> (Observable<UIImage>))?
+    var loadImageHandler: ((URL) -> Observable<UIImage>)?
     func loadImage(atURL url: URL) -> Observable<UIImage> {
         loadImageCallCount += 1
         if let loadImageHandler = loadImageHandler {
@@ -84,7 +84,7 @@ class FooMock: Foo {
     }
 
     private(set) var loadImageAtURLCallCount = 0
-    var loadImageAtURLHandler: ((URL, UIImage) -> (Observable<UIImage>))?
+    var loadImageAtURLHandler: ((URL, UIImage) -> Observable<UIImage>)?
     func loadImage(atURL url: URL, placeholder: UIImage) -> Observable<UIImage> {
         loadImageAtURLCallCount += 1
         if let loadImageAtURLHandler = loadImageAtURLHandler {
@@ -94,7 +94,7 @@ class FooMock: Foo {
     }
 
     private(set) var loadImageAtURLRetryIntervalCallCount = 0
-    var loadImageAtURLRetryIntervalHandler: ((URL, RxTimeInterval, Int) -> (Observable<UIImage>))?
+    var loadImageAtURLRetryIntervalHandler: ((URL, RxTimeInterval, Int) -> Observable<UIImage>)?
     func loadImage(atURL url: URL, retryInterval: RxTimeInterval, maxRetries: Int) -> Observable<UIImage> {
         loadImageAtURLRetryIntervalCallCount += 1
         if let loadImageAtURLRetryIntervalHandler = loadImageAtURLRetryIntervalHandler {

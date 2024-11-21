@@ -67,7 +67,7 @@ class FooMock: Foo {
     }
 
     private(set) var updateIntCallCount = 0
-    var updateIntHandler: (() -> (Int))?
+    var updateIntHandler: (() -> Int)?
     func update() -> Int {
         updateIntCallCount += 1
         if let updateIntHandler = updateIntHandler {

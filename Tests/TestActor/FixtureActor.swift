@@ -15,7 +15,7 @@ actor FooMock: Foo {
         self.bar = bar
     }
     private(set) var fooCallCount = 0
-    var fooHandler: ((String) async -> (Result<String, Error>))?
+    var fooHandler: ((String) async -> Result<String, Error>)?
     func foo(arg: String) async -> Result<String, Error> {
         fooCallCount += 1
         if let fooHandler = fooHandler {
@@ -51,7 +51,7 @@ actor FooMock: Foo {
     var bar: Int = 0
 
     private(set) var bazCallCount = 0
-    var bazHandler: ((String) async -> (Int))?
+    var bazHandler: ((String) async -> Int)?
     func baz(arg: String) async -> Int {
         bazCallCount += 1
         if let bazHandler = bazHandler {

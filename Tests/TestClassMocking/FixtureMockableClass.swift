@@ -135,7 +135,7 @@ public class LowMock: Low {
     }
 
     private(set) var fooCallCount = 0
-    var fooHandler: (() -> (Int))?
+    var fooHandler: (() -> Int)?
     override func foo() -> Int {
         fooCallCount += 1
         if let fooHandler = fooHandler {
@@ -187,7 +187,7 @@ public class LowMock: Low {
     }
 
     private(set) var fooCallCount = 0
-    var fooHandler: (() -> (Int))?
+    var fooHandler: (() -> Int)?
     override func foo() -> Int {
         fooCallCount += 1
         if let fooHandler = fooHandler {

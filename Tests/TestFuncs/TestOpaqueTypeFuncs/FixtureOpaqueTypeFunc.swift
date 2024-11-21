@@ -16,7 +16,7 @@ public class OpaqueTypeProtocolMock: OpaqueTypeProtocol {
 
 
     public private(set) var nonOptionalCallCount = 0
-    public var nonOptionalHandler: ((Any) -> (Int))?
+    public var nonOptionalHandler: ((Any) -> Int)?
     public func nonOptional(_ type: some Error) -> Int {
         nonOptionalCallCount += 1
         if let nonOptionalHandler = nonOptionalHandler {
@@ -57,7 +57,7 @@ public class OpaqueTypeWithMultiTypeProtocolMock: OpaqueTypeWithMultiTypeProtoco
 
 
     public private(set) var nonOptionalCallCount = 0
-    public var nonOptionalHandler: ((Any) -> (Int))?
+    public var nonOptionalHandler: ((Any) -> Int)?
     public func nonOptional(_ type: some Error) -> Int {
         nonOptionalCallCount += 1
         if let nonOptionalHandler = nonOptionalHandler {

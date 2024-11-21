@@ -552,13 +552,13 @@ public final class SwiftType {
             }
         }
 
-         if returnType.isSelf {
-             displayableReturnType = encloser.typeName
+        if returnType.isSelf {
+            displayableReturnType = encloser.typeName
             returnTypeCast = " as! " + String.`Self`
         }
 
-        let isSimpleTuple = displayableReturnType.hasPrefix("(") && displayableReturnType.hasSuffix(")") &&
-            displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
+        let isSimpleTuple = !displayableReturnType.isEmpty
+        && displayableReturnType.components(separatedBy: CharacterSet(charactersIn: "()")).filter({!$0.isEmpty}).count <= 1
 
         if !isSimpleTuple {
             displayableReturnType = "(\(displayableReturnType))"

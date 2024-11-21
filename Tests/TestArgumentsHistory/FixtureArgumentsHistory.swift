@@ -146,7 +146,7 @@ class FooMock: Foo {
 
     private(set) var quxFuncCallCount = 0
     var quxFuncArgValues = [Int]()
-    var quxFuncHandler: ((Int) -> (String))?
+    var quxFuncHandler: ((Int) -> String)?
     func quxFunc(val: Int) -> String {
         quxFuncCallCount += 1
         quxFuncArgValues.append(val)
@@ -298,7 +298,7 @@ class FooMock: Foo {
 
     private(set) var barFuncCallCount = 0
     var barFuncArgValues = [Any]()
-    var barFuncHandler: ((Any) -> (Any))?
+    var barFuncHandler: ((Any) -> Any)?
     func barFunc<T: Sequence, U: Collection>(val: T) -> U {
         barFuncCallCount += 1
         barFuncArgValues.append(val)

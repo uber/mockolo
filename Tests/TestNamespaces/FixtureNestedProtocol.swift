@@ -78,7 +78,7 @@ class OKMock: OK {
     typealias T = Any
 
     private(set) var requirementCallCount = 0
-    var requirementHandler: (()  -> (T))?
+    var requirementHandler: (()  -> T)?
     func requirement()  -> T {
         requirementCallCount += 1
         if let requirementHandler = requirementHandler {

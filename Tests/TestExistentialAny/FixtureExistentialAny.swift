@@ -69,7 +69,7 @@ class UseSomeProtocolMock: UseSomeProtocol {
 
 
     private(set) var fooCallCount = 0
-    var fooHandler: (()  -> (any SomeProtocol))?
+    var fooHandler: (()  -> any SomeProtocol)?
     func foo()  -> any SomeProtocol {
         fooCallCount += 1
         if let fooHandler = fooHandler {

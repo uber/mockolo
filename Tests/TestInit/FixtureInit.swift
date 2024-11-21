@@ -237,7 +237,7 @@ public class ForcastUpdatingMock: ForcastUpdating {
 
 
     public private(set) var enabledCallCount = 0
-    public var enabledHandler: (() -> (Bool))?
+    public var enabledHandler: (() -> Bool)?
     public func enabled() -> Bool {
         enabledCallCount += 1
         if let enabledHandler = enabledHandler {
@@ -247,7 +247,7 @@ public class ForcastUpdatingMock: ForcastUpdating {
     }
 
     public private(set) var forcastLoaderCallCount = 0
-    public var forcastLoaderHandler: (() -> (ForcastLoading?))?
+    public var forcastLoaderHandler: (() -> ForcastLoading?)?
     public func forcastLoader() -> ForcastLoading? {
         forcastLoaderCallCount += 1
         if let forcastLoaderHandler = forcastLoaderHandler {
