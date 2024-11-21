@@ -161,14 +161,14 @@ extension MethodModel {
         var stateVarDecl: String? {
             guard context.requiresSendable else { return nil }
 
-            let handlerVarType = handler.type(enclosingType: enclosingType).typeName
+            let handlerType = handler.type(enclosingType: enclosingType).typeName
             let argumentsTupleType: String
             if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
                 argumentsTupleType = argsHistory.capturedValueType.typeName
             } else {
                 argumentsTupleType = .neverType
             }
-            return "\(1.tab)private let \(stateVarName) = MockoloMutex(MockoloHandlerState<\(argumentsTupleType), \(handlerVarType)>())"
+            return "\(1.tab)private let \(stateVarName) = MockoloMutex(MockoloHandlerState<\(argumentsTupleType), \(handlerType)>())"
         }
 
         var callCountVarDecl: String {
@@ -211,7 +211,8 @@ extension MethodModel {
         }
 
         var handlerVarDecl: String {
-            let handlerVarType = handler.type(enclosingType: enclosingType).typeName // ?? "Any"
+            let handlerType = handler.type(enclosingType: enclosingType).typeName // ?? "Any"
+            let handlerVarType = "(\(handlerType))?"
             if !context.requiresSendable {
                 return "\(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType)"
             } else {

@@ -532,7 +532,7 @@ public final class SwiftType {
             throwing: throwing
         )
 
-        let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
+        let typeStr = "(\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType)"
         return SwiftType(typeStr, cast: returnTypeCast)
     }
     
