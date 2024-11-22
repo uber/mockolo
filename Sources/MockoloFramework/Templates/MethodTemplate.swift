@@ -74,20 +74,39 @@ extension MethodModel {
                 \(2.tab)mockFunc(&\(callCountVarName))(\"\(model.name)\", \(handlerVarName)?(\(handlerParamValsStr)), \(mockReturn))
                 """
             } else {
-                let argsHistoryCaptureCall: String
-                if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
-                    let argsHistoryCapture = argsHistory.render(context: context, arguments: arguments) ?? ""
-                    argsHistoryCaptureCall = "\(2.tab)\(argsHistoryCapture)\n"
+                let handlerReturn = handler.render(context: context, arguments: arguments)
+
+                if context.requiresSendable {
+                    let paramNamesStr: String?
+                    if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                        paramNamesStr = argsHistory.capturableParams.map(\.0).joined(separator: ", ")
+                    } else {
+                        paramNamesStr = nil
+                    }
+                    body = [
+                        paramNamesStr.map { "\(2.tab)warnIfNotSendable(\($0))" },
+                        "\(2.tab)let \(handlerVarName) = \(stateVarName).withLock { state in",
+                        "\(3.tab)state.callCount += 1",
+                        paramNamesStr.map { "\(3.tab)state.argValues.append(.init(\($0)))" },
+                        "\(3.tab)return state.handler",
+                        "\(2.tab)}",
+                        handlerReturn,
+                    ].compactMap { $0 }.joined(separator: "\n")
                 } else {
-                    argsHistoryCaptureCall = ""
+                    let argsHistoryCaptureCall: String?
+                    if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                        let argsHistoryCapture = argsHistory.render(context: context, arguments: arguments) ?? ""
+                        argsHistoryCaptureCall = argsHistoryCapture
+                    } else {
+                        argsHistoryCaptureCall = nil
+                    }
+
+                    body = [
+                        "\(2.tab)\(callCountVarName) += 1",
+                        argsHistoryCaptureCall.map { "\(2.tab)\($0)" },
+                        handlerReturn,
+                    ].compactMap { $0 }.joined(separator: "\n")
                 }
-
-                let handlerReturn = handler.render(context: context, arguments: arguments) ?? ""
-
-                body = """
-                \(2.tab)\(callCountVarName) += 1
-                \(argsHistoryCaptureCall)\(handlerReturn)
-                """
             }
 
             let wrapped = model.isSubscript ? """

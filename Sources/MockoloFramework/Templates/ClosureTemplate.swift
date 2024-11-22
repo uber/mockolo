@@ -41,17 +41,14 @@ extension ClosureModel {
             isAsync ? String.await + " " : nil,
         ].compactMap { $0 }.joined()
         
-        let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "
-        let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")"
-        
-        let template = """
+        let returnStr = returnDefaultType.isVoid ? "" : "return "
+
+        return """
         \(2.tab)if let \(name) = \(name) {
-        \(3.tab)\(callExpr)
+        \(3.tab)\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")
         \(2.tab)}
         \(2.tab)\(handlerReturnDefault)
         """
-        
-        return template
     }
     
     

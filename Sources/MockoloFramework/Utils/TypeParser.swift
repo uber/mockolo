@@ -200,6 +200,10 @@ public final class SwiftType {
         return true
     }
 
+    var isVoid: Bool {
+        return typeName.isEmpty || typeName == "()" || typeName == "Void"
+    }
+
     var hasValidBrackets: Bool {
         let arg = typeName
         if let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "<", "["), options: [], range: nil) {
