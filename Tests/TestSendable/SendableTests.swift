@@ -15,4 +15,9 @@ class SendableTests: MockoloTestCase {
         verify(srcContent: confirmedSendableProtocol,
                dstContent: confirmedSendableProtocolMock)
     }
+
+    func testGenerateConcurrencyHelpers() {
+        verify(srcContent: generatedConcurrencyHelpers,
+               dstContent: generatedConcurrencyHelpersMock)
+    }
 }
