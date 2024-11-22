@@ -13,14 +13,14 @@ public final class SendableProtocolMock: SendableProtocol {
     public init() { }
 
 
-    private let updateState = MockoloMutex(MockoloHandlerState<Int, (Int) -> String>())
+    private let updateState = MockoloMutex(MockoloHandlerState<Int, @Sendable (Int) -> String>())
     public var updateCallCount: Int {
         return updateState.withLock(\.callCount)
     }
     public var updateArgValues: [Int] {
         return updateState.withLock(\.argValues).map(\.value)
     }
-    public var updateHandler: ((Int) -> String)? {
+    public var updateHandler: (@Sendable (Int) -> String)? {
         get { updateState.withLock(\.handler) }
         set { updateState.withLock { $0.handler = newValue } }
     }
@@ -37,14 +37,14 @@ public final class SendableProtocolMock: SendableProtocol {
         return ""
     }
 
-    private let updateArg0State = MockoloMutex(MockoloHandlerState<(Any, AnyObject), (Any, AnyObject) async throws -> ()>())
+    private let updateArg0State = MockoloMutex(MockoloHandlerState<(Any, AnyObject), @Sendable (Any, AnyObject) async throws -> ()>())
     public var updateArg0CallCount: Int {
         return updateArg0State.withLock(\.callCount)
     }
     public var updateArg0ArgValues: [(Any, AnyObject)] {
         return updateArg0State.withLock(\.argValues).map(\.value)
     }
-    public var updateArg0Handler: ((Any, AnyObject) async throws -> ())? {
+    public var updateArg0Handler: (@Sendable (Any, AnyObject) async throws -> ())? {
         get { updateArg0State.withLock(\.handler) }
         set { updateArg0State.withLock { $0.handler = newValue } }
     }
@@ -71,26 +71,31 @@ public class UncheckedSendableClass: @unchecked Sendable {
 }
 """
 
-let uncheckedSendableClassMock = """
-
-
-
-public class UncheckedSendableClassMock: UncheckedSendableClass, @unchecked Sendable {
+let uncheckedSendableClassMock = #"""
+public final class UncheckedSendableClassMock: UncheckedSendableClass {
     public init() { }
 
 
-    private(set) var updateCallCount = 0
-    var updateHandler: ((Int) -> String)?
+    private let updateState = MockoloMutex(MockoloHandlerState<Never, @Sendable (Int) -> String>())
+    var updateCallCount: Int {
+        return updateState.withLock(\.callCount)
+    }
+    var updateHandler: (@Sendable (Int) -> String)? {
+        get { updateState.withLock(\.handler) }
+        set { updateState.withLock { $0.handler = newValue } }
+    }
     override func update(arg: Int) -> String {
-        updateCallCount += 1
+        let updateHandler = updateState.withLock { state in
+            state.callCount += 1
+            return state.handler
+        }
         if let updateHandler = updateHandler {
             return updateHandler(arg)
         }
         return ""
     }
 }
-
-"""
+"""#
 
 let confirmedSendableProtocol = """
 public protocol SendableSendable: Sendable {
@@ -102,19 +107,28 @@ public protocol ConfirmedSendableProtocol: SendableSendable {
 }
 """
 
-let confirmedSendableProtocolMock = """
-public class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol, @unchecked Sendable {
+let confirmedSendableProtocolMock = #"""
+public final class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol {
     public init() { }
 
 
-    public private(set) var updateCallCount = 0
-    public var updateHandler: ((Int) -> String)?
+    private let updateState = MockoloMutex(MockoloHandlerState<Never, @Sendable (Int) -> String>())
+    public var updateCallCount: Int {
+        return updateState.withLock(\.callCount)
+    }
+    public var updateHandler: (@Sendable (Int) -> String)? {
+        get { updateState.withLock(\.handler) }
+        set { updateState.withLock { $0.handler = newValue } }
+    }
     public func update(arg: Int) -> String {
-        updateCallCount += 1
+        let updateHandler = updateState.withLock { state in
+            state.callCount += 1
+            return state.handler
+        }
         if let updateHandler = updateHandler {
             return updateHandler(arg)
         }
         return ""
     }
 }
-"""
+"""#

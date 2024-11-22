@@ -40,14 +40,15 @@ final class ClosureModel: Model {
         self.funcReturnType = returnType
     }
 
-    func type(enclosingType: SwiftType) -> SwiftType {
+    func type(enclosingType: SwiftType, requiresSendable: Bool) -> SwiftType {
         return SwiftType.toClosureType(
             params: params.map(\.1),
             typeParams: genericTypeNames,
             isAsync: isAsync,
             throwing: throwing,
             returnType: funcReturnType,
-            encloser: enclosingType
+            encloser: enclosingType,
+            requiresSendable: requiresSendable
         )
     }
 
@@ -59,7 +60,7 @@ final class ClosureModel: Model {
               let enclosingType = context.enclosingType else {
             return nil
         }
-        return applyClosureTemplate(type: type(enclosingType: enclosingType),
+        return applyClosureTemplate(type: type(enclosingType: enclosingType, requiresSendable: context.requiresSendable),
                                     name: overloadingResolvedName + .handlerSuffix,
                                     params: params,
                                     returnDefaultType: funcReturnType)

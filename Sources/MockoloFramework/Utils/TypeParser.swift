@@ -488,7 +488,8 @@ public final class SwiftType {
         isAsync: Bool,
         throwing: ThrowingKind,
         returnType: SwiftType,
-        encloser: SwiftType
+        encloser: SwiftType,
+        requiresSendable: Bool
     ) -> SwiftType {
         let displayableParamTypes = params.map { (subtype: SwiftType) -> String in
             return subtype.processTypeParams(with: typeParams)
@@ -536,7 +537,8 @@ public final class SwiftType {
             throwing: throwing
         )
 
-        let typeStr = "(\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType)"
+        let sendableStr = requiresSendable ? "@Sendable " : ""
+        let typeStr = "\(sendableStr)(\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType)"
         return SwiftType(typeStr, cast: returnTypeCast)
     }
     
