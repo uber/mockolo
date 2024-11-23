@@ -44,7 +44,7 @@ extension VariableModel {
 
         var assignVal = ""
         if !shouldOverride, let val = underlyingVarDefaultVal {
-            assignVal = "= \(val)"
+            assignVal = " = \(val)"
         }
 
         let privateSetSpace = allowSetCallCount ? "" :  "\(String.privateSet) "
@@ -89,7 +89,7 @@ extension VariableModel {
                 template = """
                 
                 \(setCallCountVarDecl)
-                \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType) \(assignVal)\(accessorBlock)
+                \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType)\(assignVal)\(accessorBlock)
                 \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
                 \(2.tab)get { return \(underlyingName) }
                 \(2.tab)set { \(underlyingName) = newValue }
@@ -99,7 +99,7 @@ extension VariableModel {
                 template = """
                 
                 \(setCallCountVarDecl)
-                \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) \(assignVal)\(accessorBlock)
+                \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName)\(assignVal)\(accessorBlock)
                 """
             }
 

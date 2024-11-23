@@ -34,8 +34,7 @@ extension ClosureModel {
             }
             return argName.safeName
         }.joined(separator: ", ")
-        let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
-        
+
         let prefix = [
             throwing.hasError ? String.try + " " : nil,
             isAsync ? String.await + " " : nil,
@@ -43,23 +42,28 @@ extension ClosureModel {
         
         let returnStr = returnDefaultType.isVoid ? "" : "return "
 
-        return """
+        var template = """
         \(2.tab)if let \(name) = \(name) {
         \(3.tab)\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")
         \(2.tab)}
-        \(2.tab)\(handlerReturnDefault)
         """
+
+        if let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType) {
+            template += "\n\(2.tab)\(handlerReturnDefault)"
+        }
+
+        return template
     }
     
     
-    private func renderReturnDefaultStatement(name: String, type: SwiftType) -> String {
-        guard !type.isUnknown else { return "" }
-        
+    private func renderReturnDefaultStatement(name: String, type: SwiftType) -> String? {
+        guard !type.isUnknown else { return nil }
+
         if let result = type.defaultVal() {
             if result.isEmpty {
-                return ""
+                return nil
             }
-            return  "return \(result)"
+            return "return \(result)"
         }
 
         return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"

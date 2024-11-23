@@ -28,7 +28,7 @@ class FooMock: Foo {
 
     private(set) var displayCallCount = 0
     var displayHandler: (() -> ())?
-    func display()  {
+    func display() {
         displayCallCount += 1
         if let displayHandler = displayHandler {
             displayHandler()
@@ -38,7 +38,7 @@ class FooMock: Foo {
 
     private(set) var displayXCallCount = 0
     var displayXHandler: ((Int) -> ())?
-    func display(x: Int)  {
+    func display(x: Int) {
         displayXCallCount += 1
         if let displayXHandler = displayXHandler {
             displayXHandler(x)
@@ -48,7 +48,7 @@ class FooMock: Foo {
 
     private(set) var displayYCallCount = 0
     var displayYHandler: ((Int) -> ())?
-    func display(y: Int)  {
+    func display(y: Int) {
         displayYCallCount += 1
         if let displayYHandler = displayYHandler {
             displayYHandler(y)
@@ -58,7 +58,7 @@ class FooMock: Foo {
 
     private(set) var updateCallCount = 0
     var updateHandler: (() -> ())?
-    func update()  {
+    func update() {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler()
@@ -78,7 +78,7 @@ class FooMock: Foo {
 
     private(set) var updateArgCallCount = 0
     var updateArgHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
             updateArgHandler(arg)
@@ -88,7 +88,7 @@ class FooMock: Foo {
 
     private(set) var updateArgFloatCallCount = 0
     var updateArgFloatHandler: ((Float) -> ())?
-    func update(arg: Float)  {
+    func update(arg: Float) {
         updateArgFloatCallCount += 1
         if let updateArgFloatHandler = updateArgFloatHandler {
             updateArgFloatHandler(arg)

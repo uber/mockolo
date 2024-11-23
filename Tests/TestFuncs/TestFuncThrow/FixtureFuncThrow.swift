@@ -22,8 +22,7 @@ protocol FuncThrow {
 }
 """
 
-let funcThrowMock =
-"""
+let funcThrowMock = """
 import Foundation
 
 
@@ -43,22 +42,20 @@ class FuncThrowMock: FuncThrow {
 
     private(set) var f2CallCount = 0
     var f2Handler: ((Int) throws -> ())?
-    func f2(arg: Int) throws  {
+    func f2(arg: Int) throws {
         f2CallCount += 1
         if let f2Handler = f2Handler {
             try f2Handler(arg)
         }
-        
     }
 
     private(set) var f3CallCount = 0
     var f3Handler: ((Int) throws(SomeError) -> ())?
-    func f3(arg: Int) throws(SomeError)  {
+    func f3(arg: Int) throws(SomeError) {
         f3CallCount += 1
         if let f3Handler = f3Handler {
             try f3Handler(arg)
         }
-        
     }
 
     private(set) var f4CallCount = 0
@@ -73,22 +70,20 @@ class FuncThrowMock: FuncThrow {
 
     private(set) var f5CallCount = 0
     var f5Handler: (() throws(MyError) -> ())?
-    func f5() throws(MyError)  {
+    func f5() throws(MyError) {
         f5CallCount += 1
         if let f5Handler = f5Handler {
             try f5Handler()
         }
-        
     }
 
     private(set) var f6CallCount = 0
     var f6Handler: (() async throws(any Error) -> ())?
-    func f6() async throws(any Error)  {
+    func f6() async throws(any Error) {
         f6CallCount += 1
         if let f6Handler = f6Handler {
             try await f6Handler()
         }
-        
     }
 
     private(set) var g1CallCount = 0
@@ -103,12 +98,11 @@ class FuncThrowMock: FuncThrow {
 
     private(set) var g2CallCount = 0
     var g2Handler: (((Int) throws -> ()) throws -> ())?
-    func g2(arg: (Int) throws -> ()) throws  {
+    func g2(arg: (Int) throws -> ()) throws {
         g2CallCount += 1
         if let g2Handler = g2Handler {
             try g2Handler(arg)
         }
-        
     }
 
     private(set) var hCallCount = 0
@@ -151,6 +145,4 @@ class FuncThrowMock: FuncThrow {
         fatalError("updateArg1Handler returns can't have a default value thus its handler must be set")
     }
 }
-
-
 """

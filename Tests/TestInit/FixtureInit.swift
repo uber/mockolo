@@ -223,11 +223,8 @@ public typealias ForcastCheckBlock = () -> ForcastUpdateConfig?
 
 
 let nonSimpleInitVarsMock = """
-
-
-
 public class ForcastUpdatingMock: ForcastUpdating {
-        private var _checkBlock: ForcastCheckBlock!
+    private var _checkBlock: ForcastCheckBlock!
     private var _dataStream: DataStream!
     public init() { }
     required public init(checkBlock: @escaping ForcastCheckBlock, dataStream: DataStream) {
@@ -258,12 +255,11 @@ public class ForcastUpdatingMock: ForcastUpdating {
 
     public private(set) var fetchInfoCallCount = 0
     public var fetchInfoHandler: ((URL, @escaping (String?, URL?) -> ()) -> ())?
-    public func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ())  {
+    public func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ()) {
         fetchInfoCallCount += 1
         if let fetchInfoHandler = fetchInfoHandler {
             fetchInfoHandler(itmsURL, completionHandler)
         }
-        
     }
 }
 """
@@ -278,11 +274,8 @@ protocol MyProtocol {
 """
 
 let initWithSameParamNameButDifferentTypeMock = """
-
-
-
 class MyProtocolMock: MyProtocol {
-        private var _param: Any!
+    private var _param: Any!
     init() { }
     required init(param: Any) {
         self._param = param
@@ -293,8 +286,6 @@ class MyProtocolMock: MyProtocol {
     required init(with param: [Character] = [Character]()) {
         self._param = param
     }
-
-
 }
 """
 
@@ -307,11 +298,8 @@ protocol MyProtocol {
 """
 
 let multipleInitsWithSameParamNameMock = """
-
-
-
 class MyProtocolMock: MyProtocol {
-        private var _anotherParam: Any!
+    private var _anotherParam: Any!
     private var _param: String!
     init() { }
     required init(param: String = "", anotherParam: Int = 0) {
@@ -350,7 +338,7 @@ class MyProtocolMock: MyProtocol {
 let typedThrowableInit = """
 /// \(String.mockAnnotation)
 protocol MyProtocol {
-	init(param: String) throws(SomeError)
+    init(param: String) throws(SomeError)
 }
 """
 
@@ -359,10 +347,10 @@ let typedThrowableInitMock = """
 
 
 class MyProtocolMock: MyProtocol {
-	private var _param: String!
-	init() { }
-	required init(param: String = "") throws(SomeError) {
-		self._param = param
-	}
+    private var _param: String!
+    init() { }
+    required init(param: String = "") throws(SomeError) {
+        self._param = param
+    }
 }
 """

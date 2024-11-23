@@ -113,31 +113,31 @@ class MockoloTestCase: XCTestCase {
         }
 
         try generate(sourceDirs: [],
-                      sourceFiles: srcFilePaths,
-                      parser: SourceParser(),
-                      exclusionSuffixes: ["Mocks", "Tests"],
-                      mockFilePaths: mockFilePaths,
-                      annotation: String.mockAnnotation,
-                      header: header,
-                      macro: "MOCK",
-                      declType: declType,
-                      useTemplateFunc: useTemplateFunc,
-                      useMockObservable: useMockObservable,
-                      allowSetCallCount: allowSetCallCount,
-                      enableFuncArgsHistory: enableFuncArgsHistory,
-                      disableCombineDefaultValues: disableCombineDefaultValues,
-                      mockFinal: mockFinal,
-                      testableImports: testableImports,
-                      customImports: [],
-                      excludeImports: [],
-                      to: dstFilePath,
-                      loggingLevel: 3,
-                      concurrencyLimit: concurrencyLimit,
-            onCompletion: { ret in
-                let output = (try? String(contentsOf: URL(fileURLWithPath: self.defaultDstFilePath), encoding: .utf8)) ?? ""
-                let outputContents = output.components(separatedBy:  .whitespacesAndNewlines).filter{!$0.isEmpty}
-                let fixtureContents = dstContent.components(separatedBy: .whitespacesAndNewlines).filter{!$0.isEmpty}
-                XCTAssert(outputContents.contains(subArray: fixtureContents), "output:\n" + output)
+                     sourceFiles: srcFilePaths,
+                     parser: SourceParser(),
+                     exclusionSuffixes: ["Mocks", "Tests"],
+                     mockFilePaths: mockFilePaths,
+                     annotation: String.mockAnnotation,
+                     header: header,
+                     macro: "MOCK",
+                     declType: declType,
+                     useTemplateFunc: useTemplateFunc,
+                     useMockObservable: useMockObservable,
+                     allowSetCallCount: allowSetCallCount,
+                     enableFuncArgsHistory: enableFuncArgsHistory,
+                     disableCombineDefaultValues: disableCombineDefaultValues,
+                     mockFinal: mockFinal,
+                     testableImports: testableImports,
+                     customImports: [],
+                     excludeImports: [],
+                     to: dstFilePath,
+                     loggingLevel: 3,
+                     concurrencyLimit: concurrencyLimit,
+                     onCompletion: { ret in
+            let output = (try? String(contentsOf: URL(fileURLWithPath: self.defaultDstFilePath), encoding: .utf8)) ?? ""
+            let outputContents = output.components(separatedBy:  .newlines).filter { !$0.isEmpty && !$0.allSatisfy(\.isWhitespace) }
+            let fixtureContents = dstContent.components(separatedBy: .newlines).filter { !$0.isEmpty && !$0.allSatisfy(\.isWhitespace) }
+            XCTAssert(outputContents.contains(subArray: fixtureContents), "output:\n" + output)
         })
     }
 }

@@ -1,8 +1,6 @@
 import MockoloFramework
 
-
-let patNameCollision =
-"""
+let patNameCollision = """
 /// \(String.mockAnnotation)
 protocol Foo {
 associatedtype T
@@ -21,55 +19,28 @@ associatedtype T
 /// \(String.mockAnnotation)
 protocol Baz: Foo, Bar, Cat {
 }
-
 """
 
-let patNameCollisionMock =
-"""
-
-
+let patNameCollisionMock = """
 class FooMock: Foo {
-    
-    
-    
-    init() {
-        
-        
-    }
+    init() { }
     typealias T = Any
 }
 
 class BarMock: Bar {
-    
-    
-    
-    init() {
-        
-        
-    }
+    init() { }
     typealias T = String
 }
 
 class CatMock: Cat {
-    
-    
-    
-    init() {
-        
-        
-    }
+    init() { }
     typealias T = Hashable & Codable
 }
 
 class BazMock: Baz {
     typealias T = Any & Hashable & Codable & String
     
-    
-    init() {
-        
-        
-    }
-    
+    init() { }
 }
 """
 
@@ -98,8 +69,7 @@ public class FooBarMock: FooBar {
 """
 
 
-let patOverride =
-"""
+let patOverride = """
 /// \(String.mockAnnotation)(typealias: T = Any; U = Bar; R = (String, Int); S = AnyObject)
 protocol Foo {
     associatedtype T
@@ -110,10 +80,7 @@ protocol Foo {
 }
 """
 
-let patOverrideMock =
-"""
-
-
+let patOverrideMock = """
 class FooMock: Foo {
     init() { }
 
@@ -135,8 +102,7 @@ class FooMock: Foo {
 
 """
 
-let protocolWithTypealias =
-"""
+let protocolWithTypealias = """
 /// \(String.mockAnnotation)
 public protocol SomeType {
     typealias Key = String
@@ -145,7 +111,6 @@ public protocol SomeType {
 """
 
 let protocolWithTypealiasMock = """
-
 public class SomeTypeMock: SomeType {
     public init() { }
     public init(key: Key) {
@@ -162,8 +127,7 @@ public class SomeTypeMock: SomeType {
 
 """
 
-let patDefaultType =
-"""
+let patDefaultType = """
 /// \(String.mockAnnotation)
 protocol Foo {
     associatedtype T
@@ -171,24 +135,16 @@ protocol Foo {
 }
 """
 
-let patDefaultTypeMock =
-"""
+let patDefaultTypeMock = """
 class FooMock: Foo {
-    
-    
-    
-    init() {
-        
-        
-    }
+    init() { }
+
     typealias T = Any
     typealias U = Collection where U.Element == T
 }
-
 """
 
-let patPartialOverride =
-"""
+let patPartialOverride = """
 /// \(String.mockAnnotation)(typealias: U = AnyObject)
 protocol Foo {
     associatedtype T
@@ -197,17 +153,9 @@ protocol Foo {
 """
 
 
-let patPartialOverrideMock =
-
-"""
+let patPartialOverrideMock = """
 class FooMock: Foo {
-    
-    
-    
-    init() {
-        
-        
-    }
+    init() { }
     typealias T = Any
     typealias U = AnyObject
 }

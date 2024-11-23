@@ -35,7 +35,7 @@ class FooMock: Foo {
 
     private(set) var collectionViewConfigureCellCallCount = 0
     var collectionViewConfigureCellHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
-    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int)  {
+    func collectionView(_ collectionView: UICollectionView, configureCell cell: UICollectionViewCell, forItemAt index: Int) {
         collectionViewConfigureCellCallCount += 1
         if let collectionViewConfigureCellHandler = collectionViewConfigureCellHandler {
             collectionViewConfigureCellHandler(collectionView, cell, index)
@@ -55,7 +55,7 @@ class FooMock: Foo {
 
     private(set) var collectionViewDidEndDisplayingCallCount = 0
     var collectionViewDidEndDisplayingHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
-    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int)  {
+    func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt index: Int) {
         collectionViewDidEndDisplayingCallCount += 1
         if let collectionViewDidEndDisplayingHandler = collectionViewDidEndDisplayingHandler {
             collectionViewDidEndDisplayingHandler(collectionView, cell, index)
@@ -65,7 +65,7 @@ class FooMock: Foo {
 
     private(set) var collectionViewConfigureCallCount = 0
     var collectionViewConfigureHandler: ((UICollectionView, UICollectionViewCell, Int) -> ())?
-    func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int)  {
+    func collectionView(_ collectionView: UICollectionView, configure cell: UICollectionViewCell, forItemAt index: Int) {
         collectionViewConfigureCallCount += 1
         if let collectionViewConfigureHandler = collectionViewConfigureHandler {
             collectionViewConfigureHandler(collectionView, cell, index)

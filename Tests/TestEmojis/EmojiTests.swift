@@ -1,7 +1,4 @@
-import Foundation
-
 class EmojiTests: MockoloTestCase {
-   
     func testEmojis() {
         verify(srcContent: emojiVars,
                dstContent: emojiVarsMock)
@@ -11,5 +8,11 @@ class EmojiTests: MockoloTestCase {
         verify(srcContent: emojiVars,
                mockContent: emojiParentMock,
                dstContent: emojiCombMock)
+    }
+
+    func testKrJp() {
+        verify(srcContent: krJp,
+               mockContent: krJpParentMock,
+               dstContent: krJpMock)
     }
 }

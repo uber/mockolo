@@ -19,9 +19,7 @@ class RootControllerMock: RootController {
         self._viewController = viewController
     }
 
-
-
-    private var _viewController: UIViewController! 
+    private var _viewController: UIViewController!
     var viewController: UIViewController {
         get { return _viewController }
         set { _viewController = newValue }
@@ -34,7 +32,7 @@ class RootBuildableMock: RootBuildable {
 
     private(set) var buildCallCount = 0
     var buildHandler: (() -> RootController)?
-    func build()  -> RootController {
+    func build() -> RootController {
         buildCallCount += 1
         if let buildHandler = buildHandler {
             return buildHandler()

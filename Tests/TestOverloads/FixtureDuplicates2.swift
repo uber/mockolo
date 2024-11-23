@@ -28,7 +28,7 @@ class FooMock: Foo {
 
     private(set) var updateCallCount = 0
     var updateHandler: ((Int, Float) -> ())?
-    func update(arg: Int, some: Float)  {
+    func update(arg: Int, some: Float) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(arg, some)

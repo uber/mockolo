@@ -27,7 +27,7 @@ public class OpaqueTypeProtocolMock: OpaqueTypeProtocol {
 
     public private(set) var optionalCallCount = 0
     public var optionalHandler: ((Any?) -> ())?
-    public func optional(_ type: (some Error)?)  {
+    public func optional(_ type: (some Error)?) {
         optionalCallCount += 1
         if let optionalHandler = optionalHandler {
             optionalHandler(type)
@@ -68,7 +68,7 @@ public class OpaqueTypeWithMultiTypeProtocolMock: OpaqueTypeWithMultiTypeProtoco
 
     public private(set) var optionalCallCount = 0
     public var optionalHandler: ((Any?) -> ())?
-    public func optional(_ type: ((some (Error & Foo)))?)  {
+    public func optional(_ type: ((some (Error & Foo)))?) {
         optionalCallCount += 1
         if let optionalHandler = optionalHandler {
             optionalHandler(type)
@@ -78,7 +78,7 @@ public class OpaqueTypeWithMultiTypeProtocolMock: OpaqueTypeWithMultiTypeProtoco
 
     public private(set) var multiParamCallCount = 0
     public var multiParamHandler: ((Any, Any) -> ())?
-    public func multiParam(_ typeA: some Error, _ typeB: some Error)  {
+    public func multiParam(_ typeA: some Error, _ typeB: some Error) {
         multiParamCallCount += 1
         if let multiParamHandler = multiParamHandler {
             multiParamHandler(typeA, typeB)
@@ -107,7 +107,7 @@ class ProtocolReturningOpaqueTypeInClosureProtocolMock: ProtocolReturningOpaqueT
 
     private(set) var registerCallCount = 0
     var registerHandler: ((@autoclosure @escaping () -> (any MyAwesomeType)) -> ())?
-    func register(router: @autoclosure @escaping () -> (some MyAwesomeType))  {
+    func register(router: @autoclosure @escaping () -> (some MyAwesomeType)) {
         registerCallCount += 1
         if let registerHandler = registerHandler {
             registerHandler(router())

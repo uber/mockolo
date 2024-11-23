@@ -135,15 +135,15 @@ public final class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol {
 
 let generatedConcurrencyHelpers = """
 /// \(String.mockAnnotation)
-public protocol SendableProtocol: Sendable {
+protocol DummyProtocol: Sendable {
 }
 """
 
 let generatedConcurrencyHelpersMock = #"""
 import Foundation
 
-public final class SendableProtocolMock: SendableProtocol {
-    public init() { }
+final class DummyProtocolMock: DummyProtocol {
+    init() { }
 }
 
 fileprivate func warnIfNotSendable<each T>(function: String = #function, _: repeat each T) {

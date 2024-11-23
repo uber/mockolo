@@ -17,7 +17,7 @@ class FooMock: Foo {
     private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
-    func fooFunc(val: Int)  {
+    func fooFunc(val: Int) {
         fooFuncCallCount += 1
         fooFuncArgValues.append(val)
         if let fooFuncHandler = fooFuncHandler {
@@ -29,7 +29,7 @@ class FooMock: Foo {
     private(set) var barFuncCallCount = 0
     var barFuncArgValues = [[Int]]()
     var barFuncHandler: (([Int]) -> ())?
-    func barFunc(for: [Int])  {
+    func barFunc(for: [Int]) {
         barFuncCallCount += 1
         barFuncArgValues.append(`for`)
         if let barFuncHandler = barFuncHandler {
@@ -41,7 +41,7 @@ class FooMock: Foo {
     private(set) var bazFuncCallCount = 0
     var bazFuncArgValues = [(String, Float)]()
     var bazFuncHandler: ((String, Float) -> ())?
-    func bazFunc(arg: String, default: Float)  {
+    func bazFunc(arg: String, default: Float) {
         bazFuncCallCount += 1
         bazFuncArgValues.append((arg, `default`))
         if let bazFuncHandler = bazFuncHandler {
@@ -61,7 +61,7 @@ class FooMock: Foo {
     private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((Int) -> ())?
-    func fooFunc(val: Int)  {
+    func fooFunc(val: Int) {
         fooFuncCallCount += 1
         fooFuncArgValues.append(val)
         if let fooFuncHandler = fooFuncHandler {
@@ -72,7 +72,7 @@ class FooMock: Foo {
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
-    func barFunc(for: [Int])  {
+    func barFunc(for: [Int]) {
         barFuncCallCount += 1
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(`for`)
@@ -83,7 +83,7 @@ class FooMock: Foo {
     private(set) var bazFuncCallCount = 0
     var bazFuncArgValues = [(String, Float)]()
     var bazFuncHandler: ((String, Float) -> ())?
-    func bazFunc(arg: String, default: Float)  {
+    func bazFunc(arg: String, default: Float) {
         bazFuncCallCount += 1
         bazFuncArgValues.append((arg, `default`))
         if let bazFuncHandler = bazFuncHandler {
@@ -236,7 +236,7 @@ class FooMock: Foo {
     private(set) var fooFuncVal1CallCount = 0
     var fooFuncVal1ArgValues = [Int]()
     var fooFuncVal1Handler: ((Int) -> ())?
-    func fooFunc(val1: Int)  {
+    func fooFunc(val1: Int) {
         fooFuncVal1CallCount += 1
         fooFuncVal1ArgValues.append(val1)
 
@@ -249,7 +249,7 @@ class FooMock: Foo {
     private(set) var fooFuncVal1StringCallCount = 0
     var fooFuncVal1StringArgValues = [String]()
     var fooFuncVal1StringHandler: ((String) -> ())?
-    func fooFunc(val1: String)  {
+    func fooFunc(val1: String) {
         fooFuncVal1StringCallCount += 1
         fooFuncVal1StringArgValues.append(val1)
 
@@ -261,7 +261,7 @@ class FooMock: Foo {
     private(set) var fooFuncVal2CallCount = 0
     var fooFuncVal2ArgValues = [Int]()
     var fooFuncVal2Handler: ((Int) -> ())?
-    func fooFunc(val2: Int)  {
+    func fooFunc(val2: Int) {
         fooFuncVal2CallCount += 1
         fooFuncVal2ArgValues.append(val2)
 
@@ -323,16 +323,17 @@ let argumentsHistoryInoutCaseMock = """
 class FooMock: Foo {
     init() { }
 
-    private(set)  var fooFuncCallCount = 0
+
+    private(set) var fooFuncCallCount = 0
     var fooFuncArgValues = [Int]()
     var fooFuncHandler: ((inout Int) -> ())?
     func fooFunc(val: inout Int) {
         fooFuncCallCount += 1
         fooFuncArgValues.append(val)
-
         if let fooFuncHandler = fooFuncHandler {
             fooFuncHandler(&val)
         }
+        
     }
 
     private(set) var barFuncCallCount = 0
@@ -341,10 +342,10 @@ class FooMock: Foo {
     func barFunc(into val: inout Int) {
         barFuncCallCount += 1
         barFuncArgValues.append(val)
-
         if let barFuncHandler = barFuncHandler {
-        barFuncHandler(&val)
+            barFuncHandler(&val)
         }
+        
     }
 }
 """
@@ -433,8 +434,7 @@ protocol Foo {
 
 let argumentsHistoryAutoclosureCaseMock = """
 class FooMock: Foo {
-    init() {
-    }
+    init() { }
     
     private(set) var fooFuncCallCount = 0
     var fooFuncHandler: ((@autoclosure () -> Int) -> ())?
