@@ -9,7 +9,7 @@ public protocol SendableProtocol: Sendable {
 """
 
 let sendableProtocolMock = #"""
-public final class SendableProtocolMock: SendableProtocol {
+public final class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
     public init() { }
 
 
@@ -72,7 +72,7 @@ public class UncheckedSendableClass: @unchecked Sendable {
 """
 
 let uncheckedSendableClassMock = #"""
-public final class UncheckedSendableClassMock: UncheckedSendableClass {
+public final class UncheckedSendableClassMock: UncheckedSendableClass, @unchecked Sendable {
     public init() { }
 
 
@@ -108,7 +108,7 @@ public protocol ConfirmedSendableProtocol: SendableSendable {
 """
 
 let confirmedSendableProtocolMock = #"""
-public final class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol {
+public final class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol, @unchecked Sendable {
     public init() { }
 
 
@@ -142,7 +142,7 @@ public protocol SendableProtocol: Sendable {
 let generatedConcurrencyHelpersMock = #"""
 import Foundation
 
-public final class SendableProtocolMock: SendableProtocol {
+public final class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
     public init() { }
 }
 
