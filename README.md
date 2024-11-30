@@ -224,7 +224,7 @@ public class FooMock: Foo {
     }
 
     var barCallCount = 0
-    var barHandler: ((Float) -> (String))?
+    var barHandler: ((Float) -> String)?
     func bar(arg: Float) -> String {
         barCallCount += 1
         if let barHandler = barHandler {
