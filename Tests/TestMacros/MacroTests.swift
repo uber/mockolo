@@ -1,17 +1,13 @@
-import XCTest
-
 final class MacroTests: MockoloTestCase {
     func testMacroInFunc() {
         verify(srcContent: macroInFunc,
                dstContent: macroInFuncMock)
     }
 
-#if os(macOS)
     func testMacroInFuncWithOverload() {
         verify(srcContent: macroInFuncWithOverload,
                dstContent: macroInFuncWithOverloadMock)
     }
-#endif
 
     func testMacroImports() {
         verify(srcContent: macroImports,
