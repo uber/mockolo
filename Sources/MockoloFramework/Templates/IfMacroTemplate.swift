@@ -20,12 +20,12 @@ extension IfMacroModel {
     func applyMacroTemplate(name: String,
                             context: RenderContext,
                             arguments: GenerationArguments,
-                            entities: [Model]) -> String {
+                            entities: [(String, Model)]) -> String {
         let rendered = entities
             .compactMap { model in
-                model.render(
+                model.1.render(
                     context: .init(
-                        overloadingResolvedName: model.name, // FIXME: the name is not resolving overload
+                        overloadingResolvedName: model.0,
                         enclosingType: context.enclosingType,
                         annotatedTypeKind: context.annotatedTypeKind
                     ),
