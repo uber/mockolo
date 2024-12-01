@@ -8,10 +8,8 @@ final class MacroTests: MockoloTestCase {
 
 #if os(macOS)
     func testMacroInFuncWithOverload() {
-        XCTExpectFailure("Resolving overloading in #if is broken.") {
-            verify(srcContent: macroInFuncWithOverload,
-                   dstContent: macroInFuncWithOverloadMock)
-        }
+        verify(srcContent: macroInFuncWithOverload,
+               dstContent: macroInFuncWithOverloadMock)
     }
 #endif
 
