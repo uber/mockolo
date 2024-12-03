@@ -21,6 +21,7 @@ func write(candidates: [(String, Int64)],
            header: String?,
            macro: String?,
            imports: String,
+           helpers: [String],
            to outputFilePath: String) throws -> String {
 
     let entities = candidates
@@ -35,11 +36,18 @@ func write(candidates: [(String, Int64)],
     let headerStr = (header ?? "") + .headerDoc
     var macroStart = ""
     var macroEnd = ""
-    if let mcr = macro, !mcr.isEmpty {
-        macroStart = .poundIf + mcr
+    if let macro, !macro.isEmpty {
+        macroStart = .poundIf + macro
         macroEnd = .poundEndIf
     }
-    let ret = [headerStr, macroStart, imports, entities.joined(separator: "\n"), macroEnd].joined(separator: "\n\n")
+    let ret = [
+        headerStr,
+        macroStart,
+        imports,
+        entities.joined(separator: "\n"),
+        helpers.joined(separator: "\n\n"),
+        macroEnd,
+    ].joined(separator: "\n\n")
     let currentFileContents = try? String(contentsOfFile: outputFilePath, encoding: .utf8)
     guard currentFileContents != ret else {
         log("Not writing the file as content is unchanged", level: .info)

@@ -1,7 +1,8 @@
 class SendableTests: MockoloTestCase {
     func testSendableProtocol() {
         verify(srcContent: sendableProtocol,
-               dstContent: sendableProtocolMock)
+               dstContent: sendableProtocolMock,
+               enableFuncArgsHistory: true)
     }
 
     func testUncheckedSendableClass() {
@@ -13,5 +14,10 @@ class SendableTests: MockoloTestCase {
     func testConfirmingSendableProtocol() {
         verify(srcContent: confirmedSendableProtocol,
                dstContent: confirmedSendableProtocolMock)
+    }
+
+    func testGenerateConcurrencyHelpers() {
+        verify(srcContent: generatedConcurrencyHelpers,
+               dstContent: generatedConcurrencyHelpersMock)
     }
 }

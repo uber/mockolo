@@ -142,8 +142,7 @@ final class MethodModel: Model {
         }
 
         return ClosureModel(genericTypeParams: genericTypeParams,
-                            paramNames: params.map(\.name),
-                            paramTypes: params.map(\.type),
+                            params: params.map { ($0.name, $0.type) },
                             isAsync: isAsync,
                             throwing: throwing,
                             returnType: returnType)

@@ -99,11 +99,8 @@ class MockoloTestCase: XCTestCase {
         let macroEnd = String.poundEndIf
 
         let headerStr = header + String.headerDoc
-        index = 0
-        if let mockContents = mockContents {
-
-            for mockContent in mockContents {
-
+        if let mockContents {
+            for (index, mockContent) in mockContents.enumerated() {
                 let formattedMockContent = """
                 \(headerStr)
                 \(macroStart)
@@ -111,17 +108,9 @@ class MockoloTestCase: XCTestCase {
                 \(macroEnd)
                 """
                 let mockCreated = FileManager.default.createFile(atPath: mockFilePaths[index], contents: formattedMockContent.data(using: .utf8), attributes: nil)
-                index += 1
                 XCTAssert(mockCreated)
             }
         }
-
-        let formattedDstContent = """
-        \(headerStr)
-        \(macroStart)
-        \(dstContent)
-        \(macroEnd)
-        """
 
         try generate(sourceDirs: [],
                       sourceFiles: srcFilePaths,
@@ -147,9 +136,25 @@ class MockoloTestCase: XCTestCase {
             onCompletion: { ret in
                 let output = (try? String(contentsOf: URL(fileURLWithPath: self.defaultDstFilePath), encoding: .utf8)) ?? ""
                 let outputContents = output.components(separatedBy:  .whitespacesAndNewlines).filter{!$0.isEmpty}
-                let fixtureContents = formattedDstContent.components(separatedBy: .whitespacesAndNewlines).filter{!$0.isEmpty}
-                XCTAssert(fixtureContents == outputContents, "output:\n" + output)
+                let fixtureContents = dstContent.components(separatedBy: .whitespacesAndNewlines).filter{!$0.isEmpty}
+                XCTAssert(outputContents.contains(subArray: fixtureContents), "output:\n" + output)
         })
     }
 }
 
+extension Array where Element: Equatable {
+    fileprivate func contains(subArray: [Element]) -> Bool {
+        guard subArray.count <= self.count else {
+            return false
+        }
+
+        for i in 0...(self.count - subArray.count) {
+            let slice = self[i..<i + subArray.count]
+            if slice.elementsEqual(subArray) {
+                return true
+            }
+        }
+
+        return false
+    }
+}

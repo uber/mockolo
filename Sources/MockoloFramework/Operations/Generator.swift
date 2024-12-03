@@ -157,17 +157,25 @@ public func generate(sourceDirs: [String],
     signpost_begin(name: "Write results")
     log("Write the mock results and import lines to", outputFilePath, level: .info)
 
+    let needsConcurrencyHelpers = resolvedEntities.contains { $0.requiresSendable }
+
     let imports = handleImports(pathToImportsMap: pathToImportsMap,
-                                customImports: customImports,
+                                customImports: customImports + (needsConcurrencyHelpers ? ["Foundation"] : []),
                                 excludeImports: excludeImports,
                                 testableImports: testableImports,
                                 relevantPaths: relevantPaths)
 
+    var helpers = [String]()
+    if needsConcurrencyHelpers {
+        helpers.append(applyConcurrencyHelpersTemplate())
+    }
+
     let result = try write(candidates: candidates,
-                       header: header,
-                       macro: macro,
-                       imports: imports,
-                       to: outputFilePath)
+                           header: header,
+                           macro: macro,
+                           imports: imports,
+                           helpers: helpers,
+                           to: outputFilePath)
     signpost_end(name: "Write results")
     let t5 = CFAbsoluteTimeGetCurrent()
     log("Took", t5-t4, level: .verbose)

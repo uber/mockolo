@@ -200,6 +200,10 @@ public final class SwiftType {
         return true
     }
 
+    var isVoid: Bool {
+        return typeName.isEmpty || typeName == "()" || typeName == "Void"
+    }
+
     var hasValidBrackets: Bool {
         let arg = typeName
         if let _ = arg.rangeOfCharacter(from: CharacterSet(arrayLiteral: "<", "["), options: [], range: nil) {
@@ -484,7 +488,8 @@ public final class SwiftType {
         isAsync: Bool,
         throwing: ThrowingKind,
         returnType: SwiftType,
-        encloser: SwiftType
+        encloser: SwiftType,
+        requiresSendable: Bool
     ) -> SwiftType {
         let displayableParamTypes = params.map { (subtype: SwiftType) -> String in
             return subtype.processTypeParams(with: typeParams)
@@ -532,11 +537,12 @@ public final class SwiftType {
             throwing: throwing
         )
 
-        let typeStr = "((\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType))?"
+        let sendableStr = requiresSendable ? "@Sendable " : ""
+        let typeStr = "\(sendableStr)(\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType)"
         return SwiftType(typeStr, cast: returnTypeCast)
     }
     
-    static func toArgumentsHistoryType(with params: [SwiftType], typeParams: [String]) -> SwiftType {
+    static func toArgumentsCaptureType(with params: [SwiftType], typeParams: [String]) -> SwiftType {
         // Expected only history capturable types.
         let displayableParamTypes = params.compactMap { (subtype: SwiftType) -> String? in
             var processedType = subtype.processTypeParams(with: typeParams)
@@ -554,9 +560,9 @@ public final class SwiftType {
         let displayableParamStr = displayableParamTypes.joined(separator: ", ")
 
         if displayableParamTypes.count >= 2 {
-            return SwiftType("[(\(displayableParamStr))]")
+            return SwiftType("(\(displayableParamStr))")
         } else {
-            return SwiftType("[\(displayableParamStr)]")
+            return SwiftType(displayableParamStr)
         }
     }
 

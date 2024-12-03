@@ -19,28 +19,21 @@ import Foundation
 extension ClosureModel {
     func applyClosureTemplate(type: SwiftType,
                               name: String,
-                              paramVals: [String]?,
-                              paramTypes: [SwiftType]?,
+                              params: [(String, SwiftType)],
                               returnDefaultType: SwiftType) -> String {
-        
-        var handlerParamValsStr = ""
-        if let paramVals = paramVals, let paramTypes = paramTypes {
-            let zipped = zip(paramVals, paramTypes).map { (arg) -> String in
-                let (argName, argType) = arg
-                if argType.isAutoclosure {
-                    return argName.safeName + "()"
-                }
-                if argType.isInOut {
-                    return "&" + argName.safeName
-                }
-                if argType.hasClosure && argType.isOptional,
-                    let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
-                    return renderedClosure
-                }
-                return argName.safeName
+        let handlerParamValsStr = params.map { (argName, argType) -> String in
+            if argType.isAutoclosure {
+                return argName.safeName + "()"
             }
-            handlerParamValsStr = zipped.joined(separator: ", ")
-        }
+            if argType.isInOut {
+                return "&" + argName.safeName
+            }
+            if argType.hasClosure && argType.isOptional,
+               let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
+                return renderedClosure
+            }
+            return argName.safeName
+        }.joined(separator: ", ")
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
         
         let prefix = [
@@ -48,17 +41,14 @@ extension ClosureModel {
             isAsync ? String.await + " " : nil,
         ].compactMap { $0 }.joined()
         
-        let returnStr = returnDefaultType.typeName.isEmpty ? "" : "return "
-        let callExpr = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")"
-        
-        let template = """
+        let returnStr = returnDefaultType.isVoid ? "" : "return "
+
+        return """
         \(2.tab)if let \(name) = \(name) {
-        \(3.tab)\(callExpr)
+        \(3.tab)\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")
         \(2.tab)}
         \(2.tab)\(handlerReturnDefault)
         """
-        
-        return template
     }
     
     

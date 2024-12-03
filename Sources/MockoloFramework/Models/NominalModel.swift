@@ -23,12 +23,12 @@ final class NominalModel: Model {
     let accessLevel: String
     let identifier: String
     let declKindOfMockAnnotatedBaseType: NominalTypeDeclKind
-    let inheritedTypes: [String]
     let entities: [(String, Model)]
     let initParamCandidates: [VariableModel]
     let declaredInits: [MethodModel]
     let metadata: AnnotationMetadata?
     let declKind: NominalTypeDeclKind
+    let requiresSendable: Bool
 
     var modelType: ModelType {
         return .nominal
@@ -39,20 +39,19 @@ final class NominalModel: Model {
          acl: String,
          declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
          declKind: NominalTypeDeclKind,
-         inheritedTypes: [String],
          attributes: [String],
          offset: Int64,
          metadata: AnnotationMetadata?,
          initParamCandidates: [VariableModel],
          declaredInits: [MethodModel],
-         entities: [(String, Model)]) {
-        self.identifier = identifier 
+         entities: [(String, Model)],
+         requiresSendable: Bool) {
+        self.identifier = identifier
         self.name = metadata?.nameOverride ?? (identifier + "Mock")
         self.type = SwiftType(self.name)
         self.namespaces = namespaces
         self.declKindOfMockAnnotatedBaseType = declKindOfMockAnnotatedBaseType
         self.declKind = declKind
-        self.inheritedTypes = inheritedTypes
         self.entities = entities
         self.declaredInits = declaredInits
         self.initParamCandidates = initParamCandidates
@@ -60,6 +59,7 @@ final class NominalModel: Model {
         self.offset = offset
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessLevel = acl
+        self.requiresSendable = requiresSendable
     }
     
     func render(
@@ -71,7 +71,6 @@ final class NominalModel: Model {
             identifier: self.identifier,
             accessLevel: accessLevel,
             attribute: attribute,
-            inheritedTypes: inheritedTypes,
             metadata: metadata,
             arguments: arguments,
             initParamCandidates: initParamCandidates,

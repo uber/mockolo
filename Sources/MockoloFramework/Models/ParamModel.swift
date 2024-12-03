@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 final class ParamModel: Model {
     internal init(label: String, name: String, type: SwiftType, isGeneric: Bool, inInit: Bool, needsVarDecl: Bool, offset: Int64, length: Int64) {
         self.label = label
@@ -84,9 +82,23 @@ final class ParamModel: Model {
     }
     
     func render(
-        context: RenderContext = .init(),
-        arguments: GenerationArguments = .default
+        context: RenderContext,
+        arguments: GenerationArguments
     ) -> String? {
         return applyParamTemplate(name: name, label: label, type: type, inInit: inInit)
+    }
+}
+
+extension [ParamModel] {
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String {
+        return self.compactMap {
+            $0.render(
+                context: context,
+                arguments: arguments
+            )
+        }.joined(separator: ", ")
     }
 }

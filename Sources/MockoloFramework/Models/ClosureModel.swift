@@ -22,8 +22,7 @@ final class ClosureModel: Model {
 
     let funcReturnType: SwiftType
     let genericTypeNames: [String]
-    let paramNames: [String]
-    let paramTypes: [SwiftType]
+    let params: [(String, SwiftType)]
     let isAsync: Bool
     let throwing: ThrowingKind
 
@@ -31,40 +30,39 @@ final class ClosureModel: Model {
         return .closure
     }
 
-    init(genericTypeParams: [ParamModel], paramNames: [String], paramTypes: [SwiftType], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType) {
+    init(genericTypeParams: [ParamModel], params: [(String, SwiftType)], isAsync: Bool, throwing: ThrowingKind, returnType: SwiftType) {
         // In the mock's call handler, rethrows is unavailable.
         let throwing = throwing.coerceRethrowsToThrows
         self.isAsync = isAsync
         self.throwing = throwing
         self.genericTypeNames = genericTypeParams.map(\.name)
-        self.paramNames = paramNames
-        self.paramTypes = paramTypes
+        self.params = params
         self.funcReturnType = returnType
     }
 
-    func type(enclosingType: SwiftType) -> SwiftType {
+    func type(enclosingType: SwiftType, requiresSendable: Bool) -> SwiftType {
         return SwiftType.toClosureType(
-            params: paramTypes,
+            params: params.map(\.1),
             typeParams: genericTypeNames,
             isAsync: isAsync,
             throwing: throwing,
             returnType: funcReturnType,
-            encloser: enclosingType
+            encloser: enclosingType,
+            requiresSendable: requiresSendable
         )
     }
 
     func render(
         context: RenderContext,
-        arguments: GenerationArguments = .default
+        arguments: GenerationArguments
     ) -> String? {
         guard let overloadingResolvedName = context.overloadingResolvedName,
               let enclosingType = context.enclosingType else {
             return nil
         }
-        return applyClosureTemplate(type: type(enclosingType: enclosingType),
+        return applyClosureTemplate(type: type(enclosingType: enclosingType, requiresSendable: context.requiresSendable),
                                     name: overloadingResolvedName + .handlerSuffix,
-                                    paramVals: paramNames,
-                                    paramTypes: paramTypes,
+                                    params: params,
                                     returnDefaultType: funcReturnType)
     }
 }
