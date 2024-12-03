@@ -254,8 +254,14 @@ extension IfConfigDeclSyntax {
                 }
             }
         }
+        
+        let uniqueSubModels = uniqueEntities(
+            in: subModels,
+            exclude: [:],
+            fullnames: []
+        ).map({ $0 })
 
-        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: subModels)
+        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
         return (macroModel, attrDesc, hasInit)
     }
 }
