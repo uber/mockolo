@@ -96,11 +96,15 @@ extension NominalModel {
         if !renderedEntities.isEmpty {
             body += "\(renderedEntities)"
         }
+        var uncheckedSendableStr = ""
+        if requiresSendable {
+            uncheckedSendableStr = ", @unchecked Sendable"
+        }
 
         let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(identifier) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(identifier)\(uncheckedSendableStr) {
         \(body)
         }
         """

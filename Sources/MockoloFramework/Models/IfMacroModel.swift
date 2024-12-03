@@ -17,19 +17,19 @@
 final class IfMacroModel: Model {
     let name: String
     let offset: Int64
-    let entities: [Model]
+    let entities: [(String, Model)]
 
     var modelType: ModelType {
         return .macro
     }
 
     var fullName: String {
-        return entities.map {$0.fullName}.joined(separator: "_")
+        return entities.map {$0.0}.joined(separator: "_")
     }
     
     init(name: String,
          offset: Int64,
-         entities: [Model]) {
+         entities: [(String, Model)]) {
         self.name = name
         self.entities = entities
         self.offset = offset
