@@ -1,15 +1,14 @@
 import MockoloFramework
 
-let actorProtocol = """
-/// \(String.mockAnnotation)
-protocol Foo: Actor {
+@Fixture
+/// @mockable
+protocol ActorProtocol: Actor {
     func foo(arg: String) async -> Result<String, Error>
     var bar: Int { get }
 }
-"""
 
-let actorProtocolMock = """
-actor FooMock: Foo {
+@Fixture
+actor ActorProtocolMock: ActorProtocol {
     init() { }
     init(bar: Int = 0) {
         self.bar = bar
@@ -26,7 +25,6 @@ actor FooMock: Foo {
 
     var bar: Int = 0
 }
-"""
 
 
 let parentProtocolInheritsActor = """

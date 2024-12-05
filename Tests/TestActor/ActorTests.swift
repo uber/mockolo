@@ -1,7 +1,7 @@
 final class ActorTests: MockoloTestCase {
     func testActorProtocol() {
-        verify(srcContent: actorProtocol,
-               dstContent: actorProtocolMock)
+        verify(srcContent: ActorProtocol_Fixture.code,
+               dstContent: ActorProtocolMock_Fixture.code)
     }
 
     func testParentProtocolInheritsActor() {
