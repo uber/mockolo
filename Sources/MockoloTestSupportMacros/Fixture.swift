@@ -12,15 +12,18 @@ struct Fixture: PeerMacro {
         }
 
         let codeContent = declaration.description
-            .replacingOccurrences(of: "@Fixture", with: "")
+            .replacing("@Fixture", with: "", maxReplacements: 1)
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
+        let varDecl = VariableDeclSyntax(
+            .let,
+            name: "\(name)_rawSyntax",
+            type: TypeAnnotationSyntax(type: "String" as TypeSyntax),
+            initializer: .init(value: StringLiteralExprSyntax(content: codeContent))
+        )
+
         return [
-            DeclSyntax(try EnumDeclSyntax("enum \(name)_Fixture") {
-                try VariableDeclSyntax("static var code: String") {
-                    ReturnStmtSyntax(expression: StringLiteralExprSyntax(content: codeContent))
-                }
-            }),
+            DeclSyntax(varDecl),
         ]
     }
 }
