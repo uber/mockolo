@@ -670,6 +670,7 @@ final class EntityVisitor: SyntaxVisitor {
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
+        ?? node.protocolKeyword.leadingTrivia.annotationMetadata(with: annotation)
         if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
             entities.append(ent)
         }
@@ -863,9 +864,9 @@ extension Trivia {
     // See metadata(with:, in:) for more info on the annotation arguments.
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         guard !annotation.isEmpty else { return nil }
+
         var ret: AnnotationMetadata?
-        for i in 0..<count {
-            let trivia = self[i]
+        for trivia in self {
             switch trivia {
             case .docLineComment(let val):
                 ret = metadata(with: annotation, in: val)

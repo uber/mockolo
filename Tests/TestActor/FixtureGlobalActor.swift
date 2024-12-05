@@ -43,3 +43,19 @@ class RootBuildableMock: RootBuildable {
     }
 }
 """
+
+
+let attributeAboveAnnotationComment = """
+@MainActor
+/// \(String.mockAnnotation)
+protocol AttributeAboveAnnotationComment {
+}
+"""
+
+let attributeAboveAnnotationCommentMock = """
+class AttributeAboveAnnotationCommentMock: AttributeAboveAnnotationComment {
+    init() { }
+
+
+}
+"""
