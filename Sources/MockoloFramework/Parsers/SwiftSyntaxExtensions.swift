@@ -259,7 +259,7 @@ extension IfConfigDeclSyntax {
             in: subModels,
             exclude: [:],
             fullnames: []
-        ).map({ $0 })
+        ).sorted(path: \.value.offset, fallback: \.key)
 
         let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
         return (macroModel, attrDesc, hasInit)
