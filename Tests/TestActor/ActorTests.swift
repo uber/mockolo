@@ -10,7 +10,7 @@ final class ActorTests: MockoloTestCase {
     }
 
     func testGlobalActorProtocol() {
-        verify(srcContent: globalActorProtocol,
-               dstContent: globalActorProtocolMock)
+        verify(srcContent: globalActorProtocol.source,
+               dstContent: globalActorProtocol.expected)
     }
 }
