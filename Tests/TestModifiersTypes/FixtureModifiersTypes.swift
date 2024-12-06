@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let modifiersTypesWithWeakAnnotation = """
-/// \(String.mockAnnotation)(modifiers: listener = weak)
+/// @mockable(modifiers: listener = weak)
 protocol Foo {
     var listener: AnyObject? { get }
     func barFunc(val: [Int])
@@ -43,7 +43,7 @@ class FooMock: Foo {
 """
 
 let modifiersTypesWithDynamicAnnotation = """
-/// \(String.mockAnnotation)(modifiers: listener = dynamic)
+/// @mockable(modifiers: listener = dynamic)
 protocol Foo {
     var listener: AnyObject? { get }
     func barFunc(val: [Int])
@@ -86,7 +86,7 @@ class FooMock: Foo {
 """
 
 let modifiersTypesWithDynamicFuncAnnotation = """
-/// \(String.mockAnnotation)(modifiers: barFunc = dynamic)
+/// @mockable(modifiers: barFunc = dynamic)
 protocol Foo {
     var listener: AnyObject? { get }
     func barFunc(val: [Int])

@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let asyncThrowsVars = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol AsyncThrowsVars {
     var getOnly: Int { get }
     static var getAndSet: Int { get set }
@@ -60,7 +60,7 @@ public class AsyncThrowsVarsMock: AsyncThrowsVars {
 """
 
 let throwsNeverVars = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol P {
     var foo: Int { get throws(Never) }
 }

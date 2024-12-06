@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let inoutParams = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Foo {
     func hash(into hasher: inout Hasher)
     func bar(lhs: inout String, rhs: inout Int)
@@ -41,7 +41,7 @@ public class FooMock: Foo {
 
 let subscripts = """
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol SubscriptProtocol {
     associatedtype T
     associatedtype Value
@@ -64,7 +64,7 @@ protocol SubscriptProtocol {
     subscript<Value>(keyPath: ReferenceWritableKeyPath<T, Value>, on schedulerType: T) -> Array<Value> { get set }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol KeyValueSubscripting {
     associatedtype Key
     associatedtype Value
@@ -333,7 +333,7 @@ public class KeyValueSubscriptingMock: KeyValueSubscripting {
 let variadicFunc = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol NonSimpleFuncs {
     func bar(_ arg: String, x: Int..., y: [Double]) -> Float?
 }
@@ -366,7 +366,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 let autoclosureArgFunc = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol NonSimpleFuncs {
 func pass<T>(handler: @autoclosure () -> Int) throws -> T
 }
@@ -398,7 +398,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 let closureArgFunc = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol NonSimpleFuncs {
 func cat<T>(named arg: String, tags: [String: String]?, closure: () throws -> T) rethrows -> T
 func more<T>(named arg: String, tags: [String: String]?, closure: (T) throws -> ()) rethrows -> T
@@ -441,7 +441,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 let forArgClosureFunc = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol NonSimpleFuncs {
 func max(for: Int) -> (() -> Void)?
 func maxDo(do: Int) -> (() -> Void)?
@@ -516,7 +516,7 @@ class NonSimpleFuncsMock: NonSimpleFuncs {
 let returnSelfFunc = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol NonSimpleFuncs {
 @discardableResult
 func returnSelf() -> Self

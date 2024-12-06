@@ -3,7 +3,7 @@ import MockoloFramework
 let nonSimpleVars = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 @objc
 public protocol NonSimpleVars {
     @available(iOS 10.0, *)

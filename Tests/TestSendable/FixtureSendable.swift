@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let sendableProtocol = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SendableProtocol: Sendable {
     func update(arg: Int) -> String
     func update(arg0: some Sendable, arg1: AnyObject) async throws
@@ -65,7 +65,7 @@ public final class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
 
 
 let uncheckedSendableClass = """
-/// \(String.mockAnnotation)
+/// @mockable
 public class UncheckedSendableClass: @unchecked Sendable {
     func update(arg: Int) -> String
 }
@@ -102,7 +102,7 @@ public protocol SendableSendable: Sendable {
     func update(arg: Int) -> String
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol ConfirmedSendableProtocol: SendableSendable {
 }
 """
@@ -134,7 +134,7 @@ public final class ConfirmedSendableProtocolMock: ConfirmedSendableProtocol, @un
 """#
 
 let generatedConcurrencyHelpers = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SendableProtocol: Sendable {
 }
 """

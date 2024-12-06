@@ -4,7 +4,7 @@ let testableImports = """
 \(String.headerDoc)
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol SimpleVar {
     var name: Int { get set }
 }
@@ -32,7 +32,7 @@ let testableImportsWithOverlap = """
 import Foundation
 import SomeImport1
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol SimpleVar {
     var name: Int { get set }
 }

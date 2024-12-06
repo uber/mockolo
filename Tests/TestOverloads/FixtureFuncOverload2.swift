@@ -2,7 +2,7 @@ import MockoloFramework
 
 
 let overload2 = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Foo: Bar {
     func tell(status: Int, msg: String) -> Double
 }

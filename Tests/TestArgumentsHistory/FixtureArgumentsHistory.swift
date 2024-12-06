@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let argumentsHistoryWithAnnotation = """
-/// \(String.mockAnnotation)(history: fooFunc = true; bazFunc = true)
+/// @mockable(history: fooFunc = true; bazFunc = true)
 protocol Foo {
     func fooFunc(val: Int)
     func barFunc(for: [Int])
@@ -96,7 +96,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistorySimpleCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
    func fooFunc()
    func barFunc(val: Int)
@@ -172,7 +172,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryTupleCase = """
-/// \(String.mockAnnotation)(history: fooFunc = true)
+/// @mockable(history: fooFunc = true)
 protocol Foo {
     func fooFunc(val: (Int, String))
     func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))
@@ -210,7 +210,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryOverloadedCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func fooFunc()
     func fooFunc(val1: Int)
@@ -273,7 +273,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryGenericsCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func fooFunc<T: StringProtocol>(val1: T, val2: T?)
     func barFunc<T: Sequence, U: Collection>(val: T) -> U
@@ -312,7 +312,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryInoutCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func fooFunc(val: inout Int)
     func barFunc(into val: inout Int)
@@ -351,7 +351,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryHandlerCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func fooFunc(handler: () -> Int)
     func barFunc(val: Int, handler: (String) -> Void)
@@ -390,7 +390,7 @@ let argumentsHistoryEscapingTypealiasHandlerCase = """
 typealias FooHandler = () -> Int
 typealias BarHandler = (String) -> Void
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func fooFunc(handler: @escaping FooHandler)
     func barFunc(val: Int, handler: @escaping BarHandler)
@@ -426,7 +426,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryAutoclosureCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func fooFunc(handler: @autoclosure () -> Int)
 }
@@ -450,7 +450,7 @@ class FooMock: Foo {
 """
 
 let argumentsHistoryStaticCase = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     static func fooFunc(val: Int)
 }

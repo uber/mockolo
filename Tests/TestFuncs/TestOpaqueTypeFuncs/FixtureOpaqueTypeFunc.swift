@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let someParameterOptionalType = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol OpaqueTypeProtocol {
     func nonOptional(_ type: some Error) -> Int
     func optional(_ type: (some Error)?)
@@ -40,7 +40,7 @@ public class OpaqueTypeProtocolMock: OpaqueTypeProtocol {
 """
 
 let someMultiParameterOptionalType = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol OpaqueTypeWithMultiTypeProtocol {
     func nonOptional(_ type: some Error) -> Int
     func optional(_ type: ((some (Error & Foo)))?)
@@ -91,7 +91,7 @@ public class OpaqueTypeWithMultiTypeProtocolMock: OpaqueTypeWithMultiTypeProtoco
 """
 
 let closureReturningSomeType = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol ProtocolReturningOpaqueTypeInClosureProtocol {
     func register(router: @autoclosure @escaping () -> (some MyAwesomeType))
 }

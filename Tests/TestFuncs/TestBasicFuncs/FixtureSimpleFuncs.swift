@@ -3,7 +3,7 @@ import MockoloFramework
 let simpleFuncs = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SimpleFunc {
     func update(arg: Int) -> String
 }

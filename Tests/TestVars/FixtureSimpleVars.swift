@@ -4,7 +4,7 @@ let simpleVars = """
 \(String.headerDoc)
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol SimpleVar {
     var name: Int { get set }
 }

@@ -3,14 +3,14 @@ import MockoloFramework
 let overload8 =  """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Parent: AnyObject {
 
 @discardableResult
 func updateState(_ state: Int) -> (result: Double?, status: Bool)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Child: Parent {
 @discardableResult
 func updateState(_ state: Int, style: SomeStyle) -> (result: Double?, status: Bool)

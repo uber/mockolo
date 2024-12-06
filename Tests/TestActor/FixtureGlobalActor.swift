@@ -1,12 +1,12 @@
 import MockoloFramework
 
 let globalActorProtocol = """
-/// \(String.mockAnnotation)
+/// @mockable
 @MainActor protocol RootController: AnyObject {
     var viewController: UIViewController { get }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol RootBuildable {
     func build() -> RootController
 }
