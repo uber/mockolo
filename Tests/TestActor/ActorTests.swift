@@ -16,6 +16,7 @@ final class ActorTests: MockoloTestCase {
 
     func testAttributeAboveAnnotationComment() {
         verify(srcContent: attributeAboveAnnotationComment,
-               dstContent: attributeAboveAnnotationCommentMock)
+               dstContent: attributeAboveAnnotationCommentMock,
+               declType: .all)
     }
 }

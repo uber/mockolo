@@ -300,7 +300,7 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia.annotationMetadata(with: annotation)
+        return leadingTrivia.annotationMetadata(with: annotation) ?? protocolKeyword.leadingTrivia.annotationMetadata(with: annotation)
     }
 
     var hasBlankInit: Bool {
@@ -358,7 +358,7 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia.annotationMetadata(with: annotation)
+        return leadingTrivia.annotationMetadata(with: annotation) ?? classKeyword.leadingTrivia.annotationMetadata(with: annotation)
     }
 
     func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
@@ -670,7 +670,6 @@ final class EntityVisitor: SyntaxVisitor {
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
-        ?? node.protocolKeyword.leadingTrivia.annotationMetadata(with: annotation)
         if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
             entities.append(ent)
         }
