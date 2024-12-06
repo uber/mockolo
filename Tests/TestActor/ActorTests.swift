@@ -1,16 +1,16 @@
 final class ActorTests: MockoloTestCase {
     func testActorProtocol() {
-        verify(srcContent: ActorProtocol_rawSyntax,
-               dstContent: ActorProtocolMock_rawSyntax)
+        verify(srcContent: actorProtocol._source,
+               dstContent: actorProtocol.expected._source)
     }
 
     func testParentProtocolInheritsActor() {
-        verify(srcContent: parentProtocolInheritsActor,
-               dstContent: parentProtocolInheritsActorMock)
+        verify(srcContent: parentProtocolInheritsActor._source,
+               dstContent: parentProtocolInheritsActor.expected._source)
     }
 
     func testGlobalActorProtocol() {
-        verify(srcContent: globalActorProtocol.source,
-               dstContent: globalActorProtocol.expected)
+        verify(srcContent: globalActorProtocol._source,
+               dstContent: globalActorProtocol.expected._source)
     }
 }

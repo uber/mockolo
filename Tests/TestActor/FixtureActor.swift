@@ -1,61 +1,60 @@
-import MockoloFramework
-
-@Fixture
-/// @mockable
-protocol ActorProtocol: Actor {
-    func foo(arg: String) async -> Result<String, Error>
-    var bar: Int { get }
-}
-
-@Fixture
-actor ActorProtocolMock: ActorProtocol {
-    init() { }
-    init(bar: Int = 0) {
-        self.bar = bar
+@Fixture enum actorProtocol {
+    /// @mockable
+    protocol Foo: Actor {
+        func foo(arg: String) async -> Result<String, Error>
+        var bar: Int { get }
     }
-    private(set) var fooCallCount = 0
-    var fooHandler: ((String) async -> Result<String, Error>)?
-    func foo(arg: String) async -> Result<String, Error> {
-        fooCallCount += 1
-        if let fooHandler = fooHandler {
-            return await fooHandler(arg)
+
+    @Fixture enum expected {
+        actor FooMock: Foo {
+            init() { }
+            init(bar: Int = 0) {
+                self.bar = bar
+            }
+            private(set) var fooCallCount = 0
+            var fooHandler: ((String) async -> Result<String, Error>)?
+            func foo(arg: String) async -> Result<String, Error> {
+                fooCallCount += 1
+                if let fooHandler = fooHandler {
+                    return await fooHandler(arg)
+                }
+                fatalError("fooHandler returns can't have a default value thus its handler must be set")
+            }
+
+            var bar: Int = 0
         }
-        fatalError("fooHandler returns can't have a default value thus its handler must be set")
+    }
+}
+
+@Fixture enum parentProtocolInheritsActor {
+    protocol Bar: Actor {
+        var bar: Int { get }
     }
 
-    var bar: Int = 0
-}
-
-
-let parentProtocolInheritsActor = """
-protocol Bar: Actor {
-    var bar: Int { get }
-}
-
-/// \(String.mockAnnotation)
-protocol Foo: Bar {
-    func baz(arg: String) async -> Int
-}
-"""
-
-let parentProtocolInheritsActorMock = """
-actor FooMock: Foo {
-    init() { }
-    init(bar: Int = 0) {
-        self.bar = bar
+    /// @mockable
+    protocol Foo: Bar {
+        func baz(arg: String) async -> Int
     }
 
+    @Fixture enum expected {
+        actor FooMock: Foo {
+            init() { }
+            init(bar: Int = 0) {
+                self.bar = bar
+            }
 
-    var bar: Int = 0
 
-    private(set) var bazCallCount = 0
-    var bazHandler: ((String) async -> Int)?
-    func baz(arg: String) async -> Int {
-        bazCallCount += 1
-        if let bazHandler = bazHandler {
-            return await bazHandler(arg)
+            var bar: Int = 0
+
+            private(set) var bazCallCount = 0
+            var bazHandler: ((String) async -> Int)?
+            func baz(arg: String) async -> Int {
+                bazCallCount += 1
+                if let bazHandler = bazHandler {
+                    return await bazHandler(arg)
+                }
+                return 0
+            }
         }
-        return 0
     }
 }
-"""

@@ -1,4 +1,4 @@
-let argumentsHistoryWithAnnotation = #Fixture {
+@Fixture enum argumentsHistoryWithAnnotation {
     /// @mockable(history: fooFunc = true; bazFunc = true)
     protocol Foo {
         func fooFunc(val: Int)
@@ -6,7 +6,7 @@ let argumentsHistoryWithAnnotation = #Fixture {
         func bazFunc(arg: String, default: Float)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -47,7 +47,7 @@ let argumentsHistoryWithAnnotation = #Fixture {
     }
 }
 
-let argumentsHistoryWithAnnotationNotAllFuncCase = #Fixture {
+@Fixture enum argumentsHistoryWithAnnotationNotAllFuncCase {
     /// @mockable(history: fooFunc = true; bazFunc = true)
     protocol Foo {
         func fooFunc(val: Int)
@@ -55,7 +55,7 @@ let argumentsHistoryWithAnnotationNotAllFuncCase = #Fixture {
         func bazFunc(arg: String, default: Float)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -97,7 +97,7 @@ let argumentsHistoryWithAnnotationNotAllFuncCase = #Fixture {
     }
 }
 
-let argumentsHistorySimpleCase = #Fixture {
+@Fixture enum argumentsHistorySimpleCase {
     /// @mockable
     protocol Foo {
         func fooFunc()
@@ -107,7 +107,7 @@ let argumentsHistorySimpleCase = #Fixture {
         func quuxFunc(val1: String, val2: Float)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -176,14 +176,14 @@ let argumentsHistorySimpleCase = #Fixture {
 let argumentsHistorySimpleCaseMock = """
 """
 
-let argumentsHistoryTupleCase = #Fixture {
+@Fixture enum argumentsHistoryTupleCase {
     /// @mockable(history: fooFunc = true)
     protocol Foo {
         func fooFunc(val: (Int, String))
         func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -214,7 +214,7 @@ let argumentsHistoryTupleCase = #Fixture {
     }
 }
 
-let argumentsHistoryOverloadedCase = #Fixture {
+@Fixture enum argumentsHistoryOverloadedCase {
     /// @mockable
     protocol Foo {
         func fooFunc()
@@ -223,7 +223,7 @@ let argumentsHistoryOverloadedCase = #Fixture {
         func fooFunc(val2: Int)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -277,14 +277,14 @@ let argumentsHistoryOverloadedCase = #Fixture {
     }
 }
 
-let argumentsHistoryGenericsCase = #Fixture {
+@Fixture enum argumentsHistoryGenericsCase {
     /// @mockable
     protocol Foo {
         func fooFunc<T: StringProtocol>(val1: T, val2: T?)
         func barFunc<T: Sequence, U: Collection>(val: T) -> U
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
             
@@ -316,14 +316,14 @@ let argumentsHistoryGenericsCase = #Fixture {
     }
 }
 
-let argumentsHistoryInoutCase = #Fixture {
+@Fixture enum argumentsHistoryInoutCase {
     /// @mockable
     protocol Foo {
         func fooFunc(val: inout Int)
         func barFunc(into val: inout Int)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -355,14 +355,14 @@ let argumentsHistoryInoutCase = #Fixture {
     }
 }
 
-let argumentsHistoryHandlerCase = #Fixture {
+@Fixture enum argumentsHistoryHandlerCase {
     /// @mockable
     protocol Foo {
         func fooFunc(handler: () -> Int)
         func barFunc(val: Int, handler: (String) -> Void)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -391,7 +391,7 @@ let argumentsHistoryHandlerCase = #Fixture {
     }
 }
 
-let argumentsHistoryEscapingTypealiasHandlerCase = #Fixture {
+@Fixture enum argumentsHistoryEscapingTypealiasHandlerCase {
     typealias FooHandler = () -> Int
     typealias BarHandler = (String) -> Void
 
@@ -401,7 +401,7 @@ let argumentsHistoryEscapingTypealiasHandlerCase = #Fixture {
         func barFunc(val: Int, handler: @escaping BarHandler)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -430,13 +430,13 @@ let argumentsHistoryEscapingTypealiasHandlerCase = #Fixture {
     }
 }
 
-let argumentsHistoryAutoclosureCase = #Fixture {
+@Fixture enum argumentsHistoryAutoclosureCase {
     /// @mockable
     protocol Foo {
         func fooFunc(handler: @autoclosure () -> Int)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
@@ -453,13 +453,13 @@ let argumentsHistoryAutoclosureCase = #Fixture {
     }
 }
 
-let argumentsHistoryStaticCase = #Fixture {
+@Fixture enum argumentsHistoryStaticCase {
     /// @mockable
     protocol Foo {
         static func fooFunc(val: Int)
     }
 
-    return {
+    @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 

@@ -1,4 +1,4 @@
-let globalActorProtocol = #Fixture {
+@Fixture enum globalActorProtocol {
     /// @mockable
     @MainActor protocol RootController: AnyObject {
         var viewController: UIViewController { get }
@@ -9,7 +9,7 @@ let globalActorProtocol = #Fixture {
         func build() -> RootController
     }
 
-    return {
+    @Fixture enum expected {
         class RootControllerMock: RootController {
             init() { }
             init(viewController: UIViewController) {

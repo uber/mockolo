@@ -1,5 +1,2 @@
-@attached(
-    peer,
-    names: suffixed(_rawSyntax)
-)
+@attached(member, names: named(_source))
 macro Fixture() = #externalMacro(module: "MockoloTestSupportMacros", type: "Fixture")

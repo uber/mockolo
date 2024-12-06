@@ -1,48 +1,50 @@
+import SwiftBasicFormat
 import SwiftSyntax
 import SwiftSyntaxMacros
 
-struct Fixture: PeerMacro {
+struct Fixture: MemberMacro {
     static func expansion(
         of node: AttributeSyntax,
-        providingPeersOf declaration: some DeclSyntaxProtocol,
+        providingMembersOf declaration: some DeclGroupSyntax,
+        conformingTo protocols: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        guard let name = extractDeclIdentifier(declaration: declaration) else {
-            throw MacroExpansionErrorMessage("unsupported decl kind.")
+        let baseItems = declaration.memberBlock.members.filter { (item: MemberBlockItemSyntax) in
+            if let decl = item.decl.asProtocol(WithAttributesSyntax.self) {
+                let isFixtureAnnotated = decl.attributes.contains { (attr: AttributeListSyntax.Element) in
+                    return attr.trimmedDescription == "@Fixture"
+                }
+                return !isFixtureAnnotated
+            }
+            return true
         }
 
-        let codeContent = declaration.description
-            .replacing("@Fixture", with: "", maxReplacements: 1)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let indent = BasicFormat.inferIndentation(of: declaration) ?? .spaces(4)
+        let sourceContent = baseItems.trimmedDescription(matching: \.isNewline)
 
         let varDecl = VariableDeclSyntax(
+            modifiers: [.init(name: .keyword(.static))],
             .let,
-            name: "\(name)_rawSyntax",
+            name: "_source",
             type: TypeAnnotationSyntax(type: "String" as TypeSyntax),
-            initializer: .init(value: StringLiteralExprSyntax(content: codeContent))
+            initializer: .init(
+                value: StringLiteralExprSyntax(
+                    multilineContent: sourceContent,
+                    endIndent: Trivia(pieces: node.leadingTrivia.filter(\.isSpaceOrTab)) + indent
+                )
+            )
         )
 
-        return [
-            DeclSyntax(varDecl),
-        ]
+        return [DeclSyntax(varDecl)]
     }
 }
 
-func extractDeclIdentifier(declaration: some DeclSyntaxProtocol) -> TokenSyntax? {
-    if let decl = declaration.as(ClassDeclSyntax.self) {
-        return decl.name
+extension StringLiteralExprSyntax {
+    fileprivate init(multilineContent: String, endIndent: Trivia) {
+        self = StringLiteralExprSyntax(
+            openingQuote: .multilineStringQuoteToken(),
+            segments: [.stringSegment(.init(content: .stringSegment(multilineContent)))],
+            closingQuote: .multilineStringQuoteToken(leadingTrivia: endIndent)
+        )
     }
-    if let decl = declaration.as(StructDeclSyntax.self) {
-        return decl.name
-    }
-    if let decl = declaration.as(ProtocolDeclSyntax.self) {
-        return decl.name
-    }
-    if let decl = declaration.as(ActorDeclSyntax.self) {
-        return decl.name
-    }
-    if let decl = declaration.as(EnumDeclSyntax.self) {
-        return decl.name
-    }
-    return nil
 }
