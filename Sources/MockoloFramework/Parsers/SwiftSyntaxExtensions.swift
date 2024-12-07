@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+import Algorithms
 import Foundation
 import SwiftSyntax
 import SwiftParser
@@ -259,7 +260,7 @@ extension IfConfigDeclSyntax {
             in: subModels,
             exclude: [:],
             fullnames: []
-        ).map({ $0 })
+        ).sorted(path: \.value.offset, fallback: \.key)
 
         let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
         return (macroModel, attrDesc, hasInit)
@@ -300,7 +301,12 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia.annotationMetadata(with: annotation)
+        let trivias = [
+            leadingTrivia,
+            protocolKeyword.leadingTrivia,
+            modifiers.leadingTrivia,
+        ] + attributes.map(\.leadingTrivia)
+        return trivias.firstNonNil { $0.annotationMetadata(with: annotation) }
     }
 
     var hasBlankInit: Bool {
@@ -358,7 +364,12 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia.annotationMetadata(with: annotation)
+        let trivias = [
+            leadingTrivia,
+            classKeyword.leadingTrivia,
+            modifiers.leadingTrivia,
+        ] + attributes.map(\.leadingTrivia)
+        return trivias.firstNonNil { $0.annotationMetadata(with: annotation) }
     }
 
     func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {
@@ -863,9 +874,9 @@ extension Trivia {
     // See metadata(with:, in:) for more info on the annotation arguments.
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
         guard !annotation.isEmpty else { return nil }
+
         var ret: AnnotationMetadata?
-        for i in 0..<count {
-            let trivia = self[i]
+        for trivia in self {
             switch trivia {
             case .docLineComment(let val):
                 ret = metadata(with: annotation, in: val)
