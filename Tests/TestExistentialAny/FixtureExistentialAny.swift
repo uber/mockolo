@@ -25,28 +25,28 @@ class ExistentialAnyMock: ExistentialAny {
 
 
 
-    private var _foo: P! 
+    private var _foo: P!
     var foo: P {
         get { return _foo }
         set { _foo = newValue }
     }
 
 
-    private var _bar: (any R<Int>)! 
+    private var _bar: (any R<Int>)!
     var bar: any R<Int> {
         get { return _bar }
         set { _bar = newValue }
     }
 
 
-    private var _baz: (any P & Q)! 
+    private var _baz: (any P & Q)!
     var baz: any P & Q {
         get { return _baz }
         set { _baz = newValue }
     }
 
 
-    private var _qux: ((any P) -> any P)! 
+    private var _qux: ((any P) -> any P)!
     var qux: (any P) -> any P {
         get { return _qux }
         set { _qux = newValue }
@@ -117,13 +117,13 @@ class UseSomeProtocolMock: UseSomeProtocol {
 
 
     private(set) var fooCallCount = 0
-    var fooHandler: (()  -> any SomeProtocol)?
-    func foo()  -> any SomeProtocol {
+    var fooHandler: (() -> any SomeProtocol)?
+    func foo() -> any SomeProtocol {
         fooCallCount += 1
         if let fooHandler = fooHandler {
             return fooHandler()
         }
-        return SomeProtocolMock() 
+        return SomeProtocolMock()
     }
 }
 """

@@ -81,7 +81,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var sendEventsCallCount = 0
     var sendEventsHandler: (([SomeEvent], Any, Bool, Any) -> ())?
-    func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())  {
+    func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ()) {
         sendEventsCallCount += 1
         if let sendEventsHandler = sendEventsHandler {
             sendEventsHandler(events, value, once, closure)
@@ -131,7 +131,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var pullCallCount = 0
     var pullHandler: (([SomeEvent], Any, Bool, Any) -> ())?
-    func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T?) -> ())  {
+    func pull<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T?) -> ()) {
         pullCallCount += 1
         if let pullHandler = pullHandler {
             pullHandler(events, value, once, closure)
@@ -141,7 +141,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var pullEventsCallCount = 0
     var pullEventsHandler: (([SomeEvent], Any?, @escaping () -> ()) -> ())?
-    func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())  {
+    func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ()) {
         pullEventsCallCount += 1
         if let pullEventsHandler = pullEventsHandler {
             pullEventsHandler(events, until, closure)
@@ -151,7 +151,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var optionalPullCallCount = 0
     var optionalPullHandler: (([SomeEvent], Any, Bool, ((Any?) -> ())?) -> ())?
-    func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?)  {
+    func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?) {
         optionalPullCallCount += 1
         if let optionalPullHandler = optionalPullHandler {
             optionalPullHandler(events, value, once, closure as? ((Any?) -> ()))
@@ -161,7 +161,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var addCallCount = 0
     var addHandler: ((Any, Any?) -> ())?
-    func add<T: FixedWidthInteger>(n1: T, n2: T?)  {
+    func add<T: FixedWidthInteger>(n1: T, n2: T?) {
         addCallCount += 1
         if let addHandler = addHandler {
             addHandler(n1, n2)
@@ -171,7 +171,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var addACallCount = 0
     var addAHandler: ((Any?, Any?) -> ())?
-    func add<T: Sequence>(a: T?, b: T?)  {
+    func add<T: Sequence>(a: T?, b: T?) {
         addACallCount += 1
         if let addAHandler = addAHandler {
             addAHandler(a, b)
@@ -181,7 +181,7 @@ class GenericFuncMock: GenericFunc {
 
     private(set) var addABCallCount = 0
     var addABHandler: ((Any, Any) -> ())?
-    func add<T: Collection>(a: T, b: T)  {
+    func add<T: Collection>(a: T, b: T) {
         addABCallCount += 1
         if let addABHandler = addABHandler {
             addABHandler(a, b)
@@ -246,42 +246,38 @@ class StoringMock: Storing {
 
     private(set) var connectCallCount = 0
     var connectHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: Adapter {
+    func connect<T>(adapter: T) where T: Adapter {
         connectCallCount += 1
         if let connectHandler = connectHandler {
             connectHandler(adapter)
         }
-        
     }
 
     private(set) var connectAdapterCallCount = 0
     var connectAdapterHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: KeyedAdapter {
+    func connect<T>(adapter: T) where T: KeyedAdapter {
         connectAdapterCallCount += 1
         if let connectAdapterHandler = connectAdapterHandler {
             connectAdapterHandler(adapter)
         }
-        
     }
 
     private(set) var connectAdapterTCallCount = 0
     var connectAdapterTHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: KeyedAdapter2 {
+    func connect<T>(adapter: T) where T: KeyedAdapter2 {
         connectAdapterTCallCount += 1
         if let connectAdapterTHandler = connectAdapterTHandler {
             connectAdapterTHandler(adapter)
         }
-        
     }
 
     private(set) var connectAdapterTTKeyedAdapter3CallCount = 0
     var connectAdapterTTKeyedAdapter3Handler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: KeyedAdapter3 {
+    func connect<T>(adapter: T) where T: KeyedAdapter3 {
         connectAdapterTTKeyedAdapter3CallCount += 1
         if let connectAdapterTTKeyedAdapter3Handler = connectAdapterTTKeyedAdapter3Handler {
             connectAdapterTTKeyedAdapter3Handler(adapter)
         }
-        
     }
 }
 """
@@ -303,42 +299,38 @@ class StoringMock: Storing {
 
     private(set) var connectCallCount = 0
     var connectHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: Adapter, T.Element == S.Element {
+    func connect<T>(adapter: T) where T: Adapter, T.Element == S.Element {
         connectCallCount += 1
         if let connectHandler = connectHandler {
             connectHandler(adapter)
         }
-        
     }
 
     private(set) var connectAdapterCallCount = 0
     var connectAdapterHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: KeyedAdapter, T.Element == S.Element {
+    func connect<T>(adapter: T) where T: KeyedAdapter, T.Element == S.Element {
         connectAdapterCallCount += 1
         if let connectAdapterHandler = connectAdapterHandler {
             connectAdapterHandler(adapter)
         }
-        
     }
 
     private(set) var connectAdapterTCallCount = 0
     var connectAdapterTHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: KeyedAdapter2, T.Element == S.Element {
+    func connect<T>(adapter: T) where T: KeyedAdapter2, T.Element == S.Element {
         connectAdapterTCallCount += 1
         if let connectAdapterTHandler = connectAdapterTHandler {
             connectAdapterTHandler(adapter)
         }
-        
     }
 
     private(set) var connectAdapterTTKeyedAdapter3TElementSElementCallCount = 0
     var connectAdapterTTKeyedAdapter3TElementSElementHandler: ((Any) -> ())?
-    func connect<T>(adapter: T)  where T: KeyedAdapter3, T.Element == S.Element {
+    func connect<T>(adapter: T) where T: KeyedAdapter3, T.Element == S.Element {
         connectAdapterTTKeyedAdapter3TElementSElementCallCount += 1
         if let connectAdapterTTKeyedAdapter3TElementSElementHandler = connectAdapterTTKeyedAdapter3TElementSElementHandler {
             connectAdapterTTKeyedAdapter3TElementSElementHandler(adapter)
         }
-        
     }
 }
 """

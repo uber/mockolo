@@ -32,7 +32,7 @@ class FooMock: Foo {
 
     private(set) var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(arg)
@@ -42,7 +42,7 @@ class FooMock: Foo {
 
     private(set) var updateArgCallCount = 0
     var updateArgHandler: ((Float) -> ())?
-    func update(arg: Float)  {
+    func update(arg: Float) {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
             updateArgHandler(arg)
@@ -52,7 +52,7 @@ class FooMock: Foo {
 
     private(set) var displayCallCount = 0
     var displayHandler: ((String) -> ())?
-    func display(param: String)  {
+    func display(param: String) {
         displayCallCount += 1
         if let displayHandler = displayHandler {
             displayHandler(param)
@@ -67,7 +67,7 @@ class BarMock: Bar {
 
     private(set) var updateArgCallCount = 0
     var updateArgHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
             updateArgHandler(arg)
@@ -77,7 +77,7 @@ class BarMock: Bar {
 
     private(set) var displayParamCallCount = 0
     var displayParamHandler: ((String) -> ())?
-    func display(param: String)  {
+    func display(param: String) {
         displayParamCallCount += 1
         if let displayParamHandler = displayParamHandler {
             displayParamHandler(param)
@@ -87,7 +87,7 @@ class BarMock: Bar {
 
     private(set) var updateCallCount = 0
     var updateHandler: ((Float) -> ())?
-    func update(arg: Float)  {
+    func update(arg: Float) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(arg)
@@ -97,7 +97,7 @@ class BarMock: Bar {
 
     private(set) var displayCallCount = 0
     var displayHandler: ((Double) -> ())?
-    func display(param: Double)  {
+    func display(param: Double) {
         displayCallCount += 1
         if let displayHandler = displayHandler {
             displayHandler(param)
@@ -112,7 +112,7 @@ class BazMock: Baz {
 
     private(set) var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(arg)
@@ -122,7 +122,7 @@ class BazMock: Baz {
 
     private(set) var updateArgCallCount = 0
     var updateArgHandler: ((Float) -> ())?
-    func update(arg: Float)  {
+    func update(arg: Float) {
         updateArgCallCount += 1
         if let updateArgHandler = updateArgHandler {
             updateArgHandler(arg)
@@ -132,7 +132,7 @@ class BazMock: Baz {
 
     private(set) var displayParamStringCallCount = 0
     var displayParamStringHandler: ((String) -> ())?
-    func display(param: String)  {
+    func display(param: String) {
         displayParamStringCallCount += 1
         if let displayParamStringHandler = displayParamStringHandler {
             displayParamStringHandler(param)
@@ -142,7 +142,7 @@ class BazMock: Baz {
 
     private(set) var displayCallCount = 0
     var displayHandler: ((Double) -> ())?
-    func display(param: Double)  {
+    func display(param: Double) {
         displayCallCount += 1
         if let displayHandler = displayHandler {
             displayHandler(param)
@@ -152,7 +152,7 @@ class BazMock: Baz {
 
     private(set) var displayParamCallCount = 0
     var displayParamHandler: ((Int) -> ())?
-    func display(param: Int)  {
+    func display(param: Int) {
         displayParamCallCount += 1
         if let displayParamHandler = displayParamHandler {
             displayParamHandler(param)
@@ -162,7 +162,7 @@ class BazMock: Baz {
 
     private(set) var showCallCount = 0
     var showHandler: ((String) -> ())?
-    func show(param: String)  {
+    func show(param: String) {
         showCallCount += 1
         if let showHandler = showHandler {
             showHandler(param)

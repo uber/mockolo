@@ -21,7 +21,7 @@ class FooMock: Foo {
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
-    func barFunc(val: [Int])  {
+    func barFunc(val: [Int]) {
         barFuncCallCount += 1
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
@@ -31,7 +31,7 @@ class FooMock: Foo {
 
     private(set) var bazFuncCallCount = 0
     var bazFuncHandler: ((String, Float) -> ())?
-    func bazFunc(arg: String, other: Float)  {
+    func bazFunc(arg: String, other: Float) {
         bazFuncCallCount += 1
         if let bazFuncHandler = bazFuncHandler {
             bazFuncHandler(arg, other)
@@ -64,7 +64,7 @@ class FooMock: Foo {
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
-    func barFunc(val: [Int])  {
+    func barFunc(val: [Int]) {
         barFuncCallCount += 1
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
@@ -74,7 +74,7 @@ class FooMock: Foo {
 
     private(set) var bazFuncCallCount = 0
     var bazFuncHandler: ((String, Float) -> ())?
-    func bazFunc(arg: String, other: Float)  {
+    func bazFunc(arg: String, other: Float) {
         bazFuncCallCount += 1
         if let bazFuncHandler = bazFuncHandler {
             bazFuncHandler(arg, other)
@@ -107,7 +107,7 @@ class FooMock: Foo {
 
     private(set) var barFuncCallCount = 0
     var barFuncHandler: (([Int]) -> ())?
-    dynamic func barFunc(val: [Int])  {
+    dynamic func barFunc(val: [Int]) {
         barFuncCallCount += 1
         if let barFuncHandler = barFuncHandler {
             barFuncHandler(val)
@@ -117,7 +117,7 @@ class FooMock: Foo {
 
     private(set) var bazFuncCallCount = 0
     var bazFuncHandler: ((String, Float) -> ())?
-    func bazFunc(arg: String, other: Float)  {
+    func bazFunc(arg: String, other: Float) {
         bazFuncCallCount += 1
         if let bazFuncHandler = bazFuncHandler {
             bazFuncHandler(arg, other)

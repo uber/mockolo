@@ -20,7 +20,7 @@ class SomeVCMock: SomeVC {
 
     private(set) var popViewControllerCallCount = 0
     var popViewControllerHandler: ((UIViewController) -> ())?
-    func popViewController(viewController: UIViewController)  {
+    func popViewController(viewController: UIViewController) {
         popViewControllerCallCount += 1
         if let popViewControllerHandler = popViewControllerHandler {
             popViewControllerHandler(viewController)
@@ -30,7 +30,7 @@ class SomeVCMock: SomeVC {
 
     private(set) var popViewController1CallCount = 0
     var popViewController1Handler: (() -> ())?
-    func popViewController()  {
+    func popViewController() {
         popViewController1CallCount += 1
         if let popViewController1Handler = popViewController1Handler {
             popViewController1Handler()
@@ -77,7 +77,7 @@ public class FooMock: Foo {
 
     public private(set) var customizeCallCount = 0
     public var customizeHandler: ((String?) -> ())?
-    public func customize(text: String?)  {
+    public func customize(text: String?) {
         customizeCallCount += 1
         if let customizeHandler = customizeHandler {
             customizeHandler(text)
@@ -87,7 +87,7 @@ public class FooMock: Foo {
 
     public private(set) var customizeTextCallCount = 0
     public var customizeTextHandler: ((String?, UIColor?) -> ())?
-    public func customize(text: String?, textColor: UIColor?)  {
+    public func customize(text: String?, textColor: UIColor?) {
         customizeTextCallCount += 1
         if let customizeTextHandler = customizeTextHandler {
             customizeTextHandler(text, textColor)
@@ -97,7 +97,7 @@ public class FooMock: Foo {
 
     public private(set) var customizeTextTextColorCallCount = 0
     public var customizeTextTextColorHandler: ((String?, UIColor?, String?) -> ())?
-    public func customize(text: String?, textColor: UIColor?, loadId: String?)  {
+    public func customize(text: String?, textColor: UIColor?, loadId: String?) {
         customizeTextTextColorCallCount += 1
         if let customizeTextTextColorHandler = customizeTextTextColorHandler {
             customizeTextTextColorHandler(text, textColor, loadId)
@@ -121,40 +121,34 @@ func talk(_ dismiss: Bool)
 """
 
 let sameNameVarFuncMock = """
-
 public class BarMock: Bar {
-    
-    
-    
-    public init() {  }
+    public init() { }
     public init(talk: Int = 0) {
         self.talk = talk
-        
     }
+
+
 
     public var talk: Int = 0
 }
 
 public class FooMock: Foo {
-    
-    
-    
-    public init() {  }
+    public init() { }
     public init(talk: Int = 0) {
         self.talk = talk
-        
     }
 
+
+
     public var talk: Int = 0
+
     public private(set) var talkDismissCallCount = 0
     public var talkDismissHandler: ((Bool) -> ())?
-    public func talk(_ dismiss: Bool)  {
+    public func talk(_ dismiss: Bool) {
         talkDismissCallCount += 1
         if let talkDismissHandler = talkDismissHandler {
             talkDismissHandler(dismiss)
         }
-        
     }
 }
-
 """

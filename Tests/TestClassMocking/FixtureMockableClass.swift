@@ -126,7 +126,7 @@ public class LowMock: Low {
 
     private(set) var barCallCount = 0
     var barHandler: (() -> ())?
-    override func bar()  {
+    override func bar() {
         barCallCount += 1
         if let barHandler = barHandler {
             barHandler()
@@ -176,14 +176,13 @@ public class LowMock: Low {
     private(set) var whatSetCallCount = 0
     override var what: Float { didSet { whatSetCallCount += 1 } }
 
-    private(set)  var barCallCount = 0
+    private(set) var barCallCount = 0
     var barHandler: (() -> ())?
-    override func bar()  {
+    override func bar() {
         barCallCount += 1
         if let barHandler = barHandler {
             barHandler()
         }
-        
     }
 
     private(set) var fooCallCount = 0
@@ -206,5 +205,4 @@ public class LowMock: Low {
         }
     }
 }
-
 """

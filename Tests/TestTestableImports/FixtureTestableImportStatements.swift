@@ -10,27 +10,21 @@ protocol SimpleVar {
 }
 """
 
-let testableImportsMock =
-"""
-
+let testableImportsMock = """
 import Foundation
 @testable import SomeImport1
 @testable import SomeImport2
 
-
 class SimpleVarMock: SimpleVar {
-    
-    
-    
-    init() {  }
+    init() { }
     init(name: Int = 0) {
         self.name = name
-        
     }
+
+
     private(set) var nameSetCallCount = 0
     var name: Int = 0 { didSet { nameSetCallCount += 1 } }
 }
-
 """
 
 let testableImportsWithOverlap = """
@@ -44,24 +38,17 @@ protocol SimpleVar {
 }
 """
 
-let testableImportsWithOverlapMock =
-"""
-
+let testableImportsWithOverlapMock = """
 import Foundation
 @testable import SomeImport1
 
-
 class SimpleVarMock: SimpleVar {
-    
-    
-    
-    init() {  }
+    init() { }
     init(name: Int = 0) {
         self.name = name
-        
     }
+
     private(set) var nameSetCallCount = 0
     var name: Int = 0 { didSet { nameSetCallCount += 1 } }
 }
-
 """

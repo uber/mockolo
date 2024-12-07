@@ -18,7 +18,7 @@ public class FooMock: Foo {
 
     public private(set) var hashCallCount = 0
     public var hashHandler: ((inout Hasher) -> ())?
-    public func hash(into hasher: inout Hasher)  {
+    public func hash(into hasher: inout Hasher) {
         hashCallCount += 1
         if let hashHandler = hashHandler {
             hashHandler(&hasher)
@@ -28,7 +28,7 @@ public class FooMock: Foo {
 
     public private(set) var barCallCount = 0
     public var barHandler: ((inout String, inout Int) -> ())?
-    public func bar(lhs: inout String, rhs: inout Int)  {
+    public func bar(lhs: inout String, rhs: inout Int) {
         barCallCount += 1
         if let barHandler = barHandler {
             barHandler(&lhs, &rhs)

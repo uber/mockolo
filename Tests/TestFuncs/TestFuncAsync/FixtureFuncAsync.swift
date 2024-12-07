@@ -1,8 +1,6 @@
 import MockoloFramework
 
 let funcAsync = """
-import Foundation
-
 /// \(String.mockAnnotation)
 protocol FuncAsync {
     init() async
@@ -15,12 +13,7 @@ protocol FuncAsync {
 }
 """
 
-let funcAsyncMock =
-"""
-
-import Foundation
-
-
+let funcAsyncMock = """
 class FuncAsyncMock: FuncAsync {
     required init() async {
 
@@ -39,12 +32,11 @@ class FuncAsyncMock: FuncAsync {
 
     private(set) var f2CallCount = 0
     var f2Handler: ((Int) async -> ())?
-    func f2(arg: Int) async  {
+    func f2(arg: Int) async {
         f2CallCount += 1
         if let f2Handler = f2Handler {
             await f2Handler(arg)
         }
-
     }
 
     private(set) var g1CallCount = 0
@@ -59,12 +51,11 @@ class FuncAsyncMock: FuncAsync {
 
     private(set) var g2CallCount = 0
     var g2Handler: (((Int) async -> ()) async -> ())?
-    func g2(arg: (Int) async -> ()) async  {
+    func g2(arg: (Int) async -> ()) async {
         g2CallCount += 1
         if let g2Handler = g2Handler {
             await g2Handler(arg)
         }
-
     }
 
     private(set) var updateCallCount = 0
@@ -77,12 +68,9 @@ class FuncAsyncMock: FuncAsync {
         fatalError("updateHandler returns can't have a default value thus its handler must be set")
     }
 }
-
 """
 
 let funcAsyncThrows = """
-import Foundation
-
 /// \(String.mockAnnotation)
 protocol FuncAsyncThrows {
     init() async throws
@@ -97,10 +85,6 @@ protocol FuncAsyncThrows {
 """
 
 let funcAsyncThrowsMock = """
-
-import Foundation
-
-
 class FuncAsyncThrowsMock: FuncAsyncThrows {
     required init() async throws {
 
@@ -119,12 +103,11 @@ class FuncAsyncThrowsMock: FuncAsyncThrows {
 
     private(set) var f2CallCount = 0
     var f2Handler: ((Int) async throws -> ())?
-    func f2(arg: Int) async throws  {
+    func f2(arg: Int) async throws {
         f2CallCount += 1
         if let f2Handler = f2Handler {
             try await f2Handler(arg)
         }
-
     }
 
     private(set) var g1CallCount = 0
@@ -139,12 +122,11 @@ class FuncAsyncThrowsMock: FuncAsyncThrows {
 
     private(set) var g2CallCount = 0
     var g2Handler: (((Int) async throws -> ()) async throws -> ())?
-    func g2(arg: (Int) async throws -> ()) async throws  {
+    func g2(arg: (Int) async throws -> ()) async throws {
         g2CallCount += 1
         if let g2Handler = g2Handler {
             try await g2Handler(arg)
         }
-
     }
 
     private(set) var updateCallCount = 0
@@ -157,5 +139,4 @@ class FuncAsyncThrowsMock: FuncAsyncThrows {
         fatalError("updateHandler returns can't have a default value thus its handler must be set")
     }
 }
-
 """

@@ -34,7 +34,7 @@ public class SomeProtocolMock: SomeProtocol {
 
     public private(set) var runCallCount = 0
     public var runHandler: (() -> ())?
-    public func run()  {
+    public func run() {
         runCallCount += 1
         if let runHandler = runHandler {
             runHandler()
@@ -72,7 +72,7 @@ public class SomeProtocolMock: SomeProtocol {
 
     public private(set) var runCallCount = 0
     public var runHandler: (() -> ())?
-    public func run()  {
+    public func run() {
         runCallCount += 1
         if let runHandler = runHandler {
             runHandler()
@@ -116,7 +116,7 @@ public class SomeProtocolMock: SomeProtocol {
 
     public private(set) var runCallCount = 0
     public var runHandler: (() -> ())?
-    public func run()  {
+    public func run() {
         runCallCount += 1
         if let runHandler = runHandler {
             runHandler()
@@ -167,7 +167,7 @@ public class SomeProtocolMock: SomeProtocol {
 
     public private(set) var runCallCount = 0
     public var runHandler: (() -> ())?
-    public func run()  {
+    public func run() {
         runCallCount += 1
         if let runHandler = runHandler {
             runHandler()
@@ -217,7 +217,7 @@ public class SomeProtocolMock: SomeProtocol {
 
     public private(set) var runCallCount = 0
     public var runHandler: (() -> ())?
-    public func run()  {
+    public func run() {
         runCallCount += 1
         if let runHandler = runHandler {
             runHandler()
@@ -248,7 +248,7 @@ class PresentableListenerMock: PresentableListener {
 
     private(set) var runCallCount = 0
     var runHandler: (() -> ())?
-    func run()  {
+    func run() {
         runCallCount += 1
         if let runHandler = runHandler {
             runHandler()
@@ -259,7 +259,7 @@ class PresentableListenerMock: PresentableListener {
 
     private(set) var showDebugModeCallCount = 0
     var showDebugModeHandler: (() -> ())?
-    func showDebugMode()  {
+    func showDebugMode() {
         showDebugModeCallCount += 1
         if let showDebugModeHandler = showDebugModeHandler {
             showDebugModeHandler()

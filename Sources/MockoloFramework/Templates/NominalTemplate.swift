@@ -253,7 +253,7 @@ extension NominalModel {
         var template = ""
 
         if !extraVarsToDecl.isEmpty {
-            template += "\(1.tab)\(extraVarsToDecl)\n"
+            template += "\(extraVarsToDecl)\n"
         }
 
         if needBlankInit {

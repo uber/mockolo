@@ -47,5 +47,4 @@ public class NonSimpleVarsMock: NonSimpleVars {
     public static private(set) var someVal2SetCallCount = 0
     public static var someVal2: String = "" { didSet { someVal2SetCallCount += 1 } }
 }
-
 """

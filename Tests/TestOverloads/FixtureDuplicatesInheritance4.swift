@@ -31,7 +31,7 @@ class FooMock: Foo {
     
     var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateCallCount += 1
         
         if let updateHandler = updateHandler {
@@ -52,7 +52,7 @@ class BarMock: Bar {
     
     var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateCallCount += 1
         
         if let updateHandler = updateHandler {
@@ -73,7 +73,7 @@ class BazMock: Baz {
     
     var updateCallCount = 0
     var updateHandler: ((Int) -> ())?
-    func update(arg: Int)  {
+    func update(arg: Int) {
         updateCallCount += 1
         
         if let updateHandler = updateHandler {

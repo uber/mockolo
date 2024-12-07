@@ -173,7 +173,7 @@ public class YMock: Y {
     }
     public private(set) var updateCallCount = 0
     public var updateHandler: ((SomeKey) -> ())?
-    public func update(with key: SomeKey)  {
+    public func update(with key: SomeKey) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(key)
@@ -241,14 +241,14 @@ public class TasksStreamMock: TasksStream {
         self.completionTasks = completionTasks
     }
 
+
     public private(set) var updateCallCount = 0
     public var updateHandler: ((Tasks) -> ())?
-    public func update(tasks: Tasks)  {
+    public func update(tasks: Tasks) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(tasks)
         }
-
     }
     private var tasksSubjectKind = 0
     public private(set) var tasksSubjectSetCallCount = 0
@@ -392,6 +392,7 @@ public class BaseTaskScopeListStreamMock: BaseTaskScopeListStream {
         self.taskScopes = taskScopes
     }
 
+
     public private(set) var taskScopesSubjectSetCallCount = 0
     var _taskScopes: Observable<[TaskScope]>? { didSet { taskScopesSubjectSetCallCount += 1 } }
     public var taskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { taskScopesSubjectSetCallCount += 1 } }
@@ -407,7 +408,8 @@ public class WorkTaskScopeListStreamMock: WorkTaskScopeListStream {
         self.workTaskScopes = workTaskScopes
     }
 
-    public private(set)  var workTaskScopesSubjectSetCallCount = 0
+
+    public private(set) var workTaskScopesSubjectSetCallCount = 0
     var _workTaskScopes: Observable<[TaskScope]>? { didSet { workTaskScopesSubjectSetCallCount += 1 } }
     public var workTaskScopesSubject = ReplaySubject<[TaskScope]>.create(bufferSize: 1) { didSet { workTaskScopesSubjectSetCallCount += 1 } }
     public var workTaskScopes: Observable<[TaskScope]> {
@@ -421,6 +423,7 @@ public class OnlineStreamMock: OnlineStream {
     public init(online: Observable<Bool> = PublishSubject<Bool>()) {
         self.online = online
     }
+
     private var onlineSubjectKind = 0
     public private(set) var onlineSubjectSetCallCount = 0
     public var onlineSubject = PublishSubject<Bool>() { didSet { onlineSubjectSetCallCount += 1 } }
@@ -462,6 +465,7 @@ public class StateStreamMock: StateStream {
     public init(state: Observable<State> = PublishSubject<State>()) {
         self.state = state
     }
+
     private var stateSubjectKind = 0
     public private(set) var stateSubjectSetCallCount = 0
     public var stateSubject = PublishSubject<State>() { didSet { stateSubjectSetCallCount += 1 } }
@@ -504,6 +508,7 @@ public class WorkStateStreamMock: WorkStateStream {
         self.isOnJob = isOnJob
     }
 
+
     public private(set) var isOnJobSubjectSetCallCount = 0
     var _isOnJob: Observable<Bool>? { didSet { isOnJobSubjectSetCallCount += 1 } }
     public var isOnJobSubject = BehaviorSubject<Bool>(value: false) { didSet { isOnJobSubjectSetCallCount += 1 } }
@@ -544,7 +549,7 @@ public class TasksStreamMock: TasksStream {
     }
     public private(set) var updateCallCount = 0
     public var updateHandler: ((Tasks) -> ())?
-    public func update(tasks: Tasks)  {
+    public func update(tasks: Tasks) {
         updateCallCount += 1
         if let updateHandler = updateHandler {
             updateHandler(tasks)
@@ -675,6 +680,5 @@ public class CompletionTasksStreamMock: CompletionTasksStream {
         set { if let val = newValue as? BehaviorSubject<[CompletionTask]> { completionTasksSubject = val } else { _completionTasks = newValue } }
     }
 }
-
 """
 

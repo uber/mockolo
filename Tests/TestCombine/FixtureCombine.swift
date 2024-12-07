@@ -56,7 +56,7 @@ public class FooPublishedMock: FooPublished {
     public private(set) var myCustomTypePublisherSubject = PassthroughSubject<MyCustomType, Error>()
 
     public private(set) var myNonOptionalSetCallCount = 0
-    @CustomPropertyWrapper private var _myNonOptional: NonOptional!  { didSet { myNonOptionalSetCallCount += 1 } }
+    @CustomPropertyWrapper private var _myNonOptional: NonOptional! { didSet { myNonOptionalSetCallCount += 1 } }
     public var myNonOptional: NonOptional {
         get { return _myNonOptional }
         set { _myNonOptional = newValue }
@@ -210,13 +210,12 @@ public class ChildMock: Child {
         self.myStringInBase = myStringInBase
     }
 
-    public var myStringPublisher: AnyPublisher<String?, Never> { return self.$myStringInBase.map { $0 }.setFailureType(to: Never.self).eraseToAnyPublisher() }
 
+    public var myStringPublisher: AnyPublisher<String?, Never> { return self.$myStringInBase.map { $0 }.setFailureType(to: Never.self).eraseToAnyPublisher() }
     public var dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never> { return self.dictionaryPublisherSubject.eraseToAnyPublisher() }
     public private(set) var dictionaryPublisherSubject = CurrentValueSubject<Dictionary<String, String>, Never>(Dictionary<String, String>())
-
     public private(set) var myStringInBaseSetCallCount = 0
-    @Published public var myStringInBase: String = "" { didSet { myStringInBaseSetCallCount += 1 } }
+@Published     public var myStringInBase: String = "" { didSet { myStringInBaseSetCallCount += 1 } }
 }
 """
 
