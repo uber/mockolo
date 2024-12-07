@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+import Algorithms
 import Foundation
 import SwiftSyntax
 import SwiftParser
@@ -300,7 +301,12 @@ extension ProtocolDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia.annotationMetadata(with: annotation) ?? protocolKeyword.leadingTrivia.annotationMetadata(with: annotation)
+        let trivias = [
+            leadingTrivia,
+            protocolKeyword.leadingTrivia,
+            modifiers.leadingTrivia,
+        ] + attributes.map(\.leadingTrivia)
+        return trivias.firstNonNil { $0.annotationMetadata(with: annotation) }
     }
 
     var hasBlankInit: Bool {
@@ -358,7 +364,12 @@ extension ClassDeclSyntax: EntityNode {
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
-        return leadingTrivia.annotationMetadata(with: annotation) ?? classKeyword.leadingTrivia.annotationMetadata(with: annotation)
+        let trivias = [
+            leadingTrivia,
+            classKeyword.leadingTrivia,
+            modifiers.leadingTrivia,
+        ] + attributes.map(\.leadingTrivia)
+        return trivias.firstNonNil { $0.annotationMetadata(with: annotation) }
     }
 
     func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer {

@@ -48,21 +48,30 @@ class RootBuildableMock: RootBuildable {
 let attributeAboveAnnotationComment = """
 @MainActor
 /// \(String.mockAnnotation)
-protocol AttributeAboveAnnotationCommentProtocol {
+protocol P0 {
 }
 
 @MainActor
 /// \(String.mockAnnotation)
-class AttributeAboveAnnotationCommentClass {
+@available(iOS 18.0, *) protocol P1 {
+}
+
+@MainActor
+/// \(String.mockAnnotation)
+public class C0 {
 }
 """
 
 let attributeAboveAnnotationCommentMock = """
-class AttributeAboveAnnotationCommentProtocolMock: AttributeAboveAnnotationCommentProtocol {
+class P0Mock: P0 {
     init() { }
 }
 
-class AttributeAboveAnnotationCommentClassMock: AttributeAboveAnnotationCommentClass {
+class P1Mock: P1 {
     init() { }
+}
+
+public class C0Mock: C0 {
+    public init() { }
 }
 """
