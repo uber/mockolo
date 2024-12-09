@@ -13,4 +13,10 @@ final class ActorTests: MockoloTestCase {
         verify(srcContent: globalActorProtocol._source,
                dstContent: globalActorProtocol.expected._source)
     }
+
+    func testAttributeAboveAnnotationComment() {
+        verify(srcContent: attributeAboveAnnotationComment._source,
+               dstContent: attributeAboveAnnotationComment.expected._source,
+               declType: .all)
+    }
 }

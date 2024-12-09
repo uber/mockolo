@@ -58,3 +58,37 @@
         }
     }
 }
+
+@Fixture enum attributeAboveAnnotationComment {
+    @MainActor
+    /// @mockable
+    protocol P0 {
+    }
+
+    @MainActor
+    /// @mockable
+    @available(iOS 18.0, *) protocol P1 {
+    }
+
+    @MainActor
+    /// @mockable
+    public class C0 {
+        init() {}
+    }
+
+    @Fixture enum expected {
+        class P0Mock: P0 {
+            init() { }
+        }
+
+        class P1Mock: P1 {
+            init() { }
+        }
+
+        public class C0Mock: C0 {
+            override init() {
+                super.init()
+            }
+        }
+    }
+}
