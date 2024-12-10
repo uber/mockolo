@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let overload5 = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 
 func collectionView(_ collectionView: UICollectionView, reuseIdentifierForItemAt index: Int) -> String?

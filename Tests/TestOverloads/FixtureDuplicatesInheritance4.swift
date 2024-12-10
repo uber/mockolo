@@ -2,17 +2,17 @@ import MockoloFramework
 
 
 let duplicateSigInheritance4 = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 func update(arg: Int)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Bar: Foo {
 func update(arg: Int)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Baz: Foo, Bar {
 }
 """

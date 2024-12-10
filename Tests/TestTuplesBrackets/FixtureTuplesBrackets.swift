@@ -2,7 +2,7 @@ import MockoloFramework
 
 let tuplesBrackets = """
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol NonSimpleTypes {
 func variadicFunc(_ arg: Int, for key: String)
 func variadicFunc(_ arg: Int, for key: String...)

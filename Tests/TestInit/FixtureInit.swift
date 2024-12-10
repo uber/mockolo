@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let keywordParams = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol KeywordProtocol {
     init(in: Int)
 }
@@ -13,7 +13,7 @@ class KClass {
     }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 class KeywordClass: KClass {
     override init(in: Int) {
         super.init(in: `in`)
@@ -39,7 +39,7 @@ class KeywordProtocolMock: KeywordProtocol {
 //  MARK - protocol containing init
 
 let protocolWithBlankInit = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol BlankInit {
     init()
 }
@@ -53,7 +53,7 @@ public class BlankInitMock: BlankInit {
 """
 
 let protocolWithInit = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol HasInit: HasInitParent {
     init(arg: String)
 }
@@ -142,7 +142,7 @@ public class HasInitMock: HasInit {
 let simpleInit = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Current: Parent {
     var title: String { get set }
 }
@@ -212,7 +212,7 @@ let nonSimpleInitVars = """
 
 public typealias ForcastCheckBlock = () -> ForcastUpdateConfig?
 
-/// \(String.mockAnnotation)
+/// @mockable
 @objc public protocol ForcastUpdating {
     @objc init(checkBlock: @escaping ForcastCheckBlock, dataStream: DataStream)
     @objc func enabled() -> Bool
@@ -265,7 +265,7 @@ public class ForcastUpdatingMock: ForcastUpdating {
 """
 
 let initWithSameParamNameButDifferentType = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol MyProtocol {
     init(param: Any)
     init(param: String)
@@ -290,7 +290,7 @@ class MyProtocolMock: MyProtocol {
 """
 
 let multipleInitsWithSameParamName = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol MyProtocol {
     init(param: String, anotherParam: Int)
     init(param: String, anotherParam: String)
@@ -316,7 +316,7 @@ class MyProtocolMock: MyProtocol {
 """
 
 let throwableInit = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol MyProtocol {
     init(param: String) throws
 }
@@ -336,7 +336,7 @@ class MyProtocolMock: MyProtocol {
 """
 
 let typedThrowableInit = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol MyProtocol {
     init(param: String) throws(SomeError)
 }

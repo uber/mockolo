@@ -23,6 +23,7 @@ enum InputError: Error {
 }
 
 /// Performs end to end mock generation flow
+@discardableResult
 public func generate(sourceDirs: [String],
                      sourceFiles: [String],
                      parser: SourceParser,
@@ -43,8 +44,7 @@ public func generate(sourceDirs: [String],
                      excludeImports: [String],
                      to outputFilePath: String,
                      loggingLevel: Int,
-                     concurrencyLimit: Int?,
-                     onCompletion: @escaping (String) -> ()) throws {
+                     concurrencyLimit: Int?) throws -> String {
     guard sourceDirs.count > 0 || sourceFiles.count > 0 else {
         log("Source files or directories do not exist", level: .error)
         throw InputError.sourceFilesError
@@ -184,5 +184,5 @@ public func generate(sourceDirs: [String],
     log("TOTAL", t5-t0, level: .verbose)
     log("#Protocols = \(protocolMap.count), #Annotated protocols = \(annotatedProtocolMap.count), #Parent mock classes = \(parentMocks.count), #Final mock classes = \(candidates.count), File LoC = \(count)", level: .verbose)
     
-    onCompletion(result)
+    return result
 }

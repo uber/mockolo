@@ -1,7 +1,7 @@
  import MockoloFramework
 
  let combineProtocol = """
-/// \(String.mockAnnotation)(combine: dictionaryPublisher = CurrentValueSubject; myPublisher = PassthroughSubject; noDefaultSubjectValue = CurrentValueSubject)
+/// @mockable(combine: dictionaryPublisher = CurrentValueSubject; myPublisher = PassthroughSubject; noDefaultSubjectValue = CurrentValueSubject)
 public protocol Foo: AnyObject {
     var myPublisher: AnyPublisher<String, Never> { get }
     var dictionaryPublisher: AnyPublisher<Dictionary<String, String>, Never> { get }
@@ -25,7 +25,7 @@ public class FooMock: Foo {
 """
 
 let combinePublishedProtocol = """
-/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myString; myIntPublisher = @Published myInt; myCustomTypePublisher = @Published myCustomType; myNonOptionalPublisher = @CustomPropertyWrapper myNonOptional)
+/// @mockable(combine: myStringPublisher = @Published myString; myIntPublisher = @Published myInt; myCustomTypePublisher = @Published myCustomType; myNonOptionalPublisher = @CustomPropertyWrapper myNonOptional)
 public protocol FooPublished {
     var myString: String { get set }
     var myStringPublisher: AnyPublisher<String, Never> { get }
@@ -67,7 +67,7 @@ public class FooPublishedMock: FooPublished {
 """
 
 let combineNullableProtocol = """
-/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myString; myIntPublisher = @Published myInt; myCustomTypePublisher = @Published myCustomType; myNonOptionalPublisher = @Published myNonOptional)
+/// @mockable(combine: myStringPublisher = @Published myString; myIntPublisher = @Published myInt; myCustomTypePublisher = @Published myCustomType; myNonOptionalPublisher = @Published myNonOptional)
 public protocol FooNullable {
     var myString: String? { get set }
     var myStringPublisher: AnyPublisher<String, Never> { get }
@@ -115,18 +115,18 @@ public class FooNullableMock: FooNullable {
 
 let combineMultiParents =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol BaseProtocolA {
     var myStringInBase: String { get set }
 }
 
-/// \(String.mockAnnotation)(combine: myIntPublisher = @Published myInt)
+/// @mockable(combine: myIntPublisher = @Published myInt)
 public protocol BaseProtocolB {
     var myIntPublisher: AnyPublisher<Int, Error> { get }
     var myOtherPublisher: AnyPublisher<Double, Never> { get }
 }
 
-/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myStringInBase)
+/// @mockable(combine: myStringPublisher = @Published myStringInBase)
 public protocol Child: BaseProtocolA, BaseProtocolB {
     var myStringPublisher: AnyPublisher<String?, Never> { get }
     var myInt: Int { get set }
@@ -181,7 +181,7 @@ public class ChildMock: Child {
 """
 
 let combineMockContentProtocol = """
-/// \(String.mockAnnotation)(combine: myStringPublisher = @Published myStringInBase)
+/// @mockable(combine: myStringPublisher = @Published myStringInBase)
 public protocol Child: BaseProtocolA {
     var myStringPublisher: AnyPublisher<String?, Never> { get }
 }

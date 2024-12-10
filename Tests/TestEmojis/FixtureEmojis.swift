@@ -2,7 +2,7 @@ import MockoloFramework
 
 
 let emojiVars = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol EmojiVars: EmojiParent {
     @available(iOS 10.0, *)
     var 😂: Emoji { get set }
@@ -101,7 +101,7 @@ class EmojiVarsMock: EmojiVars {
 
 let familyEmoji =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Family: FamilyEmoji {
     var 안녕하세요: String { get set }
 }
@@ -159,7 +159,7 @@ class FamilyMock: Family {
 
 
 let krJp = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Hello: Hi {
     var 天気: String { get set }
 }

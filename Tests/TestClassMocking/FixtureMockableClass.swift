@@ -2,7 +2,7 @@ import MockoloFramework
 
 let klass =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 public class Low: Mid {
     var name: String = "k2"
 

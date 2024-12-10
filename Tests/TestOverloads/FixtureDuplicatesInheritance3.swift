@@ -1,17 +1,17 @@
 import MockoloFramework
 
 let overload10 = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 func update(arg: Int)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Bar {
 func update(arg: Int)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Baz: Foo, Bar {
 }
 """

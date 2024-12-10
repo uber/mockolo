@@ -1,14 +1,14 @@
 import MockoloFramework
 
 let o = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     func update(arg: Int) -> (String) -> Observable<Double>
 }
 """
 
 let overload4 = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 func update(arg: Int, some: Float)
 func update(arg: Int, some: Float) -> Int

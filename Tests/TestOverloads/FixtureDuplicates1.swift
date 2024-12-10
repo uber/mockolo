@@ -4,7 +4,7 @@ import MockoloFramework
 let overload3 = """
 import UIKit
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 func display()
 func display(x: Int)

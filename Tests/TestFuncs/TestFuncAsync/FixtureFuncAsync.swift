@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let funcAsync = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol FuncAsync {
     init() async
     func f1(arg: Int) async -> String
@@ -71,7 +71,7 @@ class FuncAsyncMock: FuncAsync {
 """
 
 let funcAsyncThrows = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol FuncAsyncThrows {
     init() async throws
     func f1(arg: Int) async throws -> String

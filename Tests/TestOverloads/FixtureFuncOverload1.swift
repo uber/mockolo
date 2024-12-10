@@ -3,7 +3,7 @@ import MockoloFramework
 let overload1 = """
 import AVFoundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol P1: P0 {
 }
 """

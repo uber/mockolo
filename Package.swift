@@ -1,10 +1,11 @@
-// swift-tools-version:5.7
+// swift-tools-version:5.10
+import CompilerPluginSupport
 import PackageDescription
 
 let package = Package(
     name: "Mockolo",
     platforms: [
-        .macOS(.v12),
+        .macOS(.v13),
     ],
     products: [
         .executable(name: "mockolo", targets: ["Mockolo"]),
@@ -21,7 +22,8 @@ let package = Package(
             dependencies: [
                 "MockoloFramework",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
-            ]),
+            ]
+        ),
         .target(
             name: "MockoloFramework",
             dependencies: [
@@ -30,12 +32,21 @@ let package = Package(
                 .product(name: "Algorithms", package: "swift-algorithms"),
             ]
         ),
+        .macro(
+            name: "MockoloTestSupportMacros",
+            dependencies: [
+                .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
+                .product(name: "SwiftDiagnostics", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
+            ]
+        ),
         .testTarget(
             name: "MockoloTests",
             dependencies: [
                 "MockoloFramework",
+                "MockoloTestSupportMacros",
             ],
             path: "Tests"
-        )
+        ),
     ]
 )

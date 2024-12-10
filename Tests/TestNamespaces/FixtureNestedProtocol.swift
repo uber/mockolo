@@ -2,7 +2,7 @@ import MockoloFramework
 
 let nestedProtocol = """
 @MainActor final class FooView: UIView {
-    /// \(String.mockAnnotation)
+    /// @mockable
     @MainActor protocol Delegate: AnyObject {
         func onTapButton(_ button: UIButton)
     }
@@ -12,7 +12,7 @@ let nestedProtocol = """
 
 extension AAA {
     actor BBB {
-        /// \(String.mockAnnotation)
+        /// @mockable
         protocol CCC {
         }
     }
@@ -49,7 +49,7 @@ extension AAA.BBB {
 
 let nestedProtocolInGeneric = """
 actor Foo<T> {
-    /// \(String.mockAnnotation)
+    /// @mockable
     protocol NG1 {
         func requirement() -> Int
     }
@@ -57,14 +57,14 @@ actor Foo<T> {
 
 enum Bar<T> {
     struct Baz {
-        /// \(String.mockAnnotation)
+        /// @mockable
         protocol NG2 {
             func requirement() -> Int
         }
     }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol OK<T> {
     associatedtype T
     func requirement() -> T

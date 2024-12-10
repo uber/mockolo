@@ -4,7 +4,7 @@ import MockoloFramework
 let funcThrow = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol FuncThrow {
     func f1(arg: Int) throws -> String
     func f2(arg: Int) throws

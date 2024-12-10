@@ -2,7 +2,7 @@ import MockoloFramework
 
 
 let rxSubjects = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Foo: AnyObject {
     var someBehavior: BehaviorSubject<String> { get }
     var someReply: ReplaySubject<String> { get }
@@ -50,7 +50,7 @@ public class FooMock: Foo {
 """
 
 let rx = """
-/// \(String.mockAnnotation)(rx: attachedRouter = BehaviorSubject)
+/// @mockable(rx: attachedRouter = BehaviorSubject)
 protocol TaskRouting: BaseRouting {
     var attachedRouter: Observable<Bool> { get }
     func routeToFoo() -> Observable<()>
@@ -86,7 +86,7 @@ class TaskRoutingMock: TaskRouting {
 
 
 let rxObservables = """
-/// \(String.mockAnnotation)(rx: nameStream = BehaviorSubject; integerStream = ReplaySubject)
+/// @mockable(rx: nameStream = BehaviorSubject; integerStream = ReplaySubject)
 protocol RxVar {
     var isEnabled: Observable<Bool> { get }
     var nameStream: Observable<[EMobilitySearchVehicle]> { get }
@@ -131,12 +131,12 @@ class RxVarMock: RxVar {
 
 let rxVarInherited =
 """
-/// \(String.mockAnnotation)(rx: all = BehaviorSubject)
+/// @mockable(rx: all = BehaviorSubject)
 public protocol X {
     var myKey: Observable<SomeKey?> { get }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Y: X {
     func update(with key: SomeKey)
 }
@@ -189,7 +189,7 @@ public class YMock: Y {
 
 let rxMultiParents =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol TasksStream: BaseTasksStream {
     func update(tasks: Tasks)
 }
@@ -198,31 +198,31 @@ public protocol BaseTasksStream: BaseTaskScopeListStream, WorkTaskScopeListStrea
     var tasks: Observable<Tasks> { get }
 }
 
-/// \(String.mockAnnotation)(rx: all = ReplaySubject)
+/// @mockable(rx: all = ReplaySubject)
 public protocol BaseTaskScopeListStream: AnyObject {
     var taskScopes: Observable<[TaskScope]> { get }
 }
 
-/// \(String.mockAnnotation)(rx: all = ReplaySubject)
+/// @mockable(rx: all = ReplaySubject)
 public protocol WorkTaskScopeListStream: AnyObject {
     var workTaskScopes: Observable<[TaskScope]> { get }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol OnlineStream: AnyObject {
     var online: Observable<Bool> { get }
 }
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol StateStream: AnyObject {
     var state: Observable<State> { get }
 }
 
-/// \(String.mockAnnotation)(rx: all = BehaviorSubject)
+/// @mockable(rx: all = BehaviorSubject)
 public protocol WorkStateStream: AnyObject {
     var isOnJob: Observable<Bool> { get }
 }
 
-/// \(String.mockAnnotation)(rx: all = BehaviorSubject)
+/// @mockable(rx: all = BehaviorSubject)
 public protocol CompletionTasksStream: AnyObject {
     var completionTasks: Observable<[CompletionTask]> { get }
 }

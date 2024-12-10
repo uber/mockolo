@@ -2,13 +2,13 @@ import MockoloFramework
 
 // MARK: Simple inheritance
 let simpleInheritance = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SimpleChild: SimpleParent {
     var name: String { get set }
     func foo()
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SimpleParent: AnyObject {
     var number: Int { get set }
     func bar(arg: Double) -> Float?
@@ -87,7 +87,7 @@ protocol SecondSwiftProtocol {
     func doSomethingElse() -> Bool
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol TestProtocol: FirstSwiftProtocol & SecondSwiftProtocol {
     func doSomethingSpecial()
 }

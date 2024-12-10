@@ -1,70 +1,69 @@
 import Foundation
 
-class ArgumentsHistoryTests: MockoloTestCase {
-    
+class ArgumentsHistoryTests: MockoloTestCase {    
     func testArgumentsHistoryWithAnnotationAllFuncCases() {
-        verify(srcContent: argumentsHistoryWithAnnotation,
-               dstContent: argumentsHistoryWithAnnotationAllFuncCaseMock,
+        verify(srcContent: argumentsHistoryWithAnnotation._source,
+               dstContent: argumentsHistoryWithAnnotation.expected._source,
                enableFuncArgsHistory: true)
     }
         
     func testArgumentsHistoryWithAnnotationNotAllFuncCases() {
-        verify(srcContent: argumentsHistoryWithAnnotation,
-               dstContent: argumentsHistoryWithAnnotationNotAllFuncCaseMock,
+        verify(srcContent: argumentsHistoryWithAnnotationNotAllFuncCase._source,
+               dstContent: argumentsHistoryWithAnnotationNotAllFuncCase.expected._source,
                enableFuncArgsHistory: false)
     }
     
     func testArgumentsHistorySimpleCase() {
-        verify(srcContent: argumentsHistorySimpleCase,
-               dstContent: argumentsHistorySimpleCaseMock,
+        verify(srcContent: argumentsHistorySimpleCase._source,
+               dstContent: argumentsHistorySimpleCase.expected._source,
                enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryTupleCase() {
-        verify(srcContent: argumentsHistoryTupleCase,
-               dstContent: argumentsHistoryTupleCaseMock,
+        verify(srcContent: argumentsHistoryTupleCase._source,
+               dstContent: argumentsHistoryTupleCase.expected._source,
                enableFuncArgsHistory: true)
     }
 
     func testArgumentsHistoryOverloadedCase() {
-        verify(srcContent: argumentsHistoryOverloadedCase,
-               dstContent: argumentsHistoryOverloadedCaseMock,
+        verify(srcContent: argumentsHistoryOverloadedCase._source,
+               dstContent: argumentsHistoryOverloadedCase.expected._source,
                enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryGenericsCase() {
-        verify(srcContent: argumentsHistoryGenericsCase,
-               dstContent: argumentsHistoryGenericsCaseMock,
+        verify(srcContent: argumentsHistoryGenericsCase._source,
+               dstContent: argumentsHistoryGenericsCase.expected._source,
                enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryInoutCase() {
-        verify(srcContent: argumentsHistoryInoutCase,
-               dstContent: argumentsHistoryInoutCaseMock,
+        verify(srcContent: argumentsHistoryInoutCase._source,
+               dstContent: argumentsHistoryInoutCase.expected._source,
                enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryHandlerCase() {
-        verify(srcContent: argumentsHistoryHandlerCase,
-               dstContent: argumentsHistoryHandlerCaseMock,
+        verify(srcContent: argumentsHistoryHandlerCase._source,
+               dstContent: argumentsHistoryHandlerCase.expected._source,
                enableFuncArgsHistory: true)
     }
 
     func testArgumentsHistoryEscapingTypealiasHandlerCase() {
-        verify(srcContent: argumentsHistoryEscapingTypealiasHandlerCase,
-               dstContent: argumentsHistoryEscapingTypealiasHandlerCaseMock,
+        verify(srcContent: argumentsHistoryEscapingTypealiasHandlerCase._source,
+               dstContent: argumentsHistoryEscapingTypealiasHandlerCase.expected._source,
                enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryAutoclosureCase() {
-        verify(srcContent: argumentsHistoryAutoclosureCase,
-               dstContent: argumentsHistoryAutoclosureCaseMock,
+        verify(srcContent: argumentsHistoryAutoclosureCase._source,
+               dstContent: argumentsHistoryAutoclosureCase.expected._source,
                enableFuncArgsHistory: true)
     }
     
     func testArgumentsHistoryStaticCase() {
-        verify(srcContent: argumentsHistoryStaticCase,
-               dstContent: argumentsHistoryStaticCaseMock,
+        verify(srcContent: argumentsHistoryStaticCase._source,
+               dstContent: argumentsHistoryStaticCase.expected._source,
                enableFuncArgsHistory: true)
     }
 }

@@ -10,8 +10,8 @@ class ThrowingErrorsTests: MockoloTestCase {
             "\(nonExistentDstDirPath) is expected not to exist, but it exists"
         )
         
-        verifyThrows(srcContent: simpleFuncs,
-                     dstContent: simpleFuncsMock,
+        verifyThrows(srcContent: simpleFuncs._source,
+                     dstContent: simpleFuncs.expected._source,
                      dstFilePath: nonExistentDstDirPath + "/Dst.swift")
     }
 }
