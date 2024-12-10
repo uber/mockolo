@@ -26,7 +26,6 @@ struct Fixture: MemberMacro {
             modifiers: [.init(name: .keyword(.static))],
             .let,
             name: "_source",
-            type: TypeAnnotationSyntax(type: "String" as TypeSyntax),
             initializer: .init(
                 value: StringLiteralExprSyntax(
                     multilineContent: sourceContent,
