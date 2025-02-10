@@ -1,56 +1,53 @@
-import Foundation
-
 class BasicFuncTests: MockoloTestCase {
-
     func testInoutParams() {
-        verify(srcContent: inoutParams,
-               dstContent: inoutParamsMock)
+        verify(srcContent: inoutParams._source,
+               dstContent: inoutParams.expected._source)
     }
 
     func testSubscripts() {
-        verify(srcContent: subscripts,
-               dstContent: subscriptsMocks)
+        verify(srcContent: subscripts._source,
+               dstContent: subscripts.expected._source)
     }
     
     func testVariadicFuncs() {
-        verify(srcContent: variadicFunc,
-               dstContent: variadicFuncMock)
+        verify(srcContent: variadicFunc._source,
+               dstContent: variadicFunc.expected._source)
     }
 
     func testAutoclosureArgFuncs() {
-        verify(srcContent: autoclosureArgFunc,
-               dstContent: autoclosureArgFuncMock)
+        verify(srcContent: autoclosureArgFunc._source,
+               dstContent: autoclosureArgFunc.expected._source)
     }
 
     func testClosureArgFuncs() {
-        verify(srcContent: closureArgFunc,
-               dstContent: closureArgFuncMock)
+        verify(srcContent: closureArgFunc._source,
+               dstContent: closureArgFunc.expected._source)
     }
 
     func testForArgFuncs() {
-        verify(srcContent: forArgClosureFunc,
-               dstContent: forArgClosureFuncMock)
+        verify(srcContent: forArgClosureFunc._source,
+               dstContent: forArgClosureFunc.expected._source)
     }
 
     func testReturnSelfFunc() {
-        verify(srcContent: returnSelfFunc,
-               dstContent: returnSelfFuncMock)
+        verify(srcContent: returnSelfFunc._source,
+               dstContent: returnSelfFunc.expected._source)
     }
     
     
     func testSimpleFuncs() {
-        verify(srcContent: simpleFuncs,
-               dstContent: simpleFuncsMock)
+        verify(srcContent: simpleFuncs._source,
+               dstContent: simpleFuncs.expected._source)
     }
 
     func testSimpleFuncsAllowCallCount() {
-        verify(srcContent: simpleFuncs,
-               dstContent: simpleFuncsAllowCallCountMock,
+        verify(srcContent: simpleFuncs._source,
+               dstContent: simpleFuncs.allowCallCountExpected._source,
                allowSetCallCount: true)
     }
     func testMockFuncs() {
-        verify(srcContent: simpleFuncs,
-               dstContent: simpleMockFuncMock,
+        verify(srcContent: simpleFuncs._source,
+               dstContent: simpleFuncs.mockFuncExpected._source,
                useTemplateFunc: true)
     }
 }

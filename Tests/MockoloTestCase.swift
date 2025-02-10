@@ -132,13 +132,14 @@ class MockoloTestCase: XCTestCase {
                      excludeImports: [],
                      to: dstFilePath,
                      loggingLevel: 3,
-                     concurrencyLimit: concurrencyLimit,
-                     onCompletion: { ret in
-            let output = (try? String(contentsOf: URL(fileURLWithPath: self.defaultDstFilePath), encoding: .utf8)) ?? ""
-            let outputContents = output.components(separatedBy:  .newlines).filter { !$0.isEmpty && !$0.allSatisfy(\.isWhitespace) }
-            let fixtureContents = dstContent.components(separatedBy: .newlines).filter { !$0.isEmpty && !$0.allSatisfy(\.isWhitespace) }
-            XCTAssert(outputContents.contains(subArray: fixtureContents), "output:\n" + output)
-        })
+                     concurrencyLimit: concurrencyLimit)
+        let output = (try? String(contentsOf: URL(fileURLWithPath: self.defaultDstFilePath), encoding: .utf8)) ?? ""
+        let outputContents = output.components(separatedBy:  .newlines).filter { !$0.isEmpty && !$0.allSatisfy(\.isWhitespace) }
+        let fixtureContents = dstContent.components(separatedBy: .newlines).filter { !$0.isEmpty && !$0.allSatisfy(\.isWhitespace) }
+        if fixtureContents.isEmpty {
+            throw XCTSkip("empty fixture")
+        }
+        XCTAssert(outputContents.contains(subArray: fixtureContents), "output:\n" + output)
     }
 }
 

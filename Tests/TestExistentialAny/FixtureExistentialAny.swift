@@ -1,5 +1,5 @@
 let existentialAny = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol ExistentialAny {
     var foo: P { get }
     var bar: any R<Int> { get }
@@ -95,11 +95,11 @@ class ExistentialAnyMock: ExistentialAny {
 """
 
 let existentialAnyDefaultTypeMap = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol SomeProtocol {
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol UseSomeProtocol {
     func foo() -> any SomeProtocol
 }

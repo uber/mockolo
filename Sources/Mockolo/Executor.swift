@@ -214,10 +214,8 @@ struct Executor: ParsableCommand {
                          excludeImports: excludeImports,
                          to: outputFilePath,
                          loggingLevel: loggingLevel,
-                         concurrencyLimit: concurrencyLimit,
-                         onCompletion: { _ in
-                    log("Done. Exiting program.", level: .info)
-            })
+                         concurrencyLimit: concurrencyLimit)
+            log("Done. Exiting program.", level: .info)
         } catch {
             fatalError("Generation error: \(error)")
         }

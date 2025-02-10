@@ -2,7 +2,7 @@ import Foundation
 
 let nameOverride =
 """
-/// \(String.mockAnnotation)(override: name = FooMock)
+/// @mockable(override: name = FooMock)
 protocol FooProtocol {
     func display()
 }

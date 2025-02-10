@@ -21,9 +21,9 @@ This project may contain unstable APIs which may not be ready for general use. S
 
 ## System Requirements
 
-* Swift 5.7 or later
-* Xcode 14.2 or later
-* macOS 12.0 or later and Linux
+* Swift 5.10 or later
+* Xcode 15.3 or later
+* macOS 13.0 or later and Linux
 * Support is included for the Swift Package Manager
 
 
@@ -423,11 +423,6 @@ This will generate:
 ```swift
 public class FooMock: FooProtocol { ... }
 ```
-
-## Used libraries
-
-[SwiftSyntax](https://github.com/apple/swift-syntax) |
-
 
 ## How to contribute to Mockolo
 See [CONTRIBUTING](CONTRIBUTING.md) for more info.

@@ -1,7 +1,7 @@
 import MockoloFramework
 
 let genericOptionalType = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol GenericProtocol {
     func nonOptional<T>() -> T
     func optional<T>() -> T?
@@ -42,7 +42,7 @@ public class GenericProtocolMock: GenericProtocol {
 let genericFunc = """
 import Foundation
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol GenericFunc {
     func containsGeneric<T: StringProtocol, U: ExpressibleByIntegerLiteral>(arg1: T, arg2: @escaping (U) -> ()) -> ((T) -> (U))
     func sendEvents<T>(events: [SomeEvent], value: T, once: Bool, closure: @escaping (T) -> ())
@@ -230,7 +230,7 @@ class NetworkingMock: Networking {
 """
 
 let funcDuplicateSignatureDifferentWhereClause = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Storing {
    func connect<T>(adapter: T) where T: Adapter
    func connect<T>(adapter: T) where T: KeyedAdapter
@@ -283,7 +283,7 @@ class StoringMock: Storing {
 """
 
 let funcDuplicateSignatureDifferentWhereClauseEquality = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Storing<S: Sequence> {
    func connect<T>(adapter: T) where T: Adapter, T.Element == S.Element
    func connect<T>(adapter: T) where T: KeyedAdapter, T.Element == S.Element

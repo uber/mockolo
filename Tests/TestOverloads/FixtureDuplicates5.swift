@@ -2,7 +2,7 @@ import MockoloFramework
 
 
 let simpleDuplicates = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SimpleDuplicate {
 func remove(_ arg: Int)
 func remove(_ arg: String)

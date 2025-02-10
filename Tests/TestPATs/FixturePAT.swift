@@ -1,22 +1,22 @@
 import MockoloFramework
 
 let patNameCollision = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 associatedtype T
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Bar {
 associatedtype T: String
 }
 
-/// \(String.mockAnnotation)(typealias: T = Hashable & Codable)
+/// @mockable(typealias: T = Hashable & Codable)
 protocol Cat {
 associatedtype T
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Baz: Foo, Bar, Cat {
 }
 """
@@ -46,7 +46,7 @@ class BazMock: Baz {
 
 let simplePat =
 """
-/// \(String.mockAnnotation)(typealias: T = String)
+/// @mockable(typealias: T = String)
 public protocol FooBar: Foo {
     associatedtype T
 }
@@ -70,7 +70,7 @@ public class FooBarMock: FooBar {
 
 
 let patOverride = """
-/// \(String.mockAnnotation)(typealias: T = Any; U = Bar; R = (String, Int); S = AnyObject)
+/// @mockable(typealias: T = Any; U = Bar; R = (String, Int); S = AnyObject)
 protocol Foo {
     associatedtype T
     associatedtype U: Collection where U.Element == T
@@ -103,7 +103,7 @@ class FooMock: Foo {
 """
 
 let protocolWithTypealias = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SomeType {
     typealias Key = String
     var key: Key { get }
@@ -128,7 +128,7 @@ public class SomeTypeMock: SomeType {
 """
 
 let patDefaultType = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
     associatedtype T
     associatedtype U: Collection where U.Element == T
@@ -145,7 +145,7 @@ class FooMock: Foo {
 """
 
 let patPartialOverride = """
-/// \(String.mockAnnotation)(typealias: U = AnyObject)
+/// @mockable(typealias: U = AnyObject)
 protocol Foo {
     associatedtype T
     associatedtype U: Collection where U.Element == T

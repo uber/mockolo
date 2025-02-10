@@ -2,7 +2,7 @@ import MockoloFramework
 
 let overload6 =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol SomeVC {
 func popViewController(viewController: UIViewController)
 func popViewController()
@@ -60,7 +60,7 @@ public protocol Bar5 {
 func customize(text: String?, textColor: UIColor?, loadId: String?)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Foo: Bar2, Bar3, Bar4, Bar5 {
 }
 """
@@ -109,12 +109,12 @@ public class FooMock: Foo {
 
 
 let sameNameVarFunc = """
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Bar: AnyObject {
 var talk: Int { get }
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol Foo: Bar {
 func talk(_ dismiss: Bool)
 }

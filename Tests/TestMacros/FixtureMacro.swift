@@ -11,7 +11,7 @@ import W
 
 import V
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SomeProtocol: Parent {
     func run()
 }
@@ -140,7 +140,7 @@ import Z
 
 import C
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SomeProtocol: Parent {
     func run()
 }
@@ -192,7 +192,7 @@ import Y
 
 import C
 
-/// \(String.mockAnnotation)
+/// @mockable
 public protocol SomeProtocol: Parent {
     func run()
 }
@@ -229,7 +229,7 @@ public class SomeProtocolMock: SomeProtocol {
 
 let macroInFunc =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol PresentableListener: class {
     func run()
     #if DEBUG
@@ -272,7 +272,7 @@ class PresentableListenerMock: PresentableListener {
 """
 
 let macroInFuncWithOverload = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol PresentableListener: AnyObject {
     #if DEBUG
     func run(value: Int)

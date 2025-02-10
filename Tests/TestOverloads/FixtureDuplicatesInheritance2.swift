@@ -1,12 +1,12 @@
 import MockoloFramework
 
 let overload9 = """
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Foo {
 func update(arg: Int)
 }
 
-/// \(String.mockAnnotation)
+/// @mockable
 protocol Bar: Foo {
 func update(arg: Int)
 }

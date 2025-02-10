@@ -2,7 +2,7 @@ import MockoloFramework
 
 let klassInit =
 """
-/// \(String.mockAnnotation)
+/// @mockable
 public class Low: Mid {
     var name: String = ""
     public required init(arg: String) {
