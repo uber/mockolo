@@ -173,9 +173,6 @@
     }
 }
 
-let argumentsHistorySimpleCaseMock = """
-"""
-
 @Fixture enum argumentsHistoryTupleCase {
     /// @mockable(history: fooFunc = true)
     protocol Foo {
@@ -473,6 +470,44 @@ let argumentsHistorySimpleCaseMock = """
                 if let fooFuncHandler = fooFuncHandler {
                     fooFuncHandler(val)
                 }
+            }
+        }
+    }
+}
+
+@Fixture enum argumentsHistoryLabels {
+    /// @mockable
+    protocol Foo {
+        func foo(arg0: Int, _ arg1: Double, first throws: String)
+        func bar(_: Int, _: Void, _ _: Void)
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+
+            private(set) var fooCallCount = 0
+            var fooArgValues = [(arg0: Int, arg1: Double, throws: String)]()
+            var fooHandler: ((Int, Double, String) -> ())?
+            func foo(arg0: Int, _ arg1: Double, first throws: String) {
+                fooCallCount += 1
+                fooArgValues.append((arg0, arg1, `throws`))
+                if let fooHandler = fooHandler {
+                    fooHandler(arg0, arg1, `throws`)
+                }
+
+            }
+
+            private(set) var barCallCount = 0
+            var barArgValues = [(_0: Int, _1: Void, _2: Void)]()
+            var barHandler: ((Int, Void, Void) -> ())?
+            func bar(_ _0: Int, _ _1: Void, _ _2: Void) {
+                barCallCount += 1
+                barArgValues.append((_0, _1, _2))
+                if let barHandler = barHandler {
+                    barHandler(_0, _1, _2)
+                }
+
             }
         }
     }

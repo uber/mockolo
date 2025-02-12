@@ -66,4 +66,10 @@ class ArgumentsHistoryTests: MockoloTestCase {
                dstContent: argumentsHistoryStaticCase.expected._source,
                enableFuncArgsHistory: true)
     }
+
+    func testArgumentsHistoryLabels() {
+        verify(srcContent: argumentsHistoryLabels._source,
+               dstContent: argumentsHistoryLabels.expected._source,
+               enableFuncArgsHistory: true)
+    }
 }
