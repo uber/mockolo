@@ -606,21 +606,23 @@ extension GenericParameterSyntax {
 
 extension FunctionParameterSyntax {
     func model(inInit: Bool, declKind: NominalTypeDeclKind, index: Int) -> ParamModel {
-        var label = ""
-        var name = ""
+        let label: String
+        let name: String
         // Get label and name of args
         let first = self.firstName.text
         if let second = self.secondName?.text {
             label = first
-            name = second
-            if name == "_" {
+            if second == "_" {
                 name = "_\(index)"
+            } else {
+                name = second
             }
         } else {
             if first == "_" {
                 label = first
                 name = "_\(index)"
             } else {
+                label = ""
                 name = first
             }
         }
