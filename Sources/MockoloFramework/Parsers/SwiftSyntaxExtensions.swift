@@ -489,7 +489,9 @@ extension SubscriptDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, processed: Bool) -> Model {
         let isStatic = self.modifiers.isStatic
 
-        let params = self.parameterClause.parameters.compactMap { $0.model(inInit: false, declKind: declKind) }
+        let params = self.parameterClause.parameters.enumerated().compactMap {
+            $1.model(inInit: false, declKind: declKind, index: $0)
+        }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
@@ -518,7 +520,9 @@ extension FunctionDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
         let isStatic = self.modifiers.isStatic
 
-        let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: false, declKind: declKind) }
+        let params = self.signature.parameterClause.parameters.enumerated().compactMap {
+            $1.model(inInit: false, declKind: declKind, index: $0)
+        }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
@@ -560,7 +564,9 @@ extension InitializerDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, processed: Bool) -> Model {
         let requiredInit = isRequired(with: declKind)
 
-        let params = self.signature.parameterClause.parameters.compactMap { $0.model(inInit: true, declKind: declKind) }
+        let params = self.signature.parameterClause.parameters.enumerated().compactMap {
+            $1.model(inInit: true, declKind: declKind, index: $0)
+        }
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: true) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
@@ -599,19 +605,24 @@ extension GenericParameterSyntax {
 }
 
 extension FunctionParameterSyntax {
-    func model(inInit: Bool, declKind: NominalTypeDeclKind) -> ParamModel {
-        var label = ""
-        var name = ""
+    func model(inInit: Bool, declKind: NominalTypeDeclKind, index: Int) -> ParamModel {
+        let label: String
+        let name: String
         // Get label and name of args
         let first = self.firstName.text
         if let second = self.secondName?.text {
             label = first
-            name = second
+            if second == "_" {
+                name = "_\(index)"
+            } else {
+                name = second
+            }
         } else {
             if first == "_" {
                 label = first
-                name = first + "arg"
+                name = "_\(index)"
             } else {
+                label = ""
                 name = first
             }
         }

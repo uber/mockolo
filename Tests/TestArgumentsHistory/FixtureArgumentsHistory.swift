@@ -34,7 +34,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [(String, Float)]()
+            var bazFuncArgValues = [(arg: String, default: Float)]()
             var bazFuncHandler: ((String, Float) -> ())?
             func bazFunc(arg: String, default: Float) {
                 bazFuncCallCount += 1
@@ -83,7 +83,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [(String, Float)]()
+            var bazFuncArgValues = [(arg: String, default: Float)]()
             var bazFuncHandler: ((String, Float) -> ())?
             func bazFunc(arg: String, default: Float) {
                 bazFuncCallCount += 1
@@ -159,7 +159,7 @@
             }
 
             private(set) var quuxFuncCallCount = 0
-            var quuxFuncArgValues = [(String, Float)]()
+            var quuxFuncArgValues = [(val1: String, val2: Float)]()
             var quuxFuncHandler: ((String, Float) -> ())?
             func quuxFunc(val1: String, val2: Float) {
                 quuxFuncCallCount += 1
@@ -172,9 +172,6 @@
         }
     }
 }
-
-let argumentsHistorySimpleCaseMock = """
-"""
 
 @Fixture enum argumentsHistoryTupleCase {
     /// @mockable(history: fooFunc = true)
@@ -200,7 +197,7 @@ let argumentsHistorySimpleCaseMock = """
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [((bar1: Int, String), (bar3: Int, bar4: String))]()
+            var barFuncArgValues = [(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))]()
             var barFuncHandler: (((bar1: Int, String), (bar3: Int, bar4: String)) -> ())?
             func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String)) {
                 barFuncCallCount += 1
@@ -289,7 +286,7 @@ let argumentsHistorySimpleCaseMock = """
             init() { }
             
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [(Any, Any?)]()
+            var fooFuncArgValues = [(val1: Any, val2: Any?)]()
             var fooFuncHandler: ((Any, Any?) -> ())?
             func fooFunc<T: StringProtocol>(val1: T, val2: T?) {
                 fooFuncCallCount += 1
@@ -473,6 +470,44 @@ let argumentsHistorySimpleCaseMock = """
                 if let fooFuncHandler = fooFuncHandler {
                     fooFuncHandler(val)
                 }
+            }
+        }
+    }
+}
+
+@Fixture enum argumentsHistoryLabels {
+    /// @mockable
+    protocol Foo {
+        func foo(arg0: Int, _ arg1: Double, first throws: String)
+        func bar(_: Int, _: Void, _ _: Void)
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+
+            private(set) var fooCallCount = 0
+            var fooArgValues = [(arg0: Int, arg1: Double, throws: String)]()
+            var fooHandler: ((Int, Double, String) -> ())?
+            func foo(arg0: Int, _ arg1: Double, first throws: String) {
+                fooCallCount += 1
+                fooArgValues.append((arg0, arg1, `throws`))
+                if let fooHandler = fooHandler {
+                    fooHandler(arg0, arg1, `throws`)
+                }
+
+            }
+
+            private(set) var barCallCount = 0
+            var barArgValues = [(_0: Int, _1: Void, _2: Void)]()
+            var barHandler: ((Int, Void, Void) -> ())?
+            func bar(_ _0: Int, _ _1: Void, _ _2: Void) {
+                barCallCount += 1
+                barArgValues.append((_0, _1, _2))
+                if let barHandler = barHandler {
+                    barHandler(_0, _1, _2)
+                }
+
             }
         }
     }

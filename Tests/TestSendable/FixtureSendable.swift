@@ -37,11 +37,11 @@ public final class SendableProtocolMock: SendableProtocol, @unchecked Sendable {
         return ""
     }
 
-    private let updateArg0State = MockoloMutex(MockoloHandlerState<(Any, AnyObject), @Sendable (Any, AnyObject) async throws -> ()>())
+    private let updateArg0State = MockoloMutex(MockoloHandlerState<(arg0: Any, arg1: AnyObject), @Sendable (Any, AnyObject) async throws -> ()>())
     public var updateArg0CallCount: Int {
         return updateArg0State.withLock(\.callCount)
     }
-    public var updateArg0ArgValues: [(Any, AnyObject)] {
+    public var updateArg0ArgValues: [(arg0: Any, arg1: AnyObject)] {
         return updateArg0State.withLock(\.argValues).map(\.value)
     }
     public var updateArg0Handler: (@Sendable (Any, AnyObject) async throws -> ())? {

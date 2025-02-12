@@ -79,7 +79,7 @@ extension MethodModel {
                 if context.requiresSendable {
                     let paramNamesStr: String?
                     if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
-                        paramNamesStr = argsHistory.capturableParams.map(\.0).joined(separator: ", ")
+                        paramNamesStr = argsHistory.capturableParamLabels.joined(separator: ", ")
                     } else {
                         paramNamesStr = nil
                     }
