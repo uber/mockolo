@@ -37,8 +37,10 @@ final class ArgumentsHistoryModel: Model {
 
         self.capturableParamLabels = capturables.map(\.name.safeName)
 
-        let genericTypeNameList = genericTypeParams.map(\.name)
-        self.capturedValueType = SwiftType.toArgumentsCaptureType(with: capturables.map(\.type), typeParams: genericTypeNameList)
+        self.capturedValueType = SwiftType.toArgumentsCaptureType(
+            with: capturables.map { ($0.name, $0.type) },
+            typeParams: genericTypeParams.map(\.name)
+        )
     }
     
     func enable(force: Bool) -> Bool {

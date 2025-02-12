@@ -34,7 +34,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [(String, Float)]()
+            var bazFuncArgValues = [(arg: String, default: Float)]()
             var bazFuncHandler: ((String, Float) -> ())?
             func bazFunc(arg: String, default: Float) {
                 bazFuncCallCount += 1
@@ -83,7 +83,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [(String, Float)]()
+            var bazFuncArgValues = [(arg: String, default: Float)]()
             var bazFuncHandler: ((String, Float) -> ())?
             func bazFunc(arg: String, default: Float) {
                 bazFuncCallCount += 1
@@ -159,7 +159,7 @@
             }
 
             private(set) var quuxFuncCallCount = 0
-            var quuxFuncArgValues = [(String, Float)]()
+            var quuxFuncArgValues = [(val1: String, val2: Float)]()
             var quuxFuncHandler: ((String, Float) -> ())?
             func quuxFunc(val1: String, val2: Float) {
                 quuxFuncCallCount += 1
@@ -200,7 +200,7 @@ let argumentsHistorySimpleCaseMock = """
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [((bar1: Int, String), (bar3: Int, bar4: String))]()
+            var barFuncArgValues = [(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))]()
             var barFuncHandler: (((bar1: Int, String), (bar3: Int, bar4: String)) -> ())?
             func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String)) {
                 barFuncCallCount += 1
@@ -289,7 +289,7 @@ let argumentsHistorySimpleCaseMock = """
             init() { }
             
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [(Any, Any?)]()
+            var fooFuncArgValues = [(val1: Any, val2: Any?)]()
             var fooFuncHandler: ((Any, Any?) -> ())?
             func fooFunc<T: StringProtocol>(val1: T, val2: T?) {
                 fooFuncCallCount += 1
