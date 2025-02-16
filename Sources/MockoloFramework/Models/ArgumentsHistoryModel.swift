@@ -18,7 +18,7 @@ final class ArgumentsHistoryModel: Model {
     let name: String
     let capturedValueType: SwiftType
     let offset: Int64 = .max
-    let capturableParams: [(String, SwiftType)]
+    let capturableParamLabels: [String]
     let isHistoryAnnotated: Bool
 
     var modelType: ModelType {
@@ -35,10 +35,12 @@ final class ArgumentsHistoryModel: Model {
         self.name = name + .argsHistorySuffix
         self.isHistoryAnnotated = isHistoryAnnotated
 
-        self.capturableParams = capturables.map { ($0.name.safeName, $0.type) }
-        
-        let genericTypeNameList = genericTypeParams.map(\.name)
-        self.capturedValueType = SwiftType.toArgumentsCaptureType(with: capturableParams.map(\.1), typeParams: genericTypeNameList)
+        self.capturableParamLabels = capturables.map(\.name.safeName)
+
+        self.capturedValueType = SwiftType.toArgumentsCaptureType(
+            with: capturables.map { ($0.name, $0.type) },
+            typeParams: genericTypeParams.map(\.name)
+        )
     }
     
     func enable(force: Bool) -> Bool {
@@ -56,11 +58,11 @@ final class ArgumentsHistoryModel: Model {
             return nil
         }
         
-        switch capturableParams.count {
+        switch capturableParamLabels.count {
         case 1:
-            return "\(overloadingResolvedName)\(String.argsHistorySuffix).append(\(capturableParams[0].0))"
+            return "\(overloadingResolvedName)\(String.argsHistorySuffix).append(\(capturableParamLabels[0]))"
         case 2...:
-            let paramNamesStr = capturableParams.map(\.0).joined(separator: ", ")
+            let paramNamesStr = capturableParamLabels.joined(separator: ", ")
             return "\(overloadingResolvedName)\(String.argsHistorySuffix).append((\(paramNamesStr)))"
         default:
             fatalError("paramNames must not be empty.")
