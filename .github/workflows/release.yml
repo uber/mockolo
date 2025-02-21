@@ -50,7 +50,6 @@ jobs:
         destination:
           - { name: "linux-x86_64", os: ubuntu-24.04 }
           - { name: "linux-x86_64", os: ubuntu-22.04 }
-          - { name: "linux-x86_64", os: ubuntu-20.04 }
           - { name: "macos-universal", os: macos-14 }
           - { name: "macos-universal", os: macos-13 }
     steps:
@@ -72,7 +71,6 @@ jobs:
         destination:
           - { name: "linux-aarch64", tag: "ubuntu:24.04" }
           - { name: "linux-aarch64", tag: "ubuntu:22.04" }
-          - { name: "linux-aarch64", tag: "ubuntu:20.04" }
     steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
