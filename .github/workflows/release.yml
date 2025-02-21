@@ -29,7 +29,7 @@ jobs:
       name: Install swift sdk
       run: swift sdk install ${{ env.SWIFT_SDK_URL }} --checksum ${{ env.SWIFT_SDK_CHECKSUM }}
     - if: startsWith(matrix.destination.name, 'macos')
-      run: sudo xcode-select -s /Applications/Xcode_16.app
+      run: sudo xcode-select -s /Applications/Xcode_16.2.app
 
     - uses: actions/checkout@v4
     - name: Create the binary
