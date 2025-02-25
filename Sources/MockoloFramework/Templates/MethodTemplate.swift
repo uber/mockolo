@@ -87,7 +87,7 @@ extension MethodModel {
                         paramNamesStr.map { "\(2.tab)warnIfNotSendable(\($0))" },
                         "\(2.tab)let \(handlerVarName) = \(stateVarName).withLock { state in",
                         "\(3.tab)state.callCount += 1",
-                        paramNamesStr.map { "\(3.tab)state.argValues.append(.init(\($0)))" },
+                        paramNamesStr.map { "\(3.tab)state.argValues.append(.init((\($0))))" },
                         "\(3.tab)return state.handler",
                         "\(2.tab)}",
                         handlerReturn,

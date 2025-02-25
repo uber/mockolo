@@ -1,14 +1,14 @@
-func applyConcurrencyHelpersTemplate() -> String {
-    return #"""
-fileprivate func warnIfNotSendable<each T>(function: String = #function, _: repeat each T) {
+import Foundation
+
+func warnIfNotSendable<each T>(function: String = #function, _: repeat each T) {
     print("At \(function), the captured arguments are not Sendable, it is not concurrency-safe.")
 }
 
-fileprivate func warnIfNotSendable<each T: Sendable>(function: String = #function, _: repeat each T) {
+func warnIfNotSendable<each T: Sendable>(function: String = #function, _: repeat each T) {
 }
 
 /// Will be replaced to `Synchronization.Mutex` in future.
-fileprivate final class MockoloMutex<Value>: @unchecked Sendable {
+final class MockoloMutex<Value>: @unchecked Sendable {
     private let lock = NSLock()
     private var value: Value
     init(_ initialValue: Value) {
@@ -29,17 +29,15 @@ fileprivate final class MockoloMutex<Value>: @unchecked Sendable {
 #endif
 }
 
-fileprivate struct MockoloUnsafeTransfer<Value>: @unchecked Sendable {
+struct MockoloUnsafeTransfer<Value>: @unchecked Sendable {
     var value: Value
     init(_ value: Value) {
         self.value = value
     }
 }
 
-fileprivate struct MockoloHandlerState<Arg, Handler> {
+struct MockoloHandlerState<Arg, Handler> {
     var argValues: [MockoloUnsafeTransfer<Arg>] = []
     var handler: Handler? = nil
     var callCount: Int = 0
-}
-"""#
 }

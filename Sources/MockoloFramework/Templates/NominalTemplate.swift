@@ -257,9 +257,14 @@ extension NominalModel {
         }
 
         if needBlankInit {
-            // In case of protocol mocking, we want to provide a blank init (if not present already) for convenience,
-            // where instance vars do not have to be set in init since they all have get/set (see VariableTemplate).
-            let blankInit = "\(acl)init() { }"
+            let blankInit: String
+            if context.annotatedTypeKind == .class {
+                blankInit = "\(acl)override init() { }"
+            } else {
+                // In case of protocol mocking, we want to provide a blank init (if not present already) for convenience,
+                // where instance vars do not have to be set in init since they all have get/set (see VariableTemplate).
+                blankInit = "\(acl)init() { }"
+            }
             template += "\(1.tab)\(blankInit)\n"
         }
 

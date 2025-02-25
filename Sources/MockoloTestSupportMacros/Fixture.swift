@@ -41,9 +41,11 @@ struct Fixture: MemberMacro {
 extension StringLiteralExprSyntax {
     fileprivate init(multilineContent: String, endIndent: Trivia) {
         self = StringLiteralExprSyntax(
+            openingPounds: .rawStringPoundDelimiter("##"),
             openingQuote: .multilineStringQuoteToken(),
             segments: [.stringSegment(.init(content: .stringSegment(multilineContent)))],
-            closingQuote: .multilineStringQuoteToken(leadingTrivia: endIndent)
+            closingQuote: .multilineStringQuoteToken(leadingTrivia: endIndent),
+            closingPounds: .rawStringPoundDelimiter("##")
         )
     }
 }
