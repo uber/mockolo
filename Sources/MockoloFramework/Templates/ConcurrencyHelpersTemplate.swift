@@ -31,8 +31,8 @@ fileprivate final class MockoloMutex<Value>: @unchecked Sendable {
 
 fileprivate struct MockoloUnsafeTransfer<Value>: @unchecked Sendable {
     var value: Value
-    init<each T>(_ value: repeat each T) where Value == (repeat each T) {
-        self.value = (repeat each value)
+    init(_ value: Value) {
+        self.value = value
     }
 }
 

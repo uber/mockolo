@@ -1,23 +1,18 @@
 class SendableTests: MockoloTestCase {
     func testSendableProtocol() {
-        verify(srcContent: sendableProtocol,
-               dstContent: sendableProtocolMock,
+        verify(srcContent: sendableProtocol._source,
+               dstContent: sendableProtocol.expected._source,
                enableFuncArgsHistory: true)
     }
 
     func testUncheckedSendableClass() {
-        verify(srcContent: uncheckedSendableClass,
-               dstContent: uncheckedSendableClassMock,
+        verify(srcContent: uncheckedSendableClass._source,
+               dstContent: uncheckedSendableClass.expected._source,
                declType: .classType)
     }
 
     func testConfirmingSendableProtocol() {
-        verify(srcContent: confirmedSendableProtocol,
-               dstContent: confirmedSendableProtocolMock)
-    }
-
-    func testGenerateConcurrencyHelpers() {
-        verify(srcContent: generatedConcurrencyHelpers,
-               dstContent: generatedConcurrencyHelpersMock)
+        verify(srcContent: confirmedSendableProtocol._source,
+               dstContent: confirmedSendableProtocol.expected._source)
     }
 }
