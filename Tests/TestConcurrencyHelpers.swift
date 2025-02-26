@@ -56,12 +56,19 @@ typealias MockoloHandlerState = TestConcurrencyHelpers.MockoloHandlerState
 import XCTest
 
 final class TestConcurrencyHelpersTests: MockoloTestCase {
-    func testGeneratedCodeIsSame() {
+    func testIsSameAsGeneratedCode() {
+        let src = """
+        /// @mockable
+        protocol P: Sendable {}
+        """
+
         verify(
-            srcContent: """
-            /// @mockable
-            protocol P: Sendable {}
-            """,
+            srcContent: src,
+            dstContent: "import Foundation"
+        )
+
+        verify(
+            srcContent: src,
             dstContent: TestConcurrencyHelpers._source.split(separator: "\n").map { line in
                 if ["func", "final class", "struct"].contains(where: {
                     line.starts(with: $0)

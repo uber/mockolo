@@ -15,12 +15,4 @@ class SendableTests: MockoloTestCase {
         verify(srcContent: confirmedSendableProtocol._source,
                dstContent: confirmedSendableProtocol.expected._source)
     }
-
-    func testGenerateConcurrencyHelpers() {
-        verify(srcContent: generatedConcurrencyHelpers._source,
-               dstContent: generatedConcurrencyHelpers.expected._source)
-
-        verify(srcContent: generatedConcurrencyHelpers._source,
-               dstContent: "import Foundation")
-    }
 }
