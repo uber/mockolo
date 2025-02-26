@@ -1,6 +1,6 @@
 import Foundation
 
-@Fixture struct TestConcurrencyHelpers {
+@Fixture struct concurrencyHelpers {
     func warnIfNotSendable<each T>(function: String = #function, _: repeat each T) {
         print("At \(function), the captured arguments are not Sendable, it is not concurrency-safe.")
     }
@@ -49,13 +49,13 @@ func warnIfNotSendable<each T>(function: String = #function, _: repeat each T) {
 }
 func warnIfNotSendable<each T: Sendable>(function: String = #function, _: repeat each T) {
 }
-typealias MockoloMutex = TestConcurrencyHelpers.MockoloMutex
-typealias MockoloUnsafeTransfer = TestConcurrencyHelpers.MockoloUnsafeTransfer
-typealias MockoloHandlerState = TestConcurrencyHelpers.MockoloHandlerState
+typealias MockoloMutex = concurrencyHelpers.MockoloMutex
+typealias MockoloUnsafeTransfer = concurrencyHelpers.MockoloUnsafeTransfer
+typealias MockoloHandlerState = concurrencyHelpers.MockoloHandlerState
 
 import XCTest
 
-final class TestConcurrencyHelpersTests: MockoloTestCase {
+final class ConcurrencyHelpersTests: MockoloTestCase {
     func testIsSameAsGeneratedCode() {
         let src = """
         /// @mockable
@@ -69,7 +69,7 @@ final class TestConcurrencyHelpersTests: MockoloTestCase {
 
         verify(
             srcContent: src,
-            dstContent: TestConcurrencyHelpers._source.split(separator: "\n").map { line in
+            dstContent: concurrencyHelpers._source.split(separator: "\n").map { line in
                 if ["func", "final class", "struct"].contains(where: {
                     line.starts(with: $0)
                 }) {
