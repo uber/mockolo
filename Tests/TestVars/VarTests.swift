@@ -21,6 +21,7 @@ class VarTests: MockoloTestCase {
                allowSetCallCount: true)
     }
 
+#if compiler(>=6.0)
     func testAsyncThrows() {
         verify(srcContent: asyncThrowsVars._source,
                dstContent: asyncThrowsVars.expected._source)
@@ -30,4 +31,5 @@ class VarTests: MockoloTestCase {
         verify(srcContent: throwsNeverVars._source,
                dstContent: throwsNeverVars.expected._source)
     }
+#endif
 }
