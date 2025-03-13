@@ -1,13 +1,11 @@
 import MockoloFramework
-import Foundation
 
 @Fixture enum nonSimpleVars {
     enum ModuleX {
-        class SomeType: NSObject {}
+        struct SomeType {}
     }
 
     /// @mockable
-    @objc
     public protocol NonSimpleVars {
         @available(iOS 10.0, *)
         var dict: Dictionary<String, Int> { get set }

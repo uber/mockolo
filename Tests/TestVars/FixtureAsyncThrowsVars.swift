@@ -1,6 +1,7 @@
 import MockoloFramework
 
 @Fixture enum asyncThrowsVars {
+    #if compiler(>=6.0)
     struct MyValue {}
 
     /// @mockable
@@ -11,8 +12,10 @@ import MockoloFramework
         static var getAndAsync: MyValue { get async }
         var getAndAsyncAndThrows: Int { get async throws(any Error) }
     }
+    #endif
 
     @Fixture enum expected {
+        #if compiler(>=6.0)
         public class AsyncThrowsVarsMock: AsyncThrowsVars {
             public init() { }
             public init(getOnly: Int = 0, getAndThrows: MyValue, getAndAsyncAndThrows: Int = 0) {
@@ -47,7 +50,6 @@ import MockoloFramework
                     fatalError("getAndAsyncHandler returns can't have a default value thus its handler must be set")
                 }
             }
-
             public var getAndAsyncAndThrowsHandler: (() async throws(any Error) -> Int)?
             public var getAndAsyncAndThrows: Int {
                 get async throws(any Error) {
@@ -58,17 +60,20 @@ import MockoloFramework
                 }
             }
         }
-
+        #endif
     }
 }
 
 @Fixture enum throwsNeverVars {
+    #if compiler(>=6.0)
     /// @mockable
     protocol P {
         var foo: Int { get throws(Never) }
     }
+    #endif
 
     @Fixture enum expected {
+        #if compiler(>=6.0)
         class PMock: P {
             init() { }
             init(foo: Int = 0) {
@@ -86,5 +91,6 @@ import MockoloFramework
                 }
             }
         }
+        #endif
     }
 }
