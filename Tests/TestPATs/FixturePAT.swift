@@ -1,162 +1,165 @@
 import MockoloFramework
 
-let patNameCollision = """
-/// @mockable
-protocol Foo {
-associatedtype T
-}
+@Fixture enum patNameCollision {
+    /// @mockable
+    protocol Foo {
+        associatedtype T
+    }
 
-/// @mockable
-protocol Bar {
-associatedtype T: String
-}
+    /// @mockable
+    protocol Bar {
+        associatedtype T: StringProtocol
+    }
 
-/// @mockable(typealias: T = Hashable & Codable)
-protocol Cat {
-associatedtype T
-}
+    /// @mockable(typealias: T = Hashable & Codable)
+    protocol Cat {
+        associatedtype T
+    }
 
-/// @mockable
-protocol Baz: Foo, Bar, Cat {
-}
-"""
+    /// @mockable
+    protocol Baz: Foo, Bar {
+    }
 
-let patNameCollisionMock = """
-class FooMock: Foo {
-    init() { }
-    typealias T = Any
-}
+    protocol Animal {
+        associatedtype T: Identifiable & Sendable where T.ID == String
+    }
 
-class BarMock: Bar {
-    init() { }
-    typealias T = String
-}
+    /// @mockable
+    protocol Dog: Bar, Animal {
+    }
 
-class CatMock: Cat {
-    init() { }
-    typealias T = Hashable & Codable
-}
-
-class BazMock: Baz {
-    typealias T = Any & Hashable & Codable & String
-    
-    init() { }
-}
-"""
-
-let simplePat =
-"""
-/// @mockable(typealias: T = String)
-public protocol FooBar: Foo {
-    associatedtype T
-}
-"""
-let parentPatMock =
-"""
-public class FooMock: Foo {
-    public init() { }
-
-    public typealias T = String
-}
-"""
-let patWithParentMock =
-"""
-public class FooBarMock: FooBar {
-    public init() { }
-
-    public typealias T = String
-}
-"""
-
-
-let patOverride = """
-/// @mockable(typealias: T = Any; U = Bar; R = (String, Int); S = AnyObject)
-protocol Foo {
-    associatedtype T
-    associatedtype U: Collection where U.Element == T
-    associatedtype R where Self.T == Hashable
-    associatedtype S: ExpressibleByNilLiteral
-    func update(x: T, y: U) -> (U, R)
-}
-"""
-
-let patOverrideMock = """
-class FooMock: Foo {
-    init() { }
-
-    typealias T = Any
-    typealias U = Bar
-    typealias R = (String, Int)
-    typealias S = AnyObject
-
-    private(set) var updateCallCount = 0
-    var updateHandler: ((T, U) -> (U, R))?
-    func update(x: T, y: U) -> (U, R) {
-        updateCallCount += 1
-        if let updateHandler = updateHandler {
-            return updateHandler(x, y)
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            typealias T = Any
         }
-        fatalError("updateHandler returns can't have a default value thus its handler must be set")
+
+        class BarMock<T: StringProtocol>: Bar {
+            init() { }
+        }
+
+        class CatMock: Cat {
+            init() { }
+            typealias T = Hashable & Codable
+        }
+
+        class BazMock<T>: Baz where T: StringProtocol {
+            init() { }
+        }
+
+        class DogMock<T>: Dog where T: StringProtocol, T: Identifiable & Sendable, T.ID == String {
+            init() {}
+        }
     }
 }
 
-"""
+@Fixture enum simplePat {
+    protocol Foo {}
 
-let protocolWithTypealias = """
-/// @mockable
-public protocol SomeType {
-    typealias Key = String
-    var key: Key { get }
-}
-"""
-
-let protocolWithTypealiasMock = """
-public class SomeTypeMock: SomeType {
-    public init() { }
-    public init(key: Key) {
-        self._key = key
+    /// @mockable(typealias: T = String)
+    public protocol FooBar: Foo {
+        associatedtype T
     }
-    public typealias Key = String
-    
-    private var _key: Key!
-    public var key: Key {
-        get { return _key }
-        set { _key = newValue }
+
+    @Fixture enum parent {
+        public class FooMock: Foo {
+            public init() { }
+
+            public typealias T = String
+        }
+    }
+
+    @Fixture enum expected {
+        public class FooBarMock: FooBar {
+            public init() { }
+
+            public typealias T = String
+        }
     }
 }
 
-"""
+@Fixture enum patOverride {
+    /// @mockable(typealias: T = Any; U = Bar; R = (String, Int); S = AnyObject)
+    protocol Foo {
+        associatedtype T
+        associatedtype U
+        associatedtype R
+        associatedtype S
+    }
 
-let patDefaultType = """
-/// @mockable
-protocol Foo {
-    associatedtype T
-    associatedtype U: Collection where U.Element == T
+    typealias Bar = ()
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+
+            typealias T = Any
+            typealias U = Bar
+            typealias R = (String, Int)
+            typealias S = AnyObject
+        }
+    }
 }
-"""
 
-let patDefaultTypeMock = """
-class FooMock: Foo {
-    init() { }
+@Fixture enum protocolWithTypealias {
+    /// @mockable
+    public protocol SomeType {
+        typealias Key = String
+        var key: Key { get }
+    }
 
-    typealias T = Any
-    typealias U = Collection where U.Element == T
+    @Fixture enum expected {
+        public class SomeTypeMock: SomeType {
+            public init() { }
+            public init(key: Key) {
+                self._key = key
+            }
+            public typealias Key = String
+
+            private var _key: Key!
+            public var key: Key {
+                get { return _key }
+                set { _key = newValue }
+            }
+        }
+    }
 }
-"""
 
-let patPartialOverride = """
-/// @mockable(typealias: U = AnyObject)
-protocol Foo {
-    associatedtype T
-    associatedtype U: Collection where U.Element == T
+@Fixture enum patDefaultType {
+    struct MyID: Identifiable {
+        var id: Int
+    }
+
+    /// @mockable
+    protocol Foo {
+        associatedtype T
+        associatedtype U = String
+        associatedtype S: Identifiable = MyID where S.ID == Int
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+
+            typealias T = Any
+            typealias U = String
+            typealias S = MyID
+        }
+    }
 }
-"""
 
+@Fixture enum patPartialOverride {
+    /// @mockable(typealias: U = [Any])
+    protocol Foo {
+        associatedtype T
+        associatedtype U: Collection where U.Element == T
+    }
 
-let patPartialOverrideMock = """
-class FooMock: Foo {
-    init() { }
-    typealias T = Any
-    typealias U = AnyObject
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            typealias T = Any
+            typealias U = [Any]
+        }
+    }
 }
-"""
