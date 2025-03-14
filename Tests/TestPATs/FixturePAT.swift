@@ -1,58 +1,5 @@
 import MockoloFramework
 
-@Fixture enum patNameCollision {
-    /// @mockable
-    protocol Foo {
-        associatedtype T
-    }
-
-    /// @mockable
-    protocol Bar {
-        associatedtype T: StringProtocol
-    }
-
-    /// @mockable(typealias: T = Hashable & Codable)
-    protocol Cat {
-        associatedtype T
-    }
-
-    /// @mockable
-    protocol Baz: Foo, Bar {
-    }
-
-    protocol Animal {
-        associatedtype T: Identifiable & Sendable where T.ID == String
-    }
-
-    /// @mockable
-    protocol Dog: Bar, Animal {
-    }
-
-    @Fixture enum expected {
-        class FooMock: Foo {
-            init() { }
-            typealias T = Any
-        }
-
-        class BarMock<T: StringProtocol>: Bar {
-            init() { }
-        }
-
-        class CatMock: Cat {
-            init() { }
-            typealias T = Hashable & Codable
-        }
-
-        class BazMock<T>: Baz where T: StringProtocol {
-            init() { }
-        }
-
-        class DogMock<T>: Dog where T: StringProtocol, T: Identifiable & Sendable, T.ID == String {
-            init() {}
-        }
-    }
-}
-
 @Fixture enum simplePat {
     protocol Foo {}
 
@@ -79,7 +26,7 @@ import MockoloFramework
 }
 
 @Fixture enum patOverride {
-    /// @mockable(typealias: T = Any; U = Bar; R = (String, Int); S = AnyObject)
+    /// @mockable(typealias: T = Any; U = Hashable & Codable; R = (String, Int); S = AnyObject)
     protocol Foo {
         associatedtype T
         associatedtype U
@@ -87,16 +34,30 @@ import MockoloFramework
         associatedtype S
     }
 
-    typealias Bar = ()
-
     @Fixture enum expected {
         class FooMock: Foo {
             init() { }
 
             typealias T = Any
-            typealias U = Bar
+            typealias U = Hashable & Codable
             typealias R = (String, Int)
             typealias S = AnyObject
+        }
+    }
+}
+
+@Fixture enum patPartialOverride {
+    /// @mockable(typealias: U = [Any])
+    protocol Foo {
+        associatedtype T
+        associatedtype U: Collection where U.Element == T
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            typealias T = Any
+            typealias U = [Any]
         }
     }
 }
@@ -148,18 +109,65 @@ import MockoloFramework
     }
 }
 
-@Fixture enum patPartialOverride {
-    /// @mockable(typealias: U = [Any])
+@Fixture enum patWithConstraints {
+    /// @mockable
     protocol Foo {
-        associatedtype T
-        associatedtype U: Collection where U.Element == T
+        associatedtype T: StringProtocol
+    }
+
+    /// @mockable(typealias: T = String)
+    protocol Bar {
+        associatedtype T: StringProtocol
     }
 
     @Fixture enum expected {
-        class FooMock: Foo {
+        class FooMock<T: StringProtocol>: Foo {
             init() { }
-            typealias T = Any
-            typealias U = [Any]
+        }
+
+        class BarMock: Bar {
+            init() { }
+            typealias T = String
+        }
+    }
+}
+
+@Fixture enum patNameCollision {
+    protocol Foo {
+        associatedtype T
+    }
+
+    protocol Bar {
+        associatedtype T: StringProtocol
+    }
+
+    /// @mockable
+    protocol Baz: Foo, Bar {
+    }
+
+    protocol Animal {
+        associatedtype T: Identifiable & Sendable where T.ID == String
+    }
+
+    /// @mockable
+    protocol Dog: Bar, Animal {
+    }
+
+    /// @mockable
+    protocol Cat: Bar where T: Identifiable & Sendable, T.ID == String {
+    }
+
+    @Fixture enum expected {
+        class BazMock<T>: Baz where T: StringProtocol {
+            init() { }
+        }
+
+        class DogMock<T>: Dog where T: StringProtocol, T: Identifiable & Sendable, T.ID == String {
+            init() {}
+        }
+
+        class CatMock<T>: Cat where T: StringProtocol, T: Identifiable & Sendable, T.ID == String {
+            init() {}
         }
     }
 }
