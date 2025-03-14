@@ -25,6 +25,7 @@ public enum ModelType {
     case nominal
     case argumentsHistory
     case closure
+    case associatedType
 }
 
 enum NominalTypeDeclKind: String {

@@ -111,23 +111,23 @@ import MockoloFramework
 
 @Fixture enum patWithConstraints {
     /// @mockable
-    protocol Foo {
+    public protocol Foo {
         associatedtype T: StringProtocol
     }
 
     /// @mockable(typealias: T = String)
-    protocol Bar {
+    public protocol Bar {
         associatedtype T: StringProtocol
     }
 
     @Fixture enum expected {
-        class FooMock<T: StringProtocol>: Foo {
+        public class FooMock<T: StringProtocol>: Foo {
             init() { }
         }
 
-        class BarMock: Bar {
+        public class BarMock: Bar {
             init() { }
-            typealias T = String
+            public typealias T = String
         }
     }
 }
