@@ -651,7 +651,7 @@ extension AssociatedTypeDeclSyntax {
         t.append(self.genericWhereClause?.description ?? "")
 
         return AssociatedTypeModel(name: self.name.text,
-                                   typeName: t,
+                                   defaultTypeName: t,
                                    acl: acl,
                                    overrideTypes: overrides,
                                    offset: self.offset,

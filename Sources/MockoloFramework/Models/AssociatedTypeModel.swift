@@ -18,7 +18,7 @@ import Foundation
 
 final class AssociatedTypeModel: Model {
     let name: String
-    let type: SwiftType
+    let defaultType: SwiftType?
     let offset: Int64
     let length: Int64
     let accessLevel: String
@@ -28,22 +28,26 @@ final class AssociatedTypeModel: Model {
         return .associatedType
     }
 
-    init(name: String, typeName: String, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64) {
+    init(name: String, defaultTypeName: String?, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64) {
         self.name = name
         self.accessLevel = acl ?? ""
         self.offset = offset
         self.length = length
         self.overrideTypes = overrideTypes
         // If there's an override typealias value, set it to type
-        if let val = overrideTypes?[self.name] {
-            self.type  = SwiftType(val)
+        self.defaultType = if let val = overrideTypes?[self.name] {
+            SwiftType(val)
         } else {
-            self.type = typeName.isEmpty ? SwiftType(String.anyType) : SwiftType(typeName)
+            if let defaultTypeName {
+                defaultTypeName.isEmpty ? SwiftType(String.anyType) : SwiftType(defaultTypeName)
+            } else {
+                nil
+            }
         }
     }
 
     var fullName: String {
-        return self.name + self.type.displayName
+        return self.name + (self.defaultType?.displayName ?? "")
     }
 
     func name(by level: Int) -> String {
@@ -54,11 +58,15 @@ final class AssociatedTypeModel: Model {
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
+        guard let defaultType else {
+            return nil
+        }
+
         var aclStr = accessLevel
         if !aclStr.isEmpty {
             aclStr = aclStr + " "
         }
 
-        return "\(1.tab)\(aclStr)\(String.typealias) \(name) = \(type.typeName)"
+        return "\(1.tab)\(aclStr)\(String.typealias) \(name) = \(defaultType.typeName)"
     }
 }
