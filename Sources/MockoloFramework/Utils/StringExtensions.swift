@@ -135,6 +135,10 @@ extension String {
         return "\(self) "
     }
 
+    var withDot: String {
+        return "\(self)."
+    }
+
     var withLeftAngleBracket: String {
         return "\(self)<"
     }

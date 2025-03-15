@@ -65,12 +65,7 @@ extension NominalModel {
                 return  "\(1.tab)\(addAcl)\(String.typealias) \(arg.key) = \(joinedType)"
             }.joined(separator: "\n")
         }
-        
-        var moduleDot = ""
-        if let moduleName = metadata?.module, !moduleName.isEmpty {
-            moduleDot = moduleName + "."
-        }
-        
+
         let extraInits = extraInitsIfNeeded(
             initParamCandidates: initParamCandidates,
             declaredInits: declaredInits,
@@ -103,7 +98,7 @@ extension NominalModel {
         let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(inheritedTypeName)\(uncheckedSendableStr) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(inheritedTypeName)\(uncheckedSendableStr) {
         \(body)
         }
         """
