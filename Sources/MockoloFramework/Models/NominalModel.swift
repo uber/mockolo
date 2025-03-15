@@ -68,7 +68,6 @@ final class NominalModel: Model {
             name: name,
             accessLevel: accessLevel,
             attribute: attribute,
-            metadata: context.metadata,
             arguments: arguments,
             initParamCandidates: initParamCandidates,
             declaredInits: declaredInits,

@@ -20,7 +20,6 @@ extension NominalModel {
     func applyNominalTemplate(name: String,
                               accessLevel: String,
                               attribute: String,
-                              metadata: AnnotationMetadata?,
                               arguments: GenerationArguments,
                               initParamCandidates: [VariableModel],
                               declaredInits: [MethodModel],
@@ -71,7 +70,6 @@ extension NominalModel {
             declaredInits: declaredInits,
             acl: acl,
             declKindOfMockAnnotatedBaseType: declKindOfMockAnnotatedBaseType,
-            overrides: metadata?.varTypes,
             context: .init(
                 enclosingType: type,
                 annotatedTypeKind: declKindOfMockAnnotatedBaseType,
@@ -119,7 +117,6 @@ extension NominalModel {
         declaredInits: [MethodModel],
         acl: String,
         declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
-        overrides: [String: String]?,
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String {
@@ -159,7 +156,7 @@ extension NominalModel {
             var paramsAssign = ""
             let params = initParamCandidates
                 .map { (element: VariableModel) -> String in
-                    if let val = element.type.defaultVal(with: overrides, overrideKey: element.name, isInitParam: true) {
+                    if let val = element.type.defaultVal(with: element.rxTypes, overrideKey: element.name, isInitParam: true) {
                         return "\(element.name): \(element.type.typeName) = \(val)"
                     }
                     var prefix = ""
