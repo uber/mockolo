@@ -24,7 +24,7 @@ func renderTemplates(entities: [ResolvedEntity],
     scan(entities) { (resolvedEntity, lock) in
         let mockModel = resolvedEntity.model()
         if let mockString = mockModel.render(
-            context: .init(),
+            context: .init(metadata: resolvedEntity.entity.metadata),
             arguments: arguments
         ), !mockString.isEmpty {
             lock?.lock()

@@ -18,7 +18,6 @@ import Foundation
 
 extension NominalModel {
     func applyNominalTemplate(name: String,
-                              identifier: String,
                               accessLevel: String,
                               attribute: String,
                               metadata: AnnotationMetadata?,
@@ -104,7 +103,7 @@ extension NominalModel {
         let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(identifier)\(uncheckedSendableStr) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(inheritedTypeName)\(uncheckedSendableStr) {
         \(body)
         }
         """

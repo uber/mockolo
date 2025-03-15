@@ -15,18 +15,17 @@
 //
 
 final class NominalModel: Model {
-    let namespaces: [String]
     let name: String
+    let namespaces: [String]
     let offset: Int64
+    let inheritedTypeName: String
     let type: SwiftType
     let attribute: String
     let accessLevel: String
-    let identifier: String
     let declKindOfMockAnnotatedBaseType: NominalTypeDeclKind
     let entities: [(String, Model)]
     let initParamCandidates: [VariableModel]
     let declaredInits: [MethodModel]
-    let metadata: AnnotationMetadata?
     let declKind: NominalTypeDeclKind
     let requiresSendable: Bool
 
@@ -34,20 +33,19 @@ final class NominalModel: Model {
         return .nominal
     }
     
-    init(identifier: String,
+    init(name: String,
          namespaces: [String],
          acl: String,
          declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
          declKind: NominalTypeDeclKind,
          attributes: [String],
          offset: Int64,
-         metadata: AnnotationMetadata?,
+         inheritedTypeName: String,
          initParamCandidates: [VariableModel],
          declaredInits: [MethodModel],
          entities: [(String, Model)],
          requiresSendable: Bool) {
-        self.identifier = identifier
-        self.name = metadata?.nameOverride ?? (identifier + "Mock")
+        self.name = name
         self.type = SwiftType(self.name)
         self.namespaces = namespaces
         self.declKindOfMockAnnotatedBaseType = declKindOfMockAnnotatedBaseType
@@ -55,8 +53,8 @@ final class NominalModel: Model {
         self.entities = entities
         self.declaredInits = declaredInits
         self.initParamCandidates = initParamCandidates
-        self.metadata = metadata
         self.offset = offset
+        self.inheritedTypeName = inheritedTypeName
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessLevel = acl
         self.requiresSendable = requiresSendable
@@ -68,10 +66,9 @@ final class NominalModel: Model {
     ) -> String? {
         return applyNominalTemplate(
             name: name,
-            identifier: self.identifier,
             accessLevel: accessLevel,
             attribute: attribute,
-            metadata: metadata,
+            metadata: context.metadata,
             arguments: arguments,
             initParamCandidates: initParamCandidates,
             declaredInits: declaredInits,

@@ -64,14 +64,14 @@ struct ResolvedEntity {
     }
 
     func model() -> Model {
-        return NominalModel(identifier: key,
+        return NominalModel(name: entity.metadata?.nameOverride ?? (key + "Mock"),
                             namespaces: entity.entityNode.namespaces,
                             acl: entity.entityNode.accessLevel,
                             declKindOfMockAnnotatedBaseType: entity.entityNode.declKind,
                             declKind: inheritsActorProtocol ? .actor : .class,
                             attributes: attributes,
                             offset: entity.entityNode.offset,
-                            metadata: entity.metadata,
+                            inheritedTypeName: key,
                             initParamCandidates: initParamCandidates,
                             declaredInits: declaredInits,
                             entities: uniqueModels,
