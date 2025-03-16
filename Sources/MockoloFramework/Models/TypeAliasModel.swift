@@ -25,27 +25,20 @@ final class TypeAliasModel: Model {
     let processed: Bool
     let useDescription: Bool
     let modelDescription: String?
-    let overrideTypes: [String: String]?
 
     var modelType: ModelType {
         return .typeAlias
     }
 
-    init(name: String, typeName: String, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
+    init(name: String, typeName: String, acl: String?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
         self.name = name
         self.accessLevel = acl ?? ""
         self.offset = offset
         self.length = length
         self.processed = processed
         self.modelDescription = modelDescription
-        self.overrideTypes = overrideTypes
         self.useDescription = useDescription
-        // If there's an override typealias value, set it to type
-        if let val = overrideTypes?[self.name] {
-            self.type  = SwiftType(val)
-        } else {
-            self.type = typeName.isEmpty ? SwiftType(String.anyType) : SwiftType(typeName)
-        }
+        self.type  = SwiftType(typeName)
     }
 
     var fullName: String {

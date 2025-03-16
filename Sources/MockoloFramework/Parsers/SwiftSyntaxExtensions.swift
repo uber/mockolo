@@ -646,6 +646,18 @@ extension FunctionParameterSyntax {
 
 extension AssociatedTypeDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?) -> Model {
+        if let overrideType = overrides?[self.name.text] {
+            return TypeAliasModel(
+                name: self.name.text,
+                typeName: overrideType,
+                acl: acl,
+                offset: self.offset,
+                length: self.length,
+                modelDescription: nil,
+                processed: false
+            )
+        }
+
         // Get the inhertied type for an associated type if any
         var t = self.inheritanceClause?.typesDescription ?? ""
         t.append(self.genericWhereClause?.description ?? "")
@@ -662,9 +674,8 @@ extension AssociatedTypeDeclSyntax {
 extension TypeAliasDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?, processed: Bool) -> Model {
         return TypeAliasModel(name: self.name.text,
-                              typeName: self.initializer.value.description,
+                              typeName: overrides?[self.name.text] ?? self.initializer.value.description,
                               acl: acl,
-                              overrideTypes: overrides,
                               offset: self.offset,
                               length: self.length,
                               modelDescription: self.description,
