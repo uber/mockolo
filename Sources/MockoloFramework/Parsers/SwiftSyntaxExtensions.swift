@@ -117,10 +117,6 @@ extension InheritanceClauseSyntax {
         }
         return []
     }
-
-    var typesDescription: String {
-        return self.inheritedTypes.description
-    }
 }
 
 extension MemberBlockItemSyntax {
@@ -659,7 +655,7 @@ extension AssociatedTypeDeclSyntax {
         }
 
         return AssociatedTypeModel(name: self.name.text,
-                                   inheritance: self.inheritanceClause?.typesDescription,
+                                   inheritance: self.inheritanceClause?.inheritedTypes.trimmedDescription,
                                    defaultTypeName: self.initializer?.value.trimmedDescription,
                                    whereConditions: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,
