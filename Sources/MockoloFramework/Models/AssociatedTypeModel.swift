@@ -14,40 +14,42 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 final class AssociatedTypeModel: Model {
     let name: String
+    let inheritance: String?
     let defaultType: SwiftType?
+    let whereConditions: [String]
     let offset: Int64
     let length: Int64
     let accessLevel: String
-    let overrideTypes: [String: String]?
 
     var modelType: ModelType {
         return .associatedType
     }
 
-    init(name: String, defaultTypeName: String?, acl: String?, overrideTypes: [String: String]?, offset: Int64, length: Int64) {
+    init(
+        name: String,
+        inheritance: String?,
+        defaultTypeName: String?,
+        whereConditions: [String],
+        acl: String?,
+        offset: Int64,
+        length: Int64
+    ) {
         self.name = name
-        self.accessLevel = acl ?? ""
+        self.inheritance = inheritance
+        self.defaultType = defaultTypeName.map { SwiftType($0) }
+        self.whereConditions = whereConditions
         self.offset = offset
         self.length = length
-        self.overrideTypes = overrideTypes
-        // If there's an override typealias value, set it to type
-        self.defaultType = if let val = overrideTypes?[self.name] {
-            SwiftType(val)
-        } else {
-            if let defaultTypeName {
-                defaultTypeName.isEmpty ? SwiftType(String.anyType) : SwiftType(defaultTypeName)
-            } else {
-                nil
-            }
-        }
+        self.accessLevel = acl ?? ""
     }
 
     var fullName: String {
-        return self.name + (self.defaultType?.displayName ?? "")
+        return self.name
+        + (self.inheritance ?? "")
+        + (self.defaultType?.displayName ?? "")
+        + self.whereConditions.joined()
     }
 
     func name(by level: Int) -> String {
@@ -58,9 +60,7 @@ final class AssociatedTypeModel: Model {
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
-        guard let defaultType else {
-            return nil
-        }
+        let defaultType = self.defaultType ?? SwiftType(.anyType)
 
         var aclStr = accessLevel
         if !aclStr.isEmpty {

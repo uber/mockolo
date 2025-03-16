@@ -658,14 +658,11 @@ extension AssociatedTypeDeclSyntax {
             )
         }
 
-        // Get the inhertied type for an associated type if any
-        var t = self.inheritanceClause?.typesDescription ?? ""
-        t.append(self.genericWhereClause?.description ?? "")
-
         return AssociatedTypeModel(name: self.name.text,
-                                   defaultTypeName: t,
+                                   inheritance: self.inheritanceClause?.typesDescription,
+                                   defaultTypeName: self.initializer?.value.trimmedDescription,
+                                   whereConditions: self.genericWhereClause?.requirements.map(\.trimmedDescription) ?? [],
                                    acl: acl,
-                                   overrideTypes: overrides,
                                    offset: self.offset,
                                    length: self.length)
     }

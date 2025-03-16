@@ -95,7 +95,7 @@ import MockoloFramework
     protocol Foo {
         associatedtype T
         associatedtype U = String
-        associatedtype S: Identifiable = MyID where S.ID == Int
+        associatedtype S: Identifiable, Sendable = MyID where S.ID == Int
     }
 
     @Fixture enum expected {
