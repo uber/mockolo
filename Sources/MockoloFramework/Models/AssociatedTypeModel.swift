@@ -56,17 +56,35 @@ final class AssociatedTypeModel: Model {
         return fullName
     }
 
+    var hasCondition: Bool {
+        inheritance != nil || !whereConditions.isEmpty
+    }
+
+    var hasDefaultType: Bool {
+        defaultType != nil || !hasCondition
+    }
+
     func render(
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
-        let defaultType = self.defaultType ?? SwiftType(.anyType)
-
-        var aclStr = accessLevel
-        if !aclStr.isEmpty {
-            aclStr = aclStr + " "
+        if let defaultType {
+            return renderTypealias(typeName: defaultType.typeName)
         }
 
-        return "\(1.tab)\(aclStr)\(String.typealias) \(name) = \(defaultType.typeName)"
+        if hasCondition {
+            return nil
+        } else {
+            return renderTypealias(typeName: .anyType)
+        }
+
+        func renderTypealias(typeName: String) -> String {
+            var aclStr = accessLevel
+            if !aclStr.isEmpty {
+                aclStr = aclStr + " "
+            }
+
+            return "\(1.tab)\(aclStr)\(String.typealias) \(name) = \(typeName)"
+        }
     }
 }

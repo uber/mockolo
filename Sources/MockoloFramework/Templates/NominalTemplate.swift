@@ -41,7 +41,8 @@ extension NominalModel {
                 if model.modelType == .method, let model = model as? MethodModel, model.isInitializer, !model.processed {
                     return nil
                 }
-                if let ret = model.render(
+
+                return model.render(
                     context: .init(
                         overloadingResolvedName: uniqueId,
                         enclosingType: type,
@@ -49,10 +50,7 @@ extension NominalModel {
                         requiresSendable: requiresSendable
                     ),
                     arguments: arguments
-                ) {
-                    return ret
-                }
-                return nil
+                )
             }
             .joined(separator: "\n")
         
@@ -64,6 +62,10 @@ extension NominalModel {
                 return  "\(1.tab)\(addAcl)\(String.typealias) \(arg.key) = \(joinedType)"
             }.joined(separator: "\n")
         }
+
+        let (typeparameters, whereClauses) = typeArguments(
+            associatedTypes: entities.compactMap { $1 as? AssociatedTypeModel }
+        )
 
         let extraInits = extraInitsIfNeeded(
             initParamCandidates: initParamCandidates,
@@ -96,7 +98,7 @@ extension NominalModel {
         let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(inheritedTypeName)\(uncheckedSendableStr) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name)\(typeparameters): \(inheritedTypeName)\(uncheckedSendableStr) \(whereClauses){
         \(body)
         }
         """
@@ -111,7 +113,32 @@ extension NominalModel {
             """
         }
     }
-    
+
+    private func typeArguments(
+        associatedTypes: [AssociatedTypeModel]
+    ) -> (typeparameters: String, whereClauses: String) {
+
+        var typeparameters: [String] = [], whereClauses: [String] = []
+
+        let parameterMap: [String: [AssociatedTypeModel]] = .init(grouping: associatedTypes, by: \.name)
+        for (name, models) in parameterMap.sorted(path: \.key) {
+            let models = models.sorted(path: \.offset, fallback: \.fullName)
+            let inheritances = models.compactMap(\.inheritance)
+
+            if inheritances.isEmpty {
+                typeparameters.append(name)
+            } else {
+                typeparameters.append("\(name): \(inheritances.joined(separator: ", "))")
+            }
+            whereClauses.append(contentsOf: models.flatMap(\.whereConditions))
+        }
+
+        return (
+            typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
+            whereClauses.isEmpty ? "" : "where \(whereClauses.joined(separator: ", ")) "
+        )
+    }
+
     private func extraInitsIfNeeded(
         initParamCandidates: [VariableModel],
         declaredInits: [MethodModel],
