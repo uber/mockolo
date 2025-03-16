@@ -112,21 +112,21 @@ import MockoloFramework
 @Fixture enum patWithConditions {
     /// @mockable
     public protocol Foo {
-        associatedtype T: StringProtocol
+        associatedtype T: StringProtocol, Sendable
     }
 
     /// @mockable(typealias: T = String)
     public protocol Bar {
-        associatedtype T: StringProtocol
+        associatedtype T: StringProtocol, Sendable
     }
 
     /// @mockable
     public protocol Baz {
-        associatedtype T where T: StringProtocol
+        associatedtype T where T: StringProtocol, T: Sendable
     }
 
     @Fixture enum expected {
-        public class FooMock<T: StringProtocol>: Foo {
+        public class FooMock<T: StringProtocol, Sendable>: Foo {
             public init() { }
         }
 
@@ -135,7 +135,7 @@ import MockoloFramework
             public typealias T = String
         }
 
-        public class BazMock<T>: Baz where T: StringProtocol {
+        public class BazMock<T>: Baz where T: StringProtocol, T: Sendable {
             public init() { }
         }
     }

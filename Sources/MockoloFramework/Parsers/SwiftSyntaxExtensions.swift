@@ -661,7 +661,7 @@ extension AssociatedTypeDeclSyntax {
         return AssociatedTypeModel(name: self.name.text,
                                    inheritance: self.inheritanceClause?.typesDescription,
                                    defaultTypeName: self.initializer?.value.trimmedDescription,
-                                   whereConditions: self.genericWhereClause?.requirements.map(\.trimmedDescription) ?? [],
+                                   whereConditions: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,
                                    offset: self.offset,
                                    length: self.length)
