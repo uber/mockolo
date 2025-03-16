@@ -655,7 +655,7 @@ extension AssociatedTypeDeclSyntax {
         }
 
         return AssociatedTypeModel(name: self.name.text,
-                                   inheritance: self.inheritanceClause?.inheritedTypes.trimmedDescription,
+                                   inheritances: self.inheritanceClause?.inheritedTypes.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    defaultTypeName: self.initializer?.value.trimmedDescription,
                                    whereConditions: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,

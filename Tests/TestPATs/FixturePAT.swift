@@ -126,7 +126,7 @@ import MockoloFramework
     }
 
     @Fixture enum expected {
-        public class FooMock<T: StringProtocol, Sendable>: Foo {
+        public class FooMock<T: StringProtocol & Sendable>: Foo {
             public init() { }
         }
 
@@ -171,7 +171,7 @@ import MockoloFramework
             init() { }
         }
 
-        class DogMock<T>: Dog where T: StringProtocol, T: Identifiable & Sendable, T.ID == String {
+        class DogMock<T: StringProtocol & Identifiable & Sendable>: Dog where T.ID == String {
             init() {}
         }
 

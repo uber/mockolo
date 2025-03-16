@@ -121,17 +121,17 @@ extension NominalModel {
         var typeparameters: [String] = [], whereClauses: [String] = []
 
         let parameterMap: [String: [AssociatedTypeModel]] = .init(
-            grouping: associatedTypes.filter { !$0.hasDefaultType },
+            grouping: associatedTypes.filter { $0.defaultType == nil && $0.hasCondition },
             by: \.name
         )
         for (name, models) in parameterMap.sorted(path: \.key) {
             let models = models.sorted(path: \.offset, fallback: \.fullName)
-            let inheritances = models.compactMap(\.inheritance)
+            let inheritances = models.flatMap(\.inheritances)
 
             if inheritances.isEmpty {
                 typeparameters.append(name)
             } else {
-                typeparameters.append("\(name): \(inheritances.joined(separator: ", "))")
+                typeparameters.append("\(name): \(inheritances.joined(separator: " & "))")
             }
             whereClauses.append(contentsOf: models.flatMap(\.whereConditions))
         }

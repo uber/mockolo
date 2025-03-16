@@ -16,7 +16,7 @@
 
 final class AssociatedTypeModel: Model {
     let name: String
-    let inheritance: String?
+    let inheritances: [String]
     let defaultType: SwiftType?
     let whereConditions: [String]
     let offset: Int64
@@ -29,7 +29,7 @@ final class AssociatedTypeModel: Model {
 
     init(
         name: String,
-        inheritance: String?,
+        inheritances: [String],
         defaultTypeName: String?,
         whereConditions: [String],
         acl: String?,
@@ -37,7 +37,7 @@ final class AssociatedTypeModel: Model {
         length: Int64
     ) {
         self.name = name
-        self.inheritance = inheritance
+        self.inheritances = inheritances
         self.defaultType = defaultTypeName.map { SwiftType($0) }
         self.whereConditions = whereConditions
         self.offset = offset
@@ -47,7 +47,7 @@ final class AssociatedTypeModel: Model {
 
     var fullName: String {
         return self.name
-        + (self.inheritance ?? "")
+        + self.inheritances.joined()
         + (self.defaultType?.displayName ?? "")
         + self.whereConditions.joined()
     }
@@ -57,11 +57,7 @@ final class AssociatedTypeModel: Model {
     }
 
     var hasCondition: Bool {
-        inheritance != nil || !whereConditions.isEmpty
-    }
-
-    var hasDefaultType: Bool {
-        defaultType != nil || !hasCondition
+        !inheritances.isEmpty || !whereConditions.isEmpty
     }
 
     func render(
