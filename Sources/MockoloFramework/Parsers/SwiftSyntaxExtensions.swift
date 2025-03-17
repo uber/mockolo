@@ -292,6 +292,10 @@ extension ProtocolDeclSyntax: EntityNode {
         return inheritanceClause?.types ?? []
     }
 
+    var genericWhereConditions: [String] {
+        return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
+    }
+
     var attributesDescription: String {
         self.attributes.trimmedDescription
     }
@@ -337,6 +341,10 @@ extension ClassDeclSyntax: EntityNode {
 
     var inheritedTypes: [String] {
         return inheritanceClause?.types ?? []
+    }
+
+    var genericWhereConditions: [String] {
+        return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
     var attributesDescription: String {

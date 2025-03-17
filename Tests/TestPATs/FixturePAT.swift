@@ -172,11 +172,11 @@ import MockoloFramework
         }
 
         class DogMock<T: StringProtocol & Identifiable & Sendable>: Dog where T.ID == String {
-            init() {}
+            init() { }
         }
 
         class CatMock<T: StringProtocol>: Cat where T: Identifiable & Sendable, T.ID == String {
-            init() {}
+            init() { }
         }
     }
 }

@@ -336,6 +336,9 @@ extension NominalModel {
             //   - 確定している型が他のprotocolの制約を満たさない場合は？
             //     - 検証できないため、他の制約があれば無効にする
             let renderModel: Model? = {
+                if !genericWhereConditions.isEmpty {
+                    return nil
+                }
                 if candidates.count(where: \.hasDefaultType) > 1 {
                     return nil
                 }
@@ -381,7 +384,8 @@ extension NominalModel {
         }
 
         var aliasItems: String = ""
-        var typeparameters: [String] = [], whereClauses: [String] = []
+        var typeparameters: [String] = []
+        var whereClauses: [String] = genericWhereConditions
         var renderedModelNames: Set<String> = []
         for (name, candidates) in aliasMap.sorted(path: \.key) {
             let result = processCandidates(name: name, candidates: candidates)
