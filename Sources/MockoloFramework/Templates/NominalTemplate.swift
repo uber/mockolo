@@ -28,10 +28,15 @@ extension NominalModel {
         processCombineAliases(entities: entities)
         
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
-        let typealiases = typealiasWhitelist(in: entities)
+
+        let (aliasItems,
+             typeparameters,
+             whereClauses,
+             renderedModelNames) = processAssociatedTypes(in: entities, acl: acl)
         let renderedEntities = entities
             .compactMap { (uniqueId: String, model: Model) -> String? in
-                if model.modelType == .typeAlias, let _ = typealiases?[model.name] {
+                if (model.modelType == .typeAlias || model.modelType == .associatedType)
+                    && renderedModelNames.contains(model.name) {
                     // this case will be handlded by typealiasWhitelist look up later
                     return nil
                 }
@@ -53,19 +58,6 @@ extension NominalModel {
                 )
             }
             .joined(separator: "\n")
-        
-        var typealiasTemplate = ""
-        let addAcl = declKindOfMockAnnotatedBaseType == .protocol ? acl : ""
-        if let typealiasWhitelist = typealiases {
-            typealiasTemplate = typealiasWhitelist.map { (arg: (key: String, value: [String])) -> String in
-                let joinedType = arg.value.sorted().joined(separator: " & ")
-                return  "\(1.tab)\(addAcl)\(String.typealias) \(arg.key) = \(joinedType)"
-            }.joined(separator: "\n")
-        }
-
-        let (typeparameters, whereClauses) = typeArguments(
-            associatedTypes: entities.compactMap { $1 as? AssociatedTypeModel }
-        )
 
         let extraInits = extraInitsIfNeeded(
             initParamCandidates: initParamCandidates,
@@ -81,11 +73,11 @@ extension NominalModel {
         )
 
         var body = ""
-        if !typealiasTemplate.isEmpty {
-            body += "\(typealiasTemplate)\n"
-        }
         if !extraInits.isEmpty {
             body += "\(extraInits)\n"
+        }
+        if !aliasItems.isEmpty {
+            body += "\(aliasItems)\n"
         }
         if !renderedEntities.isEmpty {
             body += "\(renderedEntities)"
@@ -112,34 +104,6 @@ extension NominalModel {
             }
             """
         }
-    }
-
-    private func typeArguments(
-        associatedTypes: [AssociatedTypeModel]
-    ) -> (typeparameters: String, whereClauses: String) {
-
-        var typeparameters: [String] = [], whereClauses: [String] = []
-
-        let parameterMap: [String: [AssociatedTypeModel]] = .init(
-            grouping: associatedTypes.filter { $0.defaultType == nil && $0.hasCondition },
-            by: \.name
-        )
-        for (name, models) in parameterMap.sorted(path: \.key) {
-            let models = models.sorted(path: \.offset, fallback: \.fullName)
-            let inheritances = models.flatMap(\.inheritances)
-
-            if inheritances.isEmpty {
-                typeparameters.append(name)
-            } else {
-                typeparameters.append("\(name): \(inheritances.joined(separator: " & "))")
-            }
-            whereClauses.append(contentsOf: models.flatMap(\.whereConditions))
-        }
-
-        return (
-            typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
-            whereClauses.isEmpty ? "" : "where \(whereClauses.joined(separator: ", ")) "
-        )
     }
 
     private func extraInitsIfNeeded(
@@ -299,20 +263,147 @@ extension NominalModel {
 
         return template
     }
-    
-    
-    /// Returns a map of typealiases with conflicting types to be whitelisted
-    /// @param models Potentially contains typealias models
-    /// @returns A map of typealiases with multiple possible types
-    func typealiasWhitelist(`in` models: [(String, Model)]) -> [String: [String]]? {
-        var aliasMap = [String: Set<String>]()
-        for (_, model) in models {
-            if let alias = model as? TypeAliasModel {
-                aliasMap[alias.name, default: []].insert(alias.type.typeName)
+
+    func processAssociatedTypes(`in` models: [(String, Model)], acl: String) -> (
+        aliasItems: String,
+        typeparameters: String,
+        whereClauses: String,
+        renderedModelNames: Set<String>
+    ) {
+        enum Candidate {
+            case `typealias`(TypeAliasModel)
+            case `associatedtype`(AssociatedTypeModel)
+            var hasCondition: Bool {
+                switch self {
+                case .typealias(let typeAliasModel):
+                    return false
+                case .associatedtype(let associatedTypeModel):
+                    return associatedTypeModel.hasCondition
+                }
+            }
+            var name: String {
+                switch self {
+                case .typealias(let typeAliasModel):
+                    return typeAliasModel.name
+                case .associatedtype(let associatedTypeModel):
+                    return associatedTypeModel.name
+                }
+            }
+            var model: Model {
+                switch self {
+                case .typealias(let typeAliasModel):
+                    return typeAliasModel
+                case .associatedtype(let associatedTypeModel):
+                    return associatedTypeModel
+                }
+            }
+            var hasDefaultType: Bool {
+                switch self {
+                case .typealias(let typeAliasModel):
+                    return true
+                case .associatedtype(let associatedTypeModel):
+                    return associatedTypeModel.defaultType != nil
+                }
             }
         }
-        let aliasDupes = aliasMap.filter {$0.value.count > 1}
-        return aliasDupes.isEmpty ? nil : aliasDupes.mapValues {$0.sorted()}
+
+        let addAcl = declKindOfMockAnnotatedBaseType == .protocol ? acl : ""
+
+        // 1. すべてのassoctypeとtypealiasを集める
+        let aliasMap = [String: [Candidate]](
+            grouping: models.compactMap { (_, model) in
+                if let alias = model as? TypeAliasModel {
+                    return .typealias(alias)
+                }
+                if let associated = model as? AssociatedTypeModel {
+                    return .associatedtype(associated)
+                }
+                return nil
+            },
+            by: \.name
+        )
+
+        enum ProcessResult {
+            case useModel(Model)
+            case rendered(String)
+            case genericArgument(typeparameter: String, whereClauses: [String])
+        }
+
+        func processCandidates(name: String, candidates: [Candidate]) -> ProcessResult {
+            // 2. 確定している型があれば、それを採用して同名の他のmodelを全て削除
+            //   - 確定している型が複数あった場合は？
+            //     - 優先度をつけることが難しいため、全て無効とする
+            //   - 確定している型が他のprotocolの制約を満たさない場合は？
+            //     - 検証できないため、他の制約があれば無効にする
+            let renderModel: Model? = {
+                if candidates.count(where: \.hasDefaultType) > 1 {
+                    return nil
+                }
+                guard let candidate = candidates.first(where: \.hasDefaultType) else {
+                    return nil
+                }
+                if candidates
+                    .filter({ $0.model !== candidate.model })
+                    .contains(where: \.hasCondition) {
+                    return nil
+                }
+                return candidates.first?.model
+            }()
+
+            if let renderModel {
+                return .useModel(renderModel)
+            }
+
+            // 3. 型が確定しなかった場合、制約の有無を確認。全てのassoctypeで制約がない場合は、Anyになる
+            if candidates.allSatisfy({ !$0.hasCondition }) {
+                return .rendered("\(1.tab)\(addAcl)\(String.typealias) \(name) = Any\n")
+            }
+
+            // 4. ここまでで確定しなかった場合、全ての制約を結合する
+            // typealiasは無視される
+            let models = candidates.compactMap {
+                if case .associatedtype(let model) = $0 {
+                    return model
+                }
+                return nil
+            }.sorted(path: \.offset, fallback: \.fullName)
+            let inheritances = models.flatMap(\.inheritances)
+
+            let typeparameter = if inheritances.isEmpty {
+                name
+            } else {
+                "\(name): \(inheritances.joined(separator: " & "))"
+            }
+            return .genericArgument(
+                typeparameter: typeparameter,
+                whereClauses: models.flatMap(\.whereConditions)
+            )
+        }
+
+        var aliasItems: String = ""
+        var typeparameters: [String] = [], whereClauses: [String] = []
+        var renderedModelNames: Set<String> = []
+        for (name, candidates) in aliasMap.sorted(path: \.key) {
+            let result = processCandidates(name: name, candidates: candidates)
+            switch result {
+            case .useModel(let model):
+                break
+            case .rendered(let string):
+                renderedModelNames.insert(name)
+                aliasItems.append(string)
+            case .genericArgument(let typeparameter, let whereClause):
+                renderedModelNames.insert(name)
+                typeparameters.append(typeparameter)
+                whereClauses.append(contentsOf: whereClause)
+            }
+        }
+
+        return (
+            aliasItems: aliasItems,
+            typeparameters: typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
+            whereClauses: whereClauses.isEmpty ? "" : "where \(whereClauses.joined(separator: ", ")) ",
+            renderedModelNames: renderedModelNames
+        )
     }
 
     // Finds all combine properties that are attempting to use a property wrapper alias

@@ -143,7 +143,7 @@ import MockoloFramework
 
 @Fixture enum patNameCollision {
     protocol Foo {
-        associatedtype T
+        associatedtype T = Int
     }
 
     protocol Bar {
@@ -175,7 +175,7 @@ import MockoloFramework
             init() {}
         }
 
-        class CatMock<T>: Cat where T: StringProtocol, T: Identifiable & Sendable, T.ID == String {
+        class CatMock<T: StringProtocol>: Cat where T: Identifiable & Sendable, T.ID == String {
             init() {}
         }
     }
