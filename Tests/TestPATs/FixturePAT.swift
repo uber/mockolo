@@ -160,6 +160,11 @@ import MockoloFramework
         associatedtype U
     }
 
+    /// @mockable
+    protocol Qux where T: Collection {
+        associatedtype T = Int
+    }
+
     @Fixture enum expected {
         class FooMock<T>: Foo where T: Equatable {
             init() { }
@@ -177,6 +182,13 @@ import MockoloFramework
 
             // Unavailable due to the presence of generic constraints
             // typealias U = Int
+        }
+
+        class QuxMock<T>: Qux where T: Collection {
+            init() { }
+
+            // Unavailable due to the presence of generic constraints
+            // typealias T = Int
         }
     }
 }

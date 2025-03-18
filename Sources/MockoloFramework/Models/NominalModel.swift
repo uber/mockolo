@@ -19,7 +19,7 @@ final class NominalModel: Model {
     let namespaces: [String]
     let offset: Int64
     let inheritedTypeName: String
-    let genericWhereConditions: [String]
+    let genericWhereConstraints: [String]
     let type: SwiftType
     let attribute: String
     let accessLevel: String
@@ -42,7 +42,7 @@ final class NominalModel: Model {
          attributes: [String],
          offset: Int64,
          inheritedTypeName: String,
-         genericWhereConditions: [String],
+         genericWhereConstraints: [String],
          initParamCandidates: [VariableModel],
          declaredInits: [MethodModel],
          entities: [(String, Model)],
@@ -57,7 +57,7 @@ final class NominalModel: Model {
         self.initParamCandidates = initParamCandidates
         self.offset = offset
         self.inheritedTypeName = inheritedTypeName
-        self.genericWhereConditions = genericWhereConditions
+        self.genericWhereConstraints = genericWhereConstraints
         self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
         self.accessLevel = acl
         self.requiresSendable = requiresSendable

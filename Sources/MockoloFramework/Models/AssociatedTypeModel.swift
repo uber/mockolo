@@ -14,11 +14,11 @@
 //  limitations under the License.
 //
 
-final class AssociatedTypeModel: Model {
+final class AssociatedTypeModel: Model, TypealiasRenderableModel {
     let name: String
     let inheritances: [String]
     let defaultType: SwiftType?
-    let whereConditions: [String]
+    let whereConstraints: [String]
     let offset: Int64
     let length: Int64
     let accessLevel: String
@@ -31,7 +31,7 @@ final class AssociatedTypeModel: Model {
         name: String,
         inheritances: [String],
         defaultTypeName: String?,
-        whereConditions: [String],
+        whereConstraints: [String],
         acl: String?,
         offset: Int64,
         length: Int64
@@ -39,7 +39,7 @@ final class AssociatedTypeModel: Model {
         self.name = name
         self.inheritances = inheritances
         self.defaultType = defaultTypeName.map { SwiftType($0) }
-        self.whereConditions = whereConditions
+        self.whereConstraints = whereConstraints
         self.offset = offset
         self.length = length
         self.accessLevel = acl ?? ""
@@ -49,15 +49,15 @@ final class AssociatedTypeModel: Model {
         return self.name
         + self.inheritances.joined()
         + (self.defaultType?.displayName ?? "")
-        + self.whereConditions.joined()
+        + self.whereConstraints.joined()
     }
 
     func name(by level: Int) -> String {
         return fullName
     }
 
-    var hasCondition: Bool {
-        !inheritances.isEmpty || !whereConditions.isEmpty
+    var hasGenericConstraints: Bool {
+        !inheritances.isEmpty || !whereConstraints.isEmpty
     }
 
     func render(
@@ -68,7 +68,7 @@ final class AssociatedTypeModel: Model {
             return renderTypealias(typeName: defaultType.typeName)
         }
 
-        if hasCondition {
+        if hasGenericConstraints {
             return nil
         } else {
             return renderTypealias(typeName: .anyType)

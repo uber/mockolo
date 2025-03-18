@@ -292,7 +292,7 @@ extension ProtocolDeclSyntax: EntityNode {
         return inheritanceClause?.types ?? []
     }
 
-    var genericWhereConditions: [String] {
+    var genericWhereConstraints: [String] {
         return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
@@ -343,7 +343,7 @@ extension ClassDeclSyntax: EntityNode {
         return inheritanceClause?.types ?? []
     }
 
-    var genericWhereConditions: [String] {
+    var genericWhereConstraints: [String] {
         return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
@@ -665,7 +665,7 @@ extension AssociatedTypeDeclSyntax {
         return AssociatedTypeModel(name: self.name.text,
                                    inheritances: self.inheritanceClause?.inheritedTypes.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    defaultTypeName: self.initializer?.value.trimmedDescription,
-                                   whereConditions: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
+                                   whereConstraints: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,
                                    offset: self.offset,
                                    length: self.length)

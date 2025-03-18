@@ -83,3 +83,8 @@ extension Model {
         return false
     }
 }
+
+protocol TypealiasRenderableModel: Model {
+    var hasGenericConstraints: Bool { get }
+    var defaultType: SwiftType? { get }
+}

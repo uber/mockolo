@@ -16,7 +16,7 @@
 
 import Foundation
 
-final class TypeAliasModel: Model {
+final class TypeAliasModel: Model, TypealiasRenderableModel {
     let name: String
     let type: SwiftType
     let offset: Int64
@@ -47,6 +47,14 @@ final class TypeAliasModel: Model {
 
     func name(by level: Int) -> String {
         return fullName
+    }
+
+    var defaultType: SwiftType? {
+        return type
+    }
+
+    var hasGenericConstraints: Bool {
+        return false
     }
 
     func render(
