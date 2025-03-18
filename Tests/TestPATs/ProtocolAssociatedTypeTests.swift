@@ -30,6 +30,11 @@ class ProtocolAssociatedTypeTests: MockoloTestCase {
                dstContent: patWithConditions.expected._source)
     }
 
+    func testPATWithParentCondition() {
+        verify(srcContent: patWithParentCondition._source,
+               dstContent: patWithParentCondition.expected._source)
+    }
+
     func testPATNameCollisions() {
         verify(srcContent: patNameCollision._source,
                dstContent: patNameCollision.expected._source)

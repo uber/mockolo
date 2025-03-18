@@ -99,12 +99,14 @@ import MockoloFramework
     }
 
     @Fixture enum expected {
-        class FooMock: Foo {
+        class FooMock<S: Identifiable & Sendable, T, U>: Foo where S.ID == Int {
             init() { }
 
-            typealias T = Any
-            typealias U = String
-            typealias S = MyID
+            // Unavailable due to the presence of generic constraints
+            // typealias S = MyID
+
+            // Unavailable due to the presence of generic constraints
+            // typealias U = String
         }
     }
 }
@@ -137,6 +139,44 @@ import MockoloFramework
 
         public class BazMock<T>: Baz where T: StringProtocol, T: Sendable {
             public init() { }
+        }
+    }
+}
+
+@Fixture enum patWithParentCondition {
+    /// @mockable
+    protocol Foo where T: Equatable {
+        associatedtype T
+    }
+
+    /// @mockable(typealias: T = Int)
+    protocol Bar where T: Equatable {
+        associatedtype T
+    }
+
+    /// @mockable(typealias: U = Int)
+    protocol Baz where T: Equatable {
+        associatedtype T
+        associatedtype U
+    }
+
+    @Fixture enum expected {
+        class FooMock<T>: Foo where T: Equatable {
+            init() { }
+        }
+
+        class BarMock<T>: Bar where T: Equatable {
+            init() { }
+
+            // Unavailable due to the presence of generic constraints
+            // typealias T = Int
+        }
+
+        class BazMock<T, U>: Baz where T: Equatable {
+            init() { }
+
+            // Unavailable due to the presence of generic constraints
+            // typealias U = Int
         }
     }
 }

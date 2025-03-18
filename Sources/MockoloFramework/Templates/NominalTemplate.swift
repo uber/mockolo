@@ -275,7 +275,7 @@ extension NominalModel {
             case `associatedtype`(AssociatedTypeModel)
             var hasCondition: Bool {
                 switch self {
-                case .typealias(let typeAliasModel):
+                case .typealias:
                     return false
                 case .associatedtype(let associatedTypeModel):
                     return associatedTypeModel.hasCondition
@@ -299,10 +299,18 @@ extension NominalModel {
             }
             var hasDefaultType: Bool {
                 switch self {
-                case .typealias(let typeAliasModel):
+                case .typealias:
                     return true
                 case .associatedtype(let associatedTypeModel):
                     return associatedTypeModel.defaultType != nil
+                }
+            }
+            var defaultType: String? {
+                switch self {
+                case .typealias(let model):
+                    return model.type.displayName
+                case .associatedtype(let model):
+                    return model.defaultType?.displayName
                 }
             }
         }
@@ -310,7 +318,7 @@ extension NominalModel {
         let addAcl = declKindOfMockAnnotatedBaseType == .protocol ? acl : ""
 
         // 1. すべてのassoctypeとtypealiasを集める
-        let aliasMap = [String: [Candidate]](
+        let aliasList = [String: [Candidate]](
             grouping: models.compactMap { (_, model) in
                 if let alias = model as? TypeAliasModel {
                     return .typealias(alias)
@@ -321,12 +329,40 @@ extension NominalModel {
                 return nil
             },
             by: \.name
-        )
+        ).sorted(path: \.key)
+
+        let allWhereConditions = genericWhereConditions + models.flatMap { ($1 as? AssociatedTypeModel)?.whereConditions ?? [] }
+        let hasWhereConditions = !allWhereConditions.isEmpty
+
+        if hasWhereConditions {
+            let aliasItems = aliasList.compactMap { (name, candidates) in
+                if let defaultType = candidates.firstNonNil(\.defaultType) {
+                    return """
+                    \(1.tab)// Unavailable due to the presence of generic constraints
+                    \(1.tab)// \(addAcl)\(String.typealias) \(name) = \(defaultType)
+                    
+                    """
+                }
+                return nil
+            }.joined(separator: "\n")
+            let typeparameters = aliasList.map { (name, candidates) in
+                mergeAssociatedTypes(
+                    name: name,
+                    models: candidates.compactMap { $0.model as? AssociatedTypeModel }
+                )
+            }
+            return (
+                aliasItems: aliasItems,
+                typeparameters: typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
+                whereClauses: allWhereConditions.isEmpty ? "" : "where \(allWhereConditions.joined(separator: ", ")) ",
+                renderedModelNames: Set(aliasList.map(\.key))
+            )
+        }
 
         enum ProcessResult {
             case useModel(Model)
             case rendered(String)
-            case genericArgument(typeparameter: String, whereClauses: [String])
+            case genericArgument(typeparameter: String)
         }
 
         func processCandidates(name: String, candidates: [Candidate]) -> ProcessResult {
@@ -357,7 +393,7 @@ extension NominalModel {
                 return .useModel(renderModel)
             }
 
-            // 3. 型が確定しなかった場合、制約の有無を確認。全てのassoctypeで制約がない場合は、Anyになる
+            // 3. 型が確定しなかった場合、制約の有無を確認。全てのassoctypeで制約がない場合は、自動的にAnyを指定
             if candidates.allSatisfy({ !$0.hasCondition }) {
                 return .rendered("\(1.tab)\(addAcl)\(String.typealias) \(name) = Any\n")
             }
@@ -370,6 +406,12 @@ extension NominalModel {
                 }
                 return nil
             }.sorted(path: \.offset, fallback: \.fullName)
+
+            let typeparameter = mergeAssociatedTypes(name: name, models: models)
+            return .genericArgument(typeparameter: typeparameter)
+        }
+
+        func mergeAssociatedTypes(name: String, models: [AssociatedTypeModel]) -> String {
             let inheritances = models.flatMap(\.inheritances)
 
             let typeparameter = if inheritances.isEmpty {
@@ -377,35 +419,30 @@ extension NominalModel {
             } else {
                 "\(name): \(inheritances.joined(separator: " & "))"
             }
-            return .genericArgument(
-                typeparameter: typeparameter,
-                whereClauses: models.flatMap(\.whereConditions)
-            )
+            return typeparameter
         }
 
         var aliasItems: String = ""
         var typeparameters: [String] = []
-        var whereClauses: [String] = genericWhereConditions
         var renderedModelNames: Set<String> = []
-        for (name, candidates) in aliasMap.sorted(path: \.key) {
+        for (name, candidates) in aliasList.sorted(path: \.key) {
             let result = processCandidates(name: name, candidates: candidates)
             switch result {
-            case .useModel(let model):
+            case .useModel:
                 break
             case .rendered(let string):
                 renderedModelNames.insert(name)
                 aliasItems.append(string)
-            case .genericArgument(let typeparameter, let whereClause):
+            case .genericArgument(let typeparameter):
                 renderedModelNames.insert(name)
                 typeparameters.append(typeparameter)
-                whereClauses.append(contentsOf: whereClause)
             }
         }
 
         return (
             aliasItems: aliasItems,
             typeparameters: typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
-            whereClauses: whereClauses.isEmpty ? "" : "where \(whereClauses.joined(separator: ", ")) ",
+            whereClauses: allWhereConditions.isEmpty ? "" : "where \(allWhereConditions.joined(separator: ", ")) ",
             renderedModelNames: renderedModelNames
         )
     }
