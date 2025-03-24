@@ -18,10 +18,8 @@ import Foundation
 
 extension NominalModel {
     func applyNominalTemplate(name: String,
-                              identifier: String,
                               accessLevel: String,
                               attribute: String,
-                              metadata: AnnotationMetadata?,
                               arguments: GenerationArguments,
                               initParamCandidates: [VariableModel],
                               declaredInits: [MethodModel],
@@ -66,18 +64,12 @@ extension NominalModel {
                 return  "\(1.tab)\(addAcl)\(String.typealias) \(arg.key) = \(joinedType)"
             }.joined(separator: "\n")
         }
-        
-        var moduleDot = ""
-        if let moduleName = metadata?.module, !moduleName.isEmpty {
-            moduleDot = moduleName + "."
-        }
-        
+
         let extraInits = extraInitsIfNeeded(
             initParamCandidates: initParamCandidates,
             declaredInits: declaredInits,
             acl: acl,
             declKindOfMockAnnotatedBaseType: declKindOfMockAnnotatedBaseType,
-            overrides: metadata?.varTypes,
             context: .init(
                 enclosingType: type,
                 annotatedTypeKind: declKindOfMockAnnotatedBaseType,
@@ -104,7 +96,7 @@ extension NominalModel {
         let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)
-        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(moduleDot)\(identifier)\(uncheckedSendableStr) {
+        \(acl)\(finalStr)\(declKind.rawValue) \(name): \(inheritedTypeName)\(uncheckedSendableStr) {
         \(body)
         }
         """
@@ -125,7 +117,6 @@ extension NominalModel {
         declaredInits: [MethodModel],
         acl: String,
         declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
-        overrides: [String: String]?,
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String {
@@ -165,7 +156,7 @@ extension NominalModel {
             var paramsAssign = ""
             let params = initParamCandidates
                 .map { (element: VariableModel) -> String in
-                    if let val = element.type.defaultVal(with: overrides, overrideKey: element.name, isInitParam: true) {
+                    if let val = element.type.defaultVal(with: element.rxTypes, overrideKey: element.name, isInitParam: true) {
                         return "\(element.name): \(element.type.typeName) = \(val)"
                     }
                     var prefix = ""
