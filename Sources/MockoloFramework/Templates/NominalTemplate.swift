@@ -35,8 +35,7 @@ extension NominalModel {
              renderedModelNames) = processAssociatedTypes(in: entities, acl: acl)
         let renderedEntities = entities
             .compactMap { (uniqueId: String, model: Model) -> String? in
-                if (model.modelType == .typeAlias || model.modelType == .associatedType)
-                    && renderedModelNames.contains(model.name) {
+                if model is TypealiasRenderableModel && renderedModelNames.contains(model.name) {
                     // this case will be handlded by typealiasWhitelist look up later
                     return nil
                 }

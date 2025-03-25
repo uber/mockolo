@@ -11,6 +11,7 @@ jobs:
     name: Build and test on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
         swift: ["5.10", "6.0"]
