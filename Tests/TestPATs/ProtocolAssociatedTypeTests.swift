@@ -29,7 +29,7 @@ class ProtocolAssociatedTypeTests: MockoloTestCase {
         verify(srcContent: patWithConditions._source,
                dstContent: patWithConditions.expected._source)
     }
-
+#if compiler(>=6.0)
     func testPATWithParentCondition() {
         verify(srcContent: patWithParentCondition._source,
                dstContent: patWithParentCondition.expected._source)
@@ -39,4 +39,5 @@ class ProtocolAssociatedTypeTests: MockoloTestCase {
         verify(srcContent: patNameCollision._source,
                dstContent: patNameCollision.expected._source)
     }
+#endif
 }

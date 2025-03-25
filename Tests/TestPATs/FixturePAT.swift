@@ -142,7 +142,7 @@ import MockoloFramework
         }
     }
 }
-
+#if compiler(>=6.0)
 @Fixture enum patWithParentCondition {
     /// @mockable
     protocol Foo where T: Equatable {
@@ -232,3 +232,4 @@ import MockoloFramework
         }
     }
 }
+#endif
