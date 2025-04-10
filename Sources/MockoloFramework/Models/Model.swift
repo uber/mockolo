@@ -25,6 +25,7 @@ public enum ModelType {
     case nominal
     case argumentsHistory
     case closure
+    case associatedType
 }
 
 enum NominalTypeDeclKind: String {
@@ -81,4 +82,9 @@ extension Model {
     var processed: Bool {
         return false
     }
+}
+
+protocol TypealiasRenderableModel: Model {
+    var hasGenericConstraints: Bool { get }
+    var defaultType: SwiftType? { get }
 }

@@ -117,10 +117,6 @@ extension InheritanceClauseSyntax {
         }
         return []
     }
-
-    var typesDescription: String {
-        return self.inheritedTypes.description
-    }
 }
 
 extension MemberBlockItemSyntax {
@@ -183,7 +179,7 @@ extension MemberBlockItemSyntax {
             }
         } else if let patMember = self.decl.as(AssociatedTypeDeclSyntax.self) {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declKind)
-            let item = patMember.model(with: acl, declKind: declKind, overrides: metadata?.typeAliases, processed: processed)
+            let item = patMember.model(with: acl, declKind: declKind, overrides: metadata?.typeAliases)
             return (item, patMember.attributes.trimmedDescription, false)
         } else if let taMember = self.decl.as(TypeAliasDeclSyntax.self) {
             let acl = memberAcl(taMember.modifiers, encloserAcl, declKind)
@@ -296,6 +292,10 @@ extension ProtocolDeclSyntax: EntityNode {
         return inheritanceClause?.types ?? []
     }
 
+    var genericWhereConstraints: [String] {
+        return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
+    }
+
     var attributesDescription: String {
         self.attributes.trimmedDescription
     }
@@ -341,6 +341,10 @@ extension ClassDeclSyntax: EntityNode {
 
     var inheritedTypes: [String] {
         return inheritanceClause?.types ?? []
+    }
+
+    var genericWhereConstraints: [String] {
+        return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
     var attributesDescription: String {
@@ -645,28 +649,34 @@ extension FunctionParameterSyntax {
 }
 
 extension AssociatedTypeDeclSyntax {
-    func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?, processed: Bool) -> Model {
-        // Get the inhertied type for an associated type if any
-        var t = self.inheritanceClause?.typesDescription ?? ""
-        t.append(self.genericWhereClause?.description ?? "")
+    func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?) -> Model {
+        if let overrideType = overrides?[self.name.text] {
+            return TypeAliasModel(
+                name: self.name.text,
+                typeName: overrideType,
+                acl: acl,
+                offset: self.offset,
+                length: self.length,
+                modelDescription: nil,
+                processed: false
+            )
+        }
 
-        return TypeAliasModel(name: self.name.text,
-                              typeName: t,
-                              acl: acl,
-                              overrideTypes: overrides,
-                              offset: self.offset,
-                              length: self.length,
-                              modelDescription: self.description,
-                              processed: processed)
+        return AssociatedTypeModel(name: self.name.text,
+                                   inheritances: self.inheritanceClause?.inheritedTypes.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
+                                   defaultTypeName: self.initializer?.value.trimmedDescription,
+                                   whereConstraints: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
+                                   acl: acl,
+                                   offset: self.offset,
+                                   length: self.length)
     }
 }
 
 extension TypeAliasDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?, processed: Bool) -> Model {
         return TypeAliasModel(name: self.name.text,
-                              typeName: self.initializer.value.description,
+                              typeName: overrides?[self.name.text] ?? self.initializer.value.description,
                               acl: acl,
-                              overrideTypes: overrides,
                               offset: self.offset,
                               length: self.length,
                               modelDescription: self.description,

@@ -73,6 +73,7 @@ struct ResolvedEntity {
                             attributes: attributes,
                             offset: entity.entityNode.offset,
                             inheritedTypeName: (entity.metadata?.module?.withDot ?? "") + key,
+                            genericWhereConstraints: entity.entityNode.genericWhereConstraints,
                             initParamCandidates: initParamCandidates,
                             declaredInits: declaredInits,
                             entities: uniqueModels,
@@ -93,6 +94,7 @@ protocol EntityNode {
     var attributesDescription: String { get }
     var declKind: NominalTypeDeclKind { get }
     var inheritedTypes: [String] { get }
+    var genericWhereConstraints: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
     func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer

@@ -8,9 +8,10 @@ on:
 
 jobs:
   run:
-    name: Build and test on ${{ matrix.os }}
+    name: Test on ${{ matrix.os }} with swift${{ matrix.swift }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
         swift: ["5.10", "6.0"]
