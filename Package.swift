@@ -10,6 +10,7 @@ let package = Package(
     products: [
         .executable(name: "mockolo", targets: ["Mockolo"]),
         .library(name: "MockoloFramework", targets: ["MockoloFramework"]),
+        .library(name: "MockoloSupportRxSwift", targets: ["MockoloSupportRxSwift"]),
     ],
     dependencies: [
         .package(url: "https://github.com/swiftlang/swift-syntax.git", from: "600.0.1"),
@@ -32,6 +33,10 @@ let package = Package(
                 .product(name: "Algorithms", package: "swift-algorithms"),
             ]
         ),
+        .target(
+            name: "MockoloSupportRxSwift",
+            dependencies: ["MockoloFramework"]
+        ),
         .macro(
             name: "MockoloTestSupportMacros",
             dependencies: [
@@ -44,6 +49,7 @@ let package = Package(
             name: "MockoloTests",
             dependencies: [
                 "MockoloFramework",
+                "MockoloSupportRxSwift",
                 "MockoloTestSupportMacros",
             ],
             path: "Tests"
