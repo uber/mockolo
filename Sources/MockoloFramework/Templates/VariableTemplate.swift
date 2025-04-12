@@ -290,11 +290,7 @@ extension VariableModel {
 
             if useMockObservable {
                 var mockObservableInitArgs = ""
-                if type.isIUO || type.isOptional {
-                    mockObservableInitArgs = "(wrappedValue: \(placeholderVal), unwrapped: \(placeholderVal))"
-                } else {
-                    mockObservableInitArgs = "(unwrapped: \(placeholderVal))"
-                }
+                mockObservableInitArgs = "(wrappedValue: \(placeholderVal))"
 
                 let template = """
 
