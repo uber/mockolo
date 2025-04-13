@@ -112,7 +112,6 @@ final class VariableModel: Model {
                                                encloser: enclosingType.typeName,
                                                rxTypes: rxTypes,
                                                shouldOverride: shouldOverride,
-                                               useMockObservable: arguments.useMockObservable,
                                                allowSetCallCount: arguments.allowSetCallCount,
                                                isStatic: isStatic,
                                                accessLevel: accessLevel) {
