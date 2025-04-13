@@ -122,7 +122,6 @@ class MockoloTestCase: XCTestCase {
                      macro: "MOCK",
                      declType: declType,
                      useTemplateFunc: useTemplateFunc,
-                     useMockObservable: useMockObservable,
                      allowSetCallCount: allowSetCallCount,
                      enableFuncArgsHistory: enableFuncArgsHistory,
                      disableCombineDefaultValues: disableCombineDefaultValues,
