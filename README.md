@@ -171,6 +171,7 @@ OPTIONS:
                           List of source files (separated by a space) to generate mocks for. If the --sourcedirs or --filelist value exists, this will be ignored.
   -i, --testable-imports <testable-imports>
                           If set, @testable import statements will be added for each module name in this list (separated by a space).
+  --use-mock-observable   If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).
   --use-template-func     If set, a common template function will be called from all functions in mock classes (default is set to false).
   -h, --help              Show help information.
 ```
