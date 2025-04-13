@@ -57,7 +57,7 @@ enum rxSubjects {
 }
 
 @Fixture
-enum rxTaskRouting {
+enum rx {
     protocol BaseRouting { }
     /// @mockable(rx: attachedRouter = BehaviorSubject)
     protocol TaskRouting: BaseRouting {
@@ -143,7 +143,7 @@ enum rxObservables {
 }
 
 @Fixture
-enum rxInherited {
+enum rxVarInherited {
     struct SomeKey {}
     
     /// @mockable(rx: all = BehaviorSubject)

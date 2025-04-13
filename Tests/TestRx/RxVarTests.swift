@@ -3,8 +3,8 @@ import Foundation
 class RxVarTests: MockoloTestCase {
     
     func testRx() {
-        verify(srcContent: rxTaskRouting._source,
-               dstContent: rxTaskRouting.expected._source)
+        verify(srcContent: rx._source,
+               dstContent: rx.expected._source)
     }
 
     func testRxMultiParents() {
@@ -13,8 +13,8 @@ class RxVarTests: MockoloTestCase {
     }
 
     func testRxVarInherited() {
-        verify(srcContent: rxInherited._source,
-               dstContent: rxInherited.expected._source)
+        verify(srcContent: rxVarInherited._source,
+               dstContent: rxVarInherited.expected._source)
     }
 
     func testRxObservables() {
