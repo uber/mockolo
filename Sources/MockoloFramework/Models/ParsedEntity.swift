@@ -137,14 +137,12 @@ struct AnnotationMetadata {
 
 struct GenerationArguments {
     var useTemplateFunc: Bool
-    var useMockObservable: Bool
     var allowSetCallCount: Bool
     var mockFinal: Bool
     var enableFuncArgsHistory: Bool
     var disableCombineDefaultValues: Bool
     static let `default` = GenerationArguments(
         useTemplateFunc: false,
-        useMockObservable: false,
         allowSetCallCount: false,
         mockFinal: false,
         enableFuncArgsHistory: false,

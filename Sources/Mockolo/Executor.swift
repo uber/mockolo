@@ -123,10 +123,6 @@ struct Executor: ParsableCommand {
     private var testableImports: [String] = []
 
     @Flag(name: .long,
-          help: "If set, a property wrapper will be used to mock RxSwift Observable variables (default is set to false).")
-    private var useMockObservable: Bool = false
-
-    @Flag(name: .long,
           help: "If set, a common template function will be called from all functions in mock classes (default is set to false).")
     private var useTemplateFunc: Bool = false
 
@@ -204,7 +200,6 @@ struct Executor: ParsableCommand {
                          macro: macro,
                          declType: mockAll ? .all : .protocolType,
                          useTemplateFunc: useTemplateFunc,
-                         useMockObservable: useMockObservable,
                          allowSetCallCount: allowSetCallCount,
                          enableFuncArgsHistory: enableArgsHistory,
                          disableCombineDefaultValues: disableCombineDefaultValues,

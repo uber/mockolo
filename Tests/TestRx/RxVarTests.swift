@@ -3,34 +3,28 @@ import Foundation
 class RxVarTests: MockoloTestCase {
     
     func testRx() {
-        verify(srcContent: rx,
-               dstContent: rxMock)
+        verify(srcContent: rx._source,
+               dstContent: rx.expected._source)
     }
 
     func testRxMultiParents() {
-           verify(srcContent: rxMultiParents,
-                  dstContent: rxMultiParentsMock)
-    }
-
-    func testRxMultiParentsMockObservable() {
-           verify(srcContent: rxMultiParents,
-                  dstContent: rxMultiParentsMockObservable,
-                  useMockObservable: true)
+        verify(srcContent: rxMultiParents._source,
+               dstContent: rxMultiParents.expected._source)
     }
 
     func testRxVarInherited() {
-        verify(srcContent: rxVarInherited,
-               dstContent: rxVarInheritedMock)
+        verify(srcContent: rxVarInherited._source,
+               dstContent: rxVarInherited.expected._source)
     }
 
     func testRxObservables() {
-        verify(srcContent: rxObservables,
-               dstContent: rxObservablesMock)
+        verify(srcContent: rxObservables._source,
+               dstContent: rxObservables.expected._source)
     }
 
     func testRxSubjects() {
-        verify(srcContent: rxSubjects,
-               mockContent: rxSubjectsParent,
-               dstContent: rxSubjectsMock)
+        verify(srcContent: rxSubjects._source,
+               mockContent: rxSubjects.parent._source,
+               dstContent: rxSubjects.expected._source)
     }
 }
