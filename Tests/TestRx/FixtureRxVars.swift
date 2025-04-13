@@ -1,6 +1,4 @@
 import MockoloFramework
-import MockoloSupportRxSwift
-
 
 @Fixture
 enum rxSubjects {
