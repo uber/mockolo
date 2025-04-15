@@ -81,5 +81,11 @@ class OverloadTests: MockoloTestCase {
             dstContent: compositionInheritanceMock
         )
     }
-    
+
+    func testOverloadReturningBracketType() {
+        verify(
+            srcContent: overloadReturningBracketType._source,
+            dstContent: overloadReturningBracketType.expected._source
+        )
+    }
 }
