@@ -23,7 +23,7 @@ fileprivate var validIdentifierChars: CharacterSet = {
 }()
 
 /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
-public final class SwiftType {
+public final class SwiftTypeOld {
     let typeName: String
     var cachedDefaultVal: String?
 
@@ -57,7 +57,7 @@ public final class SwiftType {
         }
         let sliceLast = typeName.index(before: typeName.endIndex)
         let slice = typeName[typeName.startIndex..<sliceLast]
-        let sub = SwiftType(String(slice))
+        let sub = Self(String(slice))
         return sub.isSingular
     }
 
@@ -68,7 +68,7 @@ public final class SwiftType {
         }
         let sliceLast = typeName.index(before: typeName.endIndex)
         let slice = typeName[typeName.startIndex..<sliceLast]
-        let sub = SwiftType(String(slice))
+        let sub = Self(String(slice))
         return sub.isSingular
     }
 
@@ -146,8 +146,8 @@ public final class SwiftType {
             let leftHalf = String(arg[arg.startIndex..<closureOpRange.lowerBound])
             let rightHalf = String(arg[arg.index(after: closureOpRange.upperBound)..<arg.endIndex])
 
-            let l = SwiftType(leftHalf)
-            let r = SwiftType(rightHalf)
+            let l = Self(leftHalf)
+            let r = Self(rightHalf)
 
             if l.isSingular || r.isSingular {
                 return true
@@ -372,7 +372,7 @@ public final class SwiftType {
         }
 
         // There is no "existential any" to the customDefaultValueMap key.
-        if let val = SwiftType.customDefaultValueMap?[typeName.removingExistentialAny] {
+        if let val = Self.customDefaultValueMap?[typeName.removingExistentialAny] {
             cachedDefaultVal = val
             return val
         }
@@ -405,7 +405,7 @@ public final class SwiftType {
             } else if subjectKind == String.replaySubject {
                 underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)\(String.replaySubjectCreate)"
             } else if subjectKind == String.behaviorSubject {
-                if let val = SwiftType(String(typeParamStr)).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+                if let val = Self(String(typeParamStr)).defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
                     underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
                 }
             }
@@ -435,7 +435,7 @@ public final class SwiftType {
             if sub == "," || sub == ":" || sub == "(" || sub == ")" || sub == "=" || sub == " " || sub == "" {
                 vals.append(sub)
             } else {
-                if let val = SwiftType(sub).defaultSingularVal(isInitParam: isInitParam) {
+                if let val = Self(sub).defaultSingularVal(isInitParam: isInitParam) {
                     vals.append(val)
                 } else {
                     return nil
@@ -474,22 +474,22 @@ public final class SwiftType {
             return "\(arg.typeName)()"
         }
 
-        if let val = SwiftType.defaultValueMap[arg.typeName] {
+        if let val = Self.defaultValueMap[arg.typeName] {
             return val
         }
         return nil
     }
 
     static func toClosureType(
-        params: [SwiftType],
+        params: [SwiftTypeOld],
         typeParams: [String],
         isAsync: Bool,
         throwing: ThrowingKind,
-        returnType: SwiftType,
-        encloser: SwiftType,
+        returnType: SwiftTypeOld,
+        encloser: SwiftTypeOld,
         requiresSendable: Bool
-    ) -> (type: SwiftType, cast: String?) {
-        let displayableParamTypes = params.map { (subtype: SwiftType) -> String in
+    ) -> (type: SwiftTypeOld, cast: String?) {
+        let displayableParamTypes = params.map { (subtype: SwiftTypeOld) -> String in
             return subtype.processTypeParams(with: typeParams)
         }
 
@@ -526,7 +526,7 @@ public final class SwiftType {
             returnTypeCast = " as! " + String.`Self`
         }
 
-        if !(SwiftType(displayableReturnType).isSingular || SwiftType(displayableReturnType).isOptional) {
+        if !(Self(displayableReturnType).isSingular || Self(displayableReturnType).isOptional) {
             displayableReturnType = "(\(displayableReturnType))"
         }
 
@@ -537,14 +537,14 @@ public final class SwiftType {
 
         let sendableStr = requiresSendable ? "@Sendable " : ""
         let typeStr = "\(sendableStr)(\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType)"
-        return (type: SwiftType(typeStr), cast: returnTypeCast)
+        return (type: SwiftTypeOld(typeStr), cast: returnTypeCast)
     }
-    
-    static func toArgumentsCaptureType(with params: [(label: String, type: SwiftType)], typeParams: [String]) -> SwiftType {
+
+    static func toArgumentsCaptureType(with params: [(label: String, type: SwiftTypeOld)], typeParams: [String]) -> Self {
         assert(!params.isEmpty)
 
         // Expected only history capturable types.
-        let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftType) -> String? in
+        let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftTypeOld) -> String? in
             var processedType = subtype.processTypeParams(with: typeParams)
             
             if subtype.isInOut {
@@ -562,9 +562,9 @@ public final class SwiftType {
                 "\($0): \($1)"
             }
                 .joined(separator: ", ")
-            return SwiftType("(\(displayableParamStr))")
+            return Self("(\(displayableParamStr))")
         } else {
-            return SwiftType(displayableParamTypes[0])
+            return Self(displayableParamTypes[0])
         }
     }
 
