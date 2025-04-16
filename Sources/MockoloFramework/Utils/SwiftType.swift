@@ -16,3 +16,29 @@
 
 typealias SwiftType = SwiftTypeOld
 
+struct SwiftTypeNew {
+    enum Kind {
+        case tuple(Tuple)
+        case nominal(Nominal)
+        case closure(Closure)
+    }
+
+    struct Tuple {
+        var elements: [SwiftTypeNew]
+    }
+
+    struct Nominal {
+        var name: String
+        var genericParameterTypes: [SwiftTypeNew]
+    }
+
+    struct Closure {
+        var atAttributes: [String]
+        var isAsync: Bool
+        var throwing: ThrowingKind
+    }
+
+    var kind: Kind
+
+    
+}
