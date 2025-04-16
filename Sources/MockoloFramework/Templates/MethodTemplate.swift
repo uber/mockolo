@@ -53,7 +53,7 @@ extension MethodModel {
             let body: String
             if arguments.useTemplateFunc
                 && !model.throwing.hasError
-                && (handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).cast?.isEmpty ?? false) {
+                && (handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).cast == nil) {
                 let handlerParamValsStr = model.params.map { (arg) -> String in
                     if arg.type.typeName.hasPrefix(String.autoclosure) {
                         return arg.name.safeName + "()"
@@ -180,7 +180,7 @@ extension MethodModel {
         var stateVarDecl: String? {
             guard context.requiresSendable else { return nil }
 
-            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).typeName
+            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName
             let argumentsTupleType: String
             if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
                 argumentsTupleType = argsHistory.capturedValueType.typeName
@@ -230,7 +230,7 @@ extension MethodModel {
         }
 
         var handlerVarDecl: String {
-            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).typeName // ?? "Any"
+            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName // ?? "Any"
             let handlerVarType = "(\(handlerType))?"
             if !context.requiresSendable {
                 return "\(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType)"

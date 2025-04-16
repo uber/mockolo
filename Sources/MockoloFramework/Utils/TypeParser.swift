@@ -25,12 +25,10 @@ fileprivate var validIdentifierChars: CharacterSet = {
 /// Decl(e.g. class/struct/protocol/enum) or return type (e.g. var/func)
 public final class SwiftType {
     let typeName: String
-    let cast: String?
     var cachedDefaultVal: String?
 
-    init(_ type: String, cast: String? = nil){
+    init(_ type: String){
         self.typeName = type == .unknownVal ? "" : type
-        self.cast = cast
     }
 
     var isInOut: Bool {
@@ -490,7 +488,7 @@ public final class SwiftType {
         returnType: SwiftType,
         encloser: SwiftType,
         requiresSendable: Bool
-    ) -> SwiftType {
+    ) -> (type: SwiftType, cast: String?) {
         let displayableParamTypes = params.map { (subtype: SwiftType) -> String in
             return subtype.processTypeParams(with: typeParams)
         }
@@ -502,7 +500,7 @@ public final class SwiftType {
 
         var returnAsStr = ""
         var asSuffix = "!"
-        var returnTypeCast = ""
+        var returnTypeCast: String?
         if typeParams.contains(where: { returnComps.contains($0)}) {
             returnAsStr = returnType.typeName
             if returnType.isOptional {
@@ -539,7 +537,7 @@ public final class SwiftType {
 
         let sendableStr = requiresSendable ? "@Sendable " : ""
         let typeStr = "\(sendableStr)(\(displayableParamStr)) \(suffixStr)-> \(displayableReturnType)"
-        return SwiftType(typeStr, cast: returnTypeCast)
+        return (type: SwiftType(typeStr), cast: returnTypeCast)
     }
     
     static func toArgumentsCaptureType(with params: [(label: String, type: SwiftType)], typeParams: [String]) -> SwiftType {
