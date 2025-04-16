@@ -430,7 +430,7 @@ extension VariableDeclSyntax {
 
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
-            let name = v.pattern.firstToken(viewMode: .sourceAccurate)?.text ?? String.unknownVal
+            let name = v.pattern.trimmedDescription
             var typeName = ""
             var potentialInitParam = false
 

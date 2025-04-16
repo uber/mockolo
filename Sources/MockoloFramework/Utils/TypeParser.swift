@@ -29,7 +29,7 @@ public final class SwiftType {
     var cachedDefaultVal: String?
 
     init(_ type: String, cast: String? = nil){
-        self.typeName = type == .unknownVal ? "" : type
+        self.typeName = type
         self.cast = cast
     }
 
@@ -50,7 +50,7 @@ public final class SwiftType {
     }
 
     var isUnknown: Bool {
-        return typeName.isEmpty || typeName == String.unknownVal
+        return typeName.isEmpty
     }
 
     var isOptional: Bool {
@@ -174,7 +174,7 @@ public final class SwiftType {
     }
 
     var displayName: String {
-        return typeName.displayableComponents.map{$0 == .unknownVal ? "" : $0.capitalizeFirstLetter}.joined()
+        return typeName.displayableComponents.map(\.capitalizeFirstLetter).joined()
     }
 
     var isIdentifier: Bool {
