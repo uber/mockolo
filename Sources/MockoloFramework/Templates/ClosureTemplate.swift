@@ -29,7 +29,7 @@ extension ClosureModel {
             if argType.isInOut {
                 return "&" + argName.safeName
             }
-            if argType.hasClosure && argType.isOptional,
+            if argType.isClosure && argType.isOptional,
                let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
                 return renderedClosure
             }

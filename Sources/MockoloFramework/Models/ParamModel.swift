@@ -72,7 +72,7 @@ final class ParamModel: Model {
         if self.inInit, self.needsVarDecl {
             let type: SwiftType
             if eraseType {
-                type = SwiftType(.anyType)
+                type = SwiftType.Any
             } else {
                 type = self.type
             }

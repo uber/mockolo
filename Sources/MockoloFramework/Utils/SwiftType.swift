@@ -14,7 +14,9 @@
 //  limitations under the License.
 //
 
-typealias SwiftType = SwiftTypeOld
+import SwiftSyntax
+
+typealias SwiftType = SwiftTypeNew
 
 struct SwiftTypeNew {
     enum Kind {
@@ -29,7 +31,7 @@ struct SwiftTypeNew {
 
     struct Nominal {
         var name: String
-        var genericParameterTypes: [SwiftTypeNew]
+        var genericParameterTypes: [SwiftTypeNew] = []
     }
 
     struct Closure {
@@ -39,6 +41,130 @@ struct SwiftTypeNew {
     }
 
     var kind: Kind
+    var isInOut: Bool = false
+    var isIUO: Bool = false
+    var hasEllipsis: Bool = false
 
-    
+    var typeName: String {
+        // TODO:
+        String(describing: self)
+    }
+
+    var displayName: String {
+        // TODO:
+        String(describing: self)
+    }
+
+    var isOptional: Bool {
+        isNominal(named:  "Optional")
+    }
+
+    var isVoid: Bool {
+        if case .tuple(let tuple) = kind {
+            return tuple.elements.isEmpty
+        } else {
+            return false
+        }
+    }
+
+    var isClosure: Bool {
+        if case .closure = kind {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    func isNominal(named: String) -> Bool {
+        if case .nominal(let nominal) = kind {
+            return nominal.name == named
+        } else {
+            return false
+        }
+    }
+
+    var isEscaping: Bool {
+        if case .closure(let closure) = kind {
+            return closure.atAttributes.contains(where: { $0 == "escaping" })
+        } else {
+            return false
+        }
+    }
+
+    var isAutoclosure: Bool {
+        if case .closure(let closure) = kind {
+            return closure.atAttributes.contains(where: { $0 == "autoclosure" })
+        } else {
+            return false
+        }
+    }
+
+    var underlyingType: String {
+        "TODO"
+    }
+
+    // FIXME: remove this
+    var isUnknown: Bool {
+        typeName == ""
+    }
+
+    func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
+        // TODO:
+        return nil
+    }
+
+    static func toArgumentsCaptureType(with params: [(label: String, type: SwiftTypeNew)], typeParams: [String]) -> SwiftTypeNew {
+        fatalError("TODO")
+    }
+
+    func processTypeParams(with typeParamList: [String]) -> String {
+        fatalError("TODO")
+    }
+
+    static func toClosureType(
+        params: [SwiftType],
+        typeParams: [String],
+        isAsync: Bool,
+        throwing: ThrowingKind,
+        returnType: SwiftType,
+        encloser: SwiftType,
+        requiresSendable: Bool
+    ) -> (type: SwiftType, cast: String?) {
+        fatalError("TODO")
+    }
+
+    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?, String?) {
+        fatalError("TODO")
+    }
+
+    static var customDefaultValueMap: [String: String]?
+}
+
+extension SwiftTypeNew {
+    init(typeSyntax: TypeSyntax) {
+        //        if let syntax = typeSyntax.as(TypeSyntaxEnum.Type)
+        kind = .nominal(.init(name: "", genericParameterTypes: []))
+    }
+
+    static func makeOrVoid(typeSyntax: TypeSyntax?) -> SwiftTypeNew {
+        if let typeSyntax {
+            return .init(typeSyntax: typeSyntax)
+        } else {
+            return .Void
+        }
+    }
+
+    // escaping hatch. May return corrupted results
+    static func make(named: String) -> SwiftTypeNew {
+        return .init(kind: .nominal(.init(name: named)))
+    }
+}
+
+extension SwiftTypeNew {
+    static let `Any` = SwiftTypeNew(
+        kind: .nominal(.init(name: "Any"))
+    )
+    static let `Void` = SwiftTypeNew(
+        kind: .tuple(.init(elements: []))
+    )
 }

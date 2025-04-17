@@ -155,7 +155,7 @@ extension VariableModel {
             let nextIndex = typeParamStr.index(after: lastCommaIndex)
             errorTypeStr = String(typeParamStr[nextIndex..<typeParamStr.endIndex]).trimmingCharacters(in: .whitespaces)
         }
-        let subjectType = SwiftType(subjectTypeStr)
+        let subjectType = SwiftType.make(named: subjectTypeStr)
         let subjectDefaultValue = subjectType.defaultVal()
         let staticSpace = isStatic ? "\(String.static) " : ""
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "

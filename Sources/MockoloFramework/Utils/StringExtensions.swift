@@ -168,8 +168,8 @@ extension String {
     }
 
 
-    func canBeInitParam(type: String, isStatic: Bool) -> Bool {
-        return !(isStatic || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: SwiftType(type)))
+    func canBeInitParam(type: SwiftType, isStatic: Bool) -> Bool {
+        return !(isStatic || type.isNominal(named: .anyPublisher) || (type.isOptional && type.isClosure) || isGenerated(type: type))
     }
 
     func isGenerated(type: SwiftType) -> Bool {

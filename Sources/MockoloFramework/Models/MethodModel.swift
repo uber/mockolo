@@ -149,7 +149,7 @@ final class MethodModel: Model {
     }
 
     init(name: String,
-         typeName: String,
+         returnType: SwiftType,
          kind: MethodKind,
          acl: String,
          genericTypeParams: [ParamModel],
@@ -165,7 +165,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.returnType = SwiftType(typeName.trimmingCharacters(in: .whitespaces))
+        self.returnType = returnType
         self.isAsync = isAsync
         self.throwing = throwing
         self.offset = offset
