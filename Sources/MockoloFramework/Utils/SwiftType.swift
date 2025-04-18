@@ -18,7 +18,7 @@ import SwiftSyntax
 
 typealias SwiftType = SwiftTypeNew
 
-struct SwiftTypeNew {
+struct SwiftTypeNew: CustomStringConvertible {
     enum Kind {
         case tuple(Tuple)
         case nominal(Nominal)
@@ -38,6 +38,8 @@ struct SwiftTypeNew {
         var atAttributes: [String]
         var isAsync: Bool
         var throwing: ThrowingKind
+        var arguments: [SwiftTypeNew]
+        var returning: Box<SwiftTypeNew>
     }
 
     var kind: Kind
@@ -46,13 +48,44 @@ struct SwiftTypeNew {
     var hasEllipsis: Bool = false
 
     var typeName: String {
-        // TODO:
-        String(describing: self)
+        description
     }
 
+    var description: String {
+        var repr: String
+        switch kind {
+        case .tuple(let tuple):
+            let elementTypes = tuple.elements.map(\.description)
+            repr = "(\(elementTypes.joined(separator: ", ")))"
+        case .nominal(let nominal):
+            repr = "\(nominal.name)"
+            if !nominal.genericParameterTypes.isEmpty {
+                let parameterTypes = nominal.genericParameterTypes.map(\.description)
+                repr += "<\(parameterTypes.joined(separator: ", "))>"
+            }
+        case .closure(let closure):
+            repr = "TODO"
+        }
+        if isIUO {
+            switch kind {
+            case .tuple, .nominal:
+                repr += "!"
+            case .closure:
+                repr = "(\(repr))!"
+            }
+        }
+        if isInOut {
+            repr = "inout \(repr)"
+        }
+        if hasEllipsis {
+            repr += "..."
+        }
+        return repr
+    }
+
+    /// variable safe name
     var displayName: String {
-        // TODO:
-        String(describing: self)
+        return typeName.displayableComponents.map(\.capitalizeFirstLetter).joined()
     }
 
     var isOptional: Bool {
