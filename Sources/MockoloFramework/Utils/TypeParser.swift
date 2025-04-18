@@ -29,6 +29,7 @@ public final class SwiftType {
     var cachedDefaultVal: String?
 
     init(_ type: String, cast: String? = nil){
+        assert(!type.isEmpty)
         self.typeName = type
         self.cast = cast
     }
@@ -197,7 +198,7 @@ public final class SwiftType {
     }
 
     var isVoid: Bool {
-        return typeName.isEmpty || typeName == "()" || typeName == "Void"
+        return typeName == "()" || typeName == "Void"
     }
 
     var hasValidBrackets: Bool {
@@ -524,8 +525,10 @@ public final class SwiftType {
             returnTypeCast = " as! " + String.`Self`
         }
 
-        if !(SwiftType(displayableReturnType).isSingular || SwiftType(displayableReturnType).isOptional) {
-            displayableReturnType = "(\(displayableReturnType))"
+        if !SwiftType(displayableReturnType).isVoid {
+            if !(SwiftType(displayableReturnType).isSingular || SwiftType(displayableReturnType).isOptional) {
+                displayableReturnType = "(\(displayableReturnType))"
+            }
         }
 
         let suffixStr = applyFunctionSuffixTemplate(

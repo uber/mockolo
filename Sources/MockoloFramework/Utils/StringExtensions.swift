@@ -47,6 +47,7 @@ extension String {
     static let mockType = "protocol"
     static let prefix = "prefix"
     static let anyType = "Any"
+    static let voidType = "()"
     static let neverType = "Never"
     static let any = "any"
     static let some = "some"
