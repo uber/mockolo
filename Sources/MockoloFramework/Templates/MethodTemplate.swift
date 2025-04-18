@@ -157,8 +157,11 @@ extension MethodModel {
         }
 
         var returnClause: String {
-            let returnTypeName = model.returnType.isUnknown ? "" : model.returnType.typeName
-            return returnTypeName.isEmpty ? "" : "-> \(returnTypeName) "
+            if model.returnType.isVoid {
+                return ""
+            } else {
+                return "-> \(model.returnType.typeName) "
+            }
         }
 
         var handlerVarName: String {

@@ -49,10 +49,6 @@ public final class SwiftType {
         return typeName.hasPrefix(.rxObservableLeftAngleBracket) || typeName.hasPrefix(.observableLeftAngleBracket)
     }
 
-    var isUnknown: Bool {
-        return typeName.isEmpty
-    }
-
     var isOptional: Bool {
         if !typeName.hasSuffix("?") {
             return false
@@ -178,7 +174,7 @@ public final class SwiftType {
     }
 
     var isIdentifier: Bool {
-        if isUnknown {
+        if isVoid {
             return false
         }
 

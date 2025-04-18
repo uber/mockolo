@@ -53,7 +53,7 @@ extension ClosureModel {
     
     
     private func renderReturnDefaultStatement(name: String, type: SwiftType) -> String {
-        guard !type.isUnknown else { return "" }
+        guard !type.isVoid else { return "" }
         
         if let result = type.defaultVal() {
             if result.isEmpty {
