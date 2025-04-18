@@ -51,6 +51,7 @@ extension String {
     static let any = "any"
     static let some = "some"
     static let anyObject = "AnyObject"
+    static let optional = "Optional"
     static let fatalError = "fatalError"
     static let available = "available"
     static let `public` = "public"

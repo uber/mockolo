@@ -18,23 +18,23 @@ import SwiftSyntax
 
 typealias SwiftType = SwiftTypeNew
 
-struct SwiftTypeNew: CustomStringConvertible {
-    enum Kind {
+struct SwiftTypeNew: Equatable, CustomStringConvertible {
+    enum Kind: Equatable {
         case tuple(Tuple)
         case nominal(Nominal)
         case closure(Closure)
     }
 
-    struct Tuple {
+    struct Tuple: Equatable {
         var elements: [SwiftTypeNew]
     }
 
-    struct Nominal {
+    struct Nominal: Equatable {
         var name: String
         var genericParameterTypes: [SwiftTypeNew] = []
     }
 
-    struct Closure {
+    struct Closure: Equatable {
         var atAttributes: [String]
         var isAsync: Bool
         var throwing: ThrowingKind
@@ -88,8 +88,23 @@ struct SwiftTypeNew: CustomStringConvertible {
         return typeName.displayableComponents.map(\.capitalizeFirstLetter).joined()
     }
 
+    func includingIdentifiers() -> [String] {
+        switch kind {
+        case .tuple(let tuple):
+            return tuple.elements.flatMap { $0.includingIdentifiers() }
+        case .nominal(let nominal):
+            return CollectionOfOne(nominal.name) + nominal.genericParameterTypes.flatMap { $0.includingIdentifiers() }
+        case .closure(let closure):
+            return closure.arguments.flatMap { $0.includingIdentifiers() } + closure.returning.value.includingIdentifiers()
+        }
+    }
+
     var isOptional: Bool {
-        isNominal(named:  "Optional")
+        isNominal(named: .optional)
+    }
+
+    var isSelf: Bool {
+        isNominal(named: .Self)
     }
 
     var isVoid: Bool {
@@ -163,7 +178,55 @@ struct SwiftTypeNew: CustomStringConvertible {
         encloser: SwiftType,
         requiresSendable: Bool
     ) -> (type: SwiftType, cast: String?) {
-        fatalError("TODO")
+        var displayableReturnType = returnType
+        var returnTypeCast: String?
+
+        let returnComps = displayableReturnType.includingIdentifiers()
+        if typeParams.contains(where: { returnComps.contains($0)}) {
+            var asSuffix = "!"
+            let returnAsType: SwiftType?
+
+            if let unwrapped = returnType.unwrapped() {
+                displayableReturnType = .Any.optionalWrapped()
+                returnAsType = unwrapped
+                asSuffix = "?"
+            } else if returnType.isIUO {
+                displayableReturnType = .Any
+                displayableReturnType.isIUO = true
+                var asType = returnType
+                asType.isIUO = false
+                returnAsType = asType
+            } else if returnType.isSelf {
+                returnAsType = .Self
+            } else {
+                returnAsType = nil
+                displayableReturnType = .Any
+            }
+
+            if let returnAsType {
+                returnTypeCast = " as\(asSuffix) " + returnAsType.displayName
+            }
+        }
+
+        if returnType.isSelf {
+            displayableReturnType = encloser
+            returnTypeCast = " as! " + .`Self`
+        }
+
+//        if !(Self(displayableReturnType).isSingular || Self(displayableReturnType).isOptional) {
+//            displayableReturnType = "(\(displayableReturnType))"
+//        }
+
+        let resultType = SwiftType(
+            kind: .closure(.init(
+                atAttributes: requiresSendable ? ["Sendable"] : [],
+                isAsync: false,
+                throwing: .none,
+                arguments: params,
+                returning: .init(value: displayableReturnType)
+            ))
+        )
+        return (type: resultType, cast: returnTypeCast)
     }
 
     func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?, String?) {
@@ -191,6 +254,20 @@ extension SwiftTypeNew {
     static func make(named: String) -> SwiftTypeNew {
         return .init(kind: .nominal(.init(name: named)))
     }
+
+    func optionalWrapped() -> SwiftTypeNew {
+        return .init(kind: .nominal(.init(name: .optional, genericParameterTypes: [self])))
+    }
+
+    func unwrapped() -> SwiftTypeNew? {
+        guard isOptional else {
+            return nil
+        }
+        guard case .nominal(let nominal) = kind else {
+            return nil
+        }
+        return nominal.genericParameterTypes.first
+    }
 }
 
 extension SwiftTypeNew {
@@ -199,5 +276,11 @@ extension SwiftTypeNew {
     )
     static let `Void` = SwiftTypeNew(
         kind: .tuple(.init(elements: []))
+    )
+    static let `Never` = SwiftTypeNew(
+        kind: .nominal(.init(name: "Never"))
+    )
+    static let `Self` = SwiftTypeNew(
+        kind: .nominal(.init(name: "Self"))
     )
 }

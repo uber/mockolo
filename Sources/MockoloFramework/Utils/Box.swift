@@ -20,3 +20,9 @@ class Box<Value> {
         self.value = value
     }
 }
+
+extension Box: Equatable where Value: Equatable {
+    static func == (lhs: Box<Value>, rhs: Box<Value>) -> Bool {
+        return lhs.value == rhs.value
+    }
+}
