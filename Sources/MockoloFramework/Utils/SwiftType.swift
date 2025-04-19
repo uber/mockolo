@@ -30,6 +30,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     struct Nominal: Equatable {
+        var someOrAny: SomeOrAny?
         var name: String
         var genericParameterTypes: [SwiftTypeNew] = []
     }
@@ -39,7 +40,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         var isAsync: Bool
         var throwing: ThrowingKind
         var arguments: [SwiftTypeNew]
-        var returning: Box<SwiftTypeNew>
+        @CoW var returning: SwiftTypeNew
     }
 
     var kind: Kind
@@ -58,7 +59,10 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             let elementTypes = tuple.elements.map(\.description)
             repr = "(\(elementTypes.joined(separator: ", ")))"
         case .nominal(let nominal):
-            repr = "\(nominal.name)"
+            repr = nominal.name
+            if let someOrAny = nominal.someOrAny {
+                repr = "\(someOrAny.rawValue) \(repr)"
+            }
             if !nominal.genericParameterTypes.isEmpty {
                 let parameterTypes = nominal.genericParameterTypes.map(\.description)
                 repr += "<\(parameterTypes.joined(separator: ", "))>"
@@ -95,7 +99,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         case .nominal(let nominal):
             return CollectionOfOne(nominal.name) + nominal.genericParameterTypes.flatMap { $0.includingIdentifiers() }
         case .closure(let closure):
-            return closure.arguments.flatMap { $0.includingIdentifiers() } + closure.returning.value.includingIdentifiers()
+            return closure.arguments.flatMap { $0.includingIdentifiers() } + closure.returning.includingIdentifiers()
         }
     }
 
@@ -165,8 +169,35 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         fatalError("TODO")
     }
 
-    func processTypeParams(with typeParamList: [String]) -> String {
-        fatalError("TODO")
+    func processTypeParams(with typeParamList: [String]) -> SwiftTypeNew {
+        switch kind {
+        case .tuple(let tuple):
+            return self.copy(kind: .tuple(.init(
+                elements: tuple.elements.map { $0.processTypeParams(with: typeParamList) }
+            )))
+        case .nominal(let nominal):
+            let hasGenericType: Bool
+            if nominal.someOrAny == .some {
+                hasGenericType = true
+            } else {
+                let typeIDs = includingIdentifiers()
+                hasGenericType = typeParamList.contains(where: { typeIDs.contains($0) })
+            }
+
+            if hasGenericType {
+                if isOptional {
+                    return self.copy(kind: SwiftType.Any.optionalWrapped().kind)
+                } else {
+                    return self.copy(kind: SwiftType.Any.kind)
+                }
+            } else {
+                return self
+            }
+        case .closure(var closure):
+            closure.arguments = closure.arguments.map { $0.processTypeParams(with: typeParamList) }
+            closure.returning = closure.returning.processTypeParams(with: typeParamList)
+            return self.copy(kind: .closure(closure))
+        }
     }
 
     static func toClosureType(
@@ -223,7 +254,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                 isAsync: false,
                 throwing: .none,
                 arguments: params,
-                returning: .init(value: displayableReturnType)
+                returning: displayableReturnType
             ))
         )
         return (type: resultType, cast: returnTypeCast)
@@ -234,6 +265,10 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     static var customDefaultValueMap: [String: String]?
+
+    mutating func withoutTrailingCharacters(_ characters: [String]) -> String {
+        fatalError("TODO")
+    }
 }
 
 extension SwiftTypeNew {
@@ -267,6 +302,12 @@ extension SwiftTypeNew {
             return nil
         }
         return nominal.genericParameterTypes.first
+    }
+
+    func copy(kind: Kind) -> Self {
+        var copy = self
+        copy.kind = kind
+        return copy
     }
 }
 

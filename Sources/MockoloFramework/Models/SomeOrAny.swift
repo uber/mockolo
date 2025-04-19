@@ -14,15 +14,11 @@
 //  limitations under the License.
 //
 
-class Box<Value> {
-    let value: Value
-    init(value: Value) {
-        self.value = value
-    }
-}
+enum SomeOrAny: String, Equatable {
+    case some
+    case any
 
-extension Box: Equatable where Value: Equatable {
-    static func == (lhs: Box<Value>, rhs: Box<Value>) -> Bool {
-        return lhs.value == rhs.value
+    mutating func coerceToAny() {
+        self = .any
     }
 }
