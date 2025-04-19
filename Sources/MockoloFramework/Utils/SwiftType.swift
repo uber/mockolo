@@ -265,10 +265,6 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     static var customDefaultValueMap: [String: String]?
-
-    mutating func withoutTrailingCharacters(_ characters: [String]) -> String {
-        fatalError("TODO")
-    }
 }
 
 extension SwiftTypeNew {

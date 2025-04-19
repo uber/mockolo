@@ -73,7 +73,7 @@ extension ClosureModel {
         let literalComponents = argType.typeName.literalComponents
         for genericTypeName in genericTypeNames {
             if literalComponents.contains(genericTypeName) {
-                var processTypeParams = argType.processTypeParams(with: genericTypeNames)
+                var processTypeParams = argType.processTypeParams(with: genericTypeNames).description
                 let closureCast = processTypeParams.withoutTrailingCharacters(["!", "?"])
                 return argName.safeName +
                     " as? " +
