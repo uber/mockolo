@@ -200,6 +200,29 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
     }
 
+    private func defaultSingularVal(isInitParam: Bool = false, overrides: [String: String]? = nil, overrideKey: String = "") -> String? {
+        let arg = self
+
+        if arg.isOptional {
+            return "nil"
+        }
+
+        if case .nominal(let nominal) = kind, !nominal.genericParameterTypes.isEmpty {
+            if SwiftTypeOld.bracketPrefixTypes.contains(nominal.name) {
+                return "\(arg)()"
+            } else if let val = SwiftTypeOld.rxTypes[nominal.name], let suffix = val {
+                return "\(arg)\(suffix)"
+            } else {
+                return nil
+            }
+        }
+
+        if let val = SwiftTypeOld.defaultValueMap[arg.description] {
+            return val
+        }
+        return nil
+    }
+
     static func toClosureType(
         params: [SwiftType],
         typeParams: [String],
@@ -261,7 +284,39 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?, String?) {
-        fatalError("TODO")
+        guard (self.isNominal(named: .observable) || self.isNominal(named: .rxObservable)),
+              case .nominal(let nominal) = kind,
+              let typeParam = nominal.genericParameterTypes.first else {
+            return (nil, nil, nil)
+        }
+
+        var subjectKind = ""
+        var underlyingSubjectType = ""
+        if let rxTypes = overrides {
+            if let val = rxTypes[overrideKey], val.hasSuffix(String.subjectSuffix) {
+                subjectKind = val
+            } else if let val = rxTypes["all"], val.hasSuffix(String.subjectSuffix) {
+                subjectKind = val
+            }
+        }
+
+        if subjectKind.isEmpty {
+            subjectKind = String.publishSubject
+        }
+        underlyingSubjectType = "\(subjectKind)<\(typeParam)>"
+
+        var underlyingSubjectTypeDefaultVal: String? = nil
+        if subjectKind == String.publishSubject {
+            underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)()"
+        } else if subjectKind == String.replaySubject {
+            underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)\(String.replaySubjectCreate)"
+        } else if subjectKind == String.behaviorSubject {
+            if let val = typeParam.defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+                underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
+            }
+        }
+        return (underlyingSubjectType, typeParam.description, underlyingSubjectTypeDefaultVal)
+
     }
 
     static var customDefaultValueMap: [String: String]?

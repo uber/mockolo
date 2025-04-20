@@ -463,9 +463,9 @@ public final class SwiftTypeOld {
         if arg.isValidBracketed {
             if let idx = arg.typeName.firstIndex(of: "<") {
                 let sub = String(arg.typeName[arg.typeName.startIndex..<idx])
-                if bracketPrefixTypes.contains(sub) {
+                if Self.bracketPrefixTypes.contains(sub) {
                     return "\(arg.typeName)()"
-                } else if let val = rxTypes[sub], let suffix = val {
+                } else if let val = Self.rxTypes[sub], let suffix = val {
                     return "\(arg.typeName)\(suffix)"
                 } else {
                     return nil
@@ -613,8 +613,8 @@ public final class SwiftTypeOld {
 
     public static var customDefaultValueMap: [String: String]?
 
-    private let bracketPrefixTypes = ["Array", "Set", "Dictionary"]
-    private let rxTypes = [String.publishSubject : "()",
+    static let bracketPrefixTypes = ["Array", "Set", "Dictionary"]
+    static let rxTypes = [String.publishSubject : "()",
                            String.replaySubject : String.replaySubjectCreate,
                            String.behaviorSubject : nil,
                            String.behaviorRelay: nil,
@@ -627,7 +627,7 @@ public final class SwiftTypeOld {
     }
 
 
-    private static let defaultValueMap =
+    static let defaultValueMap =
         ["Int": "0",
          "Int8": "0",
          "Int16": "0",
