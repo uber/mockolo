@@ -23,6 +23,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         case tuple(Tuple)
         case nominal(Nominal)
         case closure(Closure)
+        case composition(Composition)
     }
 
     struct Tuple: Equatable {
@@ -30,21 +31,24 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     struct Nominal: Equatable {
-        var someOrAny: SomeOrAny?
         var name: String
         var genericParameterTypes: [SwiftTypeNew] = []
     }
 
     struct Closure: Equatable {
-        var atAttributes: [String]
         var isAsync: Bool
         var throwing: ThrowingKind
         var arguments: [SwiftTypeNew]
         @CoW var returning: SwiftTypeNew
     }
 
+    struct Composition: Equatable {
+        var elements: [SwiftTypeNew]
+    }
+
     var kind: Kind
-    var isInOut: Bool = false
+    var attributes: [String] = []
+    var someOrAny: SomeOrAny?
     var isIUO: Bool = false
     var hasEllipsis: Bool = false
 
@@ -54,32 +58,44 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
 
     var description: String {
         var repr: String
+        repr = "\(attributes.map({ "\($0) " }).joined())"
+        if let someOrAny {
+            repr += "\(someOrAny.rawValue) "
+        }
         switch kind {
         case .tuple(let tuple):
             let elementTypes = tuple.elements.map(\.description)
-            repr = "(\(elementTypes.joined(separator: ", ")))"
+            repr += "(\(elementTypes.joined(separator: ", ")))"
         case .nominal(let nominal):
-            repr = nominal.name
-            if let someOrAny = nominal.someOrAny {
-                repr = "\(someOrAny.rawValue) \(repr)"
-            }
+            repr += nominal.name
             if !nominal.genericParameterTypes.isEmpty {
                 let parameterTypes = nominal.genericParameterTypes.map(\.description)
                 repr += "<\(parameterTypes.joined(separator: ", "))>"
             }
         case .closure(let closure):
-            repr = "TODO"
+            let params = closure.arguments.map(\.description).joined(separator: ", ")
+
+            var closureDesc = "(\(params))"
+            if closure.isAsync {
+                closureDesc += " async"
+            }
+            if let throwing = closure.throwing.applyThrowingTemplate() {
+                closureDesc += " \(throwing)"
+            }
+            if !closure.returning.isVoid {
+                closureDesc += " -> \(closure.returning.description)"
+            }
+            repr += closureDesc
+        case .composition(let composition):
+            repr += composition.elements.map(\.description).joined(separator: " & ")
         }
         if isIUO {
             switch kind {
             case .tuple, .nominal:
                 repr += "!"
-            case .closure:
+            case .closure, .composition:
                 repr = "(\(repr))!"
             }
-        }
-        if isInOut {
-            repr = "inout \(repr)"
         }
         if hasEllipsis {
             repr += "..."
@@ -100,6 +116,8 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             return CollectionOfOne(nominal.name) + nominal.genericParameterTypes.flatMap { $0.includingIdentifiers() }
         case .closure(let closure):
             return closure.arguments.flatMap { $0.includingIdentifiers() } + closure.returning.includingIdentifiers()
+        case .composition(let composition):
+            return composition.elements.flatMap { $0.includingIdentifiers() }
         }
     }
 
@@ -135,20 +153,16 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
     }
 
+    var isInOut: Bool {
+        attributes.contains(.inout)
+    }
+
     var isEscaping: Bool {
-        if case .closure(let closure) = kind {
-            return closure.atAttributes.contains(where: { $0 == "escaping" })
-        } else {
-            return false
-        }
+        attributes.contains(where: { $0 == "@escaping" })
     }
 
     var isAutoclosure: Bool {
-        if case .closure(let closure) = kind {
-            return closure.atAttributes.contains(where: { $0 == "autoclosure" })
-        } else {
-            return false
-        }
+        attributes.contains(where: { $0 == "@autoclosure" })
     }
 
     var underlyingType: String {
@@ -177,7 +191,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             )))
         case .nominal(let nominal):
             let hasGenericType: Bool
-            if nominal.someOrAny == .some {
+            if self.someOrAny == .some {
                 hasGenericType = true
             } else {
                 let typeIDs = includingIdentifiers()
@@ -197,6 +211,10 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             closure.arguments = closure.arguments.map { $0.processTypeParams(with: typeParamList) }
             closure.returning = closure.returning.processTypeParams(with: typeParamList)
             return self.copy(kind: .closure(closure))
+        case .composition(let composition):
+            return self.copy(kind: .composition(.init(
+                elements: composition.elements.map { $0.processTypeParams(with: typeParamList) }
+            )))
         }
     }
 
@@ -271,15 +289,17 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
 //            displayableReturnType = "(\(displayableReturnType))"
 //        }
 
-        let resultType = SwiftType(
+        var resultType = SwiftType(
             kind: .closure(.init(
-                atAttributes: requiresSendable ? ["Sendable"] : [],
                 isAsync: false,
                 throwing: .none,
                 arguments: params,
                 returning: displayableReturnType
             ))
         )
+        if requiresSendable {
+            resultType.attributes.append("@Sendable")
+        }
         return (type: resultType, cast: returnTypeCast)
     }
 
@@ -324,8 +344,106 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
 
 extension SwiftTypeNew {
     init(typeSyntax: TypeSyntax) {
-        //        if let syntax = typeSyntax.as(TypeSyntaxEnum.Type)
-        kind = .nominal(.init(name: "", genericParameterTypes: []))
+        switch typeSyntax.as(TypeSyntaxEnum.self) {
+        case .arrayType(let syntax):
+            // [T]
+            let elementType = SwiftTypeNew(typeSyntax: syntax.element)
+            self.kind = .nominal(.init(name: "Array", genericParameterTypes: [elementType]))
+
+        case .dictionaryType(let syntax):
+            // [T: U]
+            let keyType = SwiftTypeNew(typeSyntax: syntax.key)
+            let valueType = SwiftTypeNew(typeSyntax: syntax.value)
+            self.kind = .nominal(.init(name: "Dictionary", genericParameterTypes: [keyType, valueType]))
+
+        case .tupleType(let syntax):
+            // (T, U)
+            let elements = syntax.elements.map { SwiftTypeNew(typeSyntax: $0.type) }
+            self.kind = .tuple(.init(elements: elements))
+
+        case .functionType(let syntax):
+            // (T) -> U
+            self.kind = .closure(.init(
+                isAsync: syntax.effectSpecifiers?.asyncSpecifier != nil,
+                throwing: ThrowingKind(syntax.effectSpecifiers?.throwsClause),
+                arguments: syntax.parameters.map { SwiftType(typeSyntax: $0.type) },
+                returning: SwiftTypeNew(typeSyntax: syntax.returnClause.type)
+            ))
+
+        case .optionalType(let syntax):
+            // T?
+            let base = SwiftTypeNew(typeSyntax: syntax.wrappedType)
+            self = base.optionalWrapped()
+
+        case .implicitlyUnwrappedOptionalType(let syntax):
+            // T!
+            let base = SwiftTypeNew(typeSyntax: syntax.wrappedType)
+            self = base.optionalWrapped()
+            self.isIUO = true
+
+        case .identifierType(let syntax):
+            // T<U>
+            let name = syntax.name.trimmedDescription
+            let generics = syntax.genericArgumentClause?.arguments.map { SwiftTypeNew(typeSyntax: $0.argument) }
+            self.kind = .nominal(.init(name: name, genericParameterTypes: generics ?? []))
+
+        case .someOrAnyType(let syntax):
+            // some P, any P
+            self = SwiftTypeNew(typeSyntax: syntax.constraint)
+            if syntax.someOrAnySpecifier.tokenKind == .keyword(.some) {
+                self.someOrAny = .some
+            } else if syntax.someOrAnySpecifier.tokenKind == .keyword(.any) {
+                self.someOrAny = .any
+            }
+
+        case .metatypeType(let syntax):
+            // T.Type, P.Protocol
+            let base = SwiftTypeNew(typeSyntax: syntax.baseType)
+            self.kind = .nominal(.init(name: "\(base.description).\(syntax.metatypeSpecifier.text)"))
+
+        case .memberType(let syntax):
+            // T.U
+            let base = SwiftTypeNew(typeSyntax: syntax.baseType)
+            let name = syntax.name.trimmedDescription
+            self.kind = .nominal(.init(name: "\(base.description).\(name)"))
+
+        case .attributedType(let syntax):
+            // inout T, sending T
+            self = SwiftTypeNew(typeSyntax: syntax.baseType)
+            self.attributes = syntax.specifiers.map(\.trimmedDescription)
+
+        case .compositionType(let syntax):
+            // P & Q
+            let elements = syntax.elements.map { SwiftTypeNew(typeSyntax: $0.type) }
+            self.kind = .composition(.init(elements: elements))
+
+        case .namedOpaqueReturnType(let syntax):
+            // <U>A
+            // unsupported
+            self.kind = .nominal(.init(name: syntax.trimmedDescription))
+
+        case .packElementType(let syntax):
+            // each T
+            self = SwiftTypeNew(typeSyntax: syntax.pack)
+            self.attributes.append("each")
+
+        case .packExpansionType(let syntax):
+            // repeat T
+            self = SwiftTypeNew(typeSyntax: syntax.repetitionPattern)
+            self.attributes.insert("repeat", at: 0)
+
+        case .suppressedType(let syntax):
+            // unsupported
+            self = .init(typeSyntax: syntax.type)
+
+        case .classRestrictionType(let syntax):
+            // unsupported
+            self.kind = .nominal(.init(name: syntax.trimmedDescription))
+
+        case .missingType(let syntax):
+            // unsupported
+            self.kind = .nominal(.init(name: syntax.trimmedDescription))
+        }
     }
 
     static func makeOrVoid(typeSyntax: TypeSyntax?) -> SwiftTypeNew {

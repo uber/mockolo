@@ -923,7 +923,7 @@ extension Trivia {
 }
 
 extension ThrowingKind {
-    fileprivate init(_ syntax: ThrowsClauseSyntax?) {
+    init(_ syntax: ThrowsClauseSyntax?) {
         guard let syntax else {
             self = .none
             return
