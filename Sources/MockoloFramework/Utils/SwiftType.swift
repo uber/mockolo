@@ -27,7 +27,11 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     struct Tuple: Equatable {
-        var elements: [SwiftTypeNew]
+        struct Element: Equatable {
+            var label: String?
+            var type: SwiftTypeNew
+        }
+        var elements: [Element]
     }
 
     struct Nominal: Equatable {
@@ -64,7 +68,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
         switch kind {
         case .tuple(let tuple):
-            let elementTypes = tuple.elements.map(\.description)
+            let elementTypes = tuple.elements.map(\.type.description)
             repr += "(\(elementTypes.joined(separator: ", ")))"
         case .nominal(let nominal):
             repr += nominal.name
@@ -111,7 +115,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     func includingIdentifiers() -> [String] {
         switch kind {
         case .tuple(let tuple):
-            return tuple.elements.flatMap { $0.includingIdentifiers() }
+            return tuple.elements.flatMap { $0.type.includingIdentifiers() }
         case .nominal(let nominal):
             return CollectionOfOne(nominal.name) + nominal.genericParameterTypes.flatMap { $0.includingIdentifiers() }
         case .closure(let closure):
@@ -180,16 +184,41 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     static func toArgumentsCaptureType(with params: [(label: String, type: SwiftTypeNew)], typeParams: [String]) -> SwiftTypeNew {
-        fatalError("TODO")
+        assert(!params.isEmpty)
+
+        // Expected only history capturable types.
+        let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftTypeNew) -> SwiftTypeNew? in
+            var processedType = subtype.processTypeParams(with: typeParams)
+
+            if subtype.isInOut {
+                processedType.attributes.removeAll(where: { $0 == .inout })
+            }
+            processedType.isIUO = false
+
+            return processedType
+        }
+
+        if displayableParamTypes.count >= 2 {
+            let elements = zip(params.map(\.label), displayableParamTypes).map {
+                Tuple.Element(label: $0, type: $1)
+            }
+            return .init(kind: .tuple(.init(
+                elements: elements
+            )))
+        } else {
+            return displayableParamTypes[0]
+        }
     }
 
     func processTypeParams(with typeParamList: [String]) -> SwiftTypeNew {
         switch kind {
         case .tuple(let tuple):
             return self.copy(kind: .tuple(.init(
-                elements: tuple.elements.map { $0.processTypeParams(with: typeParamList) }
+                elements: tuple.elements.map {
+                    .init(label: $0.label, type: $0.type.processTypeParams(with: typeParamList))
+                }
             )))
-        case .nominal(let nominal):
+        case .nominal:
             let hasGenericType: Bool
             if self.someOrAny == .some {
                 hasGenericType = true
@@ -357,8 +386,13 @@ extension SwiftTypeNew {
             self.kind = .nominal(.init(name: "Dictionary", genericParameterTypes: [keyType, valueType]))
 
         case .tupleType(let syntax):
-            // (T, U)
-            let elements = syntax.elements.map { SwiftTypeNew(typeSyntax: $0.type) }
+            // (T, u: U)
+            let elements = syntax.elements.map {
+                SwiftTypeNew.Tuple.Element(
+                    label: $0.firstName?.text, // tuple cannot have secondName
+                    type: SwiftTypeNew(typeSyntax: $0.type)
+                )
+            }
             self.kind = .tuple(.init(elements: elements))
 
         case .functionType(let syntax):
