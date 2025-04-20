@@ -162,15 +162,32 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     var isEscaping: Bool {
-        attributes.contains(where: { $0 == "@escaping" })
+        attributes.contains(where: { $0 == .escaping })
     }
 
     var isAutoclosure: Bool {
-        attributes.contains(where: { $0 == "@autoclosure" })
+        attributes.contains(where: { $0 == .autoclosure })
     }
 
     var underlyingType: String {
-        "TODO"
+        var ret = self
+
+        // If @escaping, remove as it can only be used for a func parameter.
+        ret.attributes.removeAll(where: { $0 == .escaping })
+
+        // Use force unwrapped for the underlying type so it doesn't always have to be set in the init (need to allow blank init).
+        if isClosure || someOrAny == .any {
+            ret = ret.copy(
+                kind: .tuple(.init(elements: [.init(type: .init(kind: ret.kind))]))
+            )
+        } else {
+            if let unwrapped = ret.optionalUnwrapped() {
+                ret = unwrapped
+            }
+        }
+        ret.isIUO = true
+
+        return ret.description
     }
 
     // FIXME: remove this
@@ -287,7 +304,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             var asSuffix = "!"
             let returnAsType: SwiftType?
 
-            if let unwrapped = returnType.unwrapped() {
+            if let unwrapped = returnType.optionalUnwrapped() {
                 displayableReturnType = .Any.optionalWrapped()
                 returnAsType = unwrapped
                 asSuffix = "?"
@@ -494,10 +511,12 @@ extension SwiftTypeNew {
     }
 
     func optionalWrapped() -> SwiftTypeNew {
-        return .init(kind: .nominal(.init(name: .optional, genericParameterTypes: [self])))
+        return copy(
+            kind: .nominal(.init(name: .optional, genericParameterTypes: [.init(kind: kind)]))
+        )
     }
 
-    func unwrapped() -> SwiftTypeNew? {
+    func optionalUnwrapped() -> SwiftTypeNew? {
         guard isOptional else {
             return nil
         }
