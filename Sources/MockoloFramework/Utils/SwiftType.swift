@@ -86,9 +86,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             if let throwing = closure.throwing.applyThrowingTemplate() {
                 closureDesc += " \(throwing)"
             }
-            if !closure.returning.isVoid {
-                closureDesc += " -> \(closure.returning.description)"
-            }
+            closureDesc += " -> \(closure.returning.description)"
             repr += closureDesc
         case .composition(let composition):
             repr += composition.elements.map(\.description).joined(separator: " & ")
@@ -192,7 +190,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
 
     // FIXME: remove this
     var isUnknown: Bool {
-        typeName == ""
+        isVoid
     }
 
     func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
@@ -378,7 +376,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
 
         var resultType = SwiftType(
             kind: .closure(.init(
-                isAsync: false,
+                isAsync: isAsync,
                 throwing: .none,
                 arguments: params,
                 returning: displayableReturnType
