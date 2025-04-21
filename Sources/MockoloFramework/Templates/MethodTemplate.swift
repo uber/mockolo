@@ -61,10 +61,10 @@ extension MethodModel {
                     return arg.name.safeName
                 }.joined(separator: ", ")
 
-                let defaultVal = model.returnType.defaultVal() // ?? "nil"
+                let defaultVal = model.returnType?.defaultVal()
 
                 var mockReturn = ".error"
-                if model.returnType.typeName.isEmpty {
+                if model.returnType?.isVoid ?? true {
                     mockReturn = ".void"
                 } else if let val = defaultVal {
                     mockReturn = ".val(\(val))"
@@ -157,8 +157,11 @@ extension MethodModel {
         }
 
         var returnClause: String {
-            let returnTypeName = model.returnType.isUnknown ? "" : model.returnType.typeName
-            return returnTypeName.isEmpty ? "" : "-> \(returnTypeName) "
+            if let returnType = model.returnType {
+                return "-> \(returnType.typeName) "
+            } else {
+                return ""
+            }
         }
 
         var handlerVarName: String {

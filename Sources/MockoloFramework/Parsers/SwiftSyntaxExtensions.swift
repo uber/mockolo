@@ -430,8 +430,8 @@ extension VariableDeclSyntax {
 
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
-            let name = v.pattern.firstToken(viewMode: .sourceAccurate)?.text ?? String.unknownVal
-            var typeName = ""
+            let name = v.pattern.trimmedDescription
+            var typeName: String?
             var potentialInitParam = false
 
             // Get the type info and whether it can be a var param for an initializer
@@ -473,7 +473,7 @@ extension VariableDeclSyntax {
             }
 
             return VariableModel(name: name,
-                                 type: SwiftType(typeName),
+                                 type: typeName.map { SwiftType($0) },
                                  acl: acl,
                                  isStatic: isStatic,
                                  storageKind: storageKind,
@@ -531,7 +531,7 @@ extension FunctionDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         let funcmodel = MethodModel(name: self.name.description,
-                                    typeName: self.signature.returnClause?.type.description ?? "",
+                                    typeName: self.signature.returnClause?.type.description,
                                     kind: .funcKind,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
@@ -575,7 +575,7 @@ extension InitializerDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         return MethodModel(name: "init",
-                           typeName: "",
+                           typeName: nil,
                            kind: .initKind(required: requiredInit, override: declKind == .class),
                            acl: acl,
                            genericTypeParams: genericTypeParams,
@@ -599,7 +599,7 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          type: SwiftType(self.inheritedType?.trimmedDescription ?? ""),
+                          type: SwiftType(self.inheritedType?.trimmedDescription ?? .voidType),
                           isGeneric: true,
                           inInit: inInit,
                           needsVarDecl: false,

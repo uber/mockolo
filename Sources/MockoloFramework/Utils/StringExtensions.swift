@@ -45,9 +45,9 @@ extension String {
     static let override = "override"
     static let privateSet = "private(set)"
     static let mockType = "protocol"
-    static let unknownVal = "Unknown"
     static let prefix = "prefix"
     static let anyType = "Any"
+    static let voidType = "()"
     static let neverType = "Never"
     static let any = "any"
     static let some = "some"
@@ -170,7 +170,7 @@ extension String {
 
 
     func canBeInitParam(type: String, isStatic: Bool) -> Bool {
-        return !(isStatic || type == .unknownVal || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: SwiftType(type)))
+        return !(isStatic || type.hasPrefix(.anyPublisher) || (type.hasSuffix("?") && type.contains(String.closureArrow)) ||  isGenerated(type: SwiftType(type)))
     }
 
     func isGenerated(type: SwiftType) -> Bool {

@@ -20,15 +20,21 @@ extension ParamModel {
     func applyParamTemplate(name: String,
                             label: String,
                             type: SwiftType,
-                            inInit: Bool) -> String {
+                            inInit: Bool,
+                            isGeneric: Bool) -> String {
         var result = name
         if !label.isEmpty {
             result = "\(label) \(name)"
         }
-        if !type.isUnknown {
+        if isGeneric {
+            // FIXME: `type` is used as a generic constraint
+            if !type.isVoid {
+                result = "\(result): \(type.typeName)"
+            }
+        } else {
             result = "\(result): \(type.typeName)"
         }
-        
+
         if inInit, let defaultVal = type.defaultVal() {
             result = "\(result) = \(defaultVal)"
         }
@@ -36,7 +42,6 @@ extension ParamModel {
     }
 
     func applyVarTemplate(type: SwiftType) -> String {
-        assert(!type.isUnknown)
         let vardecl = "\(1.tab)private var \(underlyingName): \(type.underlyingType)"
         return vardecl
     }
