@@ -259,12 +259,8 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         // Expected only history capturable types.
         let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftTypeNew) -> SwiftTypeNew? in
             var processedType = subtype.processTypeParams(with: typeParams)
-
-            if subtype.isInOut {
-                processedType.attributes.removeAll(where: { $0 == .inout })
-            }
+            processedType.attributes.removeAll(where: { $0 == .inout })
             processedType.isIUO = false
-
             return processedType
         }
 
@@ -355,7 +351,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         let returnComps = displayableReturnType.includingIdentifiers()
         if typeParams.contains(where: { returnComps.contains($0)}) {
             var asSuffix = "!"
-            let returnAsType: SwiftType?
+            let returnAsType: SwiftType
 
             if let unwrapped = returnType.optionalUnwrapped() {
                 displayableReturnType = .Any.optionalWrapped()
@@ -370,13 +366,11 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             } else if returnType.isSelf {
                 returnAsType = .Self
             } else {
-                returnAsType = nil
+                returnAsType = returnType
                 displayableReturnType = .Any
             }
 
-            if let returnAsType {
-                returnTypeCast = " as\(asSuffix) " + returnAsType.displayName
-            }
+            returnTypeCast = " as\(asSuffix) " + returnAsType.displayName
         }
 
         if returnType.isSelf {
@@ -392,7 +386,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             kind: .closure(.init(
                 isAsync: isAsync,
                 throwing: .none,
-                arguments: params,
+                arguments: params.map { $0.processTypeParams(with: typeParams) },
                 returning: displayableReturnType
             ))
         )
