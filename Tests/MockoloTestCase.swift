@@ -138,7 +138,13 @@ class MockoloTestCase: XCTestCase {
         if fixtureContents.isEmpty {
             throw XCTSkip("empty fixture")
         }
-        XCTAssert(outputContents.contains(subArray: fixtureContents), "output:\n" + output)
+
+        let ok = outputContents.contains(subArray: fixtureContents)
+        if !ok {
+            let diff = lightDiff(old: outputContents, new: fixtureContents)
+            print("output:\n\(output)")
+            XCTFail("diff:\n" + "\(diff)")
+        }
     }
 }
 
@@ -156,5 +162,32 @@ extension Array where Element: Equatable {
         }
 
         return false
+    }
+}
+
+func lightDiff(old: [String], new: [String]) -> String {
+    return old.difference(from: new)
+        .sorted { l, r in
+            return l.offset < r.offset
+        }
+        .map { change in
+            switch change {
+            case .remove(_, let element, _):
+                return "- \(element)"
+            case .insert(_, let element, _):
+                return "+ \(element)"
+            }
+        }
+        .joined(separator: "\n")
+}
+
+extension CollectionDifference.Change {
+    var offset: Int {
+        switch self {
+        case .insert(let offset, _, _):
+            return offset
+        case .remove(let offset, _, _):
+            return offset
+        }
     }
 }

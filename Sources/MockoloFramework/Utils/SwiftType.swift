@@ -68,13 +68,27 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
         switch kind {
         case .tuple(let tuple):
-            let elementTypes = tuple.elements.map(\.type.description)
-            repr += "(\(elementTypes.joined(separator: ", ")))"
+            let elements = tuple.elements.map { e in
+                if let label = e.label {
+                    return "\(label): \(e.type)"
+                }
+                return e.type.description
+            }
+            repr += "(\(elements.joined(separator: ", ")))"
         case .nominal(let nominal):
-            repr += nominal.name
-            if !nominal.genericParameterTypes.isEmpty {
-                let parameterTypes = nominal.genericParameterTypes.map(\.description)
-                repr += "<\(parameterTypes.joined(separator: ", "))>"
+            switch nominal.name {
+            case "Optional" where nominal.genericParameterTypes.count == 1:
+                repr += "\(nominal.genericParameterTypes[0])?"
+            case "Array" where nominal.genericParameterTypes.count == 1:
+                repr += "[\(nominal.genericParameterTypes[0])]"
+            case "Dictionary" where nominal.genericParameterTypes.count == 2:
+                repr += "[\(nominal.genericParameterTypes[0]): \(nominal.genericParameterTypes[1])]"
+            default:
+                repr += nominal.name
+                if !nominal.genericParameterTypes.isEmpty {
+                    let parameterTypes = nominal.genericParameterTypes.map(\.description)
+                    repr += "<\(parameterTypes.joined(separator: ", "))>"
+                }
             }
         case .closure(let closure):
             let params = closure.arguments.map(\.description).joined(separator: ", ")
