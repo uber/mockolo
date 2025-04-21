@@ -18,6 +18,7 @@ import Foundation
 
 extension ClosureModel {
     func applyClosureTemplate(type: SwiftType,
+                              cast: String?,
                               name: String,
                               params: [(String, SwiftType)],
                               returnDefaultType: SwiftType) -> String {
@@ -45,7 +46,7 @@ extension ClosureModel {
 
         return """
         \(2.tab)if let \(name) = \(name) {
-        \(3.tab)\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(type.cast ?? "")
+        \(3.tab)\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(cast ?? "")
         \(2.tab)}
         \(2.tab)\(handlerReturnDefault)
         """
