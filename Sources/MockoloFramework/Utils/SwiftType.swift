@@ -196,7 +196,48 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
-        // TODO:
+        let (subjectType, typeParam, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam)
+        if subjectType != nil {
+            let prefix = typeName.hasPrefix(String.rxObservableLeftAngleBracket) ? String.rxObservableLeftAngleBracket : String.observableLeftAngleBracket
+            var rxEmpty = String.observableEmpty
+            if let t = typeParam {
+                rxEmpty = "\(prefix)\(t)>.empty()"
+            }
+            return isInitParam ? subjectVal : rxEmpty
+        }
+
+        func parseDefaultVal(type: SwiftType, isInitParam: Bool) -> String? {
+            if let val = defaultSingularVal(isInitParam: isInitParam) {
+                return val
+            }
+
+            switch type.kind {
+            case .tuple(let tuple):
+                var defaultValues: [String] = []
+                for element in tuple.elements {
+                    guard let value = parseDefaultVal(type: element.type, isInitParam: isInitParam) else {
+                        return nil
+                    }
+                    defaultValues.append(value)
+                }
+                return defaultValues.joined(separator: ", ")
+            case .nominal:
+                return type.defaultSingularVal(isInitParam: isInitParam)
+            case .closure, .composition:
+                return nil
+            }
+        }
+
+        if let val = parseDefaultVal(type: self, isInitParam: isInitParam) {
+            return val
+        }
+
+        if case .nominal(let nominal) = kind {
+            if let val = SwiftTypeOld.customDefaultValueMap?[nominal.name] {
+                return val
+            }
+        }
+
         return nil
     }
 
