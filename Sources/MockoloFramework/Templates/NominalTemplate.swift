@@ -148,17 +148,21 @@ extension NominalModel {
         if needParamedInit {
             var paramsAssign = ""
             let params = initParamCandidates
-                .map { (element: VariableModel) -> String in
-                    if let val = element.type.defaultVal(with: element.rxTypes, overrideKey: element.name, isInitParam: true) {
-                        return "\(element.name): \(element.type.typeName) = \(val)"
+                .compactMap { (element: VariableModel) -> String? in
+                    if let val = element.type?.defaultVal(with: element.rxTypes, overrideKey: element.name, isInitParam: true) {
+                        return "\(element.name): \(element.type!.typeName) = \(val)"
                     }
-                    var prefix = ""
-                    if element.type.hasClosure {
-                        if !element.type.isOptional {
-                            prefix = String.escaping + " "
+                    if let elementType = element.type {
+                        var prefix = ""
+                        if elementType.hasClosure == true {
+                            if !elementType.isOptional {
+                                prefix = String.escaping + " "
+                            }
                         }
+                        return "\(element.name): \(prefix)\(elementType.typeName)"
+                    } else {
+                        return nil
                     }
-                    return "\(element.name): \(prefix)\(element.type.typeName)"
                 }
                 .joined(separator: ", ")
 

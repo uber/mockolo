@@ -13,7 +13,7 @@ final class VariableModel: Model {
     }
 
     let name: String
-    let type: SwiftType
+    let type: SwiftType?
     let offset: Int64
     let accessLevel: String
     let attributes: [String]?
@@ -39,14 +39,14 @@ final class VariableModel: Model {
     }
 
     var underlyingName: String {
-        if type.defaultVal() == nil {
+        if type?.defaultVal() == nil {
             return "_\(name)"
         }
         return name
     }
 
     init(name: String,
-         type: SwiftType,
+         type: SwiftType?,
          acl: String?,
          isStatic: Bool,
          storageKind: MockStorageKind,
@@ -89,11 +89,15 @@ final class VariableModel: Model {
             if let propertyWrapper = propertyWrapper, !modelDescription.contains(propertyWrapper) {
                 prefix = "\(propertyWrapper) "
             }
-            if shouldOverride, !name.isGenerated(type: type) {
+            if let type, shouldOverride, !name.isGenerated(type: type) {
                 prefix += "\(String.override) "
             }
 
             return prefix + modelDescription
+        }
+
+        guard let type else {
+            return nil
         }
 
         if !arguments.disableCombineDefaultValues {
