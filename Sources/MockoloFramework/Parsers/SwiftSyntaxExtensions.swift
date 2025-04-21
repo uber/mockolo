@@ -531,7 +531,7 @@ extension FunctionDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         let funcmodel = MethodModel(name: self.name.description,
-                                    typeName: self.signature.returnClause?.type.description ?? .voidType,
+                                    typeName: self.signature.returnClause?.type.description,
                                     kind: .funcKind,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
@@ -575,7 +575,7 @@ extension InitializerDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         return MethodModel(name: "init",
-                           typeName: .voidType,
+                           typeName: nil,
                            kind: .initKind(required: requiredInit, override: declKind == .class),
                            acl: acl,
                            genericTypeParams: genericTypeParams,
