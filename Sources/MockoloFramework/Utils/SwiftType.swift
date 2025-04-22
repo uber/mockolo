@@ -501,9 +501,10 @@ extension SwiftTypeNew {
             self.kind = .nominal(.init(name: "\(base.description).\(name)"))
 
         case .attributedType(let syntax):
-            // inout T, sending T
+            // inout T, sending T, @escaping T
             self = SwiftTypeNew(typeSyntax: syntax.baseType)
-            self.attributes = syntax.specifiers.map(\.trimmedDescription)
+            self.attributes += syntax.specifiers.map(\.trimmedDescription)
+            self.attributes += syntax.attributes.map(\.trimmedDescription)
 
         case .compositionType(let syntax):
             // P & Q
