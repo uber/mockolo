@@ -430,8 +430,6 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         return (underlyingSubjectType, typeParam.description, underlyingSubjectTypeDefaultVal)
 
     }
-
-    static var customDefaultValueMap: [String: String]?
 }
 
 extension SwiftTypeNew {
