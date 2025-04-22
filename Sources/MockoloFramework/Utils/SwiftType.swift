@@ -188,10 +188,14 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         ret.attributes.removeAll(where: { $0 == .escaping })
 
         // Use force unwrapped for the underlying type so it doesn't always have to be set in the init (need to allow blank init).
-        if isClosure || someOrAny == .any {
+        if isClosure {
             ret = ret.copy(
                 kind: .tuple(.init(elements: [.init(type: .init(kind: ret.kind))]))
             )
+        } else if someOrAny == .any {
+            ret = .init(kind: .tuple(
+                .init(elements: [.init(type: ret)])
+            ))
         } else {
             if let unwrapped = ret.optionalUnwrapped() {
                 ret = unwrapped
