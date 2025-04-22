@@ -227,7 +227,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                     }
                     defaultValues.append(value)
                 }
-                return defaultValues.joined(separator: ", ")
+                return "(\(defaultValues.joined(separator: ", ")))"
             case .nominal:
                 return type.defaultSingularVal(isInitParam: isInitParam)
             case .closure, .composition:
@@ -365,7 +365,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                 displayableReturnType = .Any
             }
 
-            returnTypeCast = " as\(asSuffix) " + returnAsType.displayName
+            returnTypeCast = " as\(asSuffix) \(returnAsType)"
         }
 
         if returnType.isSelf {
@@ -380,7 +380,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         var resultType = SwiftType(
             kind: .closure(.init(
                 isAsync: isAsync,
-                throwing: .none,
+                throwing: throwing,
                 arguments: params.map { $0.processTypeParams(with: typeParams) },
                 returning: displayableReturnType
             ))
@@ -483,10 +483,10 @@ extension SwiftTypeNew {
         case .someOrAnyType(let syntax):
             // some P, any P
             self = SwiftTypeNew(typeSyntax: syntax.constraint)
-            if syntax.someOrAnySpecifier.tokenKind == .keyword(.some) {
-                self.someOrAny = .some
-            } else if syntax.someOrAnySpecifier.tokenKind == .keyword(.any) {
-                self.someOrAny = .any
+            self.someOrAny = switch syntax.someOrAnySpecifier.tokenKind {
+            case .keyword(.some): .some
+            case .keyword(.any): .any
+            default: nil
             }
 
         case .metatypeType(let syntax):
