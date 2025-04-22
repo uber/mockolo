@@ -168,14 +168,14 @@ extension VariableModel {
 
             var template = "\n"
             var isWrapperPropertyOptionalOrForceUnwrapped = false
-            if let publishedAliasModel = wrapperAliasModel {
+            if let publishedAliasModel = wrapperAliasModel, let type = publishedAliasModel.type {
                 // If the property required by the protocol/class cannot be optional, the wrapper property will be the underlyingProperty
                 // i.e. @Published var _myType: MyType!
-                let wrapperPropertyDefaultValue = publishedAliasModel.type.defaultVal()
+                let wrapperPropertyDefaultValue = type.defaultVal()
                 if wrapperPropertyDefaultValue == nil {
                     wrapperPropertyName = "_\(wrapperPropertyName)"
                 }
-                isWrapperPropertyOptionalOrForceUnwrapped = wrapperPropertyDefaultValue == nil || publishedAliasModel.type.isOptional
+                isWrapperPropertyOptionalOrForceUnwrapped = wrapperPropertyDefaultValue == nil || type.isOptional
             }
 
             var mapping = ""

@@ -28,6 +28,7 @@ public final class SwiftTypeOld {
     var cachedDefaultVal: String?
 
     init(_ type: String){
+        assert(!type.isEmpty)
         self.typeName = type
     }
 
@@ -45,10 +46,6 @@ public final class SwiftTypeOld {
 
     var isRxObservable: Bool {
         return typeName.hasPrefix(.rxObservableLeftAngleBracket) || typeName.hasPrefix(.observableLeftAngleBracket)
-    }
-
-    var isUnknown: Bool {
-        return typeName.isEmpty
     }
 
     var isOptional: Bool {
@@ -176,7 +173,7 @@ public final class SwiftTypeOld {
     }
 
     var isIdentifier: Bool {
-        if isUnknown {
+        if isVoid {
             return false
         }
 
@@ -199,7 +196,7 @@ public final class SwiftTypeOld {
     }
 
     var isVoid: Bool {
-        return typeName.isEmpty || typeName == "()" || typeName == "Void"
+        return typeName == "()" || typeName == "Void"
     }
 
     var hasValidBrackets: Bool {
@@ -526,8 +523,10 @@ public final class SwiftTypeOld {
             returnTypeCast = " as! " + String.`Self`
         }
 
-        if !(Self(displayableReturnType).isSingular || Self(displayableReturnType).isOptional) {
-            displayableReturnType = "(\(displayableReturnType))"
+        if !SwiftTypeOld(displayableReturnType).isVoid {
+            if !(SwiftTypeOld(displayableReturnType).isSingular || SwiftTypeOld(displayableReturnType).isOptional) {
+                displayableReturnType = "(\(displayableReturnType))"
+            }
         }
 
         let suffixStr = applyFunctionSuffixTemplate(

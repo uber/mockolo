@@ -85,7 +85,7 @@ final class ParamModel: Model {
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
-        return applyParamTemplate(name: name, label: label, type: type, inInit: inInit)
+        return applyParamTemplate(name: name, label: label, type: type, inInit: inInit, isGeneric: isGeneric)
     }
 }
 

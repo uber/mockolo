@@ -431,7 +431,7 @@ extension VariableDeclSyntax {
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
             let name = v.pattern.trimmedDescription
-            var swiftType: SwiftType
+            var swiftType: SwiftType?
             var potentialInitParam = false
 
             // Get the type info and whether it can be a var param for an initializer
@@ -440,7 +440,7 @@ extension VariableDeclSyntax {
                 potentialInitParam = name.canBeInitParam(type: type, isStatic: isStatic)
                 swiftType = type
             } else {
-                swiftType = .Void
+                swiftType = nil
             }
 
             let storageKind: VariableModel.MockStorageKind
@@ -534,7 +534,7 @@ extension FunctionDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         let funcmodel = MethodModel(name: self.name.description,
-                                    returnType: .makeOrVoid(typeSyntax: self.signature.returnClause?.type),
+                                    returnType: (self.signature.returnClause?.type).map { SwiftType(typeSyntax: $0) },
                                     kind: .funcKind,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
@@ -578,7 +578,7 @@ extension InitializerDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         return MethodModel(name: "init",
-                           returnType: .Void,
+                           returnType: nil,
                            kind: .initKind(required: requiredInit, override: declKind == .class),
                            acl: acl,
                            genericTypeParams: genericTypeParams,
