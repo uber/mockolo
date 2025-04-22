@@ -77,11 +77,11 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             repr += "(\(elements.joined(separator: ", ")))"
         case .nominal(let nominal):
             switch nominal.name {
-            case "Optional" where nominal.genericParameterTypes.count == 1:
+            case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
                 repr += "\(nominal.genericParameterTypes[0])?"
-            case "Array" where nominal.genericParameterTypes.count == 1:
+            case .arrayTypeSugarName where nominal.genericParameterTypes.count == 1:
                 repr += "[\(nominal.genericParameterTypes[0])]"
-            case "Dictionary" where nominal.genericParameterTypes.count == 2:
+            case .dictionaryTypeSugarName where nominal.genericParameterTypes.count == 2:
                 repr += "[\(nominal.genericParameterTypes[0]): \(nominal.genericParameterTypes[1])]"
             default:
                 repr += nominal.name
@@ -138,7 +138,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     var isOptional: Bool {
-        isNominal(named: .optional)
+        isNominal(named: .optional) || isNominal(named: .optionalTypeSugarName)
     }
 
     var isSelf: Bool {
@@ -149,7 +149,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         if case .tuple(let tuple) = kind {
             return tuple.elements.isEmpty
         } else {
-            return false
+            return isNominal(named: "Void")
         }
     }
 
@@ -200,11 +200,6 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         ret.isIUO = true
 
         return ret.description
-    }
-
-    // FIXME: remove this
-    var isUnknown: Bool {
-        isVoid
     }
 
     func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
@@ -441,13 +436,13 @@ extension SwiftTypeNew {
         case .arrayType(let syntax):
             // [T]
             let elementType = SwiftTypeNew(typeSyntax: syntax.element)
-            self.kind = .nominal(.init(name: "Array", genericParameterTypes: [elementType]))
+            self.kind = .nominal(.init(name: .arrayTypeSugarName, genericParameterTypes: [elementType]))
 
         case .dictionaryType(let syntax):
             // [T: U]
             let keyType = SwiftTypeNew(typeSyntax: syntax.key)
             let valueType = SwiftTypeNew(typeSyntax: syntax.value)
-            self.kind = .nominal(.init(name: "Dictionary", genericParameterTypes: [keyType, valueType]))
+            self.kind = .nominal(.init(name: .dictionaryTypeSugarName, genericParameterTypes: [keyType, valueType]))
 
         case .tupleType(let syntax):
             // (T, u: U)
@@ -544,14 +539,6 @@ extension SwiftTypeNew {
         }
     }
 
-    static func makeOrVoid(typeSyntax: TypeSyntax?) -> SwiftTypeNew {
-        if let typeSyntax {
-            return .init(typeSyntax: typeSyntax)
-        } else {
-            return .Void
-        }
-    }
-
     // escaping hatch. May return corrupted results
     static func make(named: String) -> SwiftTypeNew {
         return .init(kind: .nominal(.init(name: named)))
@@ -559,7 +546,7 @@ extension SwiftTypeNew {
 
     func optionalWrapped() -> SwiftTypeNew {
         return copy(
-            kind: .nominal(.init(name: .optional, genericParameterTypes: [.init(kind: kind)]))
+            kind: .nominal(.init(name: .optionalTypeSugarName, genericParameterTypes: [.init(kind: kind)]))
         )
     }
 

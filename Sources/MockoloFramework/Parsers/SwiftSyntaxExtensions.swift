@@ -602,7 +602,8 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          type: .makeOrVoid(typeSyntax: self.inheritedType),
+                          // .Void is not correct but this is due to the old implementation. see: ParamTemplate.swift#L30
+                          type: self.inheritedType.map { SwiftType(typeSyntax: $0) } ?? .Void,
                           isGeneric: true,
                           inInit: inInit,
                           needsVarDecl: false,
@@ -665,7 +666,7 @@ extension AssociatedTypeDeclSyntax {
 
         return AssociatedTypeModel(name: self.name.text,
                                    inheritances: self.inheritanceClause?.inheritedTypes.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
-                                   defaultType: .makeOrVoid(typeSyntax: self.initializer?.value),
+                                   defaultType: (self.initializer?.value).map { SwiftType(typeSyntax: $0) },
                                    whereConstraints: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,
                                    offset: self.offset,

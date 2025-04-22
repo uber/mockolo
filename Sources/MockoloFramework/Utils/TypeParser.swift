@@ -612,7 +612,7 @@ public final class SwiftTypeOld {
 
     public static var customDefaultValueMap: [String: String]?
 
-    static let bracketPrefixTypes = ["Array", "Set", "Dictionary"]
+    static let bracketPrefixTypes = ["Array", "Set", "Dictionary", .arrayTypeSugarName, .dictionaryTypeSugarName]
     static let rxTypes = [String.publishSubject : "()",
                            String.replaySubject : String.replaySubjectCreate,
                            String.behaviorSubject : nil,
