@@ -230,8 +230,8 @@ extension VariableModel {
         let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "
 
         if let rxTypes = rxTypes, !rxTypes.isEmpty {
-            let (subjectType, _, subjectVal) = type.parseRxVar(overrides: rxTypes, overrideKey: name, isInitParam: true)
-            if let underlyingSubjectType = subjectType {
+            if let (subjectType, _, subjectVal) = type.parseRxVar(overrides: rxTypes, overrideKey: name, isInitParam: true) {
+                let underlyingSubjectType = subjectType
 
                 let underlyingSubjectName = "\(name)\(String.subjectSuffix)"
                 let underlyingSetCallCount = "\(underlyingSubjectName)\(String.setCallCountSuffix)"

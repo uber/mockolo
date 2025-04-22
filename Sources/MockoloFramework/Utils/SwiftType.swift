@@ -207,14 +207,12 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
-        let (subjectType, typeParam, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam)
-        if subjectType != nil {
-            let prefix = typeName.hasPrefix(String.rxObservableLeftAngleBracket) ? String.rxObservableLeftAngleBracket : String.observableLeftAngleBracket
-            var rxEmpty = String.observableEmpty
-            if let t = typeParam {
-                rxEmpty = "\(prefix)\(t)>.empty()"
+        if let (_, typeParam, subjectVal) = parseRxVar(overrides: overrides, overrideKey: overrideKey, isInitParam: isInitParam) {
+            if isInitParam {
+                return subjectVal
             }
-            return isInitParam ? subjectVal : rxEmpty
+            let prefix = typeName.hasPrefix(String.rxObservableLeftAngleBracket) ? String.rxObservableLeftAngleBracket : String.observableLeftAngleBracket
+            return "\(prefix)\(typeParam)>.empty()"
         }
 
         func parseDefaultVal(type: SwiftType, isInitParam: Bool) -> String? {
@@ -293,11 +291,13 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             }
 
             if hasGenericType {
-                if isOptional {
-                    return self.copy(kind: SwiftType.Any.optionalWrapped().kind)
+                var result = if isOptional {
+                    self.copy(kind: SwiftType.Any.optionalWrapped().kind)
                 } else {
-                    return self.copy(kind: SwiftType.Any.kind)
+                    self.copy(kind: SwiftType.Any.kind)
                 }
+                result.someOrAny = nil
+                return result
             } else {
                 return self
             }
@@ -395,12 +395,13 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         return (type: resultType, cast: returnTypeCast)
     }
 
-    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String?, String?, String?) {
+    func parseRxVar(overrides: [String: String]?, overrideKey: String, isInitParam: Bool) -> (String, String, String?)? {
         guard (self.isNominal(named: .observable) || self.isNominal(named: .rxObservable)),
               case .nominal(let nominal) = kind,
-              let typeParam = nominal.genericParameterTypes.first else {
-            return (nil, nil, nil)
+              !nominal.genericParameterTypes.isEmpty else {
+            return nil
         }
+        let typeParams = nominal.genericParameterTypes.map(\.description).joined(separator: ", ")
 
         var subjectKind = ""
         var underlyingSubjectType = ""
@@ -415,7 +416,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         if subjectKind.isEmpty {
             subjectKind = String.publishSubject
         }
-        underlyingSubjectType = "\(subjectKind)<\(typeParam)>"
+        underlyingSubjectType = "\(subjectKind)<\(typeParams)>"
 
         var underlyingSubjectTypeDefaultVal: String? = nil
         if subjectKind == String.publishSubject {
@@ -423,11 +424,11 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         } else if subjectKind == String.replaySubject {
             underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)\(String.replaySubjectCreate)"
         } else if subjectKind == String.behaviorSubject {
-            if let val = typeParam.defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
+            if let val = nominal.genericParameterTypes[0].defaultSingularVal(isInitParam: isInitParam, overrides: overrides, overrideKey: overrideKey) {
                 underlyingSubjectTypeDefaultVal = "\(underlyingSubjectType)(value: \(val))"
             }
         }
-        return (underlyingSubjectType, typeParam.description, underlyingSubjectTypeDefaultVal)
+        return (underlyingSubjectType, typeParams, underlyingSubjectTypeDefaultVal)
 
     }
 }
