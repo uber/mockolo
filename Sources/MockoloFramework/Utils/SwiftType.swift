@@ -42,7 +42,12 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     struct Closure: Equatable {
         var isAsync: Bool
         var throwing: ThrowingKind
-        var arguments: [SwiftTypeNew]
+        struct Argument: Equatable {
+            var firstName: String?
+            var secondName: String?
+            var type: SwiftTypeNew
+        }
+        var arguments: [Argument]
         @CoW var returning: SwiftTypeNew
     }
 
@@ -91,7 +96,14 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                 }
             }
         case .closure(let closure):
-            let params = closure.arguments.map(\.description).joined(separator: ", ")
+            let params = closure.arguments.map {
+                let labels = [$0.firstName, $0.secondName].compactMap { $0 }
+                if labels.isEmpty {
+                    return $0.type.description
+                } else {
+                    return "\(labels.joined(separator: " ")): \($0.type)"
+                }
+            }.joined(separator: ", ")
 
             var closureDesc = "(\(params))"
             if closure.isAsync {
@@ -131,7 +143,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         case .nominal(let nominal):
             return CollectionOfOne(nominal.name) + nominal.genericParameterTypes.flatMap { $0.includingIdentifiers() }
         case .closure(let closure):
-            return closure.arguments.flatMap { $0.includingIdentifiers() } + closure.returning.includingIdentifiers()
+            return closure.arguments.flatMap { $0.type.includingIdentifiers() } + closure.returning.includingIdentifiers()
         case .composition(let composition):
             return composition.elements.flatMap { $0.includingIdentifiers() }
         }
@@ -154,10 +166,40 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     var isClosure: Bool {
-        if case .closure = kind {
-            return true
-        } else {
+        switch kind {
+        case .tuple(let tuple):
+            if tuple.elements.count == 1 {
+                return tuple.elements[0].type.isClosure
+            }
             return false
+        case .nominal(let nominal):
+            if nominal.genericParameterTypes.count == 1
+                && (nominal.name == .optional || nominal.name == .optionalTypeSugarName) {
+                return nominal.genericParameterTypes[0].isClosure
+            }
+            // Could be a closure with typealias, but it cannot detect.
+            return attributes.contains(.escaping)
+        case .closure:
+            return true
+        case .composition:
+            return false
+        }
+    }
+
+    var isEscapable: Bool {
+        switch kind {
+        case .tuple(let tuple):
+            if tuple.elements.count == 1 {
+                return tuple.elements[0].type.isEscapable
+            }
+            return true
+        case .nominal:
+            // Could be a non-escaping closure with typealias, but it cannot detect.
+            return true
+        case .closure:
+            return attributes.contains(.escaping)
+        case .composition:
+            return true
         }
     }
 
@@ -302,7 +344,9 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                 return self
             }
         case .closure(var closure):
-            closure.arguments = closure.arguments.map { $0.processTypeParams(with: typeParamList) }
+            for i in closure.arguments.indices {
+                closure.arguments[i].type = closure.arguments[i].type.processTypeParams(with: typeParamList)
+            }
             closure.returning = closure.returning.processTypeParams(with: typeParamList)
             return self.copy(kind: .closure(closure))
         case .composition(let composition):
@@ -385,7 +429,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             kind: .closure(.init(
                 isAsync: isAsync,
                 throwing: throwing,
-                arguments: params.map { $0.processTypeParams(with: typeParams) },
+                arguments: params.map { .init(type: $0.processTypeParams(with: typeParams)) },
                 returning: displayableReturnType
             ))
         )
@@ -451,7 +495,7 @@ extension SwiftTypeNew {
             // (T, u: U)
             let elements = syntax.elements.map {
                 SwiftTypeNew.Tuple.Element(
-                    label: $0.firstName?.text, // tuple cannot have secondName
+                    label: $0.firstName?.text, // Tuple element cannot have two labels
                     type: SwiftTypeNew(typeSyntax: $0.type)
                 )
             }
@@ -462,7 +506,13 @@ extension SwiftTypeNew {
             self.kind = .closure(.init(
                 isAsync: syntax.effectSpecifiers?.asyncSpecifier != nil,
                 throwing: ThrowingKind(syntax.effectSpecifiers?.throwsClause),
-                arguments: syntax.parameters.map { SwiftType(typeSyntax: $0.type) },
+                arguments: syntax.parameters.map {
+                    .init(
+                        firstName: $0.firstName?.text,
+                        secondName: $0.secondName?.text,
+                        type: .init(typeSyntax: $0.type)
+                    )
+                },
                 returning: SwiftTypeNew(typeSyntax: syntax.returnClause.type)
             ))
 

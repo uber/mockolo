@@ -153,12 +153,11 @@ extension NominalModel {
                         return "\(element.name): \(element.type!.typeName) = \(val)"
                     }
 
-                    if let elementType = element.type {
-                        var prefix = ""
-                        if elementType.isClosure && !elementType.isOptional {
-                            prefix = String.escaping + " "
+                    if var elementType = element.type {
+                        if !elementType.isEscapable {
+                            elementType.attributes.insert(.escaping, at: 0)
                         }
-                        return "\(element.name): \(prefix)\(elementType.typeName)"
+                        return "\(element.name): \(elementType)"
                     } else {
                         return nil
                     }
