@@ -229,8 +229,10 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         // If @escaping, remove as it can only be used for a func parameter.
         ret.attributes.removeAll(where: { $0 == .escaping })
 
+        let isNominal = if case .nominal = kind { true } else { false }
+
         // Use force unwrapped for the underlying type so it doesn't always have to be set in the init (need to allow blank init).
-        if isClosure {
+        if isClosure && !isNominal {
             ret = ret.copy(
                 kind: .tuple(.init(elements: [.init(type: .init(kind: ret.kind))]))
             )
@@ -299,6 +301,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftTypeNew) -> SwiftTypeNew? in
             var processedType = subtype.processTypeParams(with: typeParams)
             processedType.attributes.removeAll(where: { $0 == .inout })
+            processedType.attributes.removeAll(where: { $0 == .escaping })
             processedType.isIUO = false
             return processedType
         }
