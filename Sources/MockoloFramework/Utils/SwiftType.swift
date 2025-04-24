@@ -347,8 +347,10 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                 return self
             }
         case .closure(var closure):
-            for i in closure.arguments.indices {
-                closure.arguments[i].type = closure.arguments[i].type.processTypeParams(with: typeParamList)
+            if closure.arguments.contains(where: {
+                $0.type.processTypeParams(with: typeParamList) != $0.type
+            }) {
+                return .Any
             }
             closure.returning = closure.returning.processTypeParams(with: typeParamList)
             return self.copy(kind: .closure(closure))
