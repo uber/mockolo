@@ -3,32 +3,33 @@ struct CGImage {}
 struct CGRect {}
 
 // ---- Dummy RxSwift types -----
-public protocol ObservableConvertibleType {
+protocol ObservableConvertibleType {
     associatedtype Element
     func asObservable() -> any ObservableType
 }
-public protocol ObservableType: ObservableConvertibleType {
+protocol ObservableType: ObservableConvertibleType {
 }
 
-public class Observable<Element>: ObservableType {
-    public func asObservable() -> any ObservableType {
+class Observable<Element>: ObservableType {
+    func asObservable() -> any ObservableType {
         fatalError()
     }
-    public static func empty() -> Observable<Element> {
+    static func empty() -> Observable<Element> {
         fatalError()
     }
 }
 
-public class BehaviorSubject<Element>: Observable<Element> {
-    public init(value: Element) {}
+class BehaviorSubject<Element>: Observable<Element> {
+    init(value: Element) {}
 }
-public class PublishSubject<Element>: Observable<Element> {
-    public override init() {}
+class PublishSubject<Element>: Observable<Element> {
+    override init() {}
 }
-public class ReplaySubject<Element>: Observable<Element> {
-    public static func create(bufferSize: Int) -> ReplaySubject<Element> {
+class ReplaySubject<Element>: Observable<Element> {
+    static func create(bufferSize: Int) -> ReplaySubject<Element> {
         fatalError()
     }
 }
-public class BehaviorRelay<Element>: Observable<Element> {}
+class BehaviorRelay<Element>: Observable<Element> {}
+protocol Disposable {}
 // ----
