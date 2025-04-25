@@ -3,28 +3,28 @@ import Foundation
 class GenericFuncTests: MockoloTestCase {
 
     func testOptionalGenerics() {
-        verify(srcContent: genericOptionalType,
-               dstContent: genericOptionalTypeMock)
+        verify(srcContent: genericOptionalType._source,
+               dstContent: genericOptionalType.expected._source)
     }
 
     func testGenericFuncs() {
-        verify(srcContent: genericFunc,
-               dstContent: genericFuncMock)
+        verify(srcContent: genericFunc._source,
+               dstContent: genericFunc.expected._source)
     }
     
     func testWhereClause() {
-        verify(srcContent: funcWhereClause,
-               dstContent: funcWhereClauseMock)
+        verify(srcContent: funcWhereClause._source,
+               dstContent: funcWhereClause.expected._source)
     }
     
     func testWhereClauseWithSameSignature() {
-        verify(srcContent: funcDuplicateSignatureDifferentWhereClause,
-               dstContent: funcDuplicateSignatureDifferentWhereClauseMock)
+        verify(srcContent: funcDuplicateSignatureDifferentWhereClause._source,
+               dstContent: funcDuplicateSignatureDifferentWhereClause.expected._source)
     }
     
     func testWhereClauseWithSameSignatureAndEqualityConstraints() {
-        verify(srcContent: funcDuplicateSignatureDifferentWhereClauseEquality,
-               dstContent: funcDuplicateSignatureDifferentWhereClauseEqualityMock)
+        verify(srcContent: funcDuplicateSignatureDifferentWhereClauseEquality._source,
+               dstContent: funcDuplicateSignatureDifferentWhereClauseEquality.expected._source)
     }
 }
 
