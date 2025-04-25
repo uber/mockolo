@@ -146,11 +146,11 @@ import MockoloFramework
             }
 
             private(set) var optionalPullCallCount = 0
-            var optionalPullHandler: (([SomeEvent], Any, Bool, ((Any?) -> ())?) -> ())?
+            var optionalPullHandler: (([SomeEvent], Any, Bool, Any?) -> ())?
             func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?) {
                 optionalPullCallCount += 1
                 if let optionalPullHandler = optionalPullHandler {
-                    optionalPullHandler(events, value, once, closure as? ((Any?) -> ()))
+                    optionalPullHandler(events, value, once, closure)
                 }
 
             }

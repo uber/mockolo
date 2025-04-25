@@ -29,10 +29,6 @@ extension ClosureModel {
             if argType.isInOut {
                 return "&" + argName.safeName
             }
-            if argType.isClosure && argType.isOptional,
-               let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
-                return renderedClosure
-            }
             return argName.safeName
         }.joined(separator: ", ")
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
@@ -64,22 +60,5 @@ extension ClosureModel {
         }
 
         return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-    }
-
-    private func renderOptionalGenericClosure(
-        argType: SwiftType,
-        argName: String
-    ) -> String? {
-        let literalComponents = argType.typeName.literalComponents
-        for genericTypeName in genericTypeNames {
-            if literalComponents.contains(genericTypeName) {
-                var processTypeParams = argType.processTypeParams(with: genericTypeNames).description
-                let closureCast = processTypeParams.withoutTrailingCharacters(["!", "?"])
-                return argName.safeName +
-                    " as? " +
-                closureCast
-            }
-        }
-        return nil
     }
 }
