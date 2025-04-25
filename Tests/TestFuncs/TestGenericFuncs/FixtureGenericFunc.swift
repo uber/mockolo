@@ -189,6 +189,65 @@ import MockoloFramework
     }
 }
 
+@Fixture enum genericClosure {
+    /// @mockable
+    protocol P {
+        func argPosition<T>(closure: (T) -> Int) -> Int
+        func retPosition<T>(closure: (Int) -> T) -> T
+        func argPositionOptional<T>(closure: ((T) -> Int)?) -> Int
+        func retPositionOptional<T>(closure: ((Int) -> T)?) -> T
+    }
+
+    @Fixture enum expected {
+        class PMock: P {
+            init() { }
+
+
+            private(set) var argPositionCallCount = 0
+            var argPositionHandler: ((Any) -> Int)?
+            func argPosition<T>(closure: (T) -> Int) -> Int {
+                argPositionCallCount += 1
+                if let argPositionHandler = argPositionHandler {
+                    return withoutActuallyEscaping(closure) { closure in
+                        return argPositionHandler(closure)
+                    }
+                }
+                return 0
+            }
+
+            private(set) var retPositionCallCount = 0
+            var retPositionHandler: (((Int) -> Any) -> Any)?
+            func retPosition<T>(closure: (Int) -> T) -> T {
+                retPositionCallCount += 1
+                if let retPositionHandler = retPositionHandler {
+                    return retPositionHandler(closure) as! T
+                }
+                fatalError("retPositionHandler returns can't have a default value thus its handler must be set")
+            }
+
+            private(set) var argPositionOptionalCallCount = 0
+            var argPositionOptionalHandler: ((Any?) -> Int)?
+            func argPositionOptional<T>(closure: ((T) -> Int)?) -> Int {
+                argPositionOptionalCallCount += 1
+                if let argPositionOptionalHandler = argPositionOptionalHandler {
+                    return argPositionOptionalHandler(closure)
+                }
+                return 0
+            }
+
+            private(set) var retPositionOptionalCallCount = 0
+            var retPositionOptionalHandler: ((((Int) -> Any)?) -> Any)?
+            func retPositionOptional<T>(closure: ((Int) -> T)?) -> T {
+                retPositionOptionalCallCount += 1
+                if let retPositionOptionalHandler = retPositionOptionalHandler {
+                    return retPositionOptionalHandler(closure) as! T
+                }
+                fatalError("retPositionOptionalHandler returns can't have a default value thus its handler must be set")
+            }
+        }
+    }
+}
+
 @Fixture enum funcWhereClause {
     protocol Parsable {
         //  ...
