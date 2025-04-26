@@ -56,18 +56,19 @@ struct Fixture: MemberMacro {
             return true
         }
 
+        let baseIndent = Trivia(pieces: node.leadingTrivia.filter(\.isSpaceOrTab))
         let indent = BasicFormat.inferIndentation(of: declaration) ?? .spaces(4)
         var sourceContent = baseItems.trimmedDescription(matching: \.isNewline)
 
         if let imports = argument.imports {
             sourceContent = imports.map {
-                "\(indent)\(indent)import \($0)\n"
+                "\(baseIndent)\(indent)import \($0)\n"
             }.joined() + "\n" + sourceContent
         }
 
         var _sourceInitExpr = StringLiteralExprSyntax(
             multilineContent: sourceContent,
-            endIndent: Trivia(pieces: node.leadingTrivia.filter(\.isSpaceOrTab)) + indent
+            endIndent: baseIndent + indent
         )
         if argument.includesConcurrencyHelpers {
             _sourceInitExpr.segments.append(
