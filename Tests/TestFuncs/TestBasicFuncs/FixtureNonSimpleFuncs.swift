@@ -329,23 +329,22 @@ import MockoloFramework
     }
 
     @Fixture enum expected {
-//        class NonSimpleFuncsMock: NonSimpleFuncs {
-//            init() { }
-//
-//
-//            private(set) var barCallCount = 0
-//            var barHandler: ((String, Int..., [Double]) -> Float?)?
-//            func bar(_ arg: String, x: Int..., y: [Double]) -> Float? {
-//                barCallCount += 1
-//                if let barHandler = barHandler {
-//                    return barHandler(arg, x, y)
-//                }
-//                return nil
-//            }
-//        }
+        class NonSimpleFuncsMock: NonSimpleFuncs {
+            init() { }
+
+
+            private(set) var barCallCount = 0
+            var barHandler: ((String, [Int], [Double]) -> Float?)?
+            func bar(_ arg: String, x: Int..., y: [Double]) -> Float? {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    return barHandler(arg, x, y)
+                }
+                return nil
+            }
+        }
     }
 }
-
 
 @Fixture enum autoclosureArgFunc {
     /// @mockable
@@ -371,40 +370,35 @@ import MockoloFramework
     }
 }
 
-@Fixture enum closureArgFunc {
+#if compiler(>=6.0)
+@Fixture enum rethrowsFunc {
     /// @mockable
-    protocol NonSimpleFuncs {
-        func cat<T>(named arg: String, tags: [String: String]?, closure: () throws -> T) rethrows -> T
-        func more<T>(named arg: String, tags: [String: String]?, closure: (T) throws -> ()) rethrows -> T
+    protocol RethrowsFuncs {
+        func cat(closure: () throws -> Void) rethrows
     }
 
     @Fixture enum expected {
-//        class NonSimpleFuncsMock: NonSimpleFuncs {
-//            init() { }
-//            
-//            
-//            private(set) var catCallCount = 0
-//            var catHandler: ((String, [String: String]?, () throws -> Any) throws -> Any)?
-//            func cat<T>(named arg: String, tags: [String: String]?, closure: () throws -> T) rethrows -> T {
-//                catCallCount += 1
-//                if let catHandler = catHandler {
-//                    return try catHandler(arg, tags, closure) as! T
-//                }
-//                fatalError("catHandler returns can't have a default value thus its handler must be set")
-//            }
-//            
-//            private(set) var moreCallCount = 0
-//            var moreHandler: ((String, [String: String]?, (Any) throws -> ()) throws -> Any)?
-//            func more<T>(named arg: String, tags: [String: String]?, closure: (T) throws -> ()) rethrows -> T {
-//                moreCallCount += 1
-//                if let moreHandler = moreHandler {
-//                    return try moreHandler(arg, tags, closure) as! T
-//                }
-//                fatalError("moreHandler returns can't have a default value thus its handler must be set")
-//            }
-//        }
+        class RethrowsFuncsMock: RethrowsFuncs {
+            init() { }
+
+
+            private(set) var catCallCount = 0
+            var catHandler: ((() throws(any Error) -> Any) throws(any Error) -> Void)?
+            func cat<Failure: Error>(closure: () throws(Failure) -> Void) throws(Failure) {
+                catCallCount += 1
+                if let catHandler = catHandler {
+                    do {
+                        try catHandler(closure)
+                    } catch {
+                        throw error as! Failure
+                    }
+                }
+                fatalError("catHandler returns can't have a default value thus its handler must be set")
+            }
+        }
     }
 }
+#endif
 
 @Fixture enum forArgClosureFunc {
     /// @mockable

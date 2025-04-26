@@ -64,12 +64,15 @@ final class ConcurrencyHelpersTests: MockoloTestCase {
 
         verify(
             srcContent: src,
-            dstContent: "import Foundation"
-        )
+            dstContent: """
+            import Foundation
 
-        verify(
-            srcContent: src,
-            dstContent: concurrencyHelpers._generatedSource
+            final class PMock: P, @unchecked Sendable {
+                init() { }
+            }
+            
+            \(concurrencyHelpers._generatedSource)
+            """
         )
     }
 }
