@@ -69,15 +69,21 @@ final class ConcurrencyHelpersTests: MockoloTestCase {
 
         verify(
             srcContent: src,
-            dstContent: concurrencyHelpers._source.split(separator: "\n").map { line in
-                if ["func", "final class", "struct"].contains(where: {
-                    line.starts(with: $0)
-                }) {
-                    return "fileprivate \(line)"
-                } else {
-                    return String(line)
-                }
-            }.joined(separator: "\n")
+            dstContent: concurrencyHelpers._generatedSource
         )
+    }
+}
+
+extension concurrencyHelpers {
+    static var _generatedSource: String {
+        _source.split(separator: "\n").map { line in
+            if ["func", "final class", "struct"].contains(where: {
+                line.starts(with: $0)
+            }) {
+                return "fileprivate \(line)"
+            } else {
+                return String(line)
+            }
+        }.joined(separator: "\n")
     }
 }
