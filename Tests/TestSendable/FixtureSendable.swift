@@ -1,5 +1,4 @@
-import MockoloFramework
-
+#if compiler(>=6.0)
 @Fixture enum sendableProtocol {
     /// @mockable
     public protocol SendableProtocol: Sendable {
@@ -136,3 +135,4 @@ import MockoloFramework
         }
     }
 }
+#endif

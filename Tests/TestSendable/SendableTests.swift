@@ -1,3 +1,4 @@
+#if compiler(>=6.0)
 class SendableTests: MockoloTestCase {
     func testSendableProtocol() {
         verify(srcContent: sendableProtocol._source,
@@ -16,3 +17,4 @@ class SendableTests: MockoloTestCase {
                dstContent: confirmedSendableProtocol.expected._source)
     }
 }
+#endif
