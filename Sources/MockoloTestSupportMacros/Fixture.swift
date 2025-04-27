@@ -88,18 +88,17 @@ struct Fixture: MemberMacro {
             }.joined() + "\n" + sourceContent
         }
 
-        var _sourceInitExpr = StringLiteralExprSyntax(
+        var _sourceInitExpr: ExprSyntax = ExprSyntax(StringLiteralExprSyntax(
             multilineContent: sourceContent,
             endIndent: baseIndent + indent
-        )
+        ))
         if argument.includesConcurrencyHelpers {
-            _sourceInitExpr.segments.append(
-                .expressionSegment(ExpressionSegmentSyntax(
-                    pounds: .rawStringPoundDelimiter("##"),
-                    expressions: [.init(
-                        expression: #""\n\n" + concurrencyHelpers._generatedSource"# as ExprSyntax
-                    )]
-                ))
+            _sourceInitExpr = ExprSyntax(
+                InfixOperatorExprSyntax(
+                    leftOperand: _sourceInitExpr,
+                    operator: BinaryOperatorExprSyntax(operator: .binaryOperator("+")),
+                    rightOperand: #""\n\n" + concurrencyHelpers._generatedSource"# as ExprSyntax
+                )
             )
         }
 
