@@ -14,11 +14,17 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        swift: ["5.10", "6.0"]
+        swift: ["5.10", "6.0", "6.1"]
     steps:
-      - uses: swift-actions/setup-swift@v2
+      - if: startsWith(matrix.destination.name, 'linux')
+        uses: vapor/swiftly-action@v0.2
+        with:
+          toolchain: ${{ matrix.swift }}
+      - if: startsWith(matrix.destination.name, 'macos')
+        uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ matrix.swift }}
+
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build and Test

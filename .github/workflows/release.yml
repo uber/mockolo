@@ -6,9 +6,9 @@ on:
     types: [published]
 
 env:
-  SWIFT_VERSION: "6.0.3"
-  SWIFT_SDK_URL: https://download.swift.org/swift-6.0.3-release/static-sdk/swift-6.0.3-RELEASE/swift-6.0.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz
-  SWIFT_SDK_CHECKSUM: 67f765e0030e661a7450f7e4877cfe008db4f57f177d5a08a6e26fd661cdd0bd
+  SWIFT_VERSION: "6.1.0"
+  SWIFT_SDK_URL: https://download.swift.org/swift-6.1-release/static-sdk/swift-6.1-RELEASE/swift-6.1-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz
+  SWIFT_SDK_CHECKSUM: 111c6f7d280a651208b8c74c0521dd99365d785c1976a6e23162f55f65379ac6
 
 jobs:
   build:
@@ -22,14 +22,14 @@ jobs:
           - { name: "macos-universal", os: macos-latest }
     steps:
     - if: startsWith(matrix.destination.name, 'linux')
-      uses: vapor/swiftly-action@v0.1
+      uses: vapor/swiftly-action@v0.2
       with:
         toolchain: ${{ env.SWIFT_VERSION }}
     - if: startsWith(matrix.destination.name, 'linux')
       name: Install swift sdk
       run: swift sdk install ${{ env.SWIFT_SDK_URL }} --checksum ${{ env.SWIFT_SDK_CHECKSUM }}
     - if: startsWith(matrix.destination.name, 'macos')
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      run: sudo xcode-select -s /Applications/Xcode_16.3.app
 
     - uses: actions/checkout@v4
     - name: Create the binary
@@ -50,6 +50,9 @@ jobs:
         destination:
           - { name: "linux-x86_64", os: ubuntu-24.04 }
           - { name: "linux-x86_64", os: ubuntu-22.04 }
+          - { name: "linux-aarch64", os: ubuntu-24.04-arm }
+          - { name: "linux-aarch64", os: ubuntu-22.04-arm }
+          - { name: "macos-universal", os: macos-15 }
           - { name: "macos-universal", os: macos-14 }
           - { name: "macos-universal", os: macos-13 }
     steps:
@@ -60,32 +63,6 @@ jobs:
       run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Run the binary
       run: ./mockolo --version
-
-  check-portability-with-qemu:
-    needs: build
-    name: TestRun on ${{ matrix.destination.tag }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        destination:
-          - { name: "linux-aarch64", tag: "ubuntu:24.04" }
-          - { name: "linux-aarch64", tag: "ubuntu:22.04" }
-    steps:
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - uses: actions/download-artifact@v4
-      with:
-        name: mockolo.${{ matrix.destination.name }}.tar.gz
-    - name: Unpack the binary
-      run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
-    - name: Run the binary
-      run: |
-        docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work ${{ matrix.destination.tag }} \
-          ./mockolo --version
 
   make-artifact-bundle:
     needs: [build]
