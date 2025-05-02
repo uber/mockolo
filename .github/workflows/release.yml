@@ -19,7 +19,7 @@ jobs:
         destination:
           - { name: "linux-aarch64", os: ubuntu-22.04 }
           - { name: "linux-x86_64", os: ubuntu-22.04 }
-          - { name: "macos-universal", os: macos-latest }
+          - { name: "macos-universal", os: macos-15 }
     steps:
     - if: startsWith(matrix.destination.name, 'linux')
       uses: vapor/swiftly-action@v0.2
