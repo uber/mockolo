@@ -17,8 +17,8 @@ jobs:
     strategy:
       matrix:
         destination:
-          - { name: "linux-aarch64", os: ubuntu-22.04 }
-          - { name: "linux-x86_64", os: ubuntu-22.04 }
+          - { name: "ubuntu-aarch64", os: ubuntu-22.04-arm }
+          - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
           - { name: "macos-universal", os: macos-15 }
     steps:
     - if: startsWith(matrix.destination.name, 'linux')
@@ -48,10 +48,10 @@ jobs:
       fail-fast: false
       matrix:
         destination:
-          - { name: "linux-x86_64", os: ubuntu-24.04 }
-          - { name: "linux-x86_64", os: ubuntu-22.04 }
-          - { name: "linux-aarch64", os: ubuntu-24.04-arm }
-          - { name: "linux-aarch64", os: ubuntu-22.04-arm }
+          - { name: "ubuntu-x86_64", os: ubuntu-24.04 }
+          - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
+          - { name: "ubuntu-aarch64", os: ubuntu-24.04-arm }
+          - { name: "ubuntu-aarch64", os: ubuntu-22.04-arm }
           - { name: "macos-universal", os: macos-15 }
           - { name: "macos-universal", os: macos-14 }
           - { name: "macos-universal", os: macos-13 }
@@ -112,7 +112,7 @@ jobs:
 
           ## For Build Tools Plugin (artifactbundle)
 
-          - full version (linux and macos)
+          - full version (ubuntu and macos)
 
           ```swift
           .binaryTarget(
@@ -133,8 +133,8 @@ jobs:
           ```
         append_body: true
         files: |
-          mockolo.linux-x86_64.tar.gz
-          mockolo.linux-aarch64.tar.gz
+          mockolo.ubuntu-x86_64.tar.gz
+          mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
           mockolo-macos.artifactbundle.zip
