@@ -64,7 +64,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       checksum: ${{ steps.checksum.outputs.checksum }}
-      checksum-macos: ${{ steps.checksum-macos.outputs.checksum }}
     steps:
       - uses: actions/checkout@v4
       - name: Download all artifacts
@@ -78,18 +77,10 @@ jobs:
         with:
           name: mockolo.artifactbundle.zip
           path: mockolo.artifactbundle.zip
-      - name: Upload artifact bundle maocs
-        uses: actions/upload-artifact@v4
-        with:
-          name: mockolo-macos.artifactbundle.zip
-          path: mockolo-macos.artifactbundle.zip
-
+      
       - name: Compute checksum
         id: checksum
         run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
-      - name: Compute checksum macos
-        id: checksum-macos
-        run: echo "checksum=$(swift package compute-checksum mockolo-macos.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
 
   deploy-binary:
     if: ${{ github.event_name == 'release' }}
@@ -107,8 +98,6 @@ jobs:
 
           ## For Build Tools Plugin (artifactbundle)
 
-          - full version (ubuntu and macos)
-
           ```swift
           .binaryTarget(
               name: "mockolo",
@@ -117,19 +106,9 @@ jobs:
           ),
           ```
 
-          - lightweight version (macos only)
-
-          ```swift
-          .binaryTarget(
-              name: "mockolo",
-              url: "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/mockolo-macos.artifactbundle.zip",
-              checksum: "${{ needs.make-artifact-bundle.outputs.checksum-macos }}"
-          ),
-          ```
         append_body: true
         files: |
           mockolo.ubuntu-x86_64.tar.gz
           mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
-          mockolo-macos.artifactbundle.zip
