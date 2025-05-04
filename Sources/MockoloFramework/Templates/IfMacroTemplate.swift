@@ -21,59 +21,6 @@ extension IfMacroModel {
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
-        // Check if there are multiple conditions
-        if clauses.count > 1 {
-            return applyMultiConditionTemplate(context: context, arguments: arguments)
-        }
-
-        // there is a single condition
-        return applyMacroTemplate(
-            name: clauses[0].condition ?? "",
-            context: context,
-            arguments: arguments,
-            entities: clauses[0].entities
-        )
-    }
-
-    private func applyMacroTemplate(name: String,
-                            context: RenderContext,
-                            arguments: GenerationArguments,
-                            entities: [(String, Model)]) -> String {
-        let rendered = entities
-            .compactMap { model in
-                model.1.render(
-                    context: .init(
-                        overloadingResolvedName: model.0,
-                        enclosingType: context.enclosingType,
-                        annotatedTypeKind: context.annotatedTypeKind,
-                        requiresSendable: context.requiresSendable
-                    ),
-                    arguments: arguments
-                )
-            }
-            .joined(separator: "\n")
-        
-        if name.hasPrefix("!") {
-            let condition = String(name.dropFirst())
-            return """
-            \(1.tab)#if !\(condition)
-            \(rendered)
-            \(1.tab)#endif
-            """
-        } else {
-            return """
-            \(1.tab)#if \(name)
-            \(rendered)
-            \(1.tab)#endif
-            """
-        }
-    }
-
-    // template for multiple conditions
-    private func applyMultiConditionTemplate(
-        context: RenderContext,
-        arguments: GenerationArguments
-    ) -> String {
         var result = ""
 
         for (index, clause) in clauses.enumerated() {
