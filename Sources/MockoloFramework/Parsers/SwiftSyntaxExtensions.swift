@@ -761,37 +761,37 @@ final class EntityVisitor: SyntaxVisitor {
         var previousConditions: [String] = []
 
         for (index, cl) in node.clauses.enumerated() {
-            let macroKey: String
+            let key: String
 
             if let conditionDescription = cl.condition?.trimmedDescription {
                 if index == 0 {
-                    macroKey = conditionDescription
+                    key = conditionDescription
                 } else {
-                    macroKey = "elseif:\(blockId):\(conditionDescription)"
+                    key = "elseif:\(blockId):\(conditionDescription)"
                 }
                 previousConditions.append(conditionDescription)
             } else {
                 if !previousConditions.isEmpty {
-                    macroKey = "else:\(blockId)"
+                    key = "else:\(blockId)"
                 } else {
                     return .visitChildren
                 }
             }
 
-            guard macroKey != fileMacro else { return .visitChildren }
+            guard key != fileMacro else { return .visitChildren }
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        if imports[macroKey] == nil {
-                            imports[macroKey] = []
+                        if imports[key] == nil {
+                            imports[key] = []
                         }
-                        imports[macroKey]?.append(importItem.trimmedDescription)
+                        imports[key]?.append(importItem.trimmedDescription)
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        if imports[macroKey] == nil {
-                            imports[macroKey] = []
+                        if imports[key] == nil {
+                            imports[key] = []
                         }
-                        imports[macroKey]?.append(nested.trimmedDescription)
+                        imports[key]?.append(nested.trimmedDescription)
                     } else {
                         return .visitChildren
                     }
