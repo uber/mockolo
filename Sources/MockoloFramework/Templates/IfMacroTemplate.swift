@@ -22,7 +22,7 @@ extension IfMacroModel {
         arguments: GenerationArguments
     ) -> String? {
         // Check if there are multiple conditions
-        if clauses.count > 1 || (clauses.count == 1 && clauses[0].clauseType != .if) {
+        if clauses.count > 1 {
             return applyMultiConditionTemplate(context: context, arguments: arguments)
         }
 
