@@ -155,8 +155,7 @@ import C
 #if DEBUG
 import X
 import Y
-#endif
-#if TEST
+#elseif TEST
 import Z
 #endif
 
