@@ -230,35 +230,46 @@ extension MemberBlockItemListSyntax {
 
 extension IfConfigDeclSyntax {
     func model(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
-        var subModels = [Model]()
+        var clauses: [IfMacroModel.Clause] = []
         var attrDesc: String?
         var hasInit = false
+        for (index, cl) in self.clauses.enumerated() {
+            let clauseType: IfMacroModel.Clause.ClauseType
+            if cl.condition == nil {
+                clauseType = .else
+            } else if index == 0 {
+                clauseType = .if
+            } else {
+                clauseType = .elseif
+            }
 
-        var name = ""
-        for cl in self.clauses {
-            if let desc = cl.condition?.description {
-                if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
-                    name = desc
-                    for element in list {
-                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
-                            subModels.append(item)
-                            if let attr = attr, attr.contains(String.available) {
-                                attrDesc = attr
-                            }
-                            hasInit = hasInit || initFlag
+            var subModels = [Model]()
+            if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
+                for element in list {
+                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
+                        subModels.append(item)
+                        if let attr = attr, attr.contains(String.available) {
+                            attrDesc = attr
                         }
+                        hasInit = hasInit || initFlag
                     }
                 }
             }
-        }
-        
-        let uniqueSubModels = uniqueEntities(
-            in: subModels,
-            exclude: [:],
-            fullnames: []
-        ).sorted(path: \.value.offset, fallback: \.key)
 
-        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
+            let uniqueSubModels = uniqueEntities(
+                in: subModels,
+                exclude: [:],
+                fullnames: []
+            ).sorted(path: \.value.offset, fallback: \.key)
+
+            clauses.append(IfMacroModel.Clause(
+                condition: cl.condition?.description,
+                entities: uniqueSubModels,
+                clauseType: clauseType
+            ))
+        }
+
+        let macroModel = IfMacroModel(clauses: clauses, offset: self.offset)
         return (macroModel, attrDesc, hasInit)
     }
 }
@@ -746,31 +757,41 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
-        for cl in node.clauses {
-            let macroName: String
+        let blockId = UUID().uuidString
+        var previousConditions: [String] = []
+
+        for (index, cl) in node.clauses.enumerated() {
+            let macroKey: String
+
             if let conditionDescription = cl.condition?.trimmedDescription {
-                macroName = conditionDescription
+                if index == 0 {
+                    macroKey = conditionDescription
+                } else {
+                    macroKey = "elseif:\(blockId):\(conditionDescription)"
+                }
+                previousConditions.append(conditionDescription)
             } else {
-                return .visitChildren
+                if !previousConditions.isEmpty {
+                    macroKey = "else:\(blockId)"
+                } else {
+                    return .visitChildren
+                }
             }
 
-            guard macroName != fileMacro else { return .visitChildren }
+            guard macroKey != fileMacro else { return .visitChildren }
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
+                        if imports[macroKey] == nil {
+                            imports[macroKey] = []
                         }
-                        imports[key]?.append(importItem.trimmedDescription)
-
+                        imports[macroKey]?.append(importItem.trimmedDescription)
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
+                        if imports[macroKey] == nil {
+                            imports[macroKey] = []
                         }
-                        imports[key]?.append(nested.trimmedDescription)
+                        imports[macroKey]?.append(nested.trimmedDescription)
                     } else {
                         return .visitChildren
                     }

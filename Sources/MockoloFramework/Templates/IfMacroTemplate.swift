@@ -27,18 +27,27 @@ extension IfMacroModel {
                     context: .init(
                         overloadingResolvedName: model.0,
                         enclosingType: context.enclosingType,
-                        annotatedTypeKind: context.annotatedTypeKind
+                        annotatedTypeKind: context.annotatedTypeKind,
+                        requiresSendable: context.requiresSendable
                     ),
                     arguments: arguments
                 )
             }
             .joined(separator: "\n")
         
-        let template = """
-        \(1.tab)#if \(name)
-        \(rendered)
-        \(1.tab)#endif
-        """
-        return template
+        if name.hasPrefix("!") {
+            let condition = String(name.dropFirst())
+            return """
+            \(1.tab)#if !\(condition)
+            \(rendered)
+            \(1.tab)#endif
+            """
+        } else {
+            return """
+            \(1.tab)#if \(name)
+            \(rendered)
+            \(1.tab)#endif
+            """
+        }
     }
 }
