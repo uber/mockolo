@@ -15,35 +15,119 @@
 //
 
 final class IfMacroModel: Model {
-    let name: String
+    struct Clause {
+        let condition: String?  // nil == else clause
+        let entities: [(String, Model)]
+        let clauseType: ClauseType
+
+        enum ClauseType {
+            case `if`
+            case elseif
+            case `else`
+        }
+    }
+
     let offset: Int64
-    let entities: [(String, Model)]
+    let clauses: [Clause]
+
+    var name: String {
+        return clauses.first?.condition ?? ""
+    }
+
+    var entities: [(String, Model)] {
+        return clauses.first?.entities ?? []
+    }
 
     var modelType: ModelType {
         return .macro
     }
 
     var fullName: String {
-        return entities.map {$0.0}.joined(separator: "_")
+        return clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
     }
-    
+
     init(name: String,
          offset: Int64,
          entities: [(String, Model)]) {
-        self.name = name
-        self.entities = entities
+        self.offset = offset
+        self.clauses = [
+            Clause(
+                condition: name,
+                entities: entities,
+                clauseType: .if
+            )
+        ]
+    }
+
+    init(clauses: [Clause], offset: Int64) {
+        self.clauses = clauses
         self.offset = offset
     }
-    
+
     func render(
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
+        // Check if there are multiple conditions
+        if clauses.count > 1 || (clauses.count == 1 && clauses[0].clauseType != .if) {
+            return applyMultiConditionTemplate(context: context, arguments: arguments)
+        }
+
+        // there is a single condition
         return applyMacroTemplate(
-            name: name,
+            name: clauses[0].condition ?? "",
             context: context,
             arguments: arguments,
-            entities: entities
+            entities: clauses[0].entities
         )
+    }
+
+    // template for multiple conditions
+    private func applyMultiConditionTemplate(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String {
+        var result = ""
+
+        for (index, clause) in clauses.enumerated() {
+            let rendered = clause.entities
+                .compactMap { model in
+                    model.1.render(
+                        context: .init(
+                            overloadingResolvedName: model.0,
+                            enclosingType: context.enclosingType,
+                            annotatedTypeKind: context.annotatedTypeKind,
+                            requiresSendable: context.requiresSendable
+                        ),
+                        arguments: arguments
+                    )
+                }
+                .joined(separator: "\n")
+
+            switch clause.clauseType {
+            case .if:
+                result += """
+                \(1.tab)#if \(clause.condition!)
+                \(rendered)
+                """
+            case .elseif:
+                result += """
+                \(1.tab)#elseif \(clause.condition!)
+                \(rendered)
+                """
+            case .else:
+                result += """
+                \(1.tab)#else
+                \(rendered)
+                """
+            }
+
+            if index < clauses.count - 1 {
+                result += "\n"
+            }
+        }
+        
+        result += "\n\(1.tab)#endif"
+        return result
     }
 }
