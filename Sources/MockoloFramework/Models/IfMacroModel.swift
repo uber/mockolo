@@ -31,19 +31,19 @@ final class IfMacroModel: Model {
     let clauses: [Clause]
 
     var name: String {
-        return clauses.first?.condition ?? ""
+        clauses.first?.condition ?? ""
     }
 
     var entities: [(String, Model)] {
-        return clauses.first?.entities ?? []
+        clauses.first?.entities ?? []
     }
 
     var modelType: ModelType {
-        return .macro
+        .macro
     }
 
     var fullName: String {
-        return clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
+        clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
     }
 
     init(name: String,
