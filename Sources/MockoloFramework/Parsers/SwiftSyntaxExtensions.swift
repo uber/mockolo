@@ -765,7 +765,7 @@ final class EntityVisitor: SyntaxVisitor {
 
             if let conditionDescription = cl.condition?.trimmedDescription {
                 if index == 0 {
-                    key = conditionDescription
+                    key = "if:\(blockId):\(conditionDescription)"
                 } else {
                     key = "elseif:\(blockId):\(conditionDescription)"
                 }

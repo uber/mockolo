@@ -16,6 +16,25 @@
 
 import Algorithms
 
+fileprivate struct BlockImport {
+    var type: IfMacroModel.Clause.ClauseType
+    var key: String
+    var imports: [String]
+    var blockId: String {
+        let parts = key.split(separator: ":").map { String($0) }
+        return parts[1]
+    }
+    var condition: String? {
+        let parts = key.split(separator: ":").map { String($0) }
+        return switch type {
+        case .if, .elseif:
+            parts[2]
+        case .else:
+            nil
+        }
+    }
+}
+
 func handleImports(pathToImportsMap: ImportMap,
                    customImports: [String]?,
                    excludeImports: [String]?,
@@ -64,43 +83,59 @@ func handleImports(pathToImportsMap: ImportMap,
     }
 
     let sortedKeys = sortedImports.keys.sorted()
-    var blockImports: [String: [(type: IfMacroModel.Clause.ClauseType, condition: String, imports: [String])]] = [:]
+    var blockImports: [String: [BlockImport]] = [:]
 
     for k in sortedKeys {
-        if k.hasPrefix("elseif:") {
+        if k.hasPrefix("if:") {
             let parts = k.split(separator: ":")
-            assert(parts.count >= 3, "Invalid elseif key format")
-            if parts.count >= 3 {
+            assert(parts.count == 3, "Invalid if key format")
+            if parts.count == 3 {
                 let blockId = String(parts[1])
-                let condition = String(parts[2...].joined(separator: ":"))
 
                 if blockImports[blockId] == nil {
                     blockImports[blockId] = []
                 }
 
                 blockImports[blockId]!.append(
-                    (
+                    .init(
+                        type: .if,
+                        key: k,
+                        imports: sortedImports[k] ?? []
+                    )
+                )
+            }
+        } else if k.hasPrefix("elseif:") {
+            let parts = k.split(separator: ":")
+            assert(parts.count == 3, "Invalid elseif key format")
+            if parts.count == 3 {
+                let blockId = String(parts[1])
+
+                if blockImports[blockId] == nil {
+                    blockImports[blockId] = []
+                }
+
+                blockImports[blockId]!.append(
+                    .init(
                         type: .elseif,
-                        condition: condition,
+                        key: k,
                         imports: sortedImports[k] ?? []
                     )
                 )
             }
         } else if k.hasPrefix("else:") {
             let parts = k.split(separator: ":")
-            assert(parts.count >= 2, "Invalid else key format")
-            if parts.count >= 2 {
+            assert(parts.count == 2, "Invalid else key format")
+            if parts.count == 2 {
                 let blockId = String(parts[1])
-                let condition = String(parts[2...].joined(separator: ":"))
 
                 if blockImports[blockId] == nil {
                     blockImports[blockId] = []
                 }
 
                 blockImports[blockId]!.append(
-                        (
+                    .init(
                             type: .else,
-                            condition: condition,
+                            key: k,
                             imports: sortedImports[k] ?? []
                         )
                     )
@@ -118,29 +153,30 @@ func handleImports(pathToImportsMap: ImportMap,
         let lines = v?.joined(separator: "\n") ?? ""
         if k.isEmpty {
             return lines
-        } else if k.hasPrefix("elseif:") || k.hasPrefix("else:") {
-            // Processed in the blockImports section.
-            processedKeys.insert(k)
-            return nil
-        } else {
+        } else if k.hasPrefix("if:") {
             // Process blockImports.
-            let elseifEntries = blockImports.values.flatMap { $0 }.filter { $0.imports.count > 0 }
+            let blockId = k.split(separator: ":")[1]
+            let targetBlockImports = blockImports.values.flatMap { $0 }.filter {
+                $0.imports.count > 0 && $0.blockId == blockId
+            }
 
-            if !elseifEntries.isEmpty {
+            if !targetBlockImports.isEmpty {
+                let condition = k.split(separator: ":")[2]
                 var result = """
-                #if \(k)
+                #if \(condition)
                 \(lines)
                 
                 """
-                let poundElseIfEntries = elseifEntries.filter { $0.type == .elseif }
-                let poundElseEntries = elseifEntries.filter { $0.type == .else }
+                processedKeys.insert(k)
+                let poundElseIfEntries = targetBlockImports.filter { $0.type == .elseif }
+                let poundElseEntries = targetBlockImports.filter { $0.type == .else }
                 for entry in poundElseIfEntries {
+                    guard let condition = entry.condition else { continue }
                     result += """
-                    #elseif \(entry.condition)
+                    #elseif \(condition)
                     \(entry.imports.joined(separator: "\n"))
                     
                     """
-                    processedKeys.insert("elseif:\(entry.condition)")
                 }
                 for entry in poundElseEntries {
                     result += """
@@ -148,7 +184,6 @@ func handleImports(pathToImportsMap: ImportMap,
                     \(entry.imports.joined(separator: "\n"))
                     
                     """
-                    processedKeys.insert("else:")
                 }
                 result += "#endif"
                 return result
@@ -159,6 +194,10 @@ func handleImports(pathToImportsMap: ImportMap,
                 #endif
                 """
             }
+        } else {
+            // elseif and else directive are processed in if directive's section.
+            processedKeys.insert(k)
+            return nil
         }
     }.joined(separator: "\n")
 
