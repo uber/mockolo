@@ -11,8 +11,8 @@ final class MacroTests: MockoloTestCase {
 
     func testMacroElseIfInFunc() {
         verify(
-            srcContent: macroElseIfInFunc,
-            dstContent: macroElseIfInFuncMock
+            srcContent: macroElseIfInFunc._source,
+            dstContent: macroElseIfInFunc.expected._source
         )
     }
 
