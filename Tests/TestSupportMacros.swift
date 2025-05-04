@@ -1,2 +1,6 @@
 @attached(member, names: named(_source))
-macro Fixture() = #externalMacro(module: "MockoloTestSupportMacros", type: "Fixture")
+macro Fixture(
+    imports: [String]? = nil,
+    testableImports: [String]? = nil,
+    includesConcurrencyHelpers: Bool = false
+) = #externalMacro(module: "MockoloTestSupportMacros", type: "Fixture")
