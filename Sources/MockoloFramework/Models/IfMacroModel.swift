@@ -20,10 +20,46 @@ final class IfMacroModel: Model {
         let entities: [(String, Model)]
         let clauseType: ClauseType
 
-        enum ClauseType {
+        enum ClauseType: Hashable {
             case `if`
-            case elseif
+            case elseif(order: Int)
             case `else`
+            
+            init?(_ clauseType: String) {
+                if clauseType == "if" {
+                    self = .if
+                } else if clauseType.hasPrefix("elseif-"), let order = Int(String(clauseType.dropFirst(7))) {
+                    self = .elseif(order: order)
+                } else if clauseType == "else" {
+                    self = .else
+                } else {
+                    return nil
+                }
+            }
+            
+            /// order in if-elseif-else block
+            /// `999_999` corresponds to `else` clause
+            var order: Int {
+                switch self {
+                case .if:
+                    0
+                case .elseif(let order):
+                    order
+                case .else:
+                    999_999
+                }
+            }
+            
+            func render() -> String {
+                switch self {
+                case .if:
+                    "#if"
+                case .elseif:
+                    "#elseif"
+                case .else:
+                    "#else"
+                }
+            }
         }
     }
 

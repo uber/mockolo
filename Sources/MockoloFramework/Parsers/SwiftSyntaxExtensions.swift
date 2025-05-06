@@ -240,7 +240,7 @@ extension IfConfigDeclSyntax {
             } else if index == 0 {
                 clauseType = .if
             } else {
-                clauseType = .elseif
+                clauseType = .elseif(order: index)
             }
 
             var subModels = [Model]()
@@ -698,7 +698,7 @@ extension TypeAliasDeclSyntax {
 
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
-    var imports: [String: [String]] = [:]
+    var imports: [ImportStatement] = []
     let annotation: String
     let fileMacro: String
     let path: String
@@ -710,6 +710,8 @@ final class EntityVisitor: SyntaxVisitor {
         self.declType = declType
         super.init(viewMode: .sourceAccurate)
     }
+    
+    private static var ifConfigDeclCount: Int = 0
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
@@ -749,31 +751,33 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
-            let desc = node.importKeyword.text + " " + ret
-            imports["", default: []].append(desc)
-        }
+        imports.append(
+            .init(line: node.trimmedDescription)
+        )
         return .skipChildren
     }
 
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
-        let blockId = UUID().uuidString
+        let blockId = Self.ifConfigDeclCount
+        Self.ifConfigDeclCount += 1
         var previousConditions: [String] = []
 
         for (index, cl) in node.clauses.enumerated() {
-            let key: String
+            let compilerDirectiveKey: String
 
             if let conditionDescription = cl.condition?.trimmedDescription {
                 if index == 0 {
-                    guard conditionDescription != fileMacro else { return .visitChildren }
-                    key = "if:\(blockId):\(conditionDescription)"
+                    guard conditionDescription != fileMacro else {
+                        return .visitChildren
+                    }
+                    compilerDirectiveKey = "\(conditionDescription):\(blockId):if"
                 } else {
-                    key = "elseif:\(blockId):\(conditionDescription)"
+                    compilerDirectiveKey = "\(conditionDescription):\(blockId):elseif-\(index)"
                 }
                 previousConditions.append(conditionDescription)
             } else {
-                if !previousConditions.isEmpty {
-                    key = "else:\(blockId)"
+                if let previousCondition = previousConditions.first {
+                    compilerDirectiveKey = "\(previousCondition):\(blockId):else"
                 } else {
                     return .visitChildren
                 }
@@ -781,19 +785,20 @@ final class EntityVisitor: SyntaxVisitor {
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
+                    let importLine: String
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        if imports[key] == nil {
-                            imports[key] = []
-                        }
-                        imports[key]?.append(importItem.trimmedDescription)
+                        importLine = importItem.trimmedDescription
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        if imports[key] == nil {
-                            imports[key] = []
-                        }
-                        imports[key]?.append(nested.trimmedDescription)
+                        importLine = nested.trimmedDescription
                     } else {
                         return .visitChildren
                     }
+                    imports.append(
+                        .init(
+                            line: importLine,
+                            compilerDirectiveKey: compilerDirectiveKey
+                        )
+                    )
                 }
             }
         }
