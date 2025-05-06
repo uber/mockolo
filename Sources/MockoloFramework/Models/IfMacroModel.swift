@@ -15,35 +15,52 @@
 //
 
 final class IfMacroModel: Model {
-    let name: String
+    struct Clause {
+        let condition: String?  // nil == else clause
+        let entities: [(String, Model)]
+        let clauseType: ClauseType
+
+        enum ClauseType {
+            case `if`
+            case elseif
+            case `else`
+        }
+    }
+
     let offset: Int64
-    let entities: [(String, Model)]
+    let clauses: [Clause]
+
+    var name: String {
+        clauses.first?.condition ?? ""
+    }
+
+    var entities: [(String, Model)] {
+        clauses.first?.entities ?? []
+    }
 
     var modelType: ModelType {
-        return .macro
+        .macro
     }
 
     var fullName: String {
-        return entities.map {$0.0}.joined(separator: "_")
+        clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
     }
-    
+
     init(name: String,
          offset: Int64,
          entities: [(String, Model)]) {
-        self.name = name
-        self.entities = entities
         self.offset = offset
+        self.clauses = [
+            Clause(
+                condition: name,
+                entities: entities,
+                clauseType: .if
+            )
+        ]
     }
-    
-    func render(
-        context: RenderContext,
-        arguments: GenerationArguments
-    ) -> String? {
-        return applyMacroTemplate(
-            name: name,
-            context: context,
-            arguments: arguments,
-            entities: entities
-        )
+
+    init(clauses: [Clause], offset: Int64) {
+        self.clauses = clauses
+        self.offset = offset
     }
 }

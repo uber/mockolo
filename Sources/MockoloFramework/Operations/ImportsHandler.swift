@@ -16,6 +16,25 @@
 
 import Algorithms
 
+fileprivate struct BlockImport {
+    var type: IfMacroModel.Clause.ClauseType
+    var key: String
+    var imports: [String]
+    var blockId: String {
+        let parts = key.split(separator: ":").map { String($0) }
+        return parts[1]
+    }
+    var condition: String? {
+        let parts = key.split(separator: ":").map { String($0) }
+        return switch type {
+        case .if, .elseif:
+            parts[2]
+        case .else:
+            nil
+        }
+    }
+}
+
 func handleImports(pathToImportsMap: ImportMap,
                    customImports: [String]?,
                    excludeImports: [String]?,
@@ -64,17 +83,121 @@ func handleImports(pathToImportsMap: ImportMap,
     }
 
     let sortedKeys = sortedImports.keys.sorted()
-    let importsStr = sortedKeys.map { k in
+    var blockImports: [String: [BlockImport]] = [:]
+
+    for k in sortedKeys {
+        if k.hasPrefix("if:") {
+            let parts = k.split(separator: ":")
+            assert(parts.count == 3, "Invalid if key format")
+            if parts.count == 3 {
+                let blockId = String(parts[1])
+
+                if blockImports[blockId] == nil {
+                    blockImports[blockId] = []
+                }
+
+                blockImports[blockId]!.append(
+                    .init(
+                        type: .if,
+                        key: k,
+                        imports: sortedImports[k] ?? []
+                    )
+                )
+            }
+        } else if k.hasPrefix("elseif:") {
+            let parts = k.split(separator: ":")
+            assert(parts.count == 3, "Invalid elseif key format")
+            if parts.count == 3 {
+                let blockId = String(parts[1])
+
+                if blockImports[blockId] == nil {
+                    blockImports[blockId] = []
+                }
+
+                blockImports[blockId]!.append(
+                    .init(
+                        type: .elseif,
+                        key: k,
+                        imports: sortedImports[k] ?? []
+                    )
+                )
+            }
+        } else if k.hasPrefix("else:") {
+            let parts = k.split(separator: ":")
+            assert(parts.count == 2, "Invalid else key format")
+            if parts.count == 2 {
+                let blockId = String(parts[1])
+
+                if blockImports[blockId] == nil {
+                    blockImports[blockId] = []
+                }
+
+                blockImports[blockId]!.append(
+                    .init(
+                            type: .else,
+                            key: k,
+                            imports: sortedImports[k] ?? []
+                        )
+                    )
+            }
+        }
+    }
+
+    var processedKeys = Set<String>()
+    let importsStr = sortedKeys.compactMap { k -> String? in
+        if processedKeys.contains(k) {
+            return nil
+        }
+
         let v = sortedImports[k]
         let lines = v?.joined(separator: "\n") ?? ""
         if k.isEmpty {
             return lines
+        } else if k.hasPrefix("if:") {
+            // Process blockImports.
+            let blockId = k.split(separator: ":")[1]
+            let targetBlockImports = blockImports.values.flatMap { $0 }.filter {
+                $0.imports.count > 0 && $0.blockId == blockId
+            }
+
+            if !targetBlockImports.isEmpty {
+                let condition = k.split(separator: ":")[2]
+                var result = """
+                #if \(condition)
+                \(lines)
+                
+                """
+                processedKeys.insert(k)
+                let poundElseIfEntries = targetBlockImports.filter { $0.type == .elseif }
+                let poundElseEntries = targetBlockImports.filter { $0.type == .else }
+                for entry in poundElseIfEntries {
+                    guard let condition = entry.condition else { continue }
+                    result += """
+                    #elseif \(condition)
+                    \(entry.imports.joined(separator: "\n"))
+                    
+                    """
+                }
+                for entry in poundElseEntries {
+                    result += """
+                    #else
+                    \(entry.imports.joined(separator: "\n"))
+                    
+                    """
+                }
+                result += "#endif"
+                return result
+            } else {
+                return """
+                #if \(k)
+                \(lines)
+                #endif
+                """
+            }
         } else {
-            return """
-            #if \(k)
-            \(lines)
-            #endif
-            """
+            // elseif and else directive are processed in if directive's section.
+            processedKeys.insert(k)
+            return nil
         }
     }.joined(separator: "\n")
 
