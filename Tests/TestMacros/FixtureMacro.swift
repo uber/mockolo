@@ -392,3 +392,107 @@ enum macroElseIfInFunc {
         }
     }
 }
+
+
+let macroSamePreprocessorMacroName = """
+#if DEBUG
+import Foundation
+#elseif FEATURE_X
+import FeatureX
+#elseif TEST
+import Testing
+#else
+import Production
+#endif
+
+/// @mockable
+protocol PresentableListener: AnyObject {
+    func run()
+    #if DEBUG
+    func showDebugMode()
+    #elseif FEATURE_X
+    func showFeatureXMode()
+    #elseif TEST
+    func showTestMode()
+    #else
+    func showReleaseMode()
+    #endif
+}
+"""
+
+let macroSamePreprocessorMacroNameMock = """
+
+
+
+#if DEBUG
+import Foundation
+#elseif FEATURE_X
+import FeatureX
+#elseif TEST
+import Testing
+#else
+import Production
+#endif
+
+
+class PresentableListenerMock: PresentableListener {
+    init() { }
+
+
+    private(set) var runCallCount = 0
+    var runHandler: (() -> ())?
+    func run() {
+        runCallCount += 1
+        if let runHandler = runHandler {
+            runHandler()
+        }
+        
+    }
+    #if DEBUG
+
+    private(set) var showDebugModeCallCount = 0
+    var showDebugModeHandler: (() -> ())?
+    func showDebugMode() {
+        showDebugModeCallCount += 1
+        if let showDebugModeHandler = showDebugModeHandler {
+            showDebugModeHandler()
+        }
+        
+    }
+    #elseif FEATURE_X
+
+    private(set) var showFeatureXModeCallCount = 0
+    var showFeatureXModeHandler: (() -> ())?
+    func showFeatureXMode() {
+        showFeatureXModeCallCount += 1
+        if let showFeatureXModeHandler = showFeatureXModeHandler {
+            showFeatureXModeHandler()
+        }
+        
+    }
+    #elseif TEST
+
+    private(set) var showTestModeCallCount = 0
+    var showTestModeHandler: (() -> ())?
+    func showTestMode() {
+        showTestModeCallCount += 1
+        if let showTestModeHandler = showTestModeHandler {
+            showTestModeHandler()
+        }
+        
+    }
+    #else
+
+    private(set) var showReleaseModeCallCount = 0
+    var showReleaseModeHandler: (() -> ())?
+    func showReleaseMode() {
+        showReleaseModeCallCount += 1
+        if let showReleaseModeHandler = showReleaseModeHandler {
+            showReleaseModeHandler()
+        }
+        
+    }
+    #endif
+}
+
+"""

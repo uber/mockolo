@@ -15,6 +15,13 @@ final class MacroTests: MockoloTestCase {
             dstContent: macroElseIfInFunc.expected._source
         )
     }
+    
+    func testMacroSamePreprocessorMacroName() {
+        verify(
+            srcContent: macroSamePreprocessorMacroName,
+            dstContent: macroSamePreprocessorMacroNameMock
+        )
+    }
 
     func testMacroImports() {
         verify(srcContent: macroImports,
