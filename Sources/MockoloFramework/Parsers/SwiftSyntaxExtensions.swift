@@ -765,6 +765,7 @@ final class EntityVisitor: SyntaxVisitor {
 
             if let conditionDescription = cl.condition?.trimmedDescription {
                 if index == 0 {
+                    guard conditionDescription != fileMacro else { return .visitChildren }
                     key = "if:\(blockId):\(conditionDescription)"
                 } else {
                     key = "elseif:\(blockId):\(conditionDescription)"
@@ -777,8 +778,6 @@ final class EntityVisitor: SyntaxVisitor {
                     return .visitChildren
                 }
             }
-
-            guard key != fileMacro else { return .visitChildren }
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
