@@ -16,11 +16,11 @@ jobs:
         os: [macos-latest, ubuntu-latest]
         swift: ["5.10", "6.0", "6.1"]
     steps:
-      - if: startsWith(matrix.destination.name, 'linux')
+      - if: startsWith(matrix.os, 'ubuntu')
         uses: vapor/swiftly-action@v0.2
         with:
           toolchain: ${{ matrix.swift }}
-      - if: startsWith(matrix.destination.name, 'macos')
+      - if: startsWith(matrix.os, 'macos')
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: ${{ matrix.swift }}
