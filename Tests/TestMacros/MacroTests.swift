@@ -9,6 +9,20 @@ final class MacroTests: MockoloTestCase {
                dstContent: macroInFuncWithOverloadMock)
     }
 
+    func testMacroElseIfInFunc() {
+        verify(
+            srcContent: macroElseIfInFunc._source,
+            dstContent: macroElseIfInFunc.expected._source
+        )
+    }
+    
+    func testMacroSamePreprocessorMacroName() {
+        verify(
+            srcContent: macroSamePreprocessorMacroName,
+            dstContent: macroSamePreprocessorMacroNameMock
+        )
+    }
+
     func testMacroImports() {
         verify(srcContent: macroImports,
                dstContent: macroImportsMock)
