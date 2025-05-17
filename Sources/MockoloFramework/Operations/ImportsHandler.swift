@@ -100,7 +100,7 @@ func handleImports(pathToImportsMap: ImportMap,
             normalImports = [
                 nonTestableInList.sorted(),
                 testable
-            ].flatMap(\.self).map {
+            ].flatMap { $0 }.map {
                 .init(line: $0)
             }
         }
