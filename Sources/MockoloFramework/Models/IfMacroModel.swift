@@ -38,6 +38,7 @@ final class IfMacroModel: Model {
             }
             
             /// order in if-elseif-else block
+            ///
             /// `999_999` corresponds to `else` clause
             var order: Int {
                 switch self {
@@ -47,17 +48,6 @@ final class IfMacroModel: Model {
                     order
                 case .else:
                     999_999
-                }
-            }
-            
-            func render() -> String {
-                switch self {
-                case .if:
-                    "#if"
-                case .elseif:
-                    "#elseif"
-                case .else:
-                    "#else"
                 }
             }
         }
