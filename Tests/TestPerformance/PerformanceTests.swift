@@ -15,11 +15,11 @@ class PerformanceTests: MockoloTestCase {
             for _ in 0..<5 {
                 invoke(BasicFuncTests.testInoutParams, name: "testInoutParams")
                 invoke(BasicFuncTests.testSubscripts, name: "testSubscripts")
-                invoke(BasicFuncTests.testVariadicFuncs, name: "testVariadicFuncs")
                 invoke(BasicFuncTests.testAutoclosureArgFuncs, name: "testAutoclosureArgFuncs")
-                invoke(BasicFuncTests.testClosureArgFuncs, name: "testClosureArgFuncs")
                 invoke(BasicFuncTests.testForArgFuncs, name: "testForArgFuncs")
                 invoke(BasicFuncTests.testReturnSelfFunc, name: "testReturnSelfFunc")
+                invoke(BasicFuncTests.testSimpleFuncs, name: "testReturnSelfFunc")
+                invoke(BasicFuncTests.testSimpleFuncsAllowCallCount, name: "testSimpleFuncsAllowCallCount")
 
                 invoke(OverloadTests.testOverloadPartialInParentAndChild, name: "testOverloadPartialInParentAndChild")
                 invoke(OverloadTests.testOverloadSameSigInMultiParents, name: "testOverloadSameSigInMultiParents")
