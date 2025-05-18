@@ -16,6 +16,13 @@ final class MacroTests: MockoloTestCase {
         )
     }
     
+    func testMacroInVar() {
+        verify(
+            srcContent: macroInVar._source,
+            dstContent: macroInVar.expected._source
+        )
+    }
+    
     func testMacroSamePreprocessorMacroName() {
         verify(
             srcContent: macroSamePreprocessorMacroName,

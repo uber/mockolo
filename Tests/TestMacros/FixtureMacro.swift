@@ -496,3 +496,61 @@ class PresentableListenerMock: PresentableListener {
 }
 
 """
+
+@Fixture
+enum macroInVar {
+    /// @mockable
+    public protocol SomeProtocol {
+        #if DEBUG
+        var debug: String { get }
+        #elseif FEATURE_X
+        var featureX: String { get }
+        #endif
+        #if TEST
+        func runTest()
+        #elseif DEBUG
+        func runDebug()
+        #endif
+    }
+
+    @Fixture
+    enum expected {
+        public class SomeProtocolMock: SomeProtocol {
+            public init() { }
+
+            #if DEBUG
+
+
+            public var debug: String = ""
+            #elseif FEATURE_X
+
+
+            public var featureX: String = ""
+            #endif
+            #if TEST
+
+            public private(set) var runTestCallCount = 0
+            public var runTestHandler: (() -> ())?
+            public func runTest() {
+                runTestCallCount += 1
+                if let runTestHandler = runTestHandler {
+                    runTestHandler()
+                }
+                
+            }
+            #elseif DEBUG
+
+            public private(set) var runDebugCallCount = 0
+            public var runDebugHandler: (() -> ())?
+            public func runDebug() {
+                runDebugCallCount += 1
+                if let runDebugHandler = runDebugHandler {
+                    runDebugHandler()
+                }
+                
+            }
+            #endif
+        }
+
+    }
+}
