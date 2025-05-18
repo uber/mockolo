@@ -17,7 +17,7 @@
 import Algorithms
 import Foundation
 
-public struct ImportStatement: Hashable {
+struct ImportStatement: Hashable {
     
     struct InsideDirective: Hashable {
         var clauseType: IfMacroModel.Clause.ClauseType
