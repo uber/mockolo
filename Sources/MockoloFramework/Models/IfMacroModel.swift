@@ -16,9 +16,9 @@
 
 final class IfMacroModel: Model {
     struct Clause {
-        let condition: String?  // nil == else clause
-        let entities: [(String, Model)]
-        let clauseType: ClauseType
+        var condition: String?  // `nil` means `else` clause
+        var entities: [(String, Model)]
+        var clauseType: ClauseType
 
         enum ClauseType: Hashable {
             case `if`
