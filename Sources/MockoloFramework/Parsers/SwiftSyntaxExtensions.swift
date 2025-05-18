@@ -785,20 +785,45 @@ final class EntityVisitor: SyntaxVisitor {
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
-                    let importLine: String
+                    var imports: [ImportStatement] = []
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        importLine = importItem.trimmedDescription
+                        imports = [.init(
+                            line: importItem.trimmedDescription,
+                            compilerDirectiveKey: compilerDirectiveKey
+                        )]
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        importLine = nested.trimmedDescription
+                        var nestedImportLines: String = ""
+                        for (index, clause) in nested.clauses.enumerated() {
+                            let clausePrefix: String
+                            if let nestedCondition = clause.condition?.trimmedDescription {
+                                clausePrefix = index == 0 ? "#if \(nestedCondition)" : "#elseif \(nestedCondition)"
+                            } else {
+                                clausePrefix = "#else"
+                            }
+                            if let items = clause.elements?.as(CodeBlockItemListSyntax.self) {
+                                let importLines = items
+                                    .compactMap({ $0.item.as(ImportDeclSyntax.self) })
+                                    .map(\.trimmedDescription)
+                                    .joined(
+                                        separator: "\n"
+                                    )
+                                nestedImportLines += [
+                                    clausePrefix,
+                                    importLines,
+                                ].joined(separator: "\n")
+                            }
+                        }
+                        nestedImportLines.append("\n#endif")
+                        imports.append(
+                            .init(
+                                line: nestedImportLines,
+                                compilerDirectiveKey: compilerDirectiveKey
+                            )
+                        )
                     } else {
                         return .visitChildren
                     }
-                    imports.append(
-                        .init(
-                            line: importLine,
-                            compilerDirectiveKey: compilerDirectiveKey
-                        )
-                    )
+                    self.imports.append(contentsOf: imports)
                 }
             }
         }
