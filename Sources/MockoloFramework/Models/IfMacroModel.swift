@@ -89,4 +89,14 @@ final class IfMacroModel: Model {
         self.clauses = clauses
         self.offset = offset
     }
+
+    func render(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        applyMacroTemplate(
+            context: context,
+            arguments: arguments
+        )
+    }
 }

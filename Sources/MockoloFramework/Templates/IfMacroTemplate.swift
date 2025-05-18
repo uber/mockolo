@@ -17,7 +17,7 @@
 import Foundation
 
 extension IfMacroModel {
-    func render(
+    func applyMacroTemplate(
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
