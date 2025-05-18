@@ -785,12 +785,12 @@ final class EntityVisitor: SyntaxVisitor {
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
-                    var imports: [ImportStatement] = []
+                    let nestedImport: ImportStatement
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        imports = [.init(
+                        nestedImport = .init(
                             line: importItem.trimmedDescription,
                             compilerDirectiveKey: compilerDirectiveKey
-                        )]
+                        )
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
                         var nestedImportLines: String = ""
                         for (index, clause) in nested.clauses.enumerated() {
@@ -814,16 +814,14 @@ final class EntityVisitor: SyntaxVisitor {
                             }
                         }
                         nestedImportLines.append("\n#endif")
-                        imports.append(
-                            .init(
-                                line: nestedImportLines,
-                                compilerDirectiveKey: compilerDirectiveKey
-                            )
+                        nestedImport = .init(
+                            line: nestedImportLines,
+                            compilerDirectiveKey: compilerDirectiveKey
                         )
                     } else {
                         return .visitChildren
                     }
-                    self.imports.append(contentsOf: imports)
+                    imports.append(nestedImport)
                 }
             }
         }
