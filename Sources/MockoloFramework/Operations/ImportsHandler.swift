@@ -88,8 +88,7 @@ func handleImports(pathToImportsMap: ImportMap,
             })
     }
     
-    var normalImports = importLines.filter({ $0.insideDirective == nil })
-    let insideDirectives: [ImportStatement] = importLines.filter({ $0.insideDirective != nil })
+    var (insideDirectives, normalImports) = importLines.partitioned { $0.insideDirective == nil }
 
     if !normalImports.isEmpty {
         if let testableImports = testableImports {
