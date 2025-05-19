@@ -235,12 +235,15 @@ extension IfConfigDeclSyntax {
         var hasInit = false
         for (index, cl) in self.clauses.enumerated() {
             let clauseType: IfMacroModel.Clause.ClauseType
-            if cl.condition == nil {
-                clauseType = .else
-            } else if index == 0 {
+            switch cl.poundKeyword.tokenKind {
+            case .poundIf:
                 clauseType = .if
-            } else {
+            case .poundElse:
+                clauseType = .else
+            case .poundElseif:
                 clauseType = .elseif(order: index)
+            default:
+                fatalError("unexpected tokenKind: \(cl.poundKeyword.tokenKind)")
             }
 
             var subModels = [Model]()
