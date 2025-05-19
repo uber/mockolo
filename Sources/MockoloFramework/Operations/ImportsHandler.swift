@@ -17,49 +17,6 @@
 import Algorithms
 import Foundation
 
-public struct ImportStatement: Hashable {
-    
-    struct InsideDirective: Hashable {
-        var clauseType: IfMacroModel.Clause.ClauseType
-        var blockId: String
-        var condition: String?
-        var key: String {
-            "\(condition ?? ""):\(blockId):\(clauseType)"
-        }
-        var sortedKey: String? {
-            clauseType == .if ? (condition ?? "") + blockId : nil
-        }
-        
-        init?(key: String) {
-            let parts = key.split(separator: ":").map { String($0) }
-            guard let clauseType = IfMacroModel.Clause.ClauseType(parts[2]) else {
-                return nil
-            }
-            self.clauseType = clauseType
-            self.blockId = parts[1]
-            self.condition = switch clauseType {
-                case .if, .elseif:
-                parts[0]
-            case .else:
-                nil
-            }
-        }
-    }
-    
-    var line: String
-    var insideDirective: InsideDirective?
-    
-    init(line: String, compilerDirectiveKey: String? = nil) {
-        self.line = line
-        if let compilerDirectiveKey {
-            self.insideDirective = .init(key: compilerDirectiveKey)
-        }
-    }
-    
-    mutating func makeTestable() {
-        line = line.asTestableImport
-    }
-}
 
 func handleImports(pathToImportsMap: ImportMap,
                    customImports: [String]?,
