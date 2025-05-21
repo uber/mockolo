@@ -321,26 +321,29 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     func processTypeParams(with typeParamList: [String]) -> SwiftTypeNew {
         switch kind {
         case .tuple(let tuple):
-            return self.copy(kind: .tuple(.init(
-                elements: tuple.elements.map {
-                    .init(label: $0.label, type: $0.type.processTypeParams(with: typeParamList))
-                }
-            )))
-        case .nominal:
-            let hasGenericType: Bool
-            if self.someOrAny == .some {
-                hasGenericType = true
-            } else {
-                let typeIDs = includingIdentifiers()
-                hasGenericType = typeParamList.contains(where: { typeIDs.contains($0) })
+            let newElements = tuple.elements.map {
+                Tuple.Element(label: $0.label, type: $0.type.processTypeParams(with: typeParamList))
             }
 
+            /// convert `(Any)` to `Any` for readability
+            if newElements.count == 1 && newElements[0].type == .Any {
+                return newElements[0].type
+            }
+
+            return self.copy(kind: .tuple(.init(elements: newElements)))
+        case .nominal(let nominal):
+            if isOptional {
+                let wrapped = nominal.genericParameterTypes[0].processTypeParams(with: typeParamList)
+                var resultKind = nominal
+                resultKind.genericParameterTypes[0] = wrapped
+                return self.copy(kind: .nominal(resultKind))
+            }
+
+            let typeIDs = includingIdentifiers()
+            let hasGenericType = typeParamList.contains(where: { typeIDs.contains($0) }) || someOrAny == .some
             if hasGenericType {
-                var result = if isOptional {
-                    self.copy(kind: SwiftType.Any.optionalWrapped().kind)
-                } else {
-                    self.copy(kind: SwiftType.Any.kind)
-                }
+                var result = self
+                result.kind = SwiftType.Any.kind
                 result.someOrAny = nil
                 return result
             } else {
