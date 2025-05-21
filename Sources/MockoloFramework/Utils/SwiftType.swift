@@ -535,7 +535,11 @@ extension SwiftTypeNew {
         case .identifierType(let syntax):
             // T<U>
             let name = syntax.name.trimmedDescription
-            let generics = syntax.genericArgumentClause?.arguments.map { SwiftTypeNew(typeSyntax: $0.argument) }
+            let generics = syntax.genericArgumentClause?.arguments.compactMap {
+                $0.argument.as(TypeSyntax.self).flatMap {
+                    SwiftTypeNew(typeSyntax: $0)
+                }
+            }
             self.kind = .nominal(.init(name: name, genericParameterTypes: generics ?? []))
 
         case .someOrAnyType(let syntax):
