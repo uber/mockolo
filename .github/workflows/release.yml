@@ -6,9 +6,7 @@ on:
     types: [published]
 
 env:
-  SWIFT_VERSION: "6.0.3"
-  SWIFT_SDK_URL: https://download.swift.org/swift-6.0.3-release/static-sdk/swift-6.0.3-RELEASE/swift-6.0.3-RELEASE_static-linux-0.0.1.artifactbundle.tar.gz
-  SWIFT_SDK_CHECKSUM: 67f765e0030e661a7450f7e4877cfe008db4f57f177d5a08a6e26fd661cdd0bd
+  SWIFT_VERSION: "6.1.0"
 
 jobs:
   build:
@@ -17,19 +15,16 @@ jobs:
     strategy:
       matrix:
         destination:
-          - { name: "linux-aarch64", os: ubuntu-22.04 }
-          - { name: "linux-x86_64", os: ubuntu-22.04 }
-          - { name: "macos-universal", os: macos-latest }
+          - { name: "ubuntu-aarch64", os: ubuntu-22.04-arm }
+          - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
+          - { name: "macos-universal", os: macos-15 }
     steps:
     - if: startsWith(matrix.destination.name, 'linux')
-      uses: vapor/swiftly-action@v0.1
+      uses: vapor/swiftly-action@v0.2
       with:
         toolchain: ${{ env.SWIFT_VERSION }}
-    - if: startsWith(matrix.destination.name, 'linux')
-      name: Install swift sdk
-      run: swift sdk install ${{ env.SWIFT_SDK_URL }} --checksum ${{ env.SWIFT_SDK_CHECKSUM }}
     - if: startsWith(matrix.destination.name, 'macos')
-      run: sudo xcode-select -s /Applications/Xcode_16.2.app
+      run: sudo xcode-select -s /Applications/Xcode_16.3.app
 
     - uses: actions/checkout@v4
     - name: Create the binary
@@ -48,8 +43,11 @@ jobs:
       fail-fast: false
       matrix:
         destination:
-          - { name: "linux-x86_64", os: ubuntu-24.04 }
-          - { name: "linux-x86_64", os: ubuntu-22.04 }
+          - { name: "ubuntu-x86_64", os: ubuntu-24.04 }
+          - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
+          - { name: "ubuntu-aarch64", os: ubuntu-24.04-arm }
+          - { name: "ubuntu-aarch64", os: ubuntu-22.04-arm }
+          - { name: "macos-universal", os: macos-15 }
           - { name: "macos-universal", os: macos-14 }
           - { name: "macos-universal", os: macos-13 }
     steps:
@@ -61,38 +59,11 @@ jobs:
     - name: Run the binary
       run: ./mockolo --version
 
-  check-portability-with-qemu:
-    needs: build
-    name: TestRun on ${{ matrix.destination.tag }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        destination:
-          - { name: "linux-aarch64", tag: "ubuntu:24.04" }
-          - { name: "linux-aarch64", tag: "ubuntu:22.04" }
-    steps:
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-
-    - uses: actions/download-artifact@v4
-      with:
-        name: mockolo.${{ matrix.destination.name }}.tar.gz
-    - name: Unpack the binary
-      run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
-    - name: Run the binary
-      run: |
-        docker run --platform linux/arm64 --rm -v ${{ github.workspace }}:/work -w /work ${{ matrix.destination.tag }} \
-          ./mockolo --version
-
   make-artifact-bundle:
     needs: [build]
     runs-on: ubuntu-latest
     outputs:
       checksum: ${{ steps.checksum.outputs.checksum }}
-      checksum-macos: ${{ steps.checksum-macos.outputs.checksum }}
     steps:
       - uses: actions/checkout@v4
       - name: Download all artifacts
@@ -106,22 +77,14 @@ jobs:
         with:
           name: mockolo.artifactbundle.zip
           path: mockolo.artifactbundle.zip
-      - name: Upload artifact bundle maocs
-        uses: actions/upload-artifact@v4
-        with:
-          name: mockolo-macos.artifactbundle.zip
-          path: mockolo-macos.artifactbundle.zip
-
+      
       - name: Compute checksum
         id: checksum
         run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
-      - name: Compute checksum macos
-        id: checksum-macos
-        run: echo "checksum=$(swift package compute-checksum mockolo-macos.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
 
   deploy-binary:
     if: ${{ github.event_name == 'release' }}
-    needs: [check-portability, check-portability-with-qemu, make-artifact-bundle]
+    needs: [check-portability, make-artifact-bundle]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v4
@@ -135,8 +98,6 @@ jobs:
 
           ## For Build Tools Plugin (artifactbundle)
 
-          - full version (linux and macos)
-
           ```swift
           .binaryTarget(
               name: "mockolo",
@@ -145,19 +106,9 @@ jobs:
           ),
           ```
 
-          - lightweight version (macos only)
-
-          ```swift
-          .binaryTarget(
-              name: "mockolo",
-              url: "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/mockolo-macos.artifactbundle.zip",
-              checksum: "${{ needs.make-artifact-bundle.outputs.checksum-macos }}"
-          ),
-          ```
         append_body: true
         files: |
-          mockolo.linux-x86_64.tar.gz
-          mockolo.linux-aarch64.tar.gz
+          mockolo.ubuntu-x86_64.tar.gz
+          mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
-          mockolo-macos.artifactbundle.zip

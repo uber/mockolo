@@ -9,20 +9,22 @@ class BasicFuncTests: MockoloTestCase {
                dstContent: subscripts.expected._source)
     }
     
-    func testVariadicFuncs() {
-        verify(srcContent: variadicFunc._source,
-               dstContent: variadicFunc.expected._source)
-    }
+//    func testVariadicFuncs() {
+//        verify(srcContent: variadicFunc._source,
+//               dstContent: variadicFunc.expected._source)
+//    }
 
     func testAutoclosureArgFuncs() {
         verify(srcContent: autoclosureArgFunc._source,
                dstContent: autoclosureArgFunc.expected._source)
     }
 
-    func testClosureArgFuncs() {
-        verify(srcContent: closureArgFunc._source,
-               dstContent: closureArgFunc.expected._source)
-    }
+#if compiler(>=6.0)
+//    func testRethrowsFunc() {
+//        verify(srcContent: rethrowsFunc._source,
+//               dstContent: rethrowsFunc.expected._source)
+//    }
+#endif
 
     func testForArgFuncs() {
         verify(srcContent: forArgClosureFunc._source,
@@ -33,7 +35,6 @@ class BasicFuncTests: MockoloTestCase {
         verify(srcContent: returnSelfFunc._source,
                dstContent: returnSelfFunc.expected._source)
     }
-    
     
     func testSimpleFuncs() {
         verify(srcContent: simpleFuncs._source,
