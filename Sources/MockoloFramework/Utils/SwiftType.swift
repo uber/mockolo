@@ -223,10 +223,6 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         attributes.contains(where: { $0 == .autoclosure })
     }
 
-    private var hasSomeModifiers: Bool {
-        self != SwiftTypeNew(kind: self.kind)
-    }
-
     var underlyingType: String {
         var ret = self
 
@@ -323,14 +319,20 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     func processTypeParams(with typeParamList: [String]) -> SwiftTypeNew {
+        if someOrAny == .some {
+            var result = self
+            result.someOrAny = .any
+            return result
+        }
+
         switch kind {
         case .tuple(let tuple):
             let newElements = tuple.elements.map {
                 Tuple.Element(label: $0.label, type: $0.type.processTypeParams(with: typeParamList))
             }
 
-            /// convert `(T)` to `T` for readability
-            if newElements.count == 1 && !self.hasSomeModifiers {
+            /// convert `(Any)` to `Any` for readability
+            if newElements.count == 1 && newElements[0].type == .Any {
                 return newElements[0].type
             }
 
@@ -344,7 +346,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             }
 
             let typeIDs = includingIdentifiers()
-            let hasGenericType = typeParamList.contains(where: { typeIDs.contains($0) }) || someOrAny == .some
+            let hasGenericType = typeParamList.contains(where: { typeIDs.contains($0) })
             if hasGenericType {
                 var result = self
                 result.kind = SwiftType.Any.kind
