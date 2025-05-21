@@ -34,7 +34,7 @@ import MockoloFramework
 }
 
 @Fixture enum someMultiParameterOptionalType {
-    protocol Foo {}
+    public protocol Foo {}
 
     /// @mockable
     public protocol OpaqueTypeWithMultiTypeProtocol {
