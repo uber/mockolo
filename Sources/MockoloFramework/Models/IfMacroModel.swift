@@ -15,35 +15,88 @@
 //
 
 final class IfMacroModel: Model {
-    let name: String
+    struct Clause {
+        var condition: String?  // `nil` means `else` clause
+        var entities: [(String, Model)]
+        var clauseType: ClauseType
+
+        enum ClauseType: Hashable {
+            case `if`
+            case elseif(order: Int)
+            case `else`
+            
+            init?(_ clauseType: String) {
+                if clauseType == "if" {
+                    self = .if
+                } else if clauseType.hasPrefix("elseif-"), let order = Int(String(clauseType.dropFirst(7))) {
+                    self = .elseif(order: order)
+                } else if clauseType == "else" {
+                    self = .else
+                } else {
+                    return nil
+                }
+            }
+            
+            /// order in if-elseif-else block
+            ///
+            /// `999_999` corresponds to `else` clause
+            var order: Int {
+                switch self {
+                case .if:
+                    0
+                case .elseif(let order):
+                    order
+                case .else:
+                    999_999
+                }
+            }
+        }
+    }
+
     let offset: Int64
-    let entities: [(String, Model)]
+    let clauses: [Clause]
+
+    var name: String {
+        clauses.first?.condition ?? ""
+    }
+
+    var entities: [(String, Model)] {
+        clauses.first?.entities ?? []
+    }
 
     var modelType: ModelType {
-        return .macro
+        .macro
     }
 
     var fullName: String {
-        return entities.map {$0.0}.joined(separator: "_")
+        clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
     }
-    
+
     init(name: String,
          offset: Int64,
          entities: [(String, Model)]) {
-        self.name = name
-        self.entities = entities
+        self.offset = offset
+        self.clauses = [
+            Clause(
+                condition: name,
+                entities: entities,
+                clauseType: .if
+            )
+        ]
+    }
+
+    init(clauses: [Clause], offset: Int64) {
+        self.clauses = clauses
         self.offset = offset
     }
-    
+
     func render(
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
-        return applyMacroTemplate(
-            name: name,
+        applyMacroTemplate(
             context: context,
-            arguments: arguments,
-            entities: entities
+            arguments: arguments
         )
     }
 }
