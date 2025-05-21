@@ -223,6 +223,10 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         attributes.contains(where: { $0 == .autoclosure })
     }
 
+    private var hasSomeModifiers: Bool {
+        self != SwiftTypeNew(kind: self.kind)
+    }
+
     var underlyingType: String {
         var ret = self
 
@@ -325,8 +329,8 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
                 Tuple.Element(label: $0.label, type: $0.type.processTypeParams(with: typeParamList))
             }
 
-            /// convert `(Any)` to `Any` for readability
-            if newElements.count == 1 && newElements[0].type == .Any {
+            /// convert `(T)` to `T` for readability
+            if newElements.count == 1 && !self.hasSomeModifiers {
                 return newElements[0].type
             }
 
