@@ -35,6 +35,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     }
 
     struct Nominal: Equatable {
+        @CoW var namespace: SwiftTypeNew? = nil
         var name: String
         var genericParameterTypes: [SwiftTypeNew] = []
     }
@@ -81,6 +82,11 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             }
             repr += "(\(elements.joined(separator: ", ")))"
         case .nominal(let nominal):
+            if let namespace = nominal.namespace {
+                repr += namespace.description
+                repr += "."
+            }
+
             switch nominal.name {
             case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
                 repr += "\(nominal.genericParameterTypes[0])?"
@@ -141,7 +147,15 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         case .tuple(let tuple):
             return tuple.elements.flatMap { $0.type.includingIdentifiers() }
         case .nominal(let nominal):
-            return CollectionOfOne(nominal.name) + nominal.genericParameterTypes.flatMap { $0.includingIdentifiers() }
+            var ids: [String] = []
+            if let namespace = nominal.namespace {
+                ids.append(contentsOf: namespace.includingIdentifiers())
+            }
+            ids.append(nominal.name)
+            for type in nominal.genericParameterTypes {
+                ids.append(contentsOf: type.includingIdentifiers())
+            }
+            return ids
         case .closure(let closure):
             return closure.arguments.flatMap { $0.type.includingIdentifiers() } + closure.returning.includingIdentifiers()
         case .composition(let composition):
@@ -567,9 +581,10 @@ extension SwiftTypeNew {
 
         case .memberType(let syntax):
             // T.U
-            let base = SwiftTypeNew(typeSyntax: syntax.baseType)
-            let name = syntax.name.trimmedDescription
-            self.kind = .nominal(.init(name: "\(base.description).\(name)"))
+            self.kind = .nominal(.init(
+                namespace: SwiftTypeNew(typeSyntax: syntax.baseType),
+                name: syntax.name.trimmedDescription
+            ))
 
         case .attributedType(let syntax):
             // inout T, sending T, @escaping T
