@@ -17,8 +17,4 @@
 enum SomeOrAny: String, Equatable {
     case some
     case any
-
-    mutating func coerceToAny() {
-        self = .any
-    }
 }
