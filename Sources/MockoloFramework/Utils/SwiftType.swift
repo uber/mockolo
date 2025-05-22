@@ -626,11 +626,6 @@ extension SwiftTypeNew {
         }
     }
 
-    // escaping hatch. May return corrupted results
-    static func make(named: String) -> SwiftTypeNew {
-        return .init(kind: .nominal(.init(name: named)))
-    }
-
     func optionalWrapped() -> SwiftTypeNew {
         return copy(
             kind: .nominal(.init(name: .optionalTypeSugarName, genericParameterTypes: [.init(kind: kind)]))

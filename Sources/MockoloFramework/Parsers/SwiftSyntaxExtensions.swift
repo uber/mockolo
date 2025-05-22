@@ -655,7 +655,7 @@ extension AssociatedTypeDeclSyntax {
         if let overrideType = overrides?[self.name.text] {
             return TypeAliasModel(
                 name: self.name.text,
-                type: .make(named: overrideType),
+                type: .init(kind: .nominal(.init(name: overrideType))),
                 acl: acl,
                 offset: self.offset,
                 length: self.length,
@@ -677,7 +677,7 @@ extension AssociatedTypeDeclSyntax {
 extension TypeAliasDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?, processed: Bool) -> Model {
         let type = overrides?[self.name.text].map {
-            SwiftType.make(named: $0)
+            SwiftType(kind: .nominal(.init(name: $0)))
         } ?? SwiftType(typeSyntax: self.initializer.value)
 
         return TypeAliasModel(name: self.name.text,
