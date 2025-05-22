@@ -447,10 +447,6 @@ struct SwiftType: Equatable, CustomStringConvertible {
             returnTypeCast = " as! " + .`Self`
         }
 
-//        if !(Self(displayableReturnType).isSingular || Self(displayableReturnType).isOptional) {
-//            displayableReturnType = "(\(displayableReturnType))"
-//        }
-
         var resultType = SwiftType(
             kind: .closure(.init(
                 isAsync: isAsync,
