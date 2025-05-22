@@ -248,6 +248,70 @@ import MockoloFramework
     }
 }
 
+@Fixture enum genericClosureNeedsEscaping {
+    /// @mockable
+    protocol MyService {
+        func otherArgument<T>(value: String, callback closure: (T) async throws -> Void)
+        func nesting<T>(closure0: (T) -> Int, closure1: (T) -> Float) -> String
+        func asyncThrows<T>(closure: (T) -> Int) async throws -> String
+        func escapingArgument<T>(closure0: @escaping @Sendable (T) -> Void, closure1: ((T) -> Void)?)
+    }
+
+    @Fixture enum expected {
+        class MyServiceMock: MyService {
+            init() { }
+
+
+            private(set) var otherArgumentCallCount = 0
+            var otherArgumentHandler: ((String, Any) -> ())?
+            func otherArgument<T>(value: String, callback closure: (T) async throws -> Void) {
+                otherArgumentCallCount += 1
+                if let otherArgumentHandler = otherArgumentHandler {
+                    withoutActuallyEscaping(closure) { closure in
+                        otherArgumentHandler(value, closure)
+                    }
+                }
+            }
+
+            private(set) var nestingCallCount = 0
+            var nestingHandler: ((Any, Any) -> String)?
+            func nesting<T>(closure0: (T) -> Int, closure1: (T) -> Float) -> String {
+                nestingCallCount += 1
+                if let nestingHandler = nestingHandler {
+                    return withoutActuallyEscaping(closure1) { closure1 in
+                        return withoutActuallyEscaping(closure0) { closure0 in
+                            return nestingHandler(closure0, closure1)
+                        }
+                    }
+                }
+                return ""
+            }
+
+            private(set) var asyncThrowsCallCount = 0
+            var asyncThrowsHandler: ((Any) async throws -> String)?
+            func asyncThrows<T>(closure: (T) -> Int) async throws -> String {
+                asyncThrowsCallCount += 1
+                if let asyncThrowsHandler = asyncThrowsHandler {
+                    return try await withoutActuallyEscaping(closure) { closure in
+                        return try await asyncThrowsHandler(closure)
+                    }
+                }
+                return ""
+            }
+
+            private(set) var escapingArgumentCallCount = 0
+            var escapingArgumentHandler: ((Any, Any?) -> ())?
+            func escapingArgument<T>(closure0: @escaping @Sendable (T) -> Void, closure1: ((T) -> Void)?) {
+                escapingArgumentCallCount += 1
+                if let escapingArgumentHandler = escapingArgumentHandler {
+                    escapingArgumentHandler(closure0, closure1)
+                }
+
+            }
+        }
+    }
+}
+
 @Fixture enum funcWhereClause {
     protocol Parsable {
         //  ...
