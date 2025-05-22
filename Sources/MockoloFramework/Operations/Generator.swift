@@ -119,7 +119,7 @@ public func generate(sourceDirs: [String],
             // nameOverride does not work correctly but it giving up.
             return (typeName, "\(typeName)Mock()")
         }
-    SwiftTypeOld.customDefaultValueMap = [String: String](typeKeyList, uniquingKeysWith: { $1 })
+    SwiftType.customDefaultValueMap = [String: String](typeKeyList, uniquingKeysWith: { $1 })
 
     signpost_begin(name: "Generate models")
     log("Resolve inheritance and generate unique entity models...", level: .info)

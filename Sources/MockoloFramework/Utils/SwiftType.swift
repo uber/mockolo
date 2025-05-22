@@ -16,9 +16,7 @@
 
 import SwiftSyntax
 
-typealias SwiftType = SwiftTypeNew
-
-struct SwiftTypeNew: Equatable, CustomStringConvertible {
+struct SwiftType: Equatable, CustomStringConvertible {
     enum Kind: Equatable {
         case tuple(Tuple)
         case nominal(Nominal)
@@ -29,15 +27,15 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
     struct Tuple: Equatable {
         struct Element: Equatable {
             var label: String?
-            var type: SwiftTypeNew
+            var type: SwiftType
         }
         var elements: [Element]
     }
 
     struct Nominal: Equatable {
-        @CoW var namespace: SwiftTypeNew? = nil
+        @CoW var namespace: SwiftType? = nil
         var name: String
-        var genericParameterTypes: [SwiftTypeNew] = []
+        var genericParameterTypes: [SwiftType] = []
     }
 
     struct Closure: Equatable {
@@ -46,14 +44,14 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         struct Argument: Equatable {
             var firstName: String?
             var secondName: String?
-            var type: SwiftTypeNew
+            var type: SwiftType
         }
         var arguments: [Argument]
-        @CoW var returning: SwiftTypeNew
+        @CoW var returning: SwiftType
     }
 
     struct Composition: Equatable {
-        var elements: [SwiftTypeNew]
+        var elements: [SwiftType]
     }
 
     var kind: Kind
@@ -300,7 +298,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
 
         if case .nominal(let nominal) = kind {
-            if let val = SwiftTypeOld.customDefaultValueMap?[nominal.name] {
+            if let val = SwiftType.customDefaultValueMap?[nominal.name] {
                 return val
             }
         }
@@ -308,11 +306,11 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         return nil
     }
 
-    static func toArgumentsCaptureType(with params: [(label: String, type: SwiftTypeNew)], typeParams: [String]) -> SwiftTypeNew {
+    static func toArgumentsCaptureType(with params: [(label: String, type: SwiftType)], typeParams: [String]) -> SwiftType {
         assert(!params.isEmpty)
 
         // Expected only history capturable types.
-        let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftTypeNew) -> SwiftTypeNew? in
+        let displayableParamTypes = params.map { $0.type }.compactMap { (subtype: SwiftType) -> SwiftType? in
             var processedType = subtype.processTypeParams(with: typeParams)
             processedType.attributes.removeAll(where: { $0 == .inout })
             processedType.attributes.removeAll(where: { $0 == .escaping })
@@ -332,7 +330,7 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
     }
 
-    func processTypeParams(with typeParamList: [String]) -> SwiftTypeNew {
+    func processTypeParams(with typeParamList: [String]) -> SwiftType {
         if someOrAny == .some {
             var result = self
             result.someOrAny = .any
@@ -392,16 +390,16 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
         }
 
         if case .nominal(let nominal) = kind, !nominal.genericParameterTypes.isEmpty {
-            if SwiftTypeOld.bracketPrefixTypes.contains(nominal.name) {
+            if SwiftType.bracketPrefixTypes.contains(nominal.name) {
                 return "\(arg)()"
-            } else if let val = SwiftTypeOld.rxTypes[nominal.name], let suffix = val {
+            } else if let val = SwiftType.rxTypes[nominal.name], let suffix = val {
                 return "\(arg)\(suffix)"
             } else {
                 return nil
             }
         }
 
-        if let val = SwiftTypeOld.defaultValueMap[arg.description] {
+        if let val = SwiftType.defaultValueMap[arg.description] {
             return val
         }
         return nil
@@ -501,30 +499,78 @@ struct SwiftTypeNew: Equatable, CustomStringConvertible {
             }
         }
         return (underlyingSubjectType, typeParams, underlyingSubjectTypeDefaultVal)
-
     }
+
+    static var customDefaultValueMap: [String: String]?
+
+    static let bracketPrefixTypes = ["Array", "Set", "Dictionary", .arrayTypeSugarName, .dictionaryTypeSugarName]
+    static let rxTypes = [String.publishSubject : "()",
+                          String.replaySubject : String.replaySubjectCreate,
+                          String.behaviorSubject : nil,
+                          String.behaviorRelay: nil,
+                          String.observableLeftAngleBracket: String.empty,
+                          String.rxObservableLeftAngleBracket: String.empty]
+
+    static let defaultValueMap = [
+        "Int": "0",
+        "Int8": "0",
+        "Int16": "0",
+        "Int32": "0",
+        "Int64": "0",
+        "UInt": "0",
+        "UInt8": "0",
+        "UInt16": "0",
+        "UInt32": "0",
+        "UInt64": "0",
+        "CGFloat": "0.0",
+        "Float": "0.0",
+        "Double": "0.0",
+        "Bool": "false",
+        "String": "\"\"",
+        "Character": "\"\"",
+        "TimeInterval": "0.0",
+        "NSTimeInterval": "0.0",
+        "PublishSubject": "PublishSubject()",
+        "Data": "Data()",
+        "Date": "Date()",
+        "NSDate": "NSDate()",
+        "CGRect": ".zero",
+        "CGSize": ".zero",
+        "CGPoint": ".zero",
+        "UIEdgeInsets": ".zero",
+        "UIColor": ".black",
+        "UIFont": ".systemFont(ofSize: 12)",
+        "UIImage": "UIImage()",
+        "UIScrollViewKeyboardDismissMode": ".interactive",
+        "UIAccessibilityTraits": ".none",
+        "Void": "Void",
+        "()": "()",
+        "URL": "URL(fileURLWithPath: \"\")",
+        "NSURL": "NSURL(fileURLWithPath: \"\")",
+        "UUID": "UUID()",
+    ]
 }
 
-extension SwiftTypeNew {
+extension SwiftType {
     init(typeSyntax: TypeSyntax) {
         switch typeSyntax.as(TypeSyntaxEnum.self) {
         case .arrayType(let syntax):
             // [T]
-            let elementType = SwiftTypeNew(typeSyntax: syntax.element)
+            let elementType = SwiftType(typeSyntax: syntax.element)
             self.kind = .nominal(.init(name: .arrayTypeSugarName, genericParameterTypes: [elementType]))
 
         case .dictionaryType(let syntax):
             // [T: U]
-            let keyType = SwiftTypeNew(typeSyntax: syntax.key)
-            let valueType = SwiftTypeNew(typeSyntax: syntax.value)
+            let keyType = SwiftType(typeSyntax: syntax.key)
+            let valueType = SwiftType(typeSyntax: syntax.value)
             self.kind = .nominal(.init(name: .dictionaryTypeSugarName, genericParameterTypes: [keyType, valueType]))
 
         case .tupleType(let syntax):
             // (T, u: U)
             let elements = syntax.elements.map {
-                SwiftTypeNew.Tuple.Element(
+                SwiftType.Tuple.Element(
                     label: $0.firstName?.text, // Tuple element cannot have two labels
-                    type: SwiftTypeNew(typeSyntax: $0.type)
+                    type: SwiftType(typeSyntax: $0.type)
                 )
             }
             self.kind = .tuple(.init(elements: elements))
@@ -541,17 +587,17 @@ extension SwiftTypeNew {
                         type: .init(typeSyntax: $0.type)
                     )
                 },
-                returning: SwiftTypeNew(typeSyntax: syntax.returnClause.type)
+                returning: SwiftType(typeSyntax: syntax.returnClause.type)
             ))
 
         case .optionalType(let syntax):
             // T?
-            let base = SwiftTypeNew(typeSyntax: syntax.wrappedType)
+            let base = SwiftType(typeSyntax: syntax.wrappedType)
             self = base.optionalWrapped()
 
         case .implicitlyUnwrappedOptionalType(let syntax):
             // T!
-            let base = SwiftTypeNew(typeSyntax: syntax.wrappedType)
+            let base = SwiftType(typeSyntax: syntax.wrappedType)
             self = base.optionalWrapped()
             self.isIUO = true
 
@@ -560,14 +606,14 @@ extension SwiftTypeNew {
             let name = syntax.name.trimmedDescription
             let generics = syntax.genericArgumentClause?.arguments.compactMap {
                 $0.argument.as(TypeSyntax.self).flatMap {
-                    SwiftTypeNew(typeSyntax: $0)
+                    SwiftType(typeSyntax: $0)
                 }
             }
             self.kind = .nominal(.init(name: name, genericParameterTypes: generics ?? []))
 
         case .someOrAnyType(let syntax):
             // some P, any P
-            self = SwiftTypeNew(typeSyntax: syntax.constraint)
+            self = SwiftType(typeSyntax: syntax.constraint)
             self.someOrAny = switch syntax.someOrAnySpecifier.tokenKind {
             case .keyword(.some): .some
             case .keyword(.any): .any
@@ -576,25 +622,25 @@ extension SwiftTypeNew {
 
         case .metatypeType(let syntax):
             // T.Type, P.Protocol
-            let base = SwiftTypeNew(typeSyntax: syntax.baseType)
+            let base = SwiftType(typeSyntax: syntax.baseType)
             self.kind = .nominal(.init(name: "\(base.description).\(syntax.metatypeSpecifier.text)"))
 
         case .memberType(let syntax):
             // T.U
             self.kind = .nominal(.init(
-                namespace: SwiftTypeNew(typeSyntax: syntax.baseType),
+                namespace: SwiftType(typeSyntax: syntax.baseType),
                 name: syntax.name.trimmedDescription
             ))
 
         case .attributedType(let syntax):
             // inout T, sending T, @escaping T
-            self = SwiftTypeNew(typeSyntax: syntax.baseType)
+            self = SwiftType(typeSyntax: syntax.baseType)
             self.attributes += syntax.specifiers.map(\.trimmedDescription)
             self.attributes += syntax.attributes.map(\.trimmedDescription)
 
         case .compositionType(let syntax):
             // P & Q
-            let elements = syntax.elements.map { SwiftTypeNew(typeSyntax: $0.type) }
+            let elements = syntax.elements.map { SwiftType(typeSyntax: $0.type) }
             self.kind = .composition(.init(elements: elements))
 
         case .namedOpaqueReturnType(let syntax):
@@ -604,12 +650,12 @@ extension SwiftTypeNew {
 
         case .packElementType(let syntax):
             // each T
-            self = SwiftTypeNew(typeSyntax: syntax.pack)
+            self = SwiftType(typeSyntax: syntax.pack)
             self.attributes.append("each")
 
         case .packExpansionType(let syntax):
             // repeat T
-            self = SwiftTypeNew(typeSyntax: syntax.repetitionPattern)
+            self = SwiftType(typeSyntax: syntax.repetitionPattern)
             self.attributes.insert("repeat", at: 0)
 
         case .suppressedType(let syntax):
@@ -626,13 +672,13 @@ extension SwiftTypeNew {
         }
     }
 
-    func optionalWrapped() -> SwiftTypeNew {
+    func optionalWrapped() -> SwiftType {
         return copy(
             kind: .nominal(.init(name: .optionalTypeSugarName, genericParameterTypes: [.init(kind: kind)]))
         )
     }
 
-    func optionalUnwrapped() -> SwiftTypeNew? {
+    func optionalUnwrapped() -> SwiftType? {
         guard isOptional else {
             return nil
         }
@@ -649,17 +695,17 @@ extension SwiftTypeNew {
     }
 }
 
-extension SwiftTypeNew {
-    static let `Any` = SwiftTypeNew(
+extension SwiftType {
+    static let `Any` = SwiftType(
         kind: .nominal(.init(name: "Any"))
     )
-    static let `Void` = SwiftTypeNew(
+    static let `Void` = SwiftType(
         kind: .tuple(.init(elements: []))
     )
-    static let `Never` = SwiftTypeNew(
+    static let `Never` = SwiftType(
         kind: .nominal(.init(name: "Never"))
     )
-    static let `Self` = SwiftTypeNew(
+    static let `Self` = SwiftType(
         kind: .nominal(.init(name: "Self"))
     )
 }
