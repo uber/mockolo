@@ -148,14 +148,17 @@ extension VariableModel {
         }
 
         let typeParamStr = typeName[range.upperBound..<lastIdx]
-        var subjectTypeStr = ""
         var errorTypeStr = ""
         if let lastCommaIndex = typeParamStr.lastIndex(of: ",") {
-            subjectTypeStr = String(typeParamStr[..<lastCommaIndex])
             let nextIndex = typeParamStr.index(after: lastCommaIndex)
             errorTypeStr = String(typeParamStr[nextIndex..<typeParamStr.endIndex]).trimmingCharacters(in: .whitespaces)
         }
-        let subjectType = SwiftType.make(named: subjectTypeStr)
+        guard
+            case .nominal(let nominal) = type.kind,
+            let subjectType = nominal.genericParameterTypes.first
+        else {
+            return nil
+        }
         let subjectDefaultValue = subjectType.defaultVal()
         let staticSpace = isStatic ? "\(String.static) " : ""
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
