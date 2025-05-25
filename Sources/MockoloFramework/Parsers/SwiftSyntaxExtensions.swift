@@ -230,35 +230,49 @@ extension MemberBlockItemListSyntax {
 
 extension IfConfigDeclSyntax {
     func model(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
-        var subModels = [Model]()
+        var clauses: [IfMacroModel.Clause] = []
         var attrDesc: String?
         var hasInit = false
+        for (index, cl) in self.clauses.enumerated() {
+            let clauseType: IfMacroModel.Clause.ClauseType
+            switch cl.poundKeyword.tokenKind {
+            case .poundIf:
+                clauseType = .if
+            case .poundElse:
+                clauseType = .else
+            case .poundElseif:
+                clauseType = .elseif(order: index)
+            default:
+                fatalError("unexpected tokenKind: \(cl.poundKeyword.tokenKind)")
+            }
 
-        var name = ""
-        for cl in self.clauses {
-            if let desc = cl.condition?.description {
-                if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
-                    name = desc
-                    for element in list {
-                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
-                            subModels.append(item)
-                            if let attr = attr, attr.contains(String.available) {
-                                attrDesc = attr
-                            }
-                            hasInit = hasInit || initFlag
+            var subModels = [Model]()
+            if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
+                for element in list {
+                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
+                        subModels.append(item)
+                        if let attr = attr, attr.contains(String.available) {
+                            attrDesc = attr
                         }
+                        hasInit = hasInit || initFlag
                     }
                 }
             }
-        }
-        
-        let uniqueSubModels = uniqueEntities(
-            in: subModels,
-            exclude: [:],
-            fullnames: []
-        ).sorted(path: \.value.offset, fallback: \.key)
 
-        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
+            let uniqueSubModels = uniqueEntities(
+                in: subModels,
+                exclude: [:],
+                fullnames: []
+            ).sorted(path: \.value.offset, fallback: \.key)
+
+            clauses.append(IfMacroModel.Clause(
+                condition: cl.condition?.description,
+                entities: uniqueSubModels,
+                clauseType: clauseType
+            ))
+        }
+
+        let macroModel = IfMacroModel(clauses: clauses, offset: self.offset)
         return (macroModel, attrDesc, hasInit)
     }
 }
@@ -687,7 +701,7 @@ extension TypeAliasDeclSyntax {
 
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
-    var imports: [String: [String]] = [:]
+    var imports: [ImportStatement] = []
     let annotation: String
     let fileMacro: String
     let path: String
@@ -699,6 +713,8 @@ final class EntityVisitor: SyntaxVisitor {
         self.declType = declType
         super.init(viewMode: .sourceAccurate)
     }
+    
+    private static var ifConfigDeclCount: Int = 0
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
@@ -738,42 +754,77 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
-            let desc = node.importKeyword.text + " " + ret
-            imports["", default: []].append(desc)
-        }
+        imports.append(
+            .init(line: node.trimmedDescription)
+        )
         return .skipChildren
     }
 
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
-        for cl in node.clauses {
-            let macroName: String
-            if let conditionDescription = cl.condition?.trimmedDescription {
-                macroName = conditionDescription
-            } else {
-                return .visitChildren
-            }
+        let blockId = Self.ifConfigDeclCount
+        Self.ifConfigDeclCount += 1
+        var previousConditions: [String] = []
 
-            guard macroName != fileMacro else { return .visitChildren }
+        for (index, cl) in node.clauses.enumerated() {
+            let compilerDirectiveKey: String
+
+            if let conditionDescription = cl.condition?.trimmedDescription {
+                if index == 0 {
+                    guard conditionDescription != fileMacro else {
+                        return .visitChildren
+                    }
+                    compilerDirectiveKey = "\(conditionDescription):\(blockId):if"
+                } else {
+                    compilerDirectiveKey = "\(conditionDescription):\(blockId):elseif-\(index)"
+                }
+                previousConditions.append(conditionDescription)
+            } else {
+                if let previousCondition = previousConditions.first {
+                    compilerDirectiveKey = "\(previousCondition):\(blockId):else"
+                } else {
+                    return .visitChildren
+                }
+            }
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
+                    let nestedImport: ImportStatement
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
-                        }
-                        imports[key]?.append(importItem.trimmedDescription)
-
+                        nestedImport = .init(
+                            line: importItem.trimmedDescription,
+                            compilerDirectiveKey: compilerDirectiveKey
+                        )
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
+                        var nestedImportLines: String = ""
+                        for (index, clause) in nested.clauses.enumerated() {
+                            let clausePrefix: String
+                            if let nestedCondition = clause.condition?.trimmedDescription {
+                                clausePrefix = index == 0 ? "#if \(nestedCondition)" : "#elseif \(nestedCondition)"
+                            } else {
+                                clausePrefix = "#else"
+                            }
+                            if let items = clause.elements?.as(CodeBlockItemListSyntax.self) {
+                                let importLines = items
+                                    .compactMap({ $0.item.as(ImportDeclSyntax.self) })
+                                    .map(\.trimmedDescription)
+                                    .joined(
+                                        separator: "\n"
+                                    )
+                                nestedImportLines += [
+                                    clausePrefix,
+                                    importLines,
+                                ].joined(separator: "\n")
+                            }
                         }
-                        imports[key]?.append(nested.trimmedDescription)
+                        nestedImportLines.append("\n#endif")
+                        nestedImport = .init(
+                            line: nestedImportLines,
+                            compilerDirectiveKey: compilerDirectiveKey
+                        )
                     } else {
                         return .visitChildren
                     }
+                    imports.append(nestedImport)
                 }
             }
         }
