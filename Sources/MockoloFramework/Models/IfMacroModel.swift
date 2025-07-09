@@ -20,7 +20,7 @@ final class IfMacroModel: Model {
         var entities: [(String, Model)]
         var clauseType: ClauseType
 
-        enum ClauseType: Hashable {
+        enum ClauseType: Hashable, Comparable {
             case `if`
             case elseif(order: Int)
             case `else`
@@ -49,6 +49,14 @@ final class IfMacroModel: Model {
                 case .else:
                     999_999
                 }
+            }
+            
+            static func > (lhs: ClauseType, rhs: ClauseType) -> Bool {
+                lhs.order > rhs.order
+            }
+            
+            static func < (lhs: ClauseType, rhs: ClauseType) -> Bool {
+                lhs.order < rhs.order
             }
         }
     }
