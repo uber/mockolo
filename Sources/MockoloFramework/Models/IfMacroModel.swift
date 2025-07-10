@@ -16,6 +16,10 @@
 
 final class IfMacroModel: Model {
     struct Clause {
+        /// This value corresponds to `IfConfigDeclSyntax.id`'s hashValue.
+        var parentId: Int
+        /// This value corresponds to `IfConfigClauseSyntax.id`'s hashValue.
+        var id: Int
         var condition: String?  // `nil` means `else` clause
         var entities: [(String, Model)]
         var clauseType: ClauseType
@@ -25,38 +29,60 @@ final class IfMacroModel: Model {
             case elseif(order: Int)
             case `else`
             
-            init?(_ clauseType: String) {
-                if clauseType == "if" {
+            init?(order: Int, poundKeyword: String) {
+                assert(["#if", "#elseif", "#else"].contains(poundKeyword))
+                switch poundKeyword {
+                case "#if":
                     self = .if
-                } else if clauseType.hasPrefix("elseif-"), let order = Int(String(clauseType.dropFirst(7))) {
+                case "#elseif":
                     self = .elseif(order: order)
-                } else if clauseType == "else" {
+                case "#else":
                     self = .else
-                } else {
+                default:
                     return nil
                 }
             }
             
-            /// order in if-elseif-else block
-            ///
-            /// `999_999` corresponds to `else` clause
-            var order: Int {
-                switch self {
-                case .if:
-                    0
-                case .elseif(let order):
-                    order
-                case .else:
-                    999_999
+            static func > (lhs: ClauseType, rhs: ClauseType) -> Bool {
+                switch (lhs, rhs) {
+                case (.if, .elseif):
+                    false
+                case (.if, .else):
+                    false
+                case (.else, .if):
+                    true
+                case (.else, .elseif):
+                    true
+                case (.elseif, .if):
+                    true
+                case (.elseif, .else):
+                    false
+                case let (.elseif(lhsOrder), .elseif(rhsOrder)):
+                    lhsOrder > rhsOrder
+                default:
+                    false
                 }
             }
             
-            static func > (lhs: ClauseType, rhs: ClauseType) -> Bool {
-                lhs.order > rhs.order
-            }
-            
             static func < (lhs: ClauseType, rhs: ClauseType) -> Bool {
-                lhs.order < rhs.order
+                switch (lhs, rhs) {
+                case (.if, .elseif):
+                    true
+                case (.if, .else):
+                    true
+                case (.else, .if):
+                    false
+                case (.else, .elseif):
+                    false
+                case (.elseif, .if):
+                    false
+                case (.elseif, .else):
+                    true
+                case let (.elseif(lhsOrder), .elseif(rhsOrder)):
+                    lhsOrder < rhsOrder
+                default:
+                    false
+                }
             }
         }
     }
@@ -78,19 +104,6 @@ final class IfMacroModel: Model {
 
     var fullName: String {
         clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
-    }
-
-    init(name: String,
-         offset: Int64,
-         entities: [(String, Model)]) {
-        self.offset = offset
-        self.clauses = [
-            Clause(
-                condition: name,
-                entities: entities,
-                clauseType: .if
-            )
-        ]
     }
 
     init(clauses: [Clause], offset: Int64) {

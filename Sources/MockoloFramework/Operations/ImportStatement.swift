@@ -19,42 +19,31 @@ public struct ImportStatement: Hashable {
     
     struct InsideDirective: Hashable {
         var clauseType: IfMacroModel.Clause.ClauseType
-        var blockId: String
+        var directiveId: Int
+        var parentDirectiveId: Int?
+        var clauseId: Int
         var condition: String?
-        var key: String {
-            "\(condition ?? ""):\(blockId):\(clauseType)"
-        }
-        var sortedKey: String? {
-            clauseType == .if ? (condition ?? "") + blockId : nil
-        }
         
-        init?(key: String) {
-            let parts = key.split(separator: ":").map { String($0) }
-            guard let clauseType = IfMacroModel.Clause.ClauseType(parts[2]) else {
-                return nil
-            }
+        init(
+            clauseType: IfMacroModel.Clause.ClauseType,
+            directiveId: Int,
+            parentDirectiveId: Int?,
+            clauseId: Int,
+            condition: String?
+        ) {
             self.clauseType = clauseType
-            self.blockId = parts[1]
-            self.condition = switch clauseType {
-                case .if, .elseif:
-                parts[0]
-            case .else:
-                nil
-            }
+            self.directiveId = directiveId
+            self.parentDirectiveId = parentDirectiveId
+            self.clauseId = clauseId
+            self.condition = condition
         }
     }
     
     var line: String
     var insideDirective: InsideDirective?
     
-    init(line: String, compilerDirectiveKey: String? = nil) {
+    init(line: String, insideDirective: InsideDirective? = nil) {
         self.line = line
-        if let compilerDirectiveKey {
-            self.insideDirective = .init(key: compilerDirectiveKey)
-        }
-    }
-    
-    mutating func makeTestable() {
-        line = line.asTestableImport
+        self.insideDirective = insideDirective
     }
 }

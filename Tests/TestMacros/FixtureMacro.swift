@@ -101,12 +101,12 @@ import Foundation
 import V
 import X
 import Y
-#if DEBUG
-import P
-#endif
 #if canImport(NewFramework)
 import W
 import Z
+#endif
+#if DEBUG
+import P
 #endif
 
 

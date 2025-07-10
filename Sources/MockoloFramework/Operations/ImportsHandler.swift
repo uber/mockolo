@@ -45,7 +45,7 @@ func handleImports(pathToImportsMap: ImportMap,
             })
     }
     
-    var (insideDirectives, normalImports) = importLines.partitioned { $0.insideDirective == nil }
+    var (insideDirectivesImports, normalImports) = importLines.partitioned { $0.insideDirective == nil }
 
     if !normalImports.isEmpty {
         if let testableImports = testableImports {
@@ -63,37 +63,37 @@ func handleImports(pathToImportsMap: ImportMap,
     }
     
     let normalImportsStr = normalImports.map(\.line).joined(separator: "\n")
-    let insideDirectivesImportsStr = insideDirectives
+    // TODO: Consider nested IfMacroModel
+    let insideDirectivesImportsStr = insideDirectivesImports
         .grouped(
-            by: \.insideDirective!.blockId
+            by: \.insideDirective!.directiveId
         )
-        .sorted(path: \.key)
         .map(\.value)
         .map { imports in
             imports
                 .grouped {
-                    $0.insideDirective!.clauseType.order
+                    $0.insideDirective!.clauseType
                 }
                 .sorted(path: \.key)
-                .map { (order, statements) in
+                .map { (type, statements) in
                     let imports = String(
                         statements.map(\.line)
                             .filter({ !normalImports.map(\.line).contains($0) })
                             .sorted().joined(by: "\n")
                     )
-                    switch order {
-                    case 0:
+                    switch type {
+                    case .if:
                         let cond = statements.first!.insideDirective!.condition ?? ""
                         return """
                         #if \(cond)
                         \(imports)
                         """
-                    case 999_999:
+                    case .else:
                         return """
                         #else
                         \(imports)
                         """
-                    default:
+                    case .elseif:
                         let cond = statements.first!.insideDirective!.condition ?? ""
                         return """
                         #elseif \(cond)

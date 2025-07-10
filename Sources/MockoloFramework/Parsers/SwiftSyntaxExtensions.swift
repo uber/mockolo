@@ -234,16 +234,11 @@ extension IfConfigDeclSyntax {
         var attrDesc: String?
         var hasInit = false
         for (index, cl) in self.clauses.enumerated() {
-            let clauseType: IfMacroModel.Clause.ClauseType
-            switch cl.poundKeyword.tokenKind {
-            case .poundIf:
-                clauseType = .if
-            case .poundElse:
-                clauseType = .else
-            case .poundElseif:
-                clauseType = .elseif(order: index)
-            default:
-                fatalError("unexpected tokenKind: \(cl.poundKeyword.tokenKind)")
+            guard let clauseType: IfMacroModel.Clause.ClauseType = .init(
+                order: index,
+                poundKeyword: cl.poundKeyword.trimmedDescription
+            ) else {
+                continue
             }
 
             var subModels = [Model]()
@@ -266,13 +261,18 @@ extension IfConfigDeclSyntax {
             ).sorted(path: \.value.offset, fallback: \.key)
 
             clauses.append(IfMacroModel.Clause(
+                parentId: id.hashValue,
+                id: cl.id.hashValue,
                 condition: cl.condition?.description,
                 entities: uniqueSubModels,
                 clauseType: clauseType
             ))
         }
 
-        let macroModel = IfMacroModel(clauses: clauses, offset: self.offset)
+        let macroModel = IfMacroModel(
+            clauses: clauses,
+            offset: offset
+        )
         return (macroModel, attrDesc, hasInit)
     }
 }
@@ -702,6 +702,9 @@ extension TypeAliasDeclSyntax {
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
     var imports: [ImportStatement] = []
+    // key: target directive Id
+    // parent: key's parent directive Id (if exists)
+    var compilerDirectiveIdStorage: [Int: Int] = [:]
     let annotation: String
     let fileMacro: String
     let path: String
@@ -713,8 +716,6 @@ final class EntityVisitor: SyntaxVisitor {
         self.declType = declType
         super.init(viewMode: .sourceAccurate)
     }
-    
-    private static var ifConfigDeclCount: Int = 0
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
         let metadata = node.annotationMetadata(with: annotation)
@@ -761,70 +762,42 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
-        let blockId = Self.ifConfigDeclCount
-        Self.ifConfigDeclCount += 1
-        var previousConditions: [String] = []
+        let directiveId = node.id.hashValue
 
         for (index, cl) in node.clauses.enumerated() {
-            let compilerDirectiveKey: String
-
-            if let conditionDescription = cl.condition?.trimmedDescription {
-                if index == 0 {
-                    guard conditionDescription != fileMacro else {
-                        return .visitChildren
-                    }
-                    compilerDirectiveKey = "\(conditionDescription):\(blockId):if"
-                } else {
-                    compilerDirectiveKey = "\(conditionDescription):\(blockId):elseif-\(index)"
-                }
-                previousConditions.append(conditionDescription)
-            } else {
-                if let previousCondition = previousConditions.first {
-                    compilerDirectiveKey = "\(previousCondition):\(blockId):else"
-                } else {
-                    return .visitChildren
-                }
+            let clauseId = cl.id.hashValue
+            guard let clauseType: IfMacroModel.Clause.ClauseType = .init(
+                order: index,
+                poundKeyword: cl.poundKeyword.trimmedDescription
+            ) else {
+                continue
+            }
+            
+            if clauseType == .if, cl.condition?.trimmedDescription == fileMacro {
+                return .visitChildren
             }
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
-                    let nestedImport: ImportStatement
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        nestedImport = .init(
-                            line: importItem.trimmedDescription,
-                            compilerDirectiveKey: compilerDirectiveKey
-                        )
-                    } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        var nestedImportLines: String = ""
-                        for (index, clause) in nested.clauses.enumerated() {
-                            let clausePrefix: String
-                            if let nestedCondition = clause.condition?.trimmedDescription {
-                                clausePrefix = index == 0 ? "#if \(nestedCondition)" : "#elseif \(nestedCondition)"
-                            } else {
-                                clausePrefix = "#else"
-                            }
-                            if let items = clause.elements?.as(CodeBlockItemListSyntax.self) {
-                                let importLines = items
-                                    .compactMap({ $0.item.as(ImportDeclSyntax.self) })
-                                    .map(\.trimmedDescription)
-                                    .joined(
-                                        separator: "\n"
-                                    )
-                                nestedImportLines += [
-                                    clausePrefix,
-                                    importLines,
-                                ].joined(separator: "\n")
-                            }
-                        }
-                        nestedImportLines.append("\n#endif")
-                        nestedImport = .init(
-                            line: nestedImportLines,
-                            compilerDirectiveKey: compilerDirectiveKey
+                        imports.append(
+                            .init(
+                                line: importItem.trimmedDescription,
+                                insideDirective: .init(
+                                    clauseType: clauseType,
+                                    directiveId: directiveId,
+                                    parentDirectiveId: compilerDirectiveIdStorage[directiveId],
+                                    clauseId: clauseId,
+                                    condition: cl.condition?.trimmedDescription
+                                )
+                            )
                         )
                     } else {
+                        if let nestedIfConfigDecl = el.item.as(IfConfigDeclSyntax.self) {
+                            compilerDirectiveIdStorage[nestedIfConfigDecl.id.hashValue] = directiveId
+                        }
                         return .visitChildren
                     }
-                    imports.append(nestedImport)
                 }
             }
         }
