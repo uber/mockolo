@@ -17,28 +17,52 @@
 import Foundation
 
 extension IfMacroModel {
-    func applyMacroTemplate(name: String,
-                            context: RenderContext,
-                            arguments: GenerationArguments,
-                            entities: [(String, Model)]) -> String {
-        let rendered = entities
-            .compactMap { model in
-                model.1.render(
-                    context: .init(
-                        overloadingResolvedName: model.0,
-                        enclosingType: context.enclosingType,
-                        annotatedTypeKind: context.annotatedTypeKind
-                    ),
-                    arguments: arguments
-                )
+    func applyMacroTemplate(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String? {
+        var result = ""
+
+        for (index, clause) in clauses.enumerated() {
+            let rendered = clause.entities
+                .compactMap { model in
+                    model.1.render(
+                        context: .init(
+                            overloadingResolvedName: model.0,
+                            enclosingType: context.enclosingType,
+                            annotatedTypeKind: context.annotatedTypeKind,
+                            requiresSendable: context.requiresSendable
+                        ),
+                        arguments: arguments
+                    )
+                }
+                .joined(separator: "\n")
+
+            switch clause.clauseType {
+            case .if:
+                result += """
+                \(1.tab)#if \(clause.condition!)
+                \(rendered)
+                """
+            case .elseif:
+                result += """
+                \(1.tab)#elseif \(clause.condition!)
+                \(rendered)
+                """
+            case .else:
+                result += """
+                \(1.tab)#else
+                \(rendered)
+                """
             }
-            .joined(separator: "\n")
-        
-        let template = """
-        \(1.tab)#if \(name)
-        \(rendered)
-        \(1.tab)#endif
-        """
-        return template
+
+            if index < clauses.count - 1 {
+                result += "\n"
+            }
+        }
+
+        result += "\n\(1.tab)#endif"
+        return result
     }
+
 }

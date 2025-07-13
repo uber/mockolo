@@ -15,35 +15,109 @@
 //
 
 final class IfMacroModel: Model {
-    let name: String
+    struct Clause {
+        /// This value corresponds to `IfConfigDeclSyntax.id`'s hashValue.
+        var parentId: Int
+        /// This value corresponds to `IfConfigClauseSyntax.id`'s hashValue.
+        var id: Int
+        var condition: String?  // `nil` means `else` clause
+        var entities: [(String, Model)]
+        var clauseType: ClauseType
+
+        enum ClauseType: Hashable, Comparable {
+            case `if`
+            case elseif(order: Int)
+            case `else`
+            
+            init?(order: Int, poundKeyword: String) {
+                assert(["#if", "#elseif", "#else"].contains(poundKeyword))
+                switch poundKeyword {
+                case "#if":
+                    self = .if
+                case "#elseif":
+                    self = .elseif(order: order)
+                case "#else":
+                    self = .else
+                default:
+                    return nil
+                }
+            }
+            
+            static func > (lhs: ClauseType, rhs: ClauseType) -> Bool {
+                switch (lhs, rhs) {
+                case (.if, .elseif):
+                    false
+                case (.if, .else):
+                    false
+                case (.else, .if):
+                    true
+                case (.else, .elseif):
+                    true
+                case (.elseif, .if):
+                    true
+                case (.elseif, .else):
+                    false
+                case let (.elseif(lhsOrder), .elseif(rhsOrder)):
+                    lhsOrder > rhsOrder
+                default:
+                    false
+                }
+            }
+            
+            static func < (lhs: ClauseType, rhs: ClauseType) -> Bool {
+                switch (lhs, rhs) {
+                case (.if, .elseif):
+                    true
+                case (.if, .else):
+                    true
+                case (.else, .if):
+                    false
+                case (.else, .elseif):
+                    false
+                case (.elseif, .if):
+                    false
+                case (.elseif, .else):
+                    true
+                case let (.elseif(lhsOrder), .elseif(rhsOrder)):
+                    lhsOrder < rhsOrder
+                default:
+                    false
+                }
+            }
+        }
+    }
+
     let offset: Int64
-    let entities: [(String, Model)]
+    let clauses: [Clause]
+
+    var name: String {
+        clauses.first?.condition ?? ""
+    }
+
+    var entities: [(String, Model)] {
+        clauses.first?.entities ?? []
+    }
 
     var modelType: ModelType {
-        return .macro
+        .macro
     }
 
     var fullName: String {
-        return entities.map {$0.0}.joined(separator: "_")
+        clauses.flatMap { $0.entities.map { $0.0 } }.joined(separator: "_")
     }
-    
-    init(name: String,
-         offset: Int64,
-         entities: [(String, Model)]) {
-        self.name = name
-        self.entities = entities
+
+    init(clauses: [Clause], offset: Int64) {
+        self.clauses = clauses
         self.offset = offset
     }
-    
+
     func render(
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String? {
-        return applyMacroTemplate(
-            name: name,
+        applyMacroTemplate(
             context: context,
-            arguments: arguments,
-            entities: entities
+            arguments: arguments
         )
     }
 }

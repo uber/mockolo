@@ -15,6 +15,8 @@
 //
 
 import Algorithms
+import Foundation
+
 
 func handleImports(pathToImportsMap: ImportMap,
                    customImports: [String]?,
@@ -22,61 +24,84 @@ func handleImports(pathToImportsMap: ImportMap,
                    testableImports: [String]?,
                    relevantPaths: [String]) -> String {
 
-    var importLines = [String: [String]]()
-    let defaultKey = ""
-    if importLines[defaultKey] == nil {
-        importLines[defaultKey] = []
-    }
+    var importLines = [ImportStatement]()
 
-    for (path, importMap) in pathToImportsMap {
+    for (path, importStatements) in pathToImportsMap {
         guard relevantPaths.contains(path) else { continue }
-        for (k, v) in importMap {
-            if importLines[k] == nil {
-                importLines[k] = []
-            }
-
-            if let ex = excludeImports {
-                let filtered = v.filter{ !ex.contains($0.moduleNameInImport) }
-                importLines[k]?.append(contentsOf: filtered)
-            } else {
-                importLines[k]?.append(contentsOf: v)
-            }
+        if let ex = excludeImports {
+            let filtered = importStatements.filter{ !ex.contains($0.line.moduleNameInImport) }
+            importLines.append(contentsOf: filtered)
+        } else {
+            importLines.append(contentsOf: importStatements)
         }
     }
 
     if let customImports = customImports {
-        importLines[defaultKey]?.append(contentsOf: customImports.map {$0.asImport})
+        importLines.append(
+            contentsOf: customImports.map {
+                .init(
+                    line: $0.asImport
+                )
+            })
     }
+    
+    var (insideDirectivesImports, normalImports) = importLines.partitioned { $0.insideDirective == nil }
 
-    var sortedImports = [String: [String]]()
-    for (k, v) in importLines {
-        sortedImports[k] = Set(v).sorted()
-    }
-
-    if let existingSet = sortedImports[defaultKey] {
+    if !normalImports.isEmpty {
         if let testableImports = testableImports {
-            let (nonTestableInList, rawTestableInList) = existingSet.partitioned(by: { testableImports.contains($0.moduleNameInImport) })
+            let (nonTestableInList, rawTestableInList) = normalImports.map(\.line).partitioned(by: { testableImports.contains($0.moduleNameInImport) })
             let testableInList = rawTestableInList.map{ "@testable " + $0 }
             let remainingTestable = testableImports.filter { !testableInList.contains($0) }.map {$0.asTestableImport}
             let testable = Set([testableInList, remainingTestable].flatMap{$0}).sorted()
-            sortedImports[defaultKey] = [nonTestableInList, testable].flatMap{$0}
+            normalImports = [
+                nonTestableInList.sorted(),
+                testable
+            ].flatMap { $0 }.map {
+                .init(line: $0)
+            }
         }
     }
-
-    let sortedKeys = sortedImports.keys.sorted()
-    let importsStr = sortedKeys.map { k in
-        let v = sortedImports[k]
-        let lines = v?.joined(separator: "\n") ?? ""
-        if k.isEmpty {
-            return lines
-        } else {
-            return """
-            #if \(k)
-            \(lines)
-            #endif
-            """
-        }
-    }.joined(separator: "\n")
-
+    
+    let normalImportsStr = normalImports.map(\.line).joined(separator: "\n")
+    // TODO: Consider nested IfMacroModel
+    let insideDirectivesImportsStr = insideDirectivesImports
+        .grouped(
+            by: \.insideDirective!.directiveId
+        )
+        .map(\.value)
+        .map { imports in
+            imports
+                .grouped {
+                    $0.insideDirective!.clauseType
+                }
+                .sorted(path: \.key)
+                .map { (type, statements) in
+                    let imports = String(
+                        statements.map(\.line)
+                            .filter({ !normalImports.map(\.line).contains($0) })
+                            .sorted().joined(by: "\n")
+                    )
+                    switch type {
+                    case .if:
+                        let cond = statements.first!.insideDirective!.condition ?? ""
+                        return """
+                        #if \(cond)
+                        \(imports)
+                        """
+                    case .else:
+                        return """
+                        #else
+                        \(imports)
+                        """
+                    case .elseif:
+                        let cond = statements.first!.insideDirective!.condition ?? ""
+                        return """
+                        #elseif \(cond)
+                        \(imports)
+                        """
+                    }
+                }.joined(separator: "\n") + "\n#endif"
+        }.joined(separator: "\n")
+    let importsStr = [normalImportsStr, insideDirectivesImportsStr].joined(separator: "\n")
     return importsStr
 }
