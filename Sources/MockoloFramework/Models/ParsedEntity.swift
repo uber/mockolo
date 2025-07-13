@@ -65,12 +65,15 @@ struct ResolvedEntity {
 
     func model() -> Model {
         let metadata = entity.metadata
+        // Combine protocol-level attributes with member-level attributes
+        let protocolLevelAttributes = entity.entityNode.attributesDescription.isEmpty ? [] : [entity.entityNode.attributesDescription]
+        let combinedAttributes = protocolLevelAttributes + attributes
         return NominalModel(name: metadata?.nameOverride ?? (key + "Mock"),
                             namespaces: entity.entityNode.namespaces,
                             acl: entity.entityNode.accessLevel,
                             declKindOfMockAnnotatedBaseType: entity.entityNode.declKind,
                             declKind: inheritsActorProtocol ? .actor : .class,
-                            attributes: attributes,
+                            attributes: combinedAttributes,
                             offset: entity.entityNode.offset,
                             inheritedTypeName: (entity.metadata?.module?.withDot ?? "") + key,
                             genericWhereConstraints: entity.entityNode.genericWhereConstraints,
