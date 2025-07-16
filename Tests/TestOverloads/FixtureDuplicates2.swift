@@ -57,7 +57,7 @@ class FooMock: Foo {
     }
 
     private(set) var updateArgSomeIntCallCount = 0
-    var updateArgSomeIntHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
+    var updateArgSomeIntHandler: ((Int, Float) -> (String) -> Observable<Double>)?
     func update(arg: Int, some: Float) -> (String) -> Observable<Double> {
         updateArgSomeIntCallCount += 1
         if let updateArgSomeIntHandler = updateArgSomeIntHandler {

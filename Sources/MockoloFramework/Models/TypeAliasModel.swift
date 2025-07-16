@@ -30,7 +30,7 @@ final class TypeAliasModel: Model, TypealiasRenderableModel {
         return .typeAlias
     }
 
-    init(name: String, typeName: String, acl: String?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
+    init(name: String, type: SwiftType, acl: String?, offset: Int64, length: Int64, modelDescription: String?, useDescription: Bool = false, processed: Bool) {
         self.name = name
         self.accessLevel = acl ?? ""
         self.offset = offset
@@ -38,7 +38,7 @@ final class TypeAliasModel: Model, TypealiasRenderableModel {
         self.processed = processed
         self.modelDescription = modelDescription
         self.useDescription = useDescription
-        self.type  = SwiftType(typeName)
+        self.type = type
     }
 
     var fullName: String {
