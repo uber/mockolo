@@ -602,7 +602,7 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          // .Void is not correct but this is due to the old implementation. see: ParamTemplate.swift#L30
+                          // .Void is not correct but this is due to the old implementation. see: https://github.com/uber/mockolo/blob/8c628aaa552bea925e67002dfa48e5338e2d3b26/Sources/MockoloFramework/Templates/ParamTemplate.swift#L30
                           type: self.inheritedType.map { SwiftType(typeSyntax: $0) } ?? .Void,
                           isGeneric: true,
                           inInit: inInit,
