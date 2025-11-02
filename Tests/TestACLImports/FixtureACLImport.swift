@@ -27,7 +27,7 @@ enum FixtureACLImport {
         \(FixtureHelpers.someProtocolMock)
         """
 
-    /// Output when source is just `primary` and `testableImports = [B,C,D]`
+    /// Output when source is just `primary` and `testableImports = [B,C,D,E,F]`
     /// Testable imports trump access levels (they can't both be used).
     static let primaryTestableMock =
         """

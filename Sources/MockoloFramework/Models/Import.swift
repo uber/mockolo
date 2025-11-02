@@ -171,7 +171,7 @@ extension Array where Element == Import {
         }
     }
     
-    /// Converts a list of imports and a single output `String`
+    /// Converts a list of imports into a file-ready `String` 
     func lines() -> String {
         map { $0.description }.joined(separator: "\n")
     }
