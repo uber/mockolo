@@ -167,10 +167,10 @@ import A
 import B
 import C
 #if DEBUG
+import X
 #if TEST
 import Y
 #endif
-import X
 #endif
 
 
