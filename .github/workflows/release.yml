@@ -19,7 +19,7 @@ jobs:
     - if: startsWith(matrix.destination.name, 'ubuntu')
       uses: vapor/swiftly-action@v0.2
       with:
-        toolchain: "6.2.0"
+        toolchain: "6.2"
     - if: startsWith(matrix.destination.name, 'macos')
       run: sudo xcode-select -s /Applications/Xcode_26.1.app
 
