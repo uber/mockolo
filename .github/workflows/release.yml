@@ -5,9 +5,6 @@ on:
   release:
     types: [published]
 
-env:
-  SWIFT_VERSION: "6.1.0"
-
 jobs:
   build:
     name: Build for ${{ matrix.destination.name }}
@@ -22,9 +19,9 @@ jobs:
     - if: startsWith(matrix.destination.name, 'ubuntu')
       uses: vapor/swiftly-action@v0.2
       with:
-        toolchain: ${{ env.SWIFT_VERSION }}
+        toolchain: "6.2.0"
     - if: startsWith(matrix.destination.name, 'macos')
-      run: sudo xcode-select -s /Applications/Xcode_16.3.app
+      run: sudo xcode-select -s /Applications/Xcode_26.1.app
 
     - uses: actions/checkout@v4
     - name: Create the binary
@@ -47,9 +44,9 @@ jobs:
           - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
           - { name: "ubuntu-aarch64", os: ubuntu-24.04-arm }
           - { name: "ubuntu-aarch64", os: ubuntu-22.04-arm }
+          - { name: "macos-universal", os: macos-26 }
           - { name: "macos-universal", os: macos-15 }
           - { name: "macos-universal", os: macos-14 }
-          - { name: "macos-universal", os: macos-13 }
     steps:
     - uses: actions/download-artifact@v4
       with:
@@ -77,7 +74,7 @@ jobs:
         with:
           name: mockolo.artifactbundle.zip
           path: mockolo.artifactbundle.zip
-      
+
       - name: Compute checksum
         id: checksum
         run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
