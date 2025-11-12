@@ -11,10 +11,7 @@ import W
 
 import V
 
-/// @mockable
-public protocol SomeProtocol: Parent {
-    func run()
-}
+\(FixtureHelpers.someProtocol)
 """
 
 let macroImportsMock = """
@@ -28,21 +25,7 @@ import Z
 #endif
 
 
-public class SomeProtocolMock: SomeProtocol {
-    public init() { }
-
-
-    public private(set) var runCallCount = 0
-    public var runHandler: (() -> ())?
-    public func run() {
-        runCallCount += 1
-        if let runHandler = runHandler {
-            runHandler()
-        }
-        
-    }
-}
-
+\(FixtureHelpers.someProtocolMock)
 """
 
 
@@ -140,10 +123,7 @@ import Z
 
 import C
 
-/// @mockable
-public protocol SomeProtocol: Parent {
-    func run()
-}
+\(FixtureHelpers.someProtocol)
 """
 
 
@@ -161,21 +141,7 @@ import Z
 #endif
 
 
-public class SomeProtocolMock: SomeProtocol {
-    public init() { }
-
-
-    public private(set) var runCallCount = 0
-    public var runHandler: (() -> ())?
-    public func run() {
-        runCallCount += 1
-        if let runHandler = runHandler {
-            runHandler()
-        }
-        
-    }
-}
-
+\(FixtureHelpers.someProtocolMock)
 """
 
 let nestedMacroImports = """
@@ -192,10 +158,7 @@ import Y
 
 import C
 
-/// @mockable
-public protocol SomeProtocol: Parent {
-    func run()
-}
+\(FixtureHelpers.someProtocol)
 """
 
 let nestedMacroImportsMock = """
@@ -204,27 +167,14 @@ import A
 import B
 import C
 #if DEBUG
+import X
 #if TEST
 import Y
 #endif
-import X
 #endif
 
 
-public class SomeProtocolMock: SomeProtocol {
-    public init() { }
-
-
-    public private(set) var runCallCount = 0
-    public var runHandler: (() -> ())?
-    public func run() {
-        runCallCount += 1
-        if let runHandler = runHandler {
-            runHandler()
-        }
-        
-    }
-}
+\(FixtureHelpers.someProtocolMock)
 """
 
 let macroInFunc =

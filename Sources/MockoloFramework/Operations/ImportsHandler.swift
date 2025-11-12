@@ -22,51 +22,53 @@ func handleImports(pathToImportsMap: ImportMap,
                    testableImports: [String]?,
                    relevantPaths: [String]) -> String {
 
-    var importLines = [String: [String]]()
+    var imports = [String: [Import]]()
     let defaultKey = ""
-    if importLines[defaultKey] == nil {
-        importLines[defaultKey] = []
+    if imports[defaultKey] == nil {
+        imports[defaultKey] = []
     }
 
     for (path, importMap) in pathToImportsMap {
         guard relevantPaths.contains(path) else { continue }
         for (k, v) in importMap {
-            if importLines[k] == nil {
-                importLines[k] = []
+            if imports[k] == nil {
+                imports[k] = []
             }
 
             if let ex = excludeImports {
                 let filtered = v.filter{ !ex.contains($0.moduleNameInImport) }
-                importLines[k]?.append(contentsOf: filtered)
+                imports[k]?.append(contentsOf: filtered.compactMap { Import(line: $0) })
             } else {
-                importLines[k]?.append(contentsOf: v)
+                imports[k]?.append(contentsOf: v.compactMap { Import(line: $0) })
             }
         }
     }
 
     if let customImports = customImports {
-        importLines[defaultKey]?.append(contentsOf: customImports.map {$0.asImport})
+        imports[defaultKey]?.append(contentsOf: customImports.compactMap { Import(moduleName: $0) })
     }
 
-    var sortedImports = [String: [String]]()
-    for (k, v) in importLines {
-        sortedImports[k] = Set(v).sorted()
+    var sortedImports = [String: [Import]]()
+    for (k, v) in imports {
+        sortedImports[k] = v.resolved()
     }
 
     if let existingSet = sortedImports[defaultKey] {
-        if let testableImports = testableImports {
-            let (nonTestableInList, rawTestableInList) = existingSet.partitioned(by: { testableImports.contains($0.moduleNameInImport) })
-            let testableInList = rawTestableInList.map{ "@testable " + $0 }
-            let remainingTestable = testableImports.filter { !testableInList.contains($0) }.map {$0.asTestableImport}
-            let testable = Set([testableInList, remainingTestable].flatMap{$0}).sorted()
-            sortedImports[defaultKey] = [nonTestableInList, testable].flatMap{$0}
+        if let testableImportNames = testableImports, !testableImportNames.isEmpty {
+            let (passthroughImports, candidateImports) = existingSet.partitioned(by: { testableImportNames.contains($0.moduleName) })
+            let mappedImports = candidateImports.map(\.asTestable)
+            let newImports: [Import] = testableImportNames.compactMap { name in
+                guard !mappedImports.contains(where: { $0.moduleName == name }) else { return nil }
+                return Import(moduleName: name, modifier: .testable)
+            }
+            sortedImports[defaultKey] = (passthroughImports + mappedImports + newImports).resolved()
         }
     }
 
     let sortedKeys = sortedImports.keys.sorted()
     let importsStr = sortedKeys.map { k in
         let v = sortedImports[k]
-        let lines = v?.joined(separator: "\n") ?? ""
+        let lines = v?.lines() ?? ""
         if k.isEmpty {
             return lines
         } else {
