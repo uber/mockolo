@@ -68,7 +68,7 @@ struct Import: CustomStringConvertible {
     /// An opaque string preceding the entire import statement (typically `#if FOO\n` for nested macro support)
     let prefix: String?
     
-    /// An opaque string preceding the entire import statement (typically `\n#endif` for nested macro support)
+    /// An opaque string following the entire import statement (typically `\n#endif` for nested macro support)
     let suffix: String?
     
     var description: String {
@@ -132,7 +132,7 @@ extension Array where Element == Import {
     /// Prepares a list of imports for output:
     /// - consolidates imports of the same module
     /// - maintains the highest given ACL for a given module
-    /// - overrides ACL with `@testable` when present
+    /// - overrides the ACL for a given import with `@testable` if any are marked as such
     /// - sorts by module name
     func resolved() -> [Import] {
         var modifierByModuleName = [String: Import.Modifier]()
