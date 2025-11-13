@@ -8,22 +8,34 @@ on:
 
 jobs:
   run:
-    name: Test on ${{ matrix.os }} with swift${{ matrix.swift }}
+    name: Test on ${{ matrix.os }} - ${{ matrix.version }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
-        swift: ["5.10", "6.0", "6.1"]
+        include:
+          - os: ubuntu-latest
+            version: "5.10"
+          - os: ubuntu-latest
+            version: "6.0"
+          - os: ubuntu-latest
+            version: "6.1"
+          - os: ubuntu-latest
+            version: "6.2"
+          - os: macos-latest
+            version: "16.2" # Swift 6.0
+          - os: macos-latest
+            version: "16.4" # Swift 6.1
+          - os: macos-latest
+            version: "26.1" # Swift 6.2
     steps:
       - if: startsWith(matrix.os, 'ubuntu')
         uses: vapor/swiftly-action@v0.2
         with:
-          toolchain: ${{ matrix.swift }}
+          toolchain: ${{ matrix.version }}
       - if: startsWith(matrix.os, 'macos')
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: ${{ matrix.swift }}
+        name: Select Xcode
+        run: sudo xcode-select -s "/Applications/Xcode_${{ matrix.version }}.app"
 
       - name: Checkout
         uses: actions/checkout@v4
