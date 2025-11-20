@@ -29,10 +29,6 @@ extension ClosureModel {
             if argType.isInOut {
                 return "&" + argName.safeName
             }
-            if argType.hasClosure && argType.isOptional,
-               let renderedClosure = renderOptionalGenericClosure(argType: argType, argName: argName) {
-                return renderedClosure
-            }
             return argName.safeName
         }.joined(separator: ", ")
         let handlerReturnDefault = renderReturnDefaultStatement(name: name, type: returnDefaultType)
@@ -44,9 +40,33 @@ extension ClosureModel {
         
         let returnStr = returnDefaultType.isVoid ? "" : "return "
 
+        var callAndReturnStmt = "\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(cast ?? "")"
+
+        /// For when a non-escaping closure argument is passed to the handler function as `Any`
+        if case .closure(let closure) = type.kind {
+            for (handlerArgType, (label, type)) in zip(closure.arguments.map(\.type), params) {
+                guard handlerArgType == .Any && !type.isEscapable else {
+                    continue
+                }
+
+                let prefix = [
+                    closure.throwing.hasError ? String.try + " " : nil,
+                    closure.isAsync ? String.await + " " : nil,
+                ].compactMap { $0 }.joined()
+
+                callAndReturnStmt = """
+                \(returnStr)\(prefix)withoutActuallyEscaping(\(label.safeName)) { \(label.safeName) in
+                \(callAndReturnStmt.addingIndent(1))
+                }
+                """
+            }
+        } else {
+            assertionFailure("\(type) is not closure?")
+        }
+
         return """
         \(2.tab)if let \(name) = \(name) {
-        \(3.tab)\(returnStr)\(prefix)\(name)(\(handlerParamValsStr))\(cast ?? "")
+        \(callAndReturnStmt.addingIndent(3))
         \(2.tab)}
         \(2.tab)\(handlerReturnDefault)
         """
@@ -64,22 +84,5 @@ extension ClosureModel {
         }
 
         return "\(String.fatalError)(\"\(name) returns can't have a default value thus its handler must be set\")"
-    }
-
-    private func renderOptionalGenericClosure(
-        argType: SwiftType,
-        argName: String
-    ) -> String? {
-        let literalComponents = argType.typeName.literalComponents
-        for genericTypeName in genericTypeNames {
-            if literalComponents.contains(genericTypeName) {
-                var processTypeParams = argType.processTypeParams(with: genericTypeNames)
-                let closureCast = processTypeParams.withoutTrailingCharacters(["!", "?"])
-                return argName.safeName +
-                    " as? " +
-                closureCast
-            }
-        }
-        return nil
     }
 }

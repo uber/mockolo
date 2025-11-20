@@ -73,7 +73,7 @@ class ExistentialAnyMock: ExistentialAny {
     }
 
     private(set) var graultCallCount = 0
-    var graultHandler: (() -> (any P & Q))?
+    var graultHandler: (() -> any P & Q)?
     func grault() -> any P & Q {
         graultCallCount += 1
         if let graultHandler = graultHandler {
@@ -83,7 +83,7 @@ class ExistentialAnyMock: ExistentialAny {
     }
 
     private(set) var garplyCallCount = 0
-    var garplyHandler: (() -> ((any P) -> any P))?
+    var garplyHandler: (() -> (any P) -> any P)?
     func garply() -> (any P) -> any P {
         garplyCallCount += 1
         if let garplyHandler = garplyHandler {

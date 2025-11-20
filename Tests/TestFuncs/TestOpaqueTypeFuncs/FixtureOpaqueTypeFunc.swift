@@ -12,7 +12,7 @@ import MockoloFramework
             public init() { }
 
             public private(set) var nonOptionalCallCount = 0
-            public var nonOptionalHandler: ((Any) -> Int)?
+            public var nonOptionalHandler: ((any Error) -> Int)?
             public func nonOptional(_ type: some Error) -> Int {
                 nonOptionalCallCount += 1
                 if let nonOptionalHandler = nonOptionalHandler {
@@ -22,7 +22,7 @@ import MockoloFramework
             }
 
             public private(set) var optionalCallCount = 0
-            public var optionalHandler: ((Any?) -> ())?
+            public var optionalHandler: (((any Error)?) -> ())?
             public func optional(_ type: (some Error)?) {
                 optionalCallCount += 1
                 if let optionalHandler = optionalHandler {
@@ -48,7 +48,7 @@ import MockoloFramework
             public init() { }
 
             public private(set) var nonOptionalCallCount = 0
-            public var nonOptionalHandler: ((Any) -> Int)?
+            public var nonOptionalHandler: ((any Error) -> Int)?
             public func nonOptional(_ type: some Error) -> Int {
                 nonOptionalCallCount += 1
                 if let nonOptionalHandler = nonOptionalHandler {
@@ -58,7 +58,7 @@ import MockoloFramework
             }
 
             public private(set) var optionalCallCount = 0
-            public var optionalHandler: ((Any?) -> ())?
+            public var optionalHandler: ((((any (Error & Foo)))?) -> ())?
             public func optional(_ type: ((some (Error & Foo)))?) {
                 optionalCallCount += 1
                 if let optionalHandler = optionalHandler {
@@ -67,7 +67,7 @@ import MockoloFramework
             }
 
             public private(set) var multiParamCallCount = 0
-            public var multiParamHandler: ((Any, Any) -> ())?
+            public var multiParamHandler: ((any Error, any Error) -> ())?
             public func multiParam(_ typeA: some Error, _ typeB: some Error) {
                 multiParamCallCount += 1
                 if let multiParamHandler = multiParamHandler {

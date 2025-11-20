@@ -431,13 +431,16 @@ extension VariableDeclSyntax {
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
             let name = v.pattern.trimmedDescription
-            var typeName: String?
+            var swiftType: SwiftType?
             var potentialInitParam = false
 
             // Get the type info and whether it can be a var param for an initializer
-            if let vtype = v.typeAnnotation?.type.trimmedDescription {
-                potentialInitParam = name.canBeInitParam(type: vtype, isStatic: isStatic)
-                typeName = vtype
+            if let vtype = v.typeAnnotation?.type {
+                let type = SwiftType(typeSyntax: vtype)
+                potentialInitParam = name.canBeInitParam(type: type, isStatic: isStatic)
+                swiftType = type
+            } else {
+                swiftType = nil
             }
 
             let storageKind: VariableModel.MockStorageKind
@@ -473,7 +476,7 @@ extension VariableDeclSyntax {
             }
 
             return VariableModel(name: name,
-                                 type: typeName.map { SwiftType($0) },
+                                 type: swiftType,
                                  acl: acl,
                                  isStatic: isStatic,
                                  storageKind: storageKind,
@@ -500,7 +503,7 @@ extension SubscriptDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
-                                         typeName: self.returnClause.type.description,
+                                         returnType: SwiftType(typeSyntax: self.returnClause.type),
                                          kind: .subscriptKind,
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
@@ -531,7 +534,7 @@ extension FunctionDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         let funcmodel = MethodModel(name: self.name.description,
-                                    typeName: self.signature.returnClause?.type.description,
+                                    returnType: (self.signature.returnClause?.type).map { SwiftType(typeSyntax: $0) },
                                     kind: .funcKind,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
@@ -575,7 +578,7 @@ extension InitializerDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         return MethodModel(name: "init",
-                           typeName: nil,
+                           returnType: nil,
                            kind: .initKind(required: requiredInit, override: declKind == .class),
                            acl: acl,
                            genericTypeParams: genericTypeParams,
@@ -599,7 +602,8 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          type: SwiftType(self.inheritedType?.trimmedDescription ?? .voidType),
+                          // .Void is not correct but this is due to the old implementation. see: https://github.com/uber/mockolo/blob/8c628aaa552bea925e67002dfa48e5338e2d3b26/Sources/MockoloFramework/Templates/ParamTemplate.swift#L30
+                          type: self.inheritedType.map { SwiftType(typeSyntax: $0) } ?? .Void,
                           isGeneric: true,
                           inInit: inInit,
                           needsVarDecl: false,
@@ -631,14 +635,12 @@ extension FunctionParameterSyntax {
             }
         }
 
-        var type = self.type.trimmedDescription
-        if ellipsis != nil {
-            type.append("...")
-        }
+        var type = SwiftType(typeSyntax: self.type)
+        type.hasEllipsis = ellipsis != nil
 
         return ParamModel(label: label,
                           name: name,
-                          type: SwiftType(type),
+                          type: type,
                           isGeneric: false,
                           inInit: inInit,
                           needsVarDecl: declKind == .protocol,
@@ -653,7 +655,7 @@ extension AssociatedTypeDeclSyntax {
         if let overrideType = overrides?[self.name.text] {
             return TypeAliasModel(
                 name: self.name.text,
-                typeName: overrideType,
+                type: .init(kind: .nominal(.init(name: overrideType))),
                 acl: acl,
                 offset: self.offset,
                 length: self.length,
@@ -664,7 +666,7 @@ extension AssociatedTypeDeclSyntax {
 
         return AssociatedTypeModel(name: self.name.text,
                                    inheritances: self.inheritanceClause?.inheritedTypes.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
-                                   defaultTypeName: self.initializer?.value.trimmedDescription,
+                                   defaultType: (self.initializer?.value).map { SwiftType(typeSyntax: $0) },
                                    whereConstraints: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,
                                    offset: self.offset,
@@ -674,8 +676,12 @@ extension AssociatedTypeDeclSyntax {
 
 extension TypeAliasDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?, processed: Bool) -> Model {
+        let type = overrides?[self.name.text].map {
+            SwiftType(kind: .nominal(.init(name: $0)))
+        } ?? SwiftType(typeSyntax: self.initializer.value)
+
         return TypeAliasModel(name: self.name.text,
-                              typeName: overrides?[self.name.text] ?? self.initializer.value.description,
+                              type: type,
                               acl: acl,
                               offset: self.offset,
                               length: self.length,
@@ -927,7 +933,7 @@ extension Trivia {
 }
 
 extension ThrowingKind {
-    fileprivate init(_ syntax: ThrowsClauseSyntax?) {
+    init(_ syntax: ThrowsClauseSyntax?) {
         guard let syntax else {
             self = .none
             return

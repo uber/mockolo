@@ -11,7 +11,17 @@ class GenericFuncTests: MockoloTestCase {
         verify(srcContent: genericFunc._source,
                dstContent: genericFunc.expected._source)
     }
-    
+
+    func testGenericClosure() {
+        verify(srcContent: genericClosure._source,
+               dstContent: genericClosure.expected._source)
+    }
+
+    func testGenericClosureNeedsEscaping() {
+        verify(srcContent: genericClosureNeedsEscaping._source,
+               dstContent: genericClosureNeedsEscaping.expected._source)
+    }
+
     func testWhereClause() {
         verify(srcContent: funcWhereClause._source,
                dstContent: funcWhereClause.expected._source)

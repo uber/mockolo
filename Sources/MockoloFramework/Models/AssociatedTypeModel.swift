@@ -30,7 +30,7 @@ final class AssociatedTypeModel: Model, TypealiasRenderableModel {
     init(
         name: String,
         inheritances: [String],
-        defaultTypeName: String?,
+        defaultType: SwiftType?,
         whereConstraints: [String],
         acl: String?,
         offset: Int64,
@@ -38,7 +38,7 @@ final class AssociatedTypeModel: Model, TypealiasRenderableModel {
     ) {
         self.name = name
         self.inheritances = inheritances
-        self.defaultType = defaultTypeName.map { SwiftType($0) }
+        self.defaultType = defaultType
         self.whereConstraints = whereConstraints
         self.offset = offset
         self.length = length

@@ -146,11 +146,11 @@ import MockoloFramework
             }
 
             private(set) var optionalPullCallCount = 0
-            var optionalPullHandler: (([SomeEvent], Any, Bool, ((Any?) -> ())?) -> ())?
+            var optionalPullHandler: (([SomeEvent], Any, Bool, Any?) -> ())?
             func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?) {
                 optionalPullCallCount += 1
                 if let optionalPullHandler = optionalPullHandler {
-                    optionalPullHandler(events, value, once, closure as? ((Any?) -> ()))
+                    optionalPullHandler(events, value, once, closure)
                 }
 
             }
@@ -186,6 +186,129 @@ import MockoloFramework
             }
         }
 
+    }
+}
+
+@Fixture enum genericClosure {
+    /// @mockable
+    protocol P {
+        func argPosition<T>(closure: (T) -> Int) -> Int
+        func retPosition<T>(closure: (Int) -> T) -> T
+        func argPositionOptional<T>(closure: ((T) -> Int)?) -> Int
+        func retPositionOptional<T>(closure: ((Int) -> T)?) -> T
+    }
+
+    @Fixture enum expected {
+        class PMock: P {
+            init() { }
+
+
+            private(set) var argPositionCallCount = 0
+            var argPositionHandler: ((Any) -> Int)?
+            func argPosition<T>(closure: (T) -> Int) -> Int {
+                argPositionCallCount += 1
+                if let argPositionHandler = argPositionHandler {
+                    return withoutActuallyEscaping(closure) { closure in
+                        return argPositionHandler(closure)
+                    }
+                }
+                return 0
+            }
+
+            private(set) var retPositionCallCount = 0
+            var retPositionHandler: (((Int) -> Any) -> Any)?
+            func retPosition<T>(closure: (Int) -> T) -> T {
+                retPositionCallCount += 1
+                if let retPositionHandler = retPositionHandler {
+                    return retPositionHandler(closure) as! T
+                }
+                fatalError("retPositionHandler returns can't have a default value thus its handler must be set")
+            }
+
+            private(set) var argPositionOptionalCallCount = 0
+            var argPositionOptionalHandler: ((Any?) -> Int)?
+            func argPositionOptional<T>(closure: ((T) -> Int)?) -> Int {
+                argPositionOptionalCallCount += 1
+                if let argPositionOptionalHandler = argPositionOptionalHandler {
+                    return argPositionOptionalHandler(closure)
+                }
+                return 0
+            }
+
+            private(set) var retPositionOptionalCallCount = 0
+            var retPositionOptionalHandler: ((((Int) -> Any)?) -> Any)?
+            func retPositionOptional<T>(closure: ((Int) -> T)?) -> T {
+                retPositionOptionalCallCount += 1
+                if let retPositionOptionalHandler = retPositionOptionalHandler {
+                    return retPositionOptionalHandler(closure) as! T
+                }
+                fatalError("retPositionOptionalHandler returns can't have a default value thus its handler must be set")
+            }
+        }
+    }
+}
+
+@Fixture enum genericClosureNeedsEscaping {
+    /// @mockable
+    protocol MyService {
+        func otherArgument<T>(value: String, callback closure: (T) async throws -> Void)
+        func nesting<T>(closure0: (T) -> Int, closure1: (T) -> Float) -> String
+        func asyncThrows<T>(closure: (T) -> Int) async throws -> String
+        func escapingArgument<T>(closure0: @escaping @Sendable (T) -> Void, closure1: ((T) -> Void)?)
+    }
+
+    @Fixture enum expected {
+        class MyServiceMock: MyService {
+            init() { }
+
+
+            private(set) var otherArgumentCallCount = 0
+            var otherArgumentHandler: ((String, Any) -> ())?
+            func otherArgument<T>(value: String, callback closure: (T) async throws -> Void) {
+                otherArgumentCallCount += 1
+                if let otherArgumentHandler = otherArgumentHandler {
+                    withoutActuallyEscaping(closure) { closure in
+                        otherArgumentHandler(value, closure)
+                    }
+                }
+            }
+
+            private(set) var nestingCallCount = 0
+            var nestingHandler: ((Any, Any) -> String)?
+            func nesting<T>(closure0: (T) -> Int, closure1: (T) -> Float) -> String {
+                nestingCallCount += 1
+                if let nestingHandler = nestingHandler {
+                    return withoutActuallyEscaping(closure1) { closure1 in
+                        return withoutActuallyEscaping(closure0) { closure0 in
+                            return nestingHandler(closure0, closure1)
+                        }
+                    }
+                }
+                return ""
+            }
+
+            private(set) var asyncThrowsCallCount = 0
+            var asyncThrowsHandler: ((Any) async throws -> String)?
+            func asyncThrows<T>(closure: (T) -> Int) async throws -> String {
+                asyncThrowsCallCount += 1
+                if let asyncThrowsHandler = asyncThrowsHandler {
+                    return try await withoutActuallyEscaping(closure) { closure in
+                        return try await asyncThrowsHandler(closure)
+                    }
+                }
+                return ""
+            }
+
+            private(set) var escapingArgumentCallCount = 0
+            var escapingArgumentHandler: ((Any, Any?) -> ())?
+            func escapingArgument<T>(closure0: @escaping @Sendable (T) -> Void, closure1: ((T) -> Void)?) {
+                escapingArgumentCallCount += 1
+                if let escapingArgumentHandler = escapingArgumentHandler {
+                    escapingArgumentHandler(closure0, closure1)
+                }
+
+            }
+        }
     }
 }
 

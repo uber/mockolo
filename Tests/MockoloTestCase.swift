@@ -159,13 +159,13 @@ class MockoloTestCase: XCTestCase {
         let diff = lightDiff(old: outputContents, new: fixtureContents)
         if !diff.isEmpty {
             print("output:\n\(output)")
-            XCTFail("diff:\n" + "\(diff.joined(separator: "\n"))", file: file, line: line)
+            XCTFail("diff:\n" + "\(diff)", file: file, line: line)
         }
     }
 }
 
-func lightDiff(old: [String], new: [String]) -> [String] {
-    return new.difference(from: old)
+func lightDiff(old: [String], new: [String]) -> String {
+    return old.difference(from: new)
         .sorted { l, r in
             return l.offset < r.offset
         }
@@ -177,6 +177,7 @@ func lightDiff(old: [String], new: [String]) -> [String] {
                 return "+ \(element)"
             }
         }
+        .joined(separator: "\n")
 }
 
 extension CollectionDifference.Change {
@@ -187,22 +188,5 @@ extension CollectionDifference.Change {
         case .remove(let offset, _, _):
             return offset
         }
-    }
-}
-
-extension Array where Element: Equatable {
-    fileprivate func contains(subArray: [Element]) -> Bool {
-        guard subArray.count <= self.count else {
-            return false
-        }
-
-        for i in 0...(self.count - subArray.count) {
-            let slice = self[i..<i + subArray.count]
-            if slice.elementsEqual(subArray) {
-                return true
-            }
-        }
-
-        return false
     }
 }
