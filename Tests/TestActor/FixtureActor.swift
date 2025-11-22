@@ -13,6 +13,9 @@
             }
             private(set) var fooCallCount = 0
             var fooHandler: ((String) async -> Result<String, Error>)?
+            func setFooHandler(_ handler: ((String) async -> Result<String, Error>)?) {
+                fooHandler = handler
+            }
             func foo(arg: String) async -> Result<String, Error> {
                 fooCallCount += 1
                 if let fooHandler = fooHandler {
@@ -48,6 +51,9 @@
 
             private(set) var bazCallCount = 0
             var bazHandler: ((String) async -> Int)?
+            func setBazHandler(_ handler: ((String) async -> Int)?) {
+                bazHandler = handler
+            }
             func baz(arg: String) async -> Int {
                 bazCallCount += 1
                 if let bazHandler = bazHandler {

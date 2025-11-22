@@ -51,6 +51,7 @@ extension NominalModel {
                         overloadingResolvedName: uniqueId,
                         enclosingType: type,
                         annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+                        mockDeclKind: declKind,
                         requiresSendable: requiresSendable
                     ),
                     arguments: arguments
@@ -66,6 +67,7 @@ extension NominalModel {
             context: .init(
                 enclosingType: type,
                 annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+                mockDeclKind: declKind,
                 requiresSendable: requiresSendable
             ),
             arguments: arguments
