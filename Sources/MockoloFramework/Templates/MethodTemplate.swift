@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 extension MethodModel {
     func applyMethodTemplate(overloadingResolvedName: String,
                              arguments: GenerationArguments,

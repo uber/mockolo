@@ -15,7 +15,6 @@
 //
 
 import ArgumentParser
-import Foundation
 import MockoloFramework
 
 @main

@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 extension VariableModel {
     func applyVariableTemplate(name: String,
                                type: SwiftType,

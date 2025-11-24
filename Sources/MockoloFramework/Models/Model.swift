@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 public enum ModelType {
     case variable
     case method
