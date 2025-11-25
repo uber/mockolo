@@ -15,7 +15,7 @@
 //
 
 import Algorithms
-import Foundation.NSFileManager
+import Foundation
 import SwiftSyntax
 import SwiftParser
 

@@ -14,7 +14,7 @@
 //  limitations under the License.
 //
 
-import Foundation.NSFileManager
+import Foundation
 import MockoloFramework
 import ArgumentParser
 
