@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 extension NominalModel {
     func applyNominalTemplate(name: String,
                               accessLevel: String,

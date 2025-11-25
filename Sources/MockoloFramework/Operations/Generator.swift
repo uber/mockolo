@@ -15,7 +15,6 @@
 //
 
 import CoreFoundation
-import Foundation
 
 enum InputError: Error {
     case annotationError

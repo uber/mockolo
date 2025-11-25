@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 final class TypeAliasModel: Model, TypealiasRenderableModel {
     let name: String
     let type: SwiftType

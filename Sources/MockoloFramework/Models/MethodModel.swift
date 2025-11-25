@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 public enum MethodKind: Equatable {
     case funcKind
     case initKind(required: Bool, override: Bool)

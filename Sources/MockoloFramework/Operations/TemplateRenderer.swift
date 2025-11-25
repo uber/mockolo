@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 /// Renders models with templates for output
 
 func renderTemplates(entities: [ResolvedEntity],

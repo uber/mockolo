@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 extension IfMacroModel {
     func applyMacroTemplate(name: String,
                             context: RenderContext,
