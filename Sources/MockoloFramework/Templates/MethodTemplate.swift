@@ -143,6 +143,7 @@ extension MethodModel {
                 callCountVarDecl,
                 argsHistoryVarDecl,
                 handlerVarDecl,
+                handlerSetterDecl,
                 functionDecl,
             ]
             return "\n" + decls.compactMap { $0 }.joined(separator: "\n")
@@ -243,6 +244,20 @@ extension MethodModel {
                 \(1.tab)}
                 """
             }
+        }
+
+        var handlerSetterDecl: String? {
+            guard context.mockDeclKind == .actor else { return nil }
+
+            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName
+            let handlerVarType = "(\(handlerType))?"
+            let setterName = "set\(handlerVarName.capitalizeFirstLetter)"
+
+            return """
+            \(1.tab)\(declModifiers)func \(setterName)(_ handler: \(handlerVarType)) {
+            \(2.tab)\(handlerVarName) = handler
+            \(1.tab)}
+            """
         }
     }
 }

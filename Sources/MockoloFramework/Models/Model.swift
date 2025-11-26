@@ -36,6 +36,7 @@ struct RenderContext {
     var overloadingResolvedName: String?
     var enclosingType: SwiftType?
     var annotatedTypeKind: NominalTypeDeclKind?
+    var mockDeclKind: NominalTypeDeclKind?
     var requiresSendable: Bool = false
 }
 
