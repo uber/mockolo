@@ -63,7 +63,7 @@ struct Import: CustomStringConvertible {
     let moduleName: String
     
     /// A modifier preceding the "import" keyword (e.g. public, internal, @testable)
-    var modifier: Modifier?
+    private(set) var modifier: Modifier?
     
     /// An opaque string preceding the entire import statement (typically `#if FOO\n` for nested macro support)
     let prefix: String?
