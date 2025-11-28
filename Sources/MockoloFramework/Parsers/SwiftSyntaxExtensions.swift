@@ -162,20 +162,23 @@ extension MemberBlockItemSyntax {
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declKind, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declKind)
-                let item = funcMember.model(with: acl, declKind: declKind, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
-                return (item, funcMember.attributes.trimmedDescription, false)
+                let attributes = funcMember.attributes.trimmedDescription
+                let item = funcMember.model(with: acl, declKind: declKind, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, attributes: attributes, processed: processed)
+                return (item, attributes, false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
             if validateMember(subscriptMember.modifiers, declKind, processed: processed) {
                 let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declKind)
-                let item = subscriptMember.model(with: acl, declKind: declKind, processed: processed)
-                return (item, subscriptMember.attributes.trimmedDescription, false)
+                let attributes = subscriptMember.attributes.trimmedDescription
+                let item = subscriptMember.model(with: acl, declKind: declKind, attributes: attributes, processed: processed)
+                return (item, attributes, false)
             }
         } else if let initMember = self.decl.as(InitializerDeclSyntax.self) {
             if validateInit(initMember, declKind, processed: processed) {
                 let acl = memberAcl(initMember.modifiers, encloserAcl, declKind)
-                let item = initMember.model(with: acl, declKind: declKind, processed: processed)
-                return (item, initMember.attributes.trimmedDescription, true)
+                let attributes = initMember.attributes.trimmedDescription
+                let item = initMember.model(with: acl, declKind: declKind, attributes: attributes, processed: processed)
+                return (item, attributes, true)
             }
         } else if let patMember = self.decl.as(AssociatedTypeDeclSyntax.self) {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declKind)
@@ -218,8 +221,20 @@ extension MemberBlockItemListSyntax {
         for m in self {
             if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
                 memberList.append(item)
+                // Only add attributes to the class if:
+                // 1. They're NOT from non-init methods (method attributes stay on methods)
+                // 2. OR they don't contain @available (since @available from methods should stay on methods)
+                let isNonInitMethod = item is MethodModel && !((item as? MethodModel)?.isInitializer ?? false)
                 if let attrDesc = attr {
-                    attributeList.append(attrDesc)
+                    if isNonInitMethod {
+                        // For non-init methods, only add non-@available attributes to class
+                        if !attrDesc.contains("@available") {
+                            attributeList.append(attrDesc)
+                        }
+                    } else {
+                        // For vars, inits, etc., add all attributes to class
+                        attributeList.append(attrDesc)
+                    }
                 }
                 hasInit = hasInit || initFlag
             }
@@ -493,7 +508,7 @@ extension VariableDeclSyntax {
 }
 
 extension SubscriptDeclSyntax {
-    func model(with acl: String, declKind: NominalTypeDeclKind, processed: Bool) -> Model {
+    func model(with acl: String, declKind: NominalTypeDeclKind, attributes: String, processed: Bool) -> Model {
         let isStatic = self.modifiers.isStatic
 
         let params = self.parameterClause.parameters.enumerated().compactMap {
@@ -516,6 +531,7 @@ extension SubscriptDeclSyntax {
                                          length: self.length,
                                          funcsWithArgsHistory: [],
                                          customModifiers: [:],
+                                         attributes: attributes,
                                          modelDescription: self.description,
                                          processed: processed)
         return subscriptModel
@@ -524,7 +540,7 @@ extension SubscriptDeclSyntax {
 
 extension FunctionDeclSyntax {
 
-    func model(with acl: String, declKind: NominalTypeDeclKind, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, processed: Bool) -> Model {
+    func model(with acl: String, declKind: NominalTypeDeclKind, funcsWithArgsHistory: [String]?, customModifiers: [String : Modifier]?, attributes: String, processed: Bool) -> Model {
         let isStatic = self.modifiers.isStatic
 
         let params = self.signature.parameterClause.parameters.enumerated().compactMap {
@@ -547,6 +563,7 @@ extension FunctionDeclSyntax {
                                     length: self.length,
                                     funcsWithArgsHistory: funcsWithArgsHistory ?? [],
                                     customModifiers: customModifiers ?? [:],
+                                    attributes: attributes,
                                     modelDescription: self.description,
                                     processed: processed)
         return funcmodel
@@ -568,7 +585,7 @@ extension InitializerDeclSyntax {
         }
     }
 
-    func model(with acl: String, declKind: NominalTypeDeclKind, processed: Bool) -> Model {
+    func model(with acl: String, declKind: NominalTypeDeclKind, attributes: String, processed: Bool) -> Model {
         let requiredInit = isRequired(with: declKind)
 
         let params = self.signature.parameterClause.parameters.enumerated().compactMap {
@@ -591,6 +608,7 @@ extension InitializerDeclSyntax {
                            length: self.length,
                            funcsWithArgsHistory: [],
                            customModifiers: [:],
+                           attributes: attributes,
                            modelDescription: self.description,
                            processed: processed)
     }
