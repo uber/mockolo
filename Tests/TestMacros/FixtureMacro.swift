@@ -84,12 +84,12 @@ import Foundation
 import V
 import X
 import Y
-#if DEBUG
-import P
-#endif
 #if canImport(NewFramework)
 import W
 import Z
+#endif
+#if DEBUG
+import P
 #endif
 
 
@@ -135,8 +135,7 @@ import C
 #if DEBUG
 import X
 import Y
-#endif
-#if TEST
+#elseif TEST
 import Z
 #endif
 
