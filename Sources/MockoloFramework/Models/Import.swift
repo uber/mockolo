@@ -15,10 +15,10 @@
 //
 
 /// A structure defining an "import" statement parsed by `Generator`, including various modifiers.
-struct Import: CustomStringConvertible {
+public struct Import: CustomStringConvertible {
     
     /// The access level of the import
-    enum ACL: String {
+    public enum ACL: String {
         case `private`
         case `fileprivate`
         case `internal`
@@ -37,18 +37,18 @@ struct Import: CustomStringConvertible {
     }
     
     /// A modifier that precedes the "import" keyword. ACL and "@testable" are mutually exclusive.
-    enum Modifier: RawRepresentable {
+    public enum Modifier: RawRepresentable {
         case acl(ACL)
         case testable
         
-        var rawValue: String {
+        public var rawValue: String {
             switch self {
             case .acl(let acl): acl.rawValue
             case .testable: "@testable"
             }
         }
         
-        init?(rawValue: String) {
+        public init?(rawValue: String) {
             if rawValue == "@testable" {
                 self = .testable
             } else if let acl = ACL(rawValue: rawValue) {
@@ -60,18 +60,18 @@ struct Import: CustomStringConvertible {
     }
     
     /// Name of the module
-    let moduleName: String
+    public let moduleName: String
     
     /// A modifier preceding the "import" keyword (e.g. public, internal, @testable)
-    var modifier: Modifier?
+    public var modifier: Modifier?
     
     /// An opaque string preceding the entire import statement (typically `#if FOO\n` for nested macro support)
-    let prefix: String?
+    public let prefix: String?
     
     /// An opaque string following the entire import statement (typically `\n#endif` for nested macro support)
-    let suffix: String?
+    public let suffix: String?
     
-    var description: String {
+    public var description: String {
         let line: String
         if let modifier {
             line = "\(modifier.rawValue) import \(moduleName)"
@@ -81,7 +81,7 @@ struct Import: CustomStringConvertible {
         return [prefix, line, suffix].compactMap { $0 }.joined()
     }
     
-    init(
+    public init(
         moduleName: String,
         modifier: Modifier? = nil,
         prefix: String? = nil,
