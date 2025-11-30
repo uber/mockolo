@@ -15,28 +15,46 @@
 //
 
 extension IfMacroModel {
-    func applyMacroTemplate(name: String,
-                            context: RenderContext,
-                            arguments: GenerationArguments,
-                            entities: [(String, Model)]) -> String {
-        let rendered = entities
-            .compactMap { model in
-                model.1.render(
-                    context: .init(
-                        overloadingResolvedName: model.0,
-                        enclosingType: context.enclosingType,
-                        annotatedTypeKind: context.annotatedTypeKind
-                    ),
-                    arguments: arguments
-                )
+
+    func applyMacroTemplate(
+        context: RenderContext,
+        arguments: GenerationArguments
+    ) -> String {
+        var lines = [String]()
+
+        for clause in clauses {
+            // Render the directive line
+            let directive: String
+            switch clause.type {
+            case .if:
+                directive = "\(1.tab)#if \(clause.condition ?? "")"
+            case .elseif:
+                directive = "\(1.tab)#elseif \(clause.condition ?? "")"
+            case .else:
+                directive = "\(1.tab)#else"
             }
-            .joined(separator: "\n")
-        
-        let template = """
-        \(1.tab)#if \(name)
-        \(rendered)
-        \(1.tab)#endif
-        """
-        return template
+            lines.append(directive)
+
+            // Render entities in this clause
+            let rendered = clause.entities
+                .compactMap { model in
+                    model.1.render(
+                        context: .init(
+                            overloadingResolvedName: model.0,
+                            enclosingType: context.enclosingType,
+                            annotatedTypeKind: context.annotatedTypeKind
+                        ),
+                        arguments: arguments
+                    )
+                }
+                .joined(separator: "\n")
+
+            if !rendered.isEmpty {
+                lines.append(rendered)
+            }
+        }
+
+        lines.append("\(1.tab)#endif")
+        return lines.joined(separator: "\n")
     }
 }
