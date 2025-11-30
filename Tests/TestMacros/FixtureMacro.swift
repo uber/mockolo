@@ -504,3 +504,49 @@ enum macroInVar {
 
     }
 }
+
+let duplicatedImportsInMacro = """
+import SomeImport1
+import SomeImport1
+@testable import SomeImport1
+/// @mockable
+protocol Simple {
+}
+"""
+
+let duplicatedImportsInMacroMock = """
+@testable import SomeImport1
+class SimpleMock: Simple {
+    init() { }
+}
+"""
+
+let nestedMacro = """
+#if canImport(NewFramework)
+import Z
+#if canImport(NewFramework2)
+import W
+#if canImport(NewFramework3)
+import Z
+#endif
+#endif
+#endif
+/// @mockable
+protocol Simple {
+}
+"""
+
+let nestedMacroMock = """
+#if canImport(NewFramework)
+import Z
+#if canImport(NewFramework2)
+import W
+#if canImport(NewFramework3)
+import Z
+#endif
+#endif
+#endif
+class SimpleMock: Simple {
+    init() { }
+}
+"""

@@ -56,4 +56,18 @@ final class MacroTests: MockoloTestCase {
         verify(srcContent: nestedMacroImports,
                dstContent: nestedMacroImportsMock)
     }
+    
+    func testDuplicatedImportsInMacro() {
+        verify(
+            srcContent: duplicatedImportsInMacro,
+            dstContent: duplicatedImportsInMacroMock
+        )
+    }
+    
+    func testNestedMacro() {
+        verify(
+            srcContent: nestedMacro,
+            dstContent: nestedMacroMock
+        )
+    }
 }
