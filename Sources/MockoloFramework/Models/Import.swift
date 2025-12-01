@@ -60,16 +60,17 @@ public struct Import: CustomStringConvertible {
     }
     
     /// Name of the module
-    public let moduleName: String
+    public var moduleName: String
+
     
     /// A modifier preceding the "import" keyword (e.g. public, internal, @testable)
     public var modifier: Modifier?
     
     /// An opaque string preceding the entire import statement (typically `#if FOO\n` for nested macro support)
-    public let prefix: String?
+    public var prefix: String?
     
     /// An opaque string following the entire import statement (typically `\n#endif` for nested macro support)
-    public let suffix: String?
+    public var suffix: String?
     
     public var description: String {
         let line: String
