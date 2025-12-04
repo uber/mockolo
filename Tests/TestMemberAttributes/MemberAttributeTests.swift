@@ -2,9 +2,9 @@ import Foundation
 import XCTest
 
 class MemberAttributeTests: MockoloTestCase {
-    func testMethodAndVariableAttributes() {
-        verify(srcContent: methodAndVariableAttributes,
-               dstContent: methodAndVariableAttributesMock)
+    func testMemberAttributes() {
+        verify(srcContent: memberAttributes._source,
+               dstContent: memberAttributes.expected._source)
     }
 }
 

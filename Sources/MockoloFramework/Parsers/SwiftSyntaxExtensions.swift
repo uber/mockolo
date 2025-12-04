@@ -222,14 +222,8 @@ extension MemberBlockItemListSyntax {
             if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
                 memberList.append(item)
                 if let attrDesc = attr {
-                    let shouldFilterMemberAttributes = item is MethodModel || item is VariableModel
-                    
-                    if shouldFilterMemberAttributes {
-                        let memberAttributes = ["@available", "@objc", "@discardableResult"]
-                        if !memberAttributes.contains(where: { attrDesc.contains($0) }) {
-                            attributeList.append(attrDesc)
-                        }
-                    } else {
+                    let isMemberAttribute = item is MethodModel || item is VariableModel
+                    if !isMemberAttribute {
                         attributeList.append(attrDesc)
                     }
                 }

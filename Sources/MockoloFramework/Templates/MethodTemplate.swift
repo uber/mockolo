@@ -132,15 +132,18 @@ extension MethodModel {
             )
             let genericWhereStr = model.genericWhereClause.map { "\($0) " } ?? ""
             
-            let methodAttributes = model.attributes.components(separatedBy: "\n")
-                .filter { attr in
-                    attr.contains("@available")
+            var availableStr = ""
+            var inlineStr = ""
+            for attr in model.attributes.components(separatedBy: "\n") where !attr.isEmpty {
+                if attr.contains("@available") {
+                    availableStr += "\(1.tab)\(attr)\n"
+                } else {
+                    inlineStr += "\(attr) "
                 }
-                .joined(separator: "\n")
-            let attributesStr = methodAttributes.isEmpty ? "" : "\(1.tab)\(methodAttributes)\n"
+            }
 
             let functionDecl = """
-            \(attributesStr)\(1.tab)\(declModifiers)\(overrideStr)\(modifierTypeStr)\(keyword)\(model.name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnClause)\(genericWhereStr){
+            \(availableStr)\(1.tab)\(inlineStr)\(declModifiers)\(overrideStr)\(modifierTypeStr)\(keyword)\(model.name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnClause)\(genericWhereStr){
             \(wrapped)
             \(1.tab)}
             """

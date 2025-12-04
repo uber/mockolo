@@ -57,15 +57,15 @@ extension VariableModel {
 
         let staticSpace = isStatic ? "\(String.static) " : ""
         
-        let availableAttr = (attributes ?? [])
-            .filter { $0.contains("@available") }
-            .joined(separator: "\n")
-        let availableStr = availableAttr.isEmpty ? "" : "\(1.tab)\(availableAttr)\n"
-        
-        let objcAttr = (attributes ?? [])
-            .filter { $0.contains("@objc") }
-            .joined(separator: " ")
-        let objcStr = objcAttr.isEmpty ? "" : "\(objcAttr) "
+        var availableStr = ""
+        var inlineStr = ""
+        for attr in (attributes ?? []) where !attr.isEmpty {
+            if attr.contains("@available") {
+                availableStr += "\(1.tab)\(attr)\n"
+            } else {
+                inlineStr += "\(attr) "
+            }
+        }
 
         switch storageKind {
         case .stored(let needSetCount):
@@ -98,7 +98,7 @@ extension VariableModel {
                 
                 \(setCallCountVarDecl)
                 \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType)\(assignVal)\(accessorBlock)
-                \(availableStr)\(1.tab)\(objcStr)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
+                \(availableStr)\(1.tab)\(inlineStr)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
                 \(2.tab)get { return \(underlyingName) }
                 \(2.tab)set { \(underlyingName) = newValue }
                 \(1.tab)}
@@ -107,7 +107,7 @@ extension VariableModel {
                 template = """
                 
                 \(setCallCountVarDecl)
-                \(availableStr)\(1.tab)\(objcStr)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName)\(assignVal)\(accessorBlock)
+                \(availableStr)\(1.tab)\(inlineStr)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName)\(assignVal)\(accessorBlock)
                 """
             }
 
