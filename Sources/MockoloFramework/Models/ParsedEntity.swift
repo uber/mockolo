@@ -150,20 +150,7 @@ struct GenerationArguments {
     )
 }
 
-/// Structured import data parsed from a source file
-public struct ParsedImports {
-    /// Top-level imports without conditional compilation
-    public var topLevel: [Import]
-    /// Conditional import blocks (#if/#elseif/#else/#endif)
-    public var conditional: [ConditionalImportBlock]
-
-    public init(topLevel: [Import] = [], conditional: [ConditionalImportBlock] = []) {
-        self.topLevel = topLevel
-        self.conditional = conditional
-    }
-}
-
-public typealias ImportMap = [String: ParsedImports]
+public typealias ImportMap = [String: [ImportContent]]
 
 /// Metadata for a type being mocked
 public final class Entity {

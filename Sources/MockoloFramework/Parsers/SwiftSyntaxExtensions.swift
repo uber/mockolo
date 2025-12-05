@@ -710,7 +710,7 @@ extension TypeAliasDeclSyntax {
 
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
-    var imports = ParsedImports()
+    var imports: [ImportContent] = []
     let annotation: String
     let fileMacro: String
     let path: String
@@ -762,8 +762,8 @@ final class EntityVisitor: SyntaxVisitor {
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         // Top-level import (not inside #if)
-        if let imp = Import(line: node.trimmedDescription) {
-            imports.topLevel.append(imp)
+        if let `import` = Import(line: node.trimmedDescription) {
+            imports.append(.simple(`import`))
         }
         return .skipChildren
     }
@@ -777,7 +777,7 @@ final class EntityVisitor: SyntaxVisitor {
 
         // Parse conditional import block recursively
         let block = parseIfConfigDecl(node)
-        imports.conditional.append(block)
+        imports.append(.conditional(block))
         return .skipChildren
     }
 

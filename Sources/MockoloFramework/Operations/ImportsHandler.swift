@@ -28,12 +28,27 @@ func handleImports(pathToImportsMap: ImportMap,
     // 1. Collect imports from all relevant files
     for (path, parsedImports) in pathToImportsMap {
         guard relevantPaths.contains(path) else { continue }
-
+        
+        let (topLevels, conditionals) = parsedImports.partitioned(by: { $0.isConditional })
+        
         // Collect top-level imports
-        topLevelImports.append(contentsOf: parsedImports.topLevel)
-
+        topLevelImports.append(
+            contentsOf: topLevels.compactMap {
+                if case ImportContent.simple(let `import`) = $0 {
+                    return `import`
+                }
+                return nil
+            }
+        )
         // Collect conditional blocks
-        conditionalBlocks.append(contentsOf: parsedImports.conditional)
+        conditionalBlocks.append(
+            contentsOf: conditionals.compactMap {
+                if case ImportContent.conditional(let `import`) = $0 {
+                    return `import`
+                }
+                return nil
+            }
+        )
     }
 
     // 2. Apply excludeImports filter to top-level imports
