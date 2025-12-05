@@ -42,7 +42,6 @@ public class EmojiParentMock: EmojiParent {
 
 
 let emojiVarsMock = """
-@available(iOS 10.0, *)
 class EmojiVarsMock: EmojiVars {
     init() { }
     init(😂: Emoji) {
@@ -52,6 +51,7 @@ class EmojiVarsMock: EmojiVars {
 
     private(set) var 😂SetCallCount = 0
     private var _😂: Emoji! { didSet { 😂SetCallCount += 1 } }
+    @available(iOS 10.0, *)
     var 😂: Emoji {
         get { return _😂 }
         set { _😂 = newValue }
@@ -64,7 +64,6 @@ class EmojiVarsMock: EmojiVars {
 let emojiCombMock = """
 import Foundation
 
-@available(iOS 10.0, *)
 class EmojiVarsMock: EmojiVars {
     init() { }
     init(😂: Emoji, dict: Dictionary<String, Int> = Dictionary<String, Int>(), 👍: Emoji, 👌😳👍: Emoji) {
@@ -77,6 +76,7 @@ class EmojiVarsMock: EmojiVars {
 
     private(set) var 😂SetCallCount = 0
     private var _😂: Emoji! { didSet { 😂SetCallCount += 1 } }
+    @available(iOS 10.0, *)
     var 😂: Emoji {
         get { return _😂 }
         set { _😂 = newValue }
