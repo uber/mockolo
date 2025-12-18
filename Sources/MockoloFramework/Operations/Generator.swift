@@ -25,7 +25,6 @@ enum InputError: Error {
 @discardableResult
 public func generate(sourceDirs: [String],
                      sourceFiles: [String],
-                     parser: SourceParser,
                      exclusionSuffixes: [String],
                      mockFilePaths: [String]?,
                      annotation: String,
@@ -47,7 +46,8 @@ public func generate(sourceDirs: [String],
         log("Source files or directories do not exist", level: .error)
         throw InputError.sourceFilesError
     }
-    
+
+    let parser = SourceParser()
     scanConcurrencyLimit = concurrencyLimit
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
