@@ -150,7 +150,7 @@ struct GenerationArguments {
     )
 }
 
-public typealias ImportMap = [String: [ImportContent]]
+typealias ImportMap = [String: [ImportContent]]
 
 /// Metadata for a type being mocked
 public final class Entity {

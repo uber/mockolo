@@ -22,15 +22,15 @@ public enum FindTargetDeclType {
     case protocolType, classType, other, all
 }
 
-public class SourceParser {
-    public init() {}
+class SourceParser {
+    init() {}
     /// Parses processed decls (mock classes) and calls a completion block
     /// @param paths File paths containing processed mocks
     /// @param fileMacro: File level macro
     /// @param completion:The block to be executed on completion
-    public func parseProcessedDecls(_ paths: [String],
-                                    fileMacro: String?,
-                                    completion: @escaping ([Entity], ImportMap?) -> ()) {
+    func parseProcessedDecls(_ paths: [String],
+                             fileMacro: String?,
+                             completion: @escaping ([Entity], ImportMap?) -> ()) {
         scan(paths) { (path, lock) in
             self.generateASTs(path, annotation: "", fileMacro: fileMacro, declType: .classType, lock: lock, completion: completion)
         }
@@ -43,13 +43,13 @@ public class SourceParser {
     /// @param fileMacro: File level macro
     /// @param declType: The declaration type, e.g. protocol, class.
     /// @param completion:The block to be executed on completion
-    public func parseDecls(_ paths: [String],
-                           isDirs: Bool,
-                           exclusionSuffixes: [String],
-                           annotation: String,
-                           fileMacro: String?,
-                           declType: FindTargetDeclType,
-                           completion: @escaping ([Entity], ImportMap?) -> ()) {
+    func parseDecls(_ paths: [String],
+                    isDirs: Bool,
+                    exclusionSuffixes: [String],
+                    annotation: String,
+                    fileMacro: String?,
+                    declType: FindTargetDeclType,
+                    completion: @escaping ([Entity], ImportMap?) -> ()) {
 
         guard !paths.isEmpty else { return }
         scan(paths, isDirectory: isDirs) { (path, lock) in

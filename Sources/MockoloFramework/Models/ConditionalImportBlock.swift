@@ -15,10 +15,10 @@
 //
 
 /// Represents import content: either a simple import statement or a nested conditional block
-public indirect enum ImportContent {
+indirect enum ImportContent {
     case simple(Import)
     case conditional(ConditionalImportBlock)
-    
+
     var isConditional: Bool {
         switch self {
         case .simple:
@@ -30,24 +30,24 @@ public indirect enum ImportContent {
 }
 
 /// Represents a conditional import block (#if/#elseif/#else/#endif)
-public struct ConditionalImportBlock {
+struct ConditionalImportBlock {
     /// Represents a single clause in a conditional import block
-    public struct Clause {
-        public let type: ClauseType
-        public let condition: String?  // nil for #else
-        public var contents: [ImportContent]
+    struct Clause {
+        let type: ClauseType
+        let condition: String?  // nil for #else
+        var contents: [ImportContent]
 
-        public init(type: ClauseType, condition: String?, contents: [ImportContent]) {
+        init(type: ClauseType, condition: String?, contents: [ImportContent]) {
             self.type = type
             self.condition = condition
             self.contents = contents
         }
     }
 
-    public let clauses: [Clause]
-    public let offset: Int64
+    let clauses: [Clause]
+    let offset: Int64
 
-    public init(clauses: [Clause], offset: Int64) {
+    init(clauses: [Clause], offset: Int64) {
         self.clauses = clauses
         self.offset = offset
     }
