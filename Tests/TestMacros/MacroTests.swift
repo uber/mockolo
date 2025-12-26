@@ -67,7 +67,8 @@ final class MacroTests: MockoloTestCase {
     func testNestedMacro() {
         verify(
             srcContent: nestedMacro,
-            dstContent: nestedMacroMock
+            dstContent: nestedMacroMock,
+            testableImports: ["W"]
         )
     }
 }

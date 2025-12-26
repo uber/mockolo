@@ -37,7 +37,7 @@ func handleImports(pathToImportsMap: ImportMap,
             }
         }
     }
-    
+
     // 2. Sort conditional blocks by offset (file appearance order)
     conditionalBlocks.sort(by: { $0.offset < $1.offset })
 
@@ -47,13 +47,21 @@ func handleImports(pathToImportsMap: ImportMap,
             Import(moduleName: $0)
         })
     }
-    if let testableImports {
-        topLevelImports.append(contentsOf: testableImports.map {
-            Import(moduleName: $0).asTestable
-        })
+
+    var contents: [ImportContent] {
+        topLevelImports.map { .simple($0) } + conditionalBlocks.map { .conditional($0) }
     }
 
-    let contents: [ImportContent] = topLevelImports.map { .simple($0) } + conditionalBlocks.map { .conditional($0) }
+    // 4. Add testable imports if the import does not exist
+    if let testableImports {
+        let usedNames = Set(visitModuleName(contents))
+        for name in testableImports {
+            if !usedNames.contains(name) {
+                topLevelImports.append(Import(moduleName: name).asTestable)
+            }
+        }
+    }
+
     return renderImportContents(
         contents,
         excludeImports: excludeImports,
@@ -111,4 +119,15 @@ private func renderImportContents(
     resolveAccumulatedSimpleImports()
 
     return clauseLines.joined(separator: "\n")
+}
+
+private func visitModuleName(_ contents: [ImportContent]) -> [String] {
+    return contents.flatMap { content in
+        switch content {
+        case .simple(let `import`):
+            return [`import`.moduleName]
+        case .conditional(let block):
+            return visitModuleName(block.clauses.flatMap(\.contents))
+        }
+    }
 }

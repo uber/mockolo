@@ -540,7 +540,7 @@ let nestedMacroMock = """
 #if canImport(NewFramework)
 import Z
 #if canImport(NewFramework2)
-import W
+@testable import W
 #if canImport(NewFramework3)
 import Z
 #endif
