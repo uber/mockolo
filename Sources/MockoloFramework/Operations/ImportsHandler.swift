@@ -77,10 +77,9 @@ private func renderImportContents(
     var clauseLines: [String] = []
     var simpleImports: [Import] = []
     func resolveAccumulatedSimpleImports() {
-        var work: [Import] = []
-        swap(&simpleImports, &work)
-        if !work.isEmpty {
-            clauseLines.append(work.resolved().lines())
+        if !simpleImports.isEmpty {
+            clauseLines.append(simpleImports.resolved().lines())
+            simpleImports.removeAll(keepingCapacity: true)
         }
     }
 
