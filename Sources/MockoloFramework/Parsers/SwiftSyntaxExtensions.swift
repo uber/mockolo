@@ -235,16 +235,7 @@ extension IfConfigDeclSyntax {
         var hasInit = false
 
         for (index, cl) in self.clauses.enumerated() {
-            // Determine clause type from the pound keyword
-            let clauseType: ClauseType
-            switch cl.poundKeyword.tokenKind {
-            case .poundIf:
-                clauseType = .if(cl.condition?.trimmedDescription ?? "")
-            case .poundElseif:
-                clauseType = .elseif(cl.condition?.trimmedDescription ?? "")
-            case .poundElse:
-                clauseType = .else
-            default:
+            guard let clauseType = ClauseType(cl) else {
                 continue
             }
 
@@ -786,16 +777,7 @@ final class EntityVisitor: SyntaxVisitor {
         var clauseList = [ConditionalImportBlock.Clause]()
 
         for (index, cl) in node.clauses.enumerated() {
-            // Determine clause type from the pound keyword
-            let clauseType: ClauseType
-            switch cl.poundKeyword.tokenKind {
-            case .poundIf:
-                clauseType = .if(cl.condition?.trimmedDescription ?? "")
-            case .poundElseif:
-                clauseType = .elseif(cl.condition?.trimmedDescription ?? "")
-            case .poundElse:
-                clauseType = .else
-            default:
+            guard let clauseType = ClauseType(cl) else {
                 continue
             }
 
@@ -976,6 +958,21 @@ extension ThrowingKind {
             } else {
                 self = .any
             }
+        }
+    }
+}
+
+extension ClauseType {
+    init?(_ syntax: IfConfigClauseSyntax) {
+        switch syntax.poundKeyword.tokenKind {
+        case .poundIf:
+            self = .if(syntax.condition?.trimmedDescription ?? "")
+        case .poundElseif:
+            self = .elseif(syntax.condition?.trimmedDescription ?? "")
+        case .poundElse:
+            self = .else
+        default:
+            return nil
         }
     }
 }
