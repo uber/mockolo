@@ -26,7 +26,6 @@ struct ConditionalImportBlock {
     struct Clause {
         var type: ClauseType
         var contents: [ImportContent]
-        var order: Int
     }
 
     let clauses: [Clause]

@@ -776,7 +776,7 @@ final class EntityVisitor: SyntaxVisitor {
     private func parseIfConfigDecl(_ node: IfConfigDeclSyntax) -> ConditionalImportBlock {
         var clauseList = [ConditionalImportBlock.Clause]()
 
-        for (index, cl) in node.clauses.enumerated() {
+        for cl in node.clauses {
             guard let clauseType = ClauseType(cl) else {
                 continue
             }
@@ -799,8 +799,7 @@ final class EntityVisitor: SyntaxVisitor {
 
             clauseList.append(ConditionalImportBlock.Clause(
                 type: clauseType,
-                contents: contents,
-                order: index
+                contents: contents
             ))
         }
 
