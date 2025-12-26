@@ -239,9 +239,9 @@ extension IfConfigDeclSyntax {
             let clauseType: ClauseType
             switch cl.poundKeyword.tokenKind {
             case .poundIf:
-                clauseType = .if
+                clauseType = .if(cl.condition?.trimmedDescription ?? "")
             case .poundElseif:
-                clauseType = .elseif(order: index)
+                clauseType = .elseif(cl.condition?.trimmedDescription ?? "")
             case .poundElse:
                 clauseType = .else
             default:
@@ -270,8 +270,8 @@ extension IfConfigDeclSyntax {
 
             clauseList.append(IfMacroModel.Clause(
                 type: clauseType,
-                condition: cl.condition?.trimmedDescription,
-                entities: uniqueSubModels
+                entities: uniqueSubModels,
+                order: index
             ))
         }
 
@@ -790,9 +790,9 @@ final class EntityVisitor: SyntaxVisitor {
             let clauseType: ClauseType
             switch cl.poundKeyword.tokenKind {
             case .poundIf:
-                clauseType = .if
+                clauseType = .if(cl.condition?.trimmedDescription ?? "")
             case .poundElseif:
-                clauseType = .elseif(order: index)
+                clauseType = .elseif(cl.condition?.trimmedDescription ?? "")
             case .poundElse:
                 clauseType = .else
             default:
@@ -817,8 +817,8 @@ final class EntityVisitor: SyntaxVisitor {
 
             clauseList.append(ConditionalImportBlock.Clause(
                 type: clauseType,
-                condition: cl.condition?.trimmedDescription,
-                contents: contents
+                contents: contents,
+                order: index
             ))
         }
 

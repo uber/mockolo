@@ -99,10 +99,10 @@ private func renderConditionalBlock(_ block: ConditionalImportBlock, excludeImpo
     for (index, clause) in block.clauses.enumerated() {
         // Render directive line
         switch clause.type {
-        case .if:
-            result += "#if \(clause.condition ?? "")\n"
-        case .elseif:
-            result += "#elseif \(clause.condition ?? "")\n"
+        case .if(let condition):
+            result += "#if \(condition)\n"
+        case .elseif(let condition):
+            result += "#elseif \(condition)\n"
         case .else:
             result += "#else\n"
         }
