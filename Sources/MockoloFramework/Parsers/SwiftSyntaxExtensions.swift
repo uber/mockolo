@@ -261,8 +261,7 @@ extension IfConfigDeclSyntax {
 
             clauseList.append(IfMacroModel.Clause(
                 type: clauseType,
-                entities: uniqueSubModels,
-                order: index
+                entities: uniqueSubModels
             ))
         }
 

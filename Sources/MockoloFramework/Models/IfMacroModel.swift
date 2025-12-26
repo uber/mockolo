@@ -35,7 +35,6 @@ final class IfMacroModel: Model {
     struct Clause {
         var type: ClauseType
         var entities: [(String, Model)]
-        var order: Int
     }
 
     let clauses: [Clause]
@@ -63,7 +62,7 @@ final class IfMacroModel: Model {
     convenience init(name: String,
                      offset: Int64,
                      entities: [(String, Model)]) {
-        let clause = Clause(type: .if(name), entities: entities, order: 0)
+        let clause = Clause(type: .if(name), entities: entities)
         self.init(clauses: [clause], offset: offset)
     }
 
