@@ -65,33 +65,21 @@ struct Import: CustomStringConvertible {
     
     /// A modifier preceding the "import" keyword (e.g. public, internal, @testable)
     var modifier: Modifier?
-    
-    /// An opaque string preceding the entire import statement (typically `#if FOO\n` for nested macro support)
-    var prefix: String?
-    
-    /// An opaque string following the entire import statement (typically `\n#endif` for nested macro support)
-    var suffix: String?
-    
+
     var description: String {
-        let line: String
         if let modifier {
-            line = "\(modifier.rawValue) import \(moduleName)"
+            return "\(modifier.rawValue) import \(moduleName)"
         } else {
-            line = "import \(moduleName)"
+            return "import \(moduleName)"
         }
-        return [prefix, line, suffix].compactMap { $0 }.joined()
     }
     
     init(
         moduleName: String,
-        modifier: Modifier? = nil,
-        prefix: String? = nil,
-        suffix: String? = nil
+        modifier: Modifier? = nil
     ) {
         self.moduleName = moduleName
         self.modifier = modifier
-        self.prefix = prefix
-        self.suffix = suffix
     }
 }
  
@@ -105,7 +93,6 @@ extension Import {
     }
     
     /// Creates an `Import` by parsing a `String` provided by `Generator`.
-    /// It is typically a single line, but can be wrapped by `#if FOO\n...\n#endif` when it's a nested macro.
     init?(line: String) {
         guard let importSpaceRange = line.range(of: String.importSpace) else { return nil }
         
@@ -122,9 +109,6 @@ extension Import {
             let modifierEndIndex = line.index(before: importSpaceRange.lowerBound)
             modifier = Modifier(rawValue: String(line[startIndex..<modifierEndIndex]))
         }
-        
-        `prefix` = firstNewlineIndex.map { String(line[...$0]) }
-        suffix = lastNewlineIndex.map { String(line[$0...]) }
     }
 }
 
@@ -137,9 +121,7 @@ extension Array where Element == Import {
     /// - sorts by module name
     func resolved() -> [Import] {
         var modifierByModuleName = [String: Import.Modifier]()
-        var prefixByModuleName = [String: String]()
-        var suffixByModuleName = [String: String]()
-        
+
         for imp in self {
             switch (imp.modifier, modifierByModuleName[imp.moduleName]) {
             case let (.acl(acl), .acl(existingACL)):
@@ -153,21 +135,12 @@ extension Array where Element == Import {
             default:
                 break
             }
-            
-            if let prefix = imp.prefix {
-                prefixByModuleName[imp.moduleName] = prefix
-            }
-            if let suffix = imp.suffix {
-                suffixByModuleName[imp.moduleName] = suffix
-            }
         }
         
         return Set(map(\.moduleName)).sorted().map {
             Import(
                 moduleName: $0,
-                modifier: modifierByModuleName[$0],
-                prefix: prefixByModuleName[$0],
-                suffix: suffixByModuleName[$0]
+                modifier: modifierByModuleName[$0]
             )
         }
     }
