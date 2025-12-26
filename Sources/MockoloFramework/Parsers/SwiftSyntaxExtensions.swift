@@ -234,7 +234,7 @@ extension IfConfigDeclSyntax {
         var attrDesc: String?
         var hasInit = false
 
-        for (index, cl) in self.clauses.enumerated() {
+        for cl in self.clauses {
             guard let clauseType = ClauseType(cl) else {
                 continue
             }
