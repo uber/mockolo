@@ -18,15 +18,6 @@
 indirect enum ImportContent {
     case simple(Import)
     case conditional(ConditionalImportBlock)
-
-    var isConditional: Bool {
-        switch self {
-        case .simple:
-            false
-        case .conditional:
-            true
-        }
-    }
 }
 
 /// Represents a conditional import block (#if/#elseif/#else/#endif)
