@@ -18,30 +18,14 @@
 indirect enum ImportContent {
     case simple(Import)
     case conditional(ConditionalImportBlock)
-
-    var isConditional: Bool {
-        switch self {
-        case .simple:
-            false
-        case .conditional:
-            true
-        }
-    }
 }
 
 /// Represents a conditional import block (#if/#elseif/#else/#endif)
 struct ConditionalImportBlock {
     /// Represents a single clause in a conditional import block
     struct Clause {
-        let type: ClauseType
-        let condition: String?  // nil for #else
+        var type: ClauseType
         var contents: [ImportContent]
-
-        init(type: ClauseType, condition: String?, contents: [ImportContent]) {
-            self.type = type
-            self.condition = condition
-            self.contents = contents
-        }
     }
 
     let clauses: [Clause]

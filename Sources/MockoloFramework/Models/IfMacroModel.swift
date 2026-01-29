@@ -15,20 +15,17 @@
 //
 
 /// Represents the type of a clause in an #if/#elseif/#else block
-public enum ClauseType: Comparable {
-    case `if`
-    case elseif(order: Int)
+enum ClauseType {
+    case `if`(_ condition: String)
+    case elseif(_ condition: String)
     case `else`
 
-    // Comparable implementation: if < elseif(0) < elseif(1) < ... < else
-    public static func < (lhs: ClauseType, rhs: ClauseType) -> Bool {
-        switch (lhs, rhs) {
-        case (.if, .elseif), (.if, .else), (.elseif, .else):
-            true
-        case (.elseif(let l), .elseif(let r)):
-            l < r
-        default:
-            false
+    var condition: String? {
+        switch self {
+        case .if(let condition), .elseif(let condition):
+            return condition
+        case .else:
+            return nil
         }
     }
 }
@@ -36,9 +33,8 @@ public enum ClauseType: Comparable {
 final class IfMacroModel: Model {
     /// Represents a single clause in a conditional compilation block
     struct Clause {
-        let type: ClauseType
-        let condition: String?  // nil for #else
-        let entities: [(String, Model)]
+        var type: ClauseType
+        var entities: [(String, Model)]
     }
 
     let clauses: [Clause]
@@ -49,7 +45,7 @@ final class IfMacroModel: Model {
     }
     
     var name: String {
-        clauses.first?.condition ?? ""
+        clauses.first?.type.condition ?? ""
     }
 
     var fullName: String {
@@ -66,7 +62,7 @@ final class IfMacroModel: Model {
     convenience init(name: String,
                      offset: Int64,
                      entities: [(String, Model)]) {
-        let clause = Clause(type: .if, condition: name, entities: entities)
+        let clause = Clause(type: .if(name), entities: entities)
         self.init(clauses: [clause], offset: offset)
     }
 

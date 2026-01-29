@@ -234,17 +234,8 @@ extension IfConfigDeclSyntax {
         var attrDesc: String?
         var hasInit = false
 
-        for (index, cl) in self.clauses.enumerated() {
-            // Determine clause type from the pound keyword
-            let clauseType: ClauseType
-            switch cl.poundKeyword.tokenKind {
-            case .poundIf:
-                clauseType = .if
-            case .poundElseif:
-                clauseType = .elseif(order: index)
-            case .poundElse:
-                clauseType = .else
-            default:
+        for cl in self.clauses {
+            guard let clauseType = ClauseType(cl) else {
                 continue
             }
 
@@ -270,7 +261,6 @@ extension IfConfigDeclSyntax {
 
             clauseList.append(IfMacroModel.Clause(
                 type: clauseType,
-                condition: cl.condition?.trimmedDescription,
                 entities: uniqueSubModels
             ))
         }
@@ -785,17 +775,8 @@ final class EntityVisitor: SyntaxVisitor {
     private func parseIfConfigDecl(_ node: IfConfigDeclSyntax) -> ConditionalImportBlock {
         var clauseList = [ConditionalImportBlock.Clause]()
 
-        for (index, cl) in node.clauses.enumerated() {
-            // Determine clause type from the pound keyword
-            let clauseType: ClauseType
-            switch cl.poundKeyword.tokenKind {
-            case .poundIf:
-                clauseType = .if
-            case .poundElseif:
-                clauseType = .elseif(order: index)
-            case .poundElse:
-                clauseType = .else
-            default:
+        for cl in node.clauses {
+            guard let clauseType = ClauseType(cl) else {
                 continue
             }
 
@@ -817,7 +798,6 @@ final class EntityVisitor: SyntaxVisitor {
 
             clauseList.append(ConditionalImportBlock.Clause(
                 type: clauseType,
-                condition: cl.condition?.trimmedDescription,
                 contents: contents
             ))
         }
@@ -976,6 +956,21 @@ extension ThrowingKind {
             } else {
                 self = .any
             }
+        }
+    }
+}
+
+extension ClauseType {
+    init?(_ syntax: IfConfigClauseSyntax) {
+        switch syntax.poundKeyword.tokenKind {
+        case .poundIf:
+            self = .if(syntax.condition?.trimmedDescription ?? "")
+        case .poundElseif:
+            self = .elseif(syntax.condition?.trimmedDescription ?? "")
+        case .poundElse:
+            self = .else
+        default:
+            return nil
         }
     }
 }

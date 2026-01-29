@@ -26,10 +26,10 @@ extension IfMacroModel {
             // Render the directive line
             let directive: String
             switch clause.type {
-            case .if:
-                directive = "\(1.tab)#if \(clause.condition ?? "")"
-            case .elseif:
-                directive = "\(1.tab)#elseif \(clause.condition ?? "")"
+            case .if(let condition):
+                directive = "\(1.tab)#if \(condition)"
+            case .elseif(let condition):
+                directive = "\(1.tab)#elseif \(condition)"
             case .else:
                 directive = "\(1.tab)#else"
             }
