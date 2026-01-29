@@ -24,7 +24,7 @@ indirect enum ImportContent {
 struct ConditionalImportBlock {
     /// Represents a single clause in a conditional import block
     struct Clause {
-        var type: ClauseType
+        var type: IfClauseType
         var contents: [ImportContent]
     }
 

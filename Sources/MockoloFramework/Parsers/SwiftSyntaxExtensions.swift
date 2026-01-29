@@ -235,7 +235,7 @@ extension IfConfigDeclSyntax {
         var hasInit = false
 
         for cl in self.clauses {
-            guard let clauseType = ClauseType(cl) else {
+            guard let clauseType = IfClauseType(cl) else {
                 continue
             }
 
@@ -776,7 +776,7 @@ final class EntityVisitor: SyntaxVisitor {
         var clauseList = [ConditionalImportBlock.Clause]()
 
         for cl in node.clauses {
-            guard let clauseType = ClauseType(cl) else {
+            guard let clauseType = IfClauseType(cl) else {
                 continue
             }
 
@@ -960,7 +960,7 @@ extension ThrowingKind {
     }
 }
 
-extension ClauseType {
+extension IfClauseType {
     init?(_ syntax: IfConfigClauseSyntax) {
         switch syntax.poundKeyword.tokenKind {
         case .poundIf:

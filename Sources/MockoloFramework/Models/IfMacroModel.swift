@@ -15,7 +15,7 @@
 //
 
 /// Represents the type of a clause in an #if/#elseif/#else block
-enum ClauseType {
+enum IfClauseType {
     case `if`(_ condition: String)
     case elseif(_ condition: String)
     case `else`
@@ -33,7 +33,7 @@ enum ClauseType {
 final class IfMacroModel: Model {
     /// Represents a single clause in a conditional compilation block
     struct Clause {
-        var type: ClauseType
+        var type: IfClauseType
         var entities: [(String, Model)]
     }
 
