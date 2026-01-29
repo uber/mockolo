@@ -555,6 +555,13 @@ extension SwiftType {
             let elementType = SwiftType(typeSyntax: syntax.element)
             self.kind = .nominal(.init(name: .arrayTypeSugarName, genericParameterTypes: [elementType]))
 
+        case .inlineArrayType(let syntax):
+            // [N of T] - InlineArray type sugar (SE-0453, Swift 6.2+)
+            // This case was added for swift-syntax 602 compatibility.
+            // Full support (default value generation, etc.) is not implemented.
+            // The type is preserved verbatim; users must provide their own default values.
+            self.kind = .nominal(.init(name: syntax.trimmedDescription))
+
         case .dictionaryType(let syntax):
             // [T: U]
             let keyType = SwiftType(typeSyntax: syntax.key)
