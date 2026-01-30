@@ -235,7 +235,7 @@ public class ForcastUpdatingMock: ForcastUpdating {
 
     public private(set) var enabledCallCount = 0
     public var enabledHandler: (() -> Bool)?
-    public func enabled() -> Bool {
+    @objc public func enabled() -> Bool {
         enabledCallCount += 1
         if let enabledHandler = enabledHandler {
             return enabledHandler()
@@ -245,7 +245,7 @@ public class ForcastUpdatingMock: ForcastUpdating {
 
     public private(set) var forcastLoaderCallCount = 0
     public var forcastLoaderHandler: (() -> ForcastLoading?)?
-    public func forcastLoader() -> ForcastLoading? {
+    @objc public func forcastLoader() -> ForcastLoading? {
         forcastLoaderCallCount += 1
         if let forcastLoaderHandler = forcastLoaderHandler {
             return forcastLoaderHandler()
@@ -255,7 +255,7 @@ public class ForcastUpdatingMock: ForcastUpdating {
 
     public private(set) var fetchInfoCallCount = 0
     public var fetchInfoHandler: ((URL, @escaping (String?, URL?) -> ()) -> ())?
-    public func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ()) {
+    @objc public func fetchInfo(fromItmsURL itmsURL: URL, completionHandler: @escaping (String?, URL?) -> ()) {
         fetchInfoCallCount += 1
         if let fetchInfoHandler = fetchInfoHandler {
             fetchInfoHandler(itmsURL, completionHandler)
