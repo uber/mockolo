@@ -192,7 +192,6 @@ struct Executor: ParsableCommand {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
-                         parser: SourceParser(),
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,

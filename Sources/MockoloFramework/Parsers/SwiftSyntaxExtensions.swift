@@ -230,35 +230,42 @@ extension MemberBlockItemListSyntax {
 
 extension IfConfigDeclSyntax {
     func model(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
-        var subModels = [Model]()
+        var clauseList = [IfMacroModel.Clause]()
         var attrDesc: String?
         var hasInit = false
 
-        var name = ""
         for cl in self.clauses {
-            if let desc = cl.condition?.description {
-                if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
-                    name = desc
-                    for element in list {
-                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
-                            subModels.append(item)
-                            if let attr = attr, attr.contains(String.available) {
-                                attrDesc = attr
-                            }
-                            hasInit = hasInit || initFlag
+            guard let clauseType = IfClauseType(cl) else {
+                continue
+            }
+
+            var subModels = [Model]()
+            if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
+                for element in list {
+                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
+                        subModels.append(item)
+                        if let attr = attr, attr.contains(String.available) {
+                            attrDesc = attr
                         }
+                        hasInit = hasInit || initFlag
                     }
                 }
             }
-        }
-        
-        let uniqueSubModels = uniqueEntities(
-            in: subModels,
-            exclude: [:],
-            fullnames: []
-        ).sorted(path: \.value.offset, fallback: \.key)
 
-        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
+            // Process entities for this clause
+            let uniqueSubModels = uniqueEntities(
+                in: subModels,
+                exclude: [:],
+                fullnames: []
+            ).sorted(path: \.value.offset, fallback: \.key)
+
+            clauseList.append(IfMacroModel.Clause(
+                type: clauseType,
+                entities: uniqueSubModels
+            ))
+        }
+
+        let macroModel = IfMacroModel(clauses: clauseList, offset: self.offset)
         return (macroModel, attrDesc, hasInit)
     }
 }
@@ -693,7 +700,7 @@ extension TypeAliasDeclSyntax {
 
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
-    var imports: [String: [String]] = [:]
+    var imports: [ImportContent] = []
     let annotation: String
     let fileMacro: String
     let path: String
@@ -744,55 +751,58 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
-            let normalDesc = node.importKeyword.text + " " + ret
-            let acl = node.modifiers.acl
-            
-            let desc: String
-            if acl.isEmpty {
-                desc = normalDesc
-            } else {
-                desc = acl + " " + normalDesc
-            }
-            
-            imports["", default: []].append(desc)
+        // Top-level import (not inside #if)
+        if let `import` = Import(line: node.trimmedDescription) {
+            imports.append(.simple(`import`))
         }
         return .skipChildren
     }
 
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
+        // Check if this is a file macro that should be ignored
+        if let firstCondition = node.clauses.first?.condition?.trimmedDescription,
+           firstCondition == fileMacro {
+            return .visitChildren
+        }
+
+        // Parse conditional import block recursively
+        let block = parseIfConfigDecl(node)
+        imports.append(.conditional(block))
+        return .skipChildren
+    }
+
+    /// Recursively parses an IfConfigDeclSyntax into a ConditionalImportBlock
+    private func parseIfConfigDecl(_ node: IfConfigDeclSyntax) -> ConditionalImportBlock {
+        var clauseList = [ConditionalImportBlock.Clause]()
+
         for cl in node.clauses {
-            let macroName: String
-            if let conditionDescription = cl.condition?.trimmedDescription {
-                macroName = conditionDescription
-            } else {
-                return .visitChildren
+            guard let clauseType = IfClauseType(cl) else {
+                continue
             }
 
-            guard macroName != fileMacro else { return .visitChildren }
-
+            var contents = [ImportContent]()
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
+                        // Simple import
+                        if let imp = Import(line: importItem.trimmedDescription) {
+                            contents.append(.simple(imp))
                         }
-                        imports[key]?.append(importItem.trimmedDescription)
-
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
-                        }
-                        imports[key]?.append(nested.trimmedDescription)
-                    } else {
-                        return .visitChildren
+                        // Nested #if block (recursive)
+                        let nestedBlock = parseIfConfigDecl(nested)
+                        contents.append(.conditional(nestedBlock))
                     }
                 }
             }
+
+            clauseList.append(ConditionalImportBlock.Clause(
+                type: clauseType,
+                contents: contents
+            ))
         }
-        return .skipChildren
+
+        return ConditionalImportBlock(clauses: clauseList, offset: node.offset)
     }
 
     override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
@@ -946,6 +956,21 @@ extension ThrowingKind {
             } else {
                 self = .any
             }
+        }
+    }
+}
+
+extension IfClauseType {
+    init?(_ syntax: IfConfigClauseSyntax) {
+        switch syntax.poundKeyword.tokenKind {
+        case .poundIf:
+            self = .if(syntax.condition?.trimmedDescription ?? "")
+        case .poundElseif:
+            self = .elseif(syntax.condition?.trimmedDescription ?? "")
+        case .poundElse:
+            self = .else
+        default:
+            return nil
         }
     }
 }

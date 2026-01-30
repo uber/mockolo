@@ -21,64 +21,112 @@ func handleImports(pathToImportsMap: ImportMap,
                    excludeImports: [String]?,
                    testableImports: [String]?,
                    relevantPaths: [String]) -> String {
+    var topLevelImports: [Import] = []
+    var conditionalBlocks: [ConditionalImportBlock] = []
 
-    var imports = [String: [Import]]()
-    let defaultKey = ""
-    if imports[defaultKey] == nil {
-        imports[defaultKey] = []
-    }
-
-    for (path, importMap) in pathToImportsMap {
+    // 1. Collect imports from all relevant files
+    for (path, parsedImports) in pathToImportsMap {
         guard relevantPaths.contains(path) else { continue }
-        for (k, v) in importMap {
-            if imports[k] == nil {
-                imports[k] = []
-            }
 
-            if let ex = excludeImports {
-                let filtered = v.filter{ !ex.contains($0.moduleNameInImport) }
-                imports[k]?.append(contentsOf: filtered.compactMap { Import(line: $0) })
-            } else {
-                imports[k]?.append(contentsOf: v.compactMap { Import(line: $0) })
+        for `import` in parsedImports {
+            switch `import` {
+            case .simple(let simple):
+                topLevelImports.append(simple)
+            case .conditional(let conditional):
+                conditionalBlocks.append(conditional)
             }
         }
     }
 
-    if let customImports = customImports {
-        imports[defaultKey]?.append(contentsOf: customImports.compactMap { Import(moduleName: $0) })
+    // 2. Sort conditional blocks by offset (file appearance order)
+    conditionalBlocks.sort(by: { $0.offset < $1.offset })
+
+    // 3. Add custom imports
+    if let customImports {
+        topLevelImports.append(contentsOf: customImports.map {
+            Import(moduleName: $0)
+        })
     }
 
-    var sortedImports = [String: [Import]]()
-    for (k, v) in imports {
-        sortedImports[k] = v.resolved()
+    var contents: [ImportContent] {
+        topLevelImports.map { .simple($0) } + conditionalBlocks.map { .conditional($0) }
     }
 
-    if let existingSet = sortedImports[defaultKey] {
-        if let testableImportNames = testableImports, !testableImportNames.isEmpty {
-            let (passthroughImports, candidateImports) = existingSet.partitioned(by: { testableImportNames.contains($0.moduleName) })
-            let mappedImports = candidateImports.map(\.asTestable)
-            let newImports: [Import] = testableImportNames.compactMap { name in
-                guard !mappedImports.contains(where: { $0.moduleName == name }) else { return nil }
-                return Import(moduleName: name, modifier: .testable)
+    // 4. Add testable imports if the import does not exist
+    if let testableImports {
+        let usedNames = Set(visitModuleName(contents))
+        for name in testableImports {
+            if !usedNames.contains(name) {
+                topLevelImports.append(Import(moduleName: name).asTestable)
             }
-            sortedImports[defaultKey] = (passthroughImports + mappedImports + newImports).resolved()
         }
     }
 
-    let sortedKeys = sortedImports.keys.sorted()
-    let importsStr = sortedKeys.map { k in
-        let v = sortedImports[k]
-        let lines = v?.lines() ?? ""
-        if k.isEmpty {
-            return lines
-        } else {
-            return """
-            #if \(k)
-            \(lines)
-            #endif
-            """
-        }
-    }.joined(separator: "\n")
+    return renderImportContents(
+        contents,
+        excludeImports: excludeImports,
+        testableImports: testableImports
+    )
+}
 
-    return importsStr
+private func renderImportContents(
+    _ contents: [ImportContent],
+    excludeImports: [String]?,
+    testableImports: [String]?
+) -> String {
+    var clauseLines: [String] = []
+    var simpleImports: [Import] = []
+    func resolveAccumulatedSimpleImports() {
+        if !simpleImports.isEmpty {
+            clauseLines.append(simpleImports.resolved().lines())
+            simpleImports.removeAll(keepingCapacity: true)
+        }
+    }
+
+    for content in contents {
+        switch content {
+        case .simple(var `import`):
+            if let excludeImports, excludeImports.contains(`import`.moduleName) {
+                continue
+            }
+            if let testableImports, testableImports.contains(`import`.moduleName) {
+                `import` = `import`.asTestable
+            }
+            simpleImports.append(`import`)
+        case .conditional(let block):
+            // First output accumulated simple imports
+            resolveAccumulatedSimpleImports()
+
+            var result = ""
+            for clause in block.clauses {
+                switch clause.type {
+                case .if(let condition):
+                    result += "#if \(condition)\n"
+                case .elseif(let condition):
+                    result += "#elseif \(condition)\n"
+                case .else:
+                    result += "#else\n"
+                }
+                // Recursively render nested block
+                result += renderImportContents(clause.contents, excludeImports: excludeImports, testableImports: testableImports)
+                result += "\n"
+            }
+            result += "#endif"
+            clauseLines.append(result)
+        }
+    }
+    resolveAccumulatedSimpleImports()
+
+    return clauseLines.joined(separator: "\n")
+}
+
+private func visitModuleName(_ contents: [ImportContent]) -> [String] {
+    return contents.flatMap { content in
+        switch content {
+        case .simple(let `import`):
+            return [`import`.moduleName]
+        case .conditional(let block):
+            return visitModuleName(block.clauses.flatMap(\.contents))
+        }
+    }
 }

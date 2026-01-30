@@ -126,7 +126,6 @@ class MockoloTestCase: XCTestCase {
 
         try generate(sourceDirs: [],
                      sourceFiles: srcFilePaths,
-                     parser: SourceParser(),
                      exclusionSuffixes: ["Mocks", "Tests"],
                      mockFilePaths: mockFilePaths,
                      annotation: String.mockAnnotation,

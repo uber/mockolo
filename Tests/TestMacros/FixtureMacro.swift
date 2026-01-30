@@ -84,12 +84,12 @@ import Foundation
 import V
 import X
 import Y
-#if DEBUG
-import P
-#endif
 #if canImport(NewFramework)
 import W
 import Z
+#endif
+#if DEBUG
+import P
 #endif
 
 
@@ -135,8 +135,7 @@ import C
 #if DEBUG
 import X
 import Y
-#endif
-#if TEST
+#elseif TEST
 import Z
 #endif
 
@@ -262,4 +261,292 @@ class PresentableListenerMock: PresentableListener {
     #endif
 }
 
+"""
+
+@Fixture
+enum macroElseIfInFunc {
+    /// @mockable
+    protocol PresentableListener: AnyObject {
+        func run()
+        #if DEBUG
+        func showDebugMode()
+        #elseif TEST
+        func showTestMode()
+        #elseif FEATURE_X
+        func showFeatureXMode()
+        #else
+        func showReleaseMode()
+        #endif
+    }
+
+    @Fixture
+    enum expected {
+        class PresentableListenerMock: PresentableListener {
+            init() { }
+
+
+            private(set) var runCallCount = 0
+            var runHandler: (() -> ())?
+            func run() {
+                runCallCount += 1
+                if let runHandler = runHandler {
+                    runHandler()
+                }
+
+            }
+            #if DEBUG
+
+            private(set) var showDebugModeCallCount = 0
+            var showDebugModeHandler: (() -> ())?
+            func showDebugMode() {
+                showDebugModeCallCount += 1
+                if let showDebugModeHandler = showDebugModeHandler {
+                    showDebugModeHandler()
+                }
+
+            }
+            #elseif TEST
+
+            private(set) var showTestModeCallCount = 0
+            var showTestModeHandler: (() -> ())?
+            func showTestMode() {
+                showTestModeCallCount += 1
+                if let showTestModeHandler = showTestModeHandler {
+                    showTestModeHandler()
+                }
+
+            }
+            #elseif FEATURE_X
+
+            private(set) var showFeatureXModeCallCount = 0
+            var showFeatureXModeHandler: (() -> ())?
+            func showFeatureXMode() {
+                showFeatureXModeCallCount += 1
+                if let showFeatureXModeHandler = showFeatureXModeHandler {
+                    showFeatureXModeHandler()
+                }
+
+            }
+            #else
+
+            private(set) var showReleaseModeCallCount = 0
+            var showReleaseModeHandler: (() -> ())?
+            func showReleaseMode() {
+                showReleaseModeCallCount += 1
+                if let showReleaseModeHandler = showReleaseModeHandler {
+                    showReleaseModeHandler()
+                }
+
+            }
+            #endif
+        }
+    }
+}
+
+
+let macroSamePreprocessorMacroName = """
+#if DEBUG
+import Foundation
+#elseif FEATURE_X
+import FeatureX
+#elseif TEST
+import Testing
+#else
+import Production
+#endif
+
+/// @mockable
+protocol PresentableListener: AnyObject {
+    func run()
+    #if DEBUG
+    func showDebugMode()
+    #elseif FEATURE_X
+    func showFeatureXMode()
+    #elseif TEST
+    func showTestMode()
+    #else
+    func showReleaseMode()
+    #endif
+}
+"""
+
+let macroSamePreprocessorMacroNameMock = """
+
+
+
+#if DEBUG
+import Foundation
+#elseif FEATURE_X
+import FeatureX
+#elseif TEST
+import Testing
+#else
+import Production
+#endif
+
+
+class PresentableListenerMock: PresentableListener {
+    init() { }
+
+
+    private(set) var runCallCount = 0
+    var runHandler: (() -> ())?
+    func run() {
+        runCallCount += 1
+        if let runHandler = runHandler {
+            runHandler()
+        }
+        
+    }
+    #if DEBUG
+
+    private(set) var showDebugModeCallCount = 0
+    var showDebugModeHandler: (() -> ())?
+    func showDebugMode() {
+        showDebugModeCallCount += 1
+        if let showDebugModeHandler = showDebugModeHandler {
+            showDebugModeHandler()
+        }
+        
+    }
+    #elseif FEATURE_X
+
+    private(set) var showFeatureXModeCallCount = 0
+    var showFeatureXModeHandler: (() -> ())?
+    func showFeatureXMode() {
+        showFeatureXModeCallCount += 1
+        if let showFeatureXModeHandler = showFeatureXModeHandler {
+            showFeatureXModeHandler()
+        }
+        
+    }
+    #elseif TEST
+
+    private(set) var showTestModeCallCount = 0
+    var showTestModeHandler: (() -> ())?
+    func showTestMode() {
+        showTestModeCallCount += 1
+        if let showTestModeHandler = showTestModeHandler {
+            showTestModeHandler()
+        }
+        
+    }
+    #else
+
+    private(set) var showReleaseModeCallCount = 0
+    var showReleaseModeHandler: (() -> ())?
+    func showReleaseMode() {
+        showReleaseModeCallCount += 1
+        if let showReleaseModeHandler = showReleaseModeHandler {
+            showReleaseModeHandler()
+        }
+        
+    }
+    #endif
+}
+
+"""
+
+@Fixture
+enum macroInVar {
+    /// @mockable
+    public protocol SomeProtocol {
+        #if DEBUG
+        var debug: String { get }
+        #elseif FEATURE_X
+        var featureX: String { get }
+        #endif
+        #if TEST
+        func runTest()
+        #elseif DEBUG
+        func runDebug()
+        #endif
+    }
+
+    @Fixture
+    enum expected {
+        public class SomeProtocolMock: SomeProtocol {
+            public init() { }
+
+            #if DEBUG
+
+
+            public var debug: String = ""
+            #elseif FEATURE_X
+
+
+            public var featureX: String = ""
+            #endif
+            #if TEST
+
+            public private(set) var runTestCallCount = 0
+            public var runTestHandler: (() -> ())?
+            public func runTest() {
+                runTestCallCount += 1
+                if let runTestHandler = runTestHandler {
+                    runTestHandler()
+                }
+                
+            }
+            #elseif DEBUG
+
+            public private(set) var runDebugCallCount = 0
+            public var runDebugHandler: (() -> ())?
+            public func runDebug() {
+                runDebugCallCount += 1
+                if let runDebugHandler = runDebugHandler {
+                    runDebugHandler()
+                }
+                
+            }
+            #endif
+        }
+
+    }
+}
+
+let duplicatedImportsInMacro = """
+import SomeImport1
+import SomeImport1
+@testable import SomeImport1
+/// @mockable
+protocol Simple {
+}
+"""
+
+let duplicatedImportsInMacroMock = """
+@testable import SomeImport1
+class SimpleMock: Simple {
+    init() { }
+}
+"""
+
+let nestedMacro = """
+#if canImport(NewFramework)
+import Z
+#if canImport(NewFramework2)
+import W
+#if canImport(NewFramework3)
+import Z
+#endif
+#endif
+#endif
+/// @mockable
+protocol Simple {
+}
+"""
+
+let nestedMacroMock = """
+#if canImport(NewFramework)
+import Z
+#if canImport(NewFramework2)
+@testable import W
+#if canImport(NewFramework3)
+import Z
+#endif
+#endif
+#endif
+class SimpleMock: Simple {
+    init() { }
+}
 """
