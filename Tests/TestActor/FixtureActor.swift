@@ -11,13 +11,20 @@
             init(bar: Int = 0) {
                 self.bar = bar
             }
-            private(set) var fooCallCount = 0
-            var fooHandler: ((String) async -> Result<String, Error>)?
-            func setFooHandler(_ handler: ((String) async -> Result<String, Error>)?) {
-                fooHandler = handler
+
+            private let fooState = MockoloMutex(MockoloHandlerState<Never, (String) async -> Result<String, Error>>())
+            nonisolated var fooCallCount: Int {
+                return fooState.withLock(\.callCount)
+            }
+            nonisolated var fooHandler: ((String) async -> Result<String, Error>)? {
+                get { fooState.withLock(\.handler) }
+                set { fooState.withLock { $0.handler = newValue } }
             }
             func foo(arg: String) async -> Result<String, Error> {
-                fooCallCount += 1
+                let fooHandler = fooState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
                 if let fooHandler = fooHandler {
                     return await fooHandler(arg)
                 }
@@ -49,13 +56,19 @@
 
             var bar: Int = 0
 
-            private(set) var bazCallCount = 0
-            var bazHandler: ((String) async -> Int)?
-            func setBazHandler(_ handler: ((String) async -> Int)?) {
-                bazHandler = handler
+            private let bazState = MockoloMutex(MockoloHandlerState<Never, (String) async -> Int>())
+            nonisolated var bazCallCount: Int {
+                return bazState.withLock(\.callCount)
+            }
+            nonisolated var bazHandler: ((String) async -> Int)? {
+                get { bazState.withLock(\.handler) }
+                set { bazState.withLock { $0.handler = newValue } }
             }
             func baz(arg: String) async -> Int {
-                bazCallCount += 1
+                let bazHandler = bazState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
                 if let bazHandler = bazHandler {
                     return await bazHandler(arg)
                 }
