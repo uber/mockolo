@@ -74,7 +74,7 @@ extension MethodModel {
             } else {
                 let handlerReturn = handler.render(context: context, arguments: arguments)
 
-                if context.requiresSendable {
+                if requiresConcurrencySafeAccess {
                     let paramNamesStr: String?
                     if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
                         paramNamesStr = argsHistory.capturableParamLabels.joined(separator: ", ")
@@ -179,8 +179,21 @@ extension MethodModel {
             return overloadingResolvedName + .argsHistorySuffix
         }
 
+        /// Returns true if the mock requires concurrency-safe access (via MockoloMutex).
+        /// This is true when:
+        /// - The protocol inherits Sendable or Error (`requiresSendable`)
+        /// - The mock is an actor (needs `nonisolated` computed properties)
+        var requiresConcurrencySafeAccess: Bool {
+            context.requiresSendable || context.mockDeclKind == .actor
+        }
+
+        /// Returns "nonisolated " prefix for actor mocks, empty string otherwise.
+        private var nonisolatedSpace: String {
+            context.mockDeclKind == .actor ? String.nonisolated.withSpace : ""
+        }
+
         var stateVarDecl: String? {
-            guard context.requiresSendable else { return nil }
+            guard requiresConcurrencySafeAccess else { return nil }
 
             let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName
             let argumentsTupleType: String
@@ -193,20 +206,20 @@ extension MethodModel {
         }
 
         var callCountVarDecl: String {
-            if !context.requiresSendable {
+            if !requiresConcurrencySafeAccess {
                 let privateSetSpace = arguments.allowSetCallCount ? "" : "\(String.privateSet) "
                 return "\(1.tab)\(declModifiers)\(privateSetSpace)var \(callCountVarName) = 0"
             } else {
                 if arguments.allowSetCallCount {
                     return """
-                    \(1.tab)\(declModifiers)var \(callCountVarName): Int {
+                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(callCountVarName): Int {
                     \(2.tab)get { \(stateVarName).withLock(\\.callCount) }
                     \(2.tab)set { \(stateVarName).withLock { $0.callCount = newValue } }
                     \(1.tab)}
                     """
                 } else {
                     return """
-                    \(1.tab)\(declModifiers)var \(callCountVarName): Int {
+                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(callCountVarName): Int {
                     \(2.tab)return \(stateVarName).withLock(\\.callCount)
                     \(1.tab)}
                     """
@@ -218,11 +231,11 @@ extension MethodModel {
             if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
                 let capturedValueType = argsHistory.capturedValueType.typeName
 
-                if !context.requiresSendable {
+                if !requiresConcurrencySafeAccess {
                     return "\(1.tab)\(declModifiers)var \(argsHistoryVarName) = [\(capturedValueType)]()"
                 } else {
                     return """
-                    \(1.tab)\(declModifiers)var \(argsHistoryVarName): [\(capturedValueType)] {
+                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(argsHistoryVarName): [\(capturedValueType)] {
                     \(2.tab)return \(stateVarName).withLock(\\.argValues).map(\\.value)
                     \(1.tab)}
                     """
@@ -234,11 +247,11 @@ extension MethodModel {
         var handlerVarDecl: String {
             let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName // ?? "Any"
             let handlerVarType = "(\(handlerType))?"
-            if !context.requiresSendable {
+            if !requiresConcurrencySafeAccess {
                 return "\(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType)"
             } else {
                 return """
-                \(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType) {
+                \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(handlerVarName): \(handlerVarType) {
                 \(2.tab)get { \(stateVarName).withLock(\\.handler) }
                 \(2.tab)set { \(stateVarName).withLock { $0.handler = newValue } }
                 \(1.tab)}
@@ -247,17 +260,9 @@ extension MethodModel {
         }
 
         var handlerSetterDecl: String? {
-            guard context.mockDeclKind == .actor else { return nil }
-
-            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName
-            let handlerVarType = "(\(handlerType))?"
-            let setterName = "set\(handlerVarName.capitalizeFirstLetter)"
-
-            return """
-            \(1.tab)\(declModifiers)func \(setterName)(_ handler: \(handlerVarType)) {
-            \(2.tab)\(handlerVarName) = handler
-            \(1.tab)}
-            """
+            // Handler setter is no longer needed since actor mocks now use
+            // nonisolated computed properties backed by MockoloMutex
+            return nil
         }
     }
 }
