@@ -58,6 +58,8 @@ import MockoloFramework
         func add<T: FixedWidthInteger>(n1: T, n2: T?)
         func add<T: Sequence> (a: T?, b: T?)
         func add<T: Collection> (a: T, b: T)
+        func useMetatype<T>(type: T.Type) -> T.Type
+        func useAssociatedType<I: Identifiable>(value: I, id: I.ID) -> I.ID
     }
 
     @Fixture enum expected {
@@ -184,8 +186,27 @@ import MockoloFramework
                 }
 
             }
-        }
 
+            private(set) var useMetatypeCallCount = 0
+            var useMetatypeHandler: ((Any) -> Any)?
+            func useMetatype<T>(type: T.Type) -> T.Type {
+                useMetatypeCallCount += 1
+                if let useMetatypeHandler = useMetatypeHandler {
+                    return useMetatypeHandler(type) as! T.Type
+                }
+                fatalError("useMetatypeHandler returns can't have a default value thus its handler must be set")
+            }
+
+            private(set) var useAssociatedTypeCallCount = 0
+            var useAssociatedTypeHandler: ((Any, Any) -> Any)?
+            func useAssociatedType<I: Identifiable>(value: I, id: I.ID) -> I.ID {
+                useAssociatedTypeCallCount += 1
+                if let useAssociatedTypeHandler = useAssociatedTypeHandler {
+                    return useAssociatedTypeHandler(value, id) as! I.ID
+                }
+                fatalError("useAssociatedTypeHandler returns can't have a default value thus its handler must be set")
+            }
+        }
     }
 }
 
