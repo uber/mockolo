@@ -143,7 +143,6 @@ extension MethodModel {
                 callCountVarDecl,
                 argsHistoryVarDecl,
                 handlerVarDecl,
-                handlerSetterDecl,
                 functionDecl,
             ]
             return "\n" + decls.compactMap { $0 }.joined(separator: "\n")
@@ -257,12 +256,6 @@ extension MethodModel {
                 \(1.tab)}
                 """
             }
-        }
-
-        var handlerSetterDecl: String? {
-            // Handler setter is no longer needed since actor mocks now use
-            // nonisolated computed properties backed by MockoloMutex
-            return nil
         }
     }
 }
