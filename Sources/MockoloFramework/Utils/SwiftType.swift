@@ -626,7 +626,10 @@ extension SwiftType {
         case .metatypeType(let syntax):
             // T.Type, P.Protocol
             let base = SwiftType(typeSyntax: syntax.baseType)
-            self.kind = .nominal(.init(name: "\(base.description).\(syntax.metatypeSpecifier.text)"))
+            self.kind = .nominal(.init(
+                namespace: base,
+                name: syntax.metatypeSpecifier.text
+            ))
 
         case .memberType(let syntax):
             // T.U
