@@ -131,9 +131,19 @@ extension MethodModel {
                 throwing: model.throwing
             )
             let genericWhereStr = model.genericWhereClause.map { "\($0) " } ?? ""
+            
+            var availableStr = ""
+            var inlineStr = ""
+            for attr in model.attributes.components(separatedBy: "\n") where !attr.isEmpty {
+                if attr.contains("@available") {
+                    availableStr += "\(1.tab)\(attr)\n"
+                } else {
+                    inlineStr += "\(attr) "
+                }
+            }
 
             let functionDecl = """
-            \(1.tab)\(declModifiers)\(overrideStr)\(modifierTypeStr)\(keyword)\(model.name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnClause)\(genericWhereStr){
+            \(availableStr)\(1.tab)\(inlineStr)\(declModifiers)\(overrideStr)\(modifierTypeStr)\(keyword)\(model.name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnClause)\(genericWhereStr){
             \(wrapped)
             \(1.tab)}
             """

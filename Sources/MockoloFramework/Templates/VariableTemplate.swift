@@ -56,6 +56,16 @@ extension VariableModel {
         }
 
         let staticSpace = isStatic ? "\(String.static) " : ""
+        
+        var availableStr = ""
+        var inlineStr = ""
+        for attr in (attributes ?? []) where !attr.isEmpty {
+            if attr.contains("@available") {
+                availableStr += "\(1.tab)\(attr)\n"
+            } else {
+                inlineStr += "\(attr) "
+            }
+        }
 
         switch storageKind {
         case .stored(let needSetCount):
@@ -88,7 +98,7 @@ extension VariableModel {
                 
                 \(setCallCountVarDecl)
                 \(1.tab)\(propertyWrapper)\(staticSpace)private var \(underlyingName): \(underlyingType)\(assignVal)\(accessorBlock)
-                \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
+                \(availableStr)\(1.tab)\(inlineStr)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
                 \(2.tab)get { return \(underlyingName) }
                 \(2.tab)set { \(underlyingName) = newValue }
                 \(1.tab)}
@@ -97,7 +107,7 @@ extension VariableModel {
                 template = """
                 
                 \(setCallCountVarDecl)
-                \(1.tab)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName)\(assignVal)\(accessorBlock)
+                \(availableStr)\(1.tab)\(inlineStr)\(propertyWrapper)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName)\(assignVal)\(accessorBlock)
                 """
             }
 

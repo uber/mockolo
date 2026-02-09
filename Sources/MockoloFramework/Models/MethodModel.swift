@@ -32,6 +32,7 @@ final class MethodModel: Model {
     let params: [ParamModel]
     let processed: Bool
     let modelDescription: String?
+    let attributes: String
     let isStatic: Bool
     let isAsync: Bool
     let throwing: ThrowingKind
@@ -161,6 +162,7 @@ final class MethodModel: Model {
          length: Int64,
          funcsWithArgsHistory: [String],
          customModifiers: [String: Modifier],
+         attributes: String,
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
@@ -177,6 +179,7 @@ final class MethodModel: Model {
         self.processed = processed
         self.funcsWithArgsHistory = funcsWithArgsHistory
         self.customModifiers = customModifiers
+        self.attributes = attributes
         self.modelDescription = modelDescription
         self.accessLevel = acl
     }
