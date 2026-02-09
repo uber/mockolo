@@ -41,6 +41,7 @@ extension String {
     static public let `class` = "class"
     static let `actor` = "actor"
     static let actorProtocol = "Actor"
+    static let nonisolated = "nonisolated"
     static public let `final` = "final"
     static let override = "override"
     static let privateSet = "private(set)"
