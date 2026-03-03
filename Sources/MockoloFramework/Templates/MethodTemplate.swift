@@ -47,17 +47,22 @@ extension MethodModel {
         var handler: ClosureModel
         var enclosingType: SwiftType
 
+        private struct AccessorBacking {
+            let handlerTypeName: String
+            let stateVarName: String
+            let callCountVarName: String
+            let handlerVarName: String
+            let argumentsTupleTypeName: String
+        }
+
         func render() -> String {
+            let setter = setterBacking
+
             let body: String
             if arguments.useTemplateFunc
                 && !model.throwing.hasError
                 && (handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).cast == nil) {
-                let handlerParamValsStr = model.params.map { (arg) -> String in
-                    if arg.type.typeName.hasPrefix(String.autoclosure) {
-                        return arg.name.safeName + "()"
-                    }
-                    return arg.name.safeName
-                }.joined(separator: ", ")
+                let handlerParamValsStr = renderParamValues(includeNewValue: false)
 
                 let defaultVal = model.returnType?.defaultVal()
 
@@ -107,12 +112,27 @@ extension MethodModel {
                 }
             }
 
-            let wrapped = model.isSubscript ? """
-            \(2.tab)get {
-            \(body)
-            \(2.tab)}
-            \(2.tab)set { }
-            """ : body
+            let wrapped: String
+            if model.isSubscript {
+                if let setBody = renderSetterBody(setter) {
+                    wrapped = """
+                    \(2.tab)get {
+                    \(body)
+                    \(2.tab)}
+                    \(2.tab)set {
+                    \(setBody)
+                    \(2.tab)}
+                    """
+                } else {
+                    wrapped = """
+                    \(2.tab)get {
+                    \(body)
+                    \(2.tab)}
+                    """
+                }
+            } else {
+                wrapped = body
+            }
 
             let overrideStr = isOverride ? String.override.withSpace : ""
             let modifierTypeStr: String
@@ -138,11 +158,15 @@ extension MethodModel {
             \(1.tab)}
             """
 
+            let getter = getterBacking
             let decls: [String?] = [
-                stateVarDecl,
-                callCountVarDecl,
+                renderStateVarDecl(getter),
+                renderCallCountVarDecl(getter),
                 argsHistoryVarDecl,
-                handlerVarDecl,
+                renderHandlerVarDecl(getter),
+                setter.flatMap { renderStateVarDecl($0) },
+                setter.map { renderCallCountVarDecl($0) },
+                setter.map { renderHandlerVarDecl($0) },
                 functionDecl,
             ]
             return "\n" + decls.compactMap { $0 }.joined(separator: "\n")
@@ -191,40 +215,85 @@ extension MethodModel {
             context.mockDeclKind == .actor ? String.nonisolated.withSpace : ""
         }
 
-        var stateVarDecl: String? {
-            guard requiresConcurrencySafeAccess else { return nil }
+        // MARK: - Accessor Backing
 
-            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName
-            let argumentsTupleType: String
-            if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
-                argumentsTupleType = argsHistory.capturedValueType.typeName
-            } else {
-                argumentsTupleType = .neverType
-            }
-            return "\(1.tab)private let \(stateVarName) = MockoloMutex(MockoloHandlerState<\(argumentsTupleType), \(handlerType)>())"
+        private func handlerTypeName(for closureModel: ClosureModel) -> String {
+            closureModel
+                .type(enclosingType: enclosingType, requiresSendable: context.requiresSendable)
+                .type.typeName
         }
 
-        var callCountVarDecl: String {
+        private var getterBacking: AccessorBacking {
+            let argumentsTupleTypeName: String
+            if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
+                argumentsTupleTypeName = argsHistory.capturedValueType.typeName
+            } else {
+                argumentsTupleTypeName = .neverType
+            }
+            return AccessorBacking(
+                handlerTypeName: handlerTypeName(for: handler),
+                stateVarName: stateVarName,
+                callCountVarName: callCountVarName,
+                handlerVarName: handlerVarName,
+                argumentsTupleTypeName: argumentsTupleTypeName
+            )
+        }
+
+        private var setterBacking: AccessorBacking? {
+            guard let setHandler = model.setHandler() else { return nil }
+            return AccessorBacking(
+                handlerTypeName: handlerTypeName(for: setHandler),
+                stateVarName: overloadingResolvedName + .setStateSuffix,
+                callCountVarName: overloadingResolvedName + .setCallCountSuffix,
+                handlerVarName: overloadingResolvedName + .setHandlerSuffix,
+                argumentsTupleTypeName: .neverType
+            )
+        }
+
+        // MARK: - Shared Rendering Methods
+
+        private func renderStateVarDecl(_ backing: AccessorBacking) -> String? {
+            guard requiresConcurrencySafeAccess else { return nil }
+            return "\(1.tab)private let \(backing.stateVarName) = MockoloMutex(MockoloHandlerState<\(backing.argumentsTupleTypeName), \(backing.handlerTypeName)>())"
+        }
+
+        private func renderCallCountVarDecl(_ backing: AccessorBacking) -> String {
             if !requiresConcurrencySafeAccess {
                 let privateSetSpace = arguments.allowSetCallCount ? "" : "\(String.privateSet) "
-                return "\(1.tab)\(declModifiers)\(privateSetSpace)var \(callCountVarName) = 0"
+                return "\(1.tab)\(declModifiers)\(privateSetSpace)var \(backing.callCountVarName) = 0"
             } else {
                 if arguments.allowSetCallCount {
                     return """
-                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(callCountVarName): Int {
-                    \(2.tab)get { \(stateVarName).withLock(\\.callCount) }
-                    \(2.tab)set { \(stateVarName).withLock { $0.callCount = newValue } }
+                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(backing.callCountVarName): Int {
+                    \(2.tab)get { \(backing.stateVarName).withLock(\\.callCount) }
+                    \(2.tab)set { \(backing.stateVarName).withLock { $0.callCount = newValue } }
                     \(1.tab)}
                     """
                 } else {
                     return """
-                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(callCountVarName): Int {
-                    \(2.tab)return \(stateVarName).withLock(\\.callCount)
+                    \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(backing.callCountVarName): Int {
+                    \(2.tab)return \(backing.stateVarName).withLock(\\.callCount)
                     \(1.tab)}
                     """
                 }
             }
         }
+
+        private func renderHandlerVarDecl(_ backing: AccessorBacking) -> String {
+            let handlerVarType = "(\(backing.handlerTypeName))?"
+            if !requiresConcurrencySafeAccess {
+                return "\(1.tab)\(declModifiers)var \(backing.handlerVarName): \(handlerVarType)"
+            } else {
+                return """
+                \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(backing.handlerVarName): \(handlerVarType) {
+                \(2.tab)get { \(backing.stateVarName).withLock(\\.handler) }
+                \(2.tab)set { \(backing.stateVarName).withLock { $0.handler = newValue } }
+                \(1.tab)}
+                """
+            }
+        }
+
+        // MARK: - Args History (getter-only)
 
         var argsHistoryVarDecl: String? {
             if let argsHistory = model.argsHistory, argsHistory.enable(force: arguments.enableFuncArgsHistory) {
@@ -243,18 +312,36 @@ extension MethodModel {
             return nil
         }
 
-        var handlerVarDecl: String {
-            let handlerType = handler.type(enclosingType: enclosingType, requiresSendable: context.requiresSendable).type.typeName // ?? "Any"
-            let handlerVarType = "(\(handlerType))?"
-            if !requiresConcurrencySafeAccess {
-                return "\(1.tab)\(declModifiers)var \(handlerVarName): \(handlerVarType)"
+        // MARK: - Shared Param Values
+
+        private func renderParamValues(includeNewValue: Bool) -> String {
+            let parts = model.params.map { arg -> String in
+                if arg.type.typeName.hasPrefix(String.autoclosure) {
+                    return arg.name.safeName + "()"
+                }
+                return arg.name.safeName
+            }
+            let allParts = includeNewValue ? parts + ["newValue"] : parts
+            return allParts.joined(separator: ", ")
+        }
+
+        // MARK: - Setter Body
+
+        private func renderSetterBody(_ backing: AccessorBacking?) -> String? {
+            guard let backing else { return nil }
+            if requiresConcurrencySafeAccess {
+                return [
+                    "\(2.tab)let \(backing.handlerVarName) = \(backing.stateVarName).withLock { state in",
+                    "\(3.tab)state.callCount += 1",
+                    "\(3.tab)return state.handler",
+                    "\(2.tab)}",
+                    "\(2.tab)\(backing.handlerVarName)?(\(renderParamValues(includeNewValue: true)))",
+                ].joined(separator: "\n")
             } else {
-                return """
-                \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(handlerVarName): \(handlerVarType) {
-                \(2.tab)get { \(stateVarName).withLock(\\.handler) }
-                \(2.tab)set { \(stateVarName).withLock { $0.handler = newValue } }
-                \(1.tab)}
-                """
+                return [
+                    "\(2.tab)\(backing.callCountVarName) += 1",
+                    "\(2.tab)\(backing.handlerVarName)?(\(renderParamValues(includeNewValue: true)))",
+                ].joined(separator: "\n")
             }
         }
     }

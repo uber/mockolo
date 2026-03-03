@@ -14,10 +14,15 @@
 //  limitations under the License.
 //
 
-public enum MethodKind: Equatable {
+enum SubscriptAccess: Equatable {
+    case get
+    case getSet
+}
+
+enum MethodKind: Equatable {
     case funcKind
     case initKind(required: Bool, override: Bool)
-    case subscriptKind
+    case subscriptKind(SubscriptAccess)
 }
 
 final class MethodModel: Model {
@@ -145,6 +150,19 @@ final class MethodModel: Model {
                             isAsync: isAsync,
                             throwing: throwing,
                             returnType: returnType ?? .Void)
+    }
+
+    func setHandler() -> ClosureModel? {
+        // Setters only apply to subscripts; properties are handled by VariableModel.
+        guard case .subscriptKind(.getSet) = kind, let returnType else { return nil }
+        let elementType = returnType
+        var setParams = params.map { ($0.name, $0.type) }
+        setParams.append(("newValue", elementType))
+        return ClosureModel(genericTypeParams: genericTypeParams,
+                            params: setParams,
+                            isAsync: false,
+                            throwing: .none,
+                            returnType: .Void)
     }
 
     init(name: String,

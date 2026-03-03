@@ -1,4 +1,77 @@
 #if compiler(>=6.0)
+@Fixture enum sendableSubscript {
+    /// @mockable
+    public protocol SendableSubscriptProtocol: Sendable {
+        subscript(key: Int) -> String { get set }
+        subscript(index: String) -> Int? { get }
+    }
+
+    @Fixture(includesConcurrencyHelpers: true)
+    enum expected {
+        public final class SendableSubscriptProtocolMock: SendableSubscriptProtocol, @unchecked Sendable {
+            public init() { }
+
+
+            private let subscriptState = MockoloMutex(MockoloHandlerState<Never, @Sendable (Int) -> String>())
+            public var subscriptCallCount: Int {
+                return subscriptState.withLock(\.callCount)
+            }
+            public var subscriptHandler: (@Sendable (Int) -> String)? {
+                get { subscriptState.withLock(\.handler) }
+                set { subscriptState.withLock { $0.handler = newValue } }
+            }
+            private let subscriptSetState = MockoloMutex(MockoloHandlerState<Never, @Sendable (Int, String) -> ()>())
+            public var subscriptSetCallCount: Int {
+                return subscriptSetState.withLock(\.callCount)
+            }
+            public var subscriptSetHandler: (@Sendable (Int, String) -> ())? {
+                get { subscriptSetState.withLock(\.handler) }
+                set { subscriptSetState.withLock { $0.handler = newValue } }
+            }
+            public subscript(key: Int) -> String {
+                get {
+                let subscriptHandler = subscriptState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
+                if let subscriptHandler = subscriptHandler {
+                    return subscriptHandler(key)
+                }
+                return ""
+                }
+                set {
+                let subscriptSetHandler = subscriptSetState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
+                subscriptSetHandler?(key, newValue)
+                }
+            }
+
+            private let subscriptIndexState = MockoloMutex(MockoloHandlerState<Never, @Sendable (String) -> Int?>())
+            public var subscriptIndexCallCount: Int {
+                return subscriptIndexState.withLock(\.callCount)
+            }
+            public var subscriptIndexHandler: (@Sendable (String) -> Int?)? {
+                get { subscriptIndexState.withLock(\.handler) }
+                set { subscriptIndexState.withLock { $0.handler = newValue } }
+            }
+            public subscript(index: String) -> Int? {
+                get {
+                let subscriptIndexHandler = subscriptIndexState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
+                if let subscriptIndexHandler = subscriptIndexHandler {
+                    return subscriptIndexHandler(index)
+                }
+                return nil
+                }
+            }
+        }
+    }
+}
+
 @Fixture enum sendableProtocol {
     /// @mockable
     public protocol SendableProtocol: Sendable {

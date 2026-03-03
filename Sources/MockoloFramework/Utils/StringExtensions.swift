@@ -95,6 +95,8 @@ extension String {
     static let subjectSuffix = "Subject"
     static let underlyingVarPrefix = "_"
     static let setCallCountSuffix = "SetCallCount"
+    static let setHandlerSuffix = "SetHandler"
+    static let setStateSuffix = "SetState"
     static let callCountSuffix = "CallCount"
     static let stateSuffix = "State"
     static let initializerLeftParen = "init("
