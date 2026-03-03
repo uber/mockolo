@@ -8,6 +8,17 @@ class BasicFuncTests: MockoloTestCase {
         verify(srcContent: subscripts._source,
                dstContent: subscripts.expected._source)
     }
+
+    func testGetOnlySubscripts() {
+        verify(srcContent: getOnlySubscripts._source,
+               dstContent: getOnlySubscripts.expected._source)
+    }
+
+    func testAllowSetCallCountSubscripts() {
+        verify(srcContent: allowSetCallCountSubscripts._source,
+               dstContent: allowSetCallCountSubscripts.expected._source,
+               allowSetCallCount: true)
+    }
     
 //    func testVariadicFuncs() {
 //        verify(srcContent: variadicFunc._source,

@@ -509,9 +509,28 @@ extension SubscriptDeclSyntax {
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
+        let access: SubscriptAccess
+        switch self.accessorBlock?.accessors {
+        case .accessors(let accessorDecls):
+            let hasWriteAccessor = accessorDecls.contains(where: {
+                switch $0.accessorSpecifier.tokenKind {
+                case .keyword(.set), .keyword(._modify):
+                    return true
+                default:
+                    // Also match "modify" which is behind @_spi(ExperimentalLanguageFeatures)
+                    return $0.accessorSpecifier.text == "modify"
+                }
+            })
+            access = hasWriteAccessor ? .getSet : .get
+        case .getter:
+            access = .get
+        case nil:
+            access = .getSet
+        }
+
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
                                          returnType: SwiftType(typeSyntax: self.returnClause.type),
-                                         kind: .subscriptKind,
+                                         kind: .subscriptKind(access),
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
