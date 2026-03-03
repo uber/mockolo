@@ -525,7 +525,7 @@ extension SubscriptDeclSyntax {
         case .getter:
             access = .get
         case nil:
-            access = .getSet
+            access = .getSet // fallback
         }
 
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
