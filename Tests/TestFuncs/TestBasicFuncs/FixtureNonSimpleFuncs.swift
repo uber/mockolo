@@ -643,7 +643,7 @@ import MockoloFramework
             
             private(set) var returnSelfCallCount = 0
             var returnSelfHandler: (() -> NonSimpleFuncsMock)?
-            func returnSelf() -> Self {
+            @discardableResult func returnSelf() -> Self {
                 returnSelfCallCount += 1
                 if let returnSelfHandler = returnSelfHandler {
                     return returnSelfHandler() as! Self

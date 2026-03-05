@@ -18,7 +18,6 @@ import MockoloFramework
     }
 
     @Fixture enum expected {
-        @available(iOS 10.0, *)
         public class NonSimpleVarsMock: NonSimpleVars {
             public init() { }
             public init(dict: Dictionary<String, Int> = Dictionary<String, Int>(), voidHandler: @escaping (() -> ()), hasDot: ModuleX.SomeType? = nil) {
@@ -27,6 +26,7 @@ import MockoloFramework
                 self.hasDot = hasDot
             }
             public private(set) var dictSetCallCount = 0
+            @available(iOS 10.0, *)
             public var dict: Dictionary<String, Int> = Dictionary<String, Int>() { didSet { dictSetCallCount += 1 } }
 
             public var closureVar: ((_ arg: String) -> Void)? = nil

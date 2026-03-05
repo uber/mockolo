@@ -54,6 +54,7 @@ final class VariableModel: Model {
          customModifiers: [String: Modifier]?,
          modelDescription: String?,
          combineType: CombineType?,
+         attributes: [String]?,
          processed: Bool) {
         self.name = name
         self.type = type
@@ -65,7 +66,7 @@ final class VariableModel: Model {
         self.rxTypes = rxTypes
         self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
-        self.attributes = nil
+        self.attributes = attributes
         self.modelDescription = modelDescription
         self.combineType = combineType
     }
