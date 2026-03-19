@@ -724,13 +724,13 @@ final class EntityVisitor: SyntaxVisitor {
     let fileMacro: String
     let path: String
     let declType: FindTargetDeclType
-    let classesHaveBeenProcessed: Bool
-    init(_ path: String, annotation: String = "", fileMacro: String?, declType: FindTargetDeclType, classesHaveBeenProcessed: Bool = false) {
+    let scanAsMockfile: Bool
+    init(_ path: String, annotation: String = "", fileMacro: String?, declType: FindTargetDeclType, scanAsMockfile: Bool = false) {
         self.annotation = annotation
         self.fileMacro = fileMacro ?? ""
         self.path = path
         self.declType = declType
-        self.classesHaveBeenProcessed = classesHaveBeenProcessed
+        self.scanAsMockfile = scanAsMockfile
         super.init(viewMode: .sourceAccurate)
     }
 
@@ -751,7 +751,7 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        if classesHaveBeenProcessed || node.nameText.hasSuffix("Mock") {
+        if scanAsMockfile || node.nameText.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
             if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
                 entities.append(ent)
