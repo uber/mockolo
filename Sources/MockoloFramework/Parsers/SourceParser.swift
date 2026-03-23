@@ -32,7 +32,7 @@ class SourceParser {
                              fileMacro: String?,
                              completion: @escaping ([Entity], ImportMap?) -> ()) {
         scan(paths) { (path, lock) in
-            self.generateASTs(path, annotation: "", fileMacro: fileMacro, declType: .classType, lock: lock, completion: completion)
+            self.generateASTs(path, annotation: "", fileMacro: fileMacro, declType: .classType, scanAsMockfile: true, lock: lock, completion: completion)
         }
     }
     /// Parses decls (protocol, class) with annotations (/// @mockable) and calls a completion block
@@ -68,6 +68,7 @@ class SourceParser {
                               annotation: String,
                               fileMacro: String?,
                               declType: FindTargetDeclType,
+                              scanAsMockfile: Bool = false,
                               lock: NSLock?,
                               completion: @escaping ([Entity], ImportMap?) -> ()) {
 
@@ -87,7 +88,7 @@ class SourceParser {
 
         var results = [Entity]()
         let node = Parser.parse(path)
-        let treeVisitor = EntityVisitor(path, annotation: annotation, fileMacro: fileMacro, declType: declType)
+        let treeVisitor = EntityVisitor(path, annotation: annotation, fileMacro: fileMacro, declType: declType, scanAsMockfile: scanAsMockfile)
         treeVisitor.walk(node)
         let ret = treeVisitor.entities
         results.append(contentsOf: ret)

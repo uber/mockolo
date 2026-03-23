@@ -21,9 +21,10 @@ import Algorithms
 func generateUniqueModels(protocolMap: [String: Entity],
                           annotatedProtocolMap: [String: Entity],
                           inheritanceMap: [String: Entity],
+                          inheritanceByProtocolMap: [String: Entity],
                           completion: @escaping (ResolvedEntityContainer) -> ()) {
     scan(annotatedProtocolMap) { (key, val, lock) in
-        let ret = generateUniqueModels(key: key, entity: val, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+        let ret = generateUniqueModels(key: key, entity: val, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap)
         lock?.lock()
         completion(ret)
         lock?.unlock()
@@ -33,8 +34,9 @@ func generateUniqueModels(protocolMap: [String: Entity],
 private func generateUniqueModels(key: String,
                                   entity: Entity,
                                   protocolMap: [String: Entity],
-                                  inheritanceMap: [String: Entity]) -> ResolvedEntityContainer {
-    let (models, processedModels, attributes, inheritedTypes, paths) = lookupEntities(key: key, declKind: entity.entityNode.declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap)
+                                  inheritanceMap: [String: Entity],
+                                  inheritanceByProtocolMap: [String: Entity]) -> ResolvedEntityContainer {
+    let (models, processedModels, attributes, inheritedTypes, paths) = lookupEntities(key: key, declKind: entity.entityNode.declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap)
 
     let processedFullNames = processedModels.compactMap {$0.fullName}
 
