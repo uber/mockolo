@@ -22,7 +22,7 @@ struct Mockolo {
     static func main() {
         let inputs = Array(CommandLine.arguments.dropFirst())
         if let arg = inputs.first, (arg == "--version" || arg == "-v") {
-            print(Version.current.value)
+            print(version)
             return
         }
 
