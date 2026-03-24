@@ -633,9 +633,16 @@ extension SwiftType {
 
         case .memberType(let syntax):
             // T.U
+            let name = syntax.name.trimmedDescription
+            let generics = syntax.genericArgumentClause?.arguments.compactMap {
+                $0.argument.as(TypeSyntax.self).flatMap {
+                    SwiftType(typeSyntax: $0)
+                }
+            }
             self.kind = .nominal(.init(
                 namespace: SwiftType(typeSyntax: syntax.baseType),
-                name: syntax.name.trimmedDescription
+                name: name,
+                genericParameterTypes: generics ?? []
             ))
 
         case .attributedType(let syntax):
