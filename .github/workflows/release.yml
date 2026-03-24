@@ -43,6 +43,7 @@ jobs:
       with:
         name: mockolo.${{ matrix.destination.name }}.tar.gz
         path: mockolo.${{ matrix.destination.name }}.tar.gz
+        archive: false
 
   check-portability:
     needs: build
@@ -63,6 +64,7 @@ jobs:
     - uses: actions/download-artifact@v8
       with:
         name: mockolo.${{ matrix.destination.name }}.tar.gz
+        skip-decompress: true
     - name: Unpack the binary
       run: tar -xvf mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Run the binary
@@ -79,6 +81,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           merge-multiple: true
+          skip-decompress: true
 
       - run: bundle/make_artifactbundle.sh "${{ inputs.version }}"
       
@@ -101,13 +104,9 @@ jobs:
     steps:
     - uses: actions/download-artifact@v8
       with:
-        pattern: mockolo.*.tar.gz
         merge-multiple: true
-        skip-decompress: false
-    - uses: actions/download-artifact@v8
-      with:
-        name: mockolo.artifactbundle.zip
         skip-decompress: true
+
     - name: Publish to GitHub Releases
       uses: softprops/action-gh-release@v2
       with:
