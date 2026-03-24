@@ -7,14 +7,9 @@ on:
         description: "Version to release (e.g. 2.7.0)"
         required: true
         type: string
-      release_notes:
-        description: "Release notes body"
-        required: true
-        type: string
       dry_run:
-        description: "Build and validate only (do not create release/tag)"
+        description: "Dry run"
         required: true
-        default: true
         type: boolean
 
 permissions:
@@ -106,17 +101,14 @@ jobs:
     - uses: actions/download-artifact@v7
       with:
         merge-multiple: true
+        skip-decompress: true
     - name: Publish to GitHub Releases
       uses: softprops/action-gh-release@v2
       with:
-        name: v${{ inputs.version }}
-        tag_name: v${{ inputs.version }}
+        name: ${{ inputs.version }}
+        tag_name: ${{ inputs.version }}
         target_commitish: ${{ github.sha }}
         body: |
-          ${{ inputs.release_notes }}
-
-          ----
-
           ## For Build Tools Plugin (artifactbundle)
 
           ```swift
@@ -126,10 +118,11 @@ jobs:
               checksum: "${{ needs.make-artifact-bundle.outputs.checksum }}"
           ),
           ```
-
+        generate_release_notes: true
         files: |
           mockolo.ubuntu-x86_64.tar.gz
           mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
+        fail_on_unmatched_files: true
         draft: true
