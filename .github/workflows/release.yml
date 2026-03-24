@@ -69,15 +69,17 @@ jobs:
           merge-multiple: true
 
       - run: bundle/make_artifactbundle.sh ${{ github.event.release.tag_name || github.ref_name }}
+      
       - name: Upload artifact bundle
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: mockolo.artifactbundle.zip
           path: mockolo.artifactbundle.zip
+          archive: false
 
       - name: Compute checksum
         id: checksum
-        run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" >> "$GITHUB_OUTPUT"
+        run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" | tee -a "$GITHUB_OUTPUT"
 
   deploy-binary:
     if: ${{ github.event_name == 'release' }}
