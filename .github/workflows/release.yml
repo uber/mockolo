@@ -60,7 +60,7 @@ jobs:
           - { name: "macos-universal", os: macos-15 }
           - { name: "macos-universal", os: macos-14 }
     steps:
-    - uses: actions/download-artifact@v7
+    - uses: actions/download-artifact@v8
       with:
         name: mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Unpack the binary
@@ -76,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           merge-multiple: true
 
@@ -87,6 +87,7 @@ jobs:
         with:
           name: mockolo.artifactbundle.zip
           path: mockolo.artifactbundle.zip
+          # GitHub re-compresses the zip file, resulting in a broken zip file
           archive: false
 
       - name: Compute checksum
@@ -100,7 +101,12 @@ jobs:
     steps:
     - uses: actions/download-artifact@v8
       with:
+        pattern: mockolo.*.tar.gz
         merge-multiple: true
+        skip-decompress: false
+    - uses: actions/download-artifact@v8
+      with:
+        name: mockolo.artifactbundle.zip
         skip-decompress: true
     - name: Publish to GitHub Releases
       uses: softprops/action-gh-release@v2
