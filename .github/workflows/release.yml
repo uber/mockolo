@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to release (e.g. 2.7.0)"
+        description: "Version to release (e.g. 1.2.3)"
         required: true
         type: string
       dry_run:
@@ -37,7 +37,7 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_26.3.app
 
     - uses: actions/checkout@v6
-    - name: Update Sources/Mockolo/Version.swift
+    - name: Update Version.swift
       run: echo "let version = \"${{ inputs.version }}\"" > Sources/Mockolo/Version.swift
     - name: Create the binary
       run: ./install-script.sh -s . -t mockolo -d . -o mockolo.${{ matrix.destination.name }}.tar.gz
