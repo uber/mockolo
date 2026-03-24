@@ -56,10 +56,12 @@ import MockoloFramework
         func pull<U: ObservableType>(events: [SomeEvent], until: U?, closure: @escaping () -> ())
         func optionalPull<T>(events: [SomeEvent], value: T, once: Bool, closure: ((T?) -> ())?)
         func add<T: FixedWidthInteger>(n1: T, n2: T?)
-        func add<T: Sequence> (a: T?, b: T?)
-        func add<T: Collection> (a: T, b: T)
+        func add<T: Sequence>(a: T?, b: T?)
+        func add<T: Collection>(a: T, b: T)
         func useMetatype<T>(type: T.Type) -> T.Type
         func useAssociatedType<I: Identifiable>(value: I, id: I.ID) -> I.ID
+        func foo<T: Body>() -> Result<T, any Error>
+        func bar<T: Body>() -> Swift.Result<T, any Error>
     }
 
     @Fixture enum expected {
@@ -205,6 +207,26 @@ import MockoloFramework
                     return useAssociatedTypeHandler(value, id) as! I.ID
                 }
                 fatalError("useAssociatedTypeHandler returns can't have a default value thus its handler must be set")
+            }
+
+            private(set) var fooCallCount = 0
+            var fooHandler: (() -> Any)?
+            func foo<T: Body>() -> Result<T, any Error> {
+                fooCallCount += 1
+                if let fooHandler = fooHandler {
+                    return fooHandler() as! Result<T, any Error>
+                }
+                fatalError("fooHandler returns can't have a default value thus its handler must be set")
+            }
+
+            private(set) var barCallCount = 0
+            var barHandler: (() -> Any)?
+            func bar<T: Body>() -> Swift.Result<T, any Error> {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    return barHandler() as! Swift.Result<T, any Error>
+                }
+                fatalError("barHandler returns can't have a default value thus its handler must be set")
             }
         }
     }
