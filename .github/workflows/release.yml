@@ -29,14 +29,14 @@ jobs:
         destination:
           - { name: "ubuntu-aarch64", os: ubuntu-22.04-arm }
           - { name: "ubuntu-x86_64", os: ubuntu-22.04 }
-          - { name: "macos-universal", os: macos-15 }
+          - { name: "macos-universal", os: macos-26 }
     steps:
     - if: startsWith(matrix.destination.name, 'ubuntu')
       uses: vapor/swiftly-action@v0.2
       with:
         toolchain: "6.2"
     - if: startsWith(matrix.destination.name, 'macos')
-      run: sudo xcode-select -s /Applications/Xcode_26.1.app
+      run: sudo xcode-select -s /Applications/Xcode_26.3.app
 
     - uses: actions/checkout@v6
     - name: Update Sources/Mockolo/Version.swift
@@ -122,7 +122,7 @@ jobs:
           ```swift
           .binaryTarget(
               name: "mockolo",
-              url: "https://github.com/${{ github.repository }}/releases/download/v${{ inputs.version }}/mockolo.artifactbundle.zip",
+              url: "https://github.com/${{ github.repository }}/releases/download/${{ inputs.version }}/mockolo.artifactbundle.zip",
               checksum: "${{ needs.make-artifact-bundle.outputs.checksum }}"
           ),
           ```
@@ -132,5 +132,4 @@ jobs:
           mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
-        fail_on_unmatched_files: true
         draft: true
