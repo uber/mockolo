@@ -2,8 +2,23 @@ name: Release
 
 on:
   workflow_dispatch:
-  release:
-    types: [published]
+    inputs:
+      version:
+        description: "Version to release (e.g. 2.7.0)"
+        required: true
+        type: string
+      release_notes:
+        description: "Release notes body"
+        required: true
+        type: string
+      dry_run:
+        description: "Build and validate only (do not create release/tag)"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -24,6 +39,8 @@ jobs:
       run: sudo xcode-select -s /Applications/Xcode_26.1.app
 
     - uses: actions/checkout@v6
+    - name: Update Sources/Mockolo/Version.swift
+      run: echo "let version = \"${{ inputs.version }}\"" > Sources/Mockolo/Version.swift
     - name: Create the binary
       run: ./install-script.sh -s . -t mockolo -d . -o mockolo.${{ matrix.destination.name }}.tar.gz
     - name: Upload the binary
@@ -68,7 +85,7 @@ jobs:
         with:
           merge-multiple: true
 
-      - run: bundle/make_artifactbundle.sh ${{ github.event.release.tag_name || github.ref_name }}
+      - run: bundle/make_artifactbundle.sh "${{ inputs.version }}"
       
       - name: Upload artifact bundle
         uses: actions/upload-artifact@v7
@@ -81,18 +98,23 @@ jobs:
         id: checksum
         run: echo "checksum=$(swift package compute-checksum mockolo.artifactbundle.zip)" | tee -a "$GITHUB_OUTPUT"
 
-  deploy-binary:
-    if: ${{ github.event_name == 'release' }}
+  publish:
+    if: ${{ !inputs.dry_run }}
     needs: [check-portability, make-artifact-bundle]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/download-artifact@v7
       with:
         merge-multiple: true
-    - name: Deploy the binary
+    - name: Publish to GitHub Releases
       uses: softprops/action-gh-release@v2
       with:
+        name: v${{ inputs.version }}
+        tag_name: v${{ inputs.version }}
+        target_commitish: ${{ github.sha }}
         body: |
+          ${{ inputs.release_notes }}
+
           ----
 
           ## For Build Tools Plugin (artifactbundle)
@@ -100,14 +122,15 @@ jobs:
           ```swift
           .binaryTarget(
               name: "mockolo",
-              url: "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/mockolo.artifactbundle.zip",
+              url: "https://github.com/${{ github.repository }}/releases/download/v${{ inputs.version }}/mockolo.artifactbundle.zip",
               checksum: "${{ needs.make-artifact-bundle.outputs.checksum }}"
           ),
           ```
 
-        append_body: true
         files: |
           mockolo.ubuntu-x86_64.tar.gz
           mockolo.ubuntu-aarch64.tar.gz
           mockolo.macos-universal.tar.gz
           mockolo.artifactbundle.zip
+        fail_on_unmatched_files: true
+        draft: true
