@@ -208,4 +208,40 @@
         }
     }
 }
+
+@Fixture enum availableSendableProtocol {
+    /// @mockable
+    @available(iOS 18.0, *)
+    public protocol Foo: Sendable {
+        func bar() -> String
+    }
+
+    @Fixture(includesConcurrencyHelpers: true)
+    enum expected {
+        @available(iOS 18.0, *)
+        public final class FooMock: Foo, @unchecked Sendable {
+            public init() { }
+
+
+            private let barState = MockoloMutex(MockoloHandlerState<Never, @Sendable () -> String>())
+            public var barCallCount: Int {
+                return barState.withLock(\.callCount)
+            }
+            public var barHandler: (@Sendable () -> String)? {
+                get { barState.withLock(\.handler) }
+                set { barState.withLock { $0.handler = newValue } }
+            }
+            public func bar() -> String {
+                let barHandler = barState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
+                if let barHandler = barHandler {
+                    return barHandler()
+                }
+                return ""
+            }
+        }
+    }
+}
 #endif
