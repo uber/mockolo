@@ -27,15 +27,14 @@ struct ResolvedEntity {
     var declaredInits: [MethodModel] {
         return uniqueModels.compactMap { (_, model) in
             guard let model = model as? MethodModel,
-                model.isInitializer
-            else { return nil }
+                  model.isInitializer else { return nil }
             return model
         }
     }
 
     var initParamCandidates: [VariableModel] {
         return sortedInitVars(
-            in: uniqueModels.compactMap { $0.1 as? VariableModel }
+            in: uniqueModels.compactMap{ $0.1 as? VariableModel }
         )
     }
 
@@ -54,9 +53,9 @@ struct ResolvedEntity {
         let curVarsSorted = unprocessed.sorted(path: \.offset, fallback: \.name)
 
         let curVarNames = curVarsSorted.map(\.name)
-        let parentVars = processed.filter { !curVarNames.contains($0.name) }
+        let parentVars = processed.filter {!curVarNames.contains($0.name)}
         let parentVarsSorted = parentVars.sorted(path: \.offset, fallback: \.name)
-        let result = [curVarsSorted, parentVarsSorted].flatMap { $0 }
+        let result = [curVarsSorted, parentVarsSorted].flatMap{$0}
         return result
     }
 
@@ -103,10 +102,7 @@ protocol EntityNode {
     var genericWhereConstraints: [String] { get }
     var offset: Int64 { get }
     var hasBlankInit: Bool { get }
-    func subContainer(
-        metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?,
-        isProcessed: Bool
-    ) -> EntityNodeSubContainer
+    func subContainer(metadata: AnnotationMetadata?, declKind: NominalTypeDeclKind, path: String?, isProcessed: Bool) -> EntityNodeSubContainer
 }
 
 struct EntityNodeSubContainer {
@@ -172,30 +168,25 @@ public final class Entity {
         return metadata != nil
     }
 
-    static func node(
-        with entityNode: EntityNode,
-        filepath: String,
-        isPrivate: Bool,
-        isFinal: Bool,
-        metadata: AnnotationMetadata?,
-        processed: Bool
-    ) -> Entity? {
+    static func node(with entityNode: EntityNode,
+                     filepath: String,
+                     isPrivate: Bool,
+                     isFinal: Bool,
+                     metadata: AnnotationMetadata?,
+                     processed: Bool) -> Entity? {
 
-        guard !isPrivate, !isFinal else { return nil }
+        guard !isPrivate, !isFinal else {return nil}
 
-        return Entity(
-            entityNode: entityNode,
-            filepath: filepath,
-            metadata: metadata,
-            isProcessed: processed)
+        return Entity(entityNode: entityNode,
+                      filepath: filepath,
+                      metadata: metadata,
+                      isProcessed: processed)
     }
 
-    init(
-        entityNode: EntityNode,
-        filepath: String,
-        metadata: AnnotationMetadata?,
-        isProcessed: Bool
-    ) {
+    init(entityNode: EntityNode,
+         filepath: String,
+         metadata: AnnotationMetadata?,
+         isProcessed: Bool) {
         self.entityNode = entityNode
         self.filepath = filepath
         self.metadata = metadata
