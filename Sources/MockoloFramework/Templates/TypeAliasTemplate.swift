@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 extension TypeAliasModel {
     func applyTypealiasTemplate(name: String,
                                 type: SwiftType,

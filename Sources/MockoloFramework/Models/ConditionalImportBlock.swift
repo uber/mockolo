@@ -14,20 +14,25 @@
 //  limitations under the License.
 //
 
-/// Renders models with templates for output
+/// Represents import content: either a simple import statement or a nested conditional block
+indirect enum ImportContent {
+    case simple(Import)
+    case conditional(ConditionalImportBlock)
+}
 
-func renderTemplates(entities: [ResolvedEntity],
-                     arguments: GenerationArguments,
-                     completion: @escaping (String, Int64) -> ()) {
-    scan(entities) { (resolvedEntity, lock) in
-        let mockModel = resolvedEntity.model()
-        if let mockString = mockModel.render(
-            context: .init(),
-            arguments: arguments
-        ), !mockString.isEmpty {
-            lock?.lock()
-            completion(mockString, mockModel.offset)
-            lock?.unlock()
-        }
+/// Represents a conditional import block (#if/#elseif/#else/#endif)
+struct ConditionalImportBlock {
+    /// Represents a single clause in a conditional import block
+    struct Clause {
+        var type: IfClauseType
+        var contents: [ImportContent]
+    }
+
+    let clauses: [Clause]
+    let offset: Int64
+
+    init(clauses: [Clause], offset: Int64) {
+        self.clauses = clauses
+        self.offset = offset
     }
 }

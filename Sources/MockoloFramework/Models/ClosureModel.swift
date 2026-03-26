@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 final class ClosureModel: Model {
     let name: String = "" // closure type cannot have a name
     let offset: Int64 = .max

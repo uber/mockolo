@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 public enum ModelType {
     case variable
     case method
@@ -38,6 +36,7 @@ struct RenderContext {
     var overloadingResolvedName: String?
     var enclosingType: SwiftType?
     var annotatedTypeKind: NominalTypeDeclKind?
+    var mockDeclKind: NominalTypeDeclKind?
     var requiresSendable: Bool = false
 }
 

@@ -15,7 +15,6 @@
 //
 
 import CoreFoundation
-import Foundation
 
 enum InputError: Error {
     case annotationError
@@ -26,7 +25,6 @@ enum InputError: Error {
 @discardableResult
 public func generate(sourceDirs: [String],
                      sourceFiles: [String],
-                     parser: SourceParser,
                      exclusionSuffixes: [String],
                      mockFilePaths: [String]?,
                      annotation: String,
@@ -48,12 +46,14 @@ public func generate(sourceDirs: [String],
         log("Source files or directories do not exist", level: .error)
         throw InputError.sourceFilesError
     }
-    
+
+    let parser = SourceParser()
     scanConcurrencyLimit = concurrencyLimit
     minLogLevel = loggingLevel
     var candidates = [(String, Int64)]()
     var resolvedEntities = [ResolvedEntity]()
     var parentMocks = [String: Entity]()
+    var parentMocksByInheritedType = [String: Entity]()
     var protocolMap = [String: Entity]()
     var annotatedProtocolMap = [String: Entity]()
     var pathToImportsMap = ImportMap()
@@ -73,6 +73,12 @@ public func generate(sourceDirs: [String],
                                             pathToImportsMap[path] = importMap
                                         }
                                     }
+        }
+    }
+    // Build table mapping protocol name (inheritedType) => mock entity (entity)
+    for entity in parentMocks.values {
+        for inheritedType in entity.entityNode.inheritedTypes {
+            parentMocksByInheritedType[inheritedType] = entity
         }
     }
     signpost_end(name: "Process input")
@@ -105,20 +111,25 @@ public func generate(sourceDirs: [String],
     let t2 = CFAbsoluteTimeGetCurrent()
     log("Took", t2-t1, level: .verbose)
     
-    let typeKeyList = [
-        parentMocks.compactMap { (key, value) -> String? in
-            if value.entityNode.mayHaveGlobalActor {
-                return nil
-            }
-            return key.components(separatedBy: "Mock").first
-        },
-        annotatedProtocolMap.filter { !$0.value.entityNode.mayHaveGlobalActor }.map(\.key)
-    ]
-        .flatMap { $0 }
-        .map { typeName in
-            // nameOverride does not work correctly but it giving up.
-            return (typeName, "\(typeName)Mock()")
+    let typeKeyList = parentMocks.compactMap { (className, value) -> (String, String)? in
+        if value.entityNode.mayHaveGlobalActor {
+            return nil
         }
+        let protocolName = className.components(separatedBy: "Mock").first ?? className
+        return (protocolName, "\(className)()")
+    } + annotatedProtocolMap
+        .lazy
+        .filter { _, entity in !entity.entityNode.mayHaveGlobalActor }
+        .map { typeName, entity in
+            switch entity.metadata?.nameOverride {
+            case .none:
+                (typeName, "\(typeName)Mock()")
+            case .some(let nameOverride):
+                (typeName, "\(nameOverride)()")
+            }
+            
+        }
+    
     SwiftType.customDefaultValueMap = [String: String](typeKeyList, uniquingKeysWith: { $1 })
 
     signpost_begin(name: "Generate models")
@@ -126,6 +137,7 @@ public func generate(sourceDirs: [String],
     generateUniqueModels(protocolMap: protocolMap,
                          annotatedProtocolMap: annotatedProtocolMap,
                          inheritanceMap: parentMocks,
+                         inheritanceByProtocolMap: parentMocksByInheritedType,
                          completion: { container in
                             resolvedEntities.append(container.entity)
                             relevantPaths.append(contentsOf: container.paths)

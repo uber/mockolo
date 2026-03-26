@@ -1,5 +1,3 @@
-import Foundation
-
 final class VariableModel: Model {
     struct GetterEffects: Equatable {
         var isAsync: Bool

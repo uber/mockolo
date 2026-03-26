@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 /// Combines a list of entities and import lines and header and writes the final output
 func write(candidates: [(String, Int64)],
            header: String?,

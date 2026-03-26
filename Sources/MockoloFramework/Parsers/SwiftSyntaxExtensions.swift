@@ -230,35 +230,42 @@ extension MemberBlockItemListSyntax {
 
 extension IfConfigDeclSyntax {
     func model(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
-        var subModels = [Model]()
+        var clauseList = [IfMacroModel.Clause]()
         var attrDesc: String?
         var hasInit = false
 
-        var name = ""
         for cl in self.clauses {
-            if let desc = cl.condition?.description {
-                if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
-                    name = desc
-                    for element in list {
-                        if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
-                            subModels.append(item)
-                            if let attr = attr, attr.contains(String.available) {
-                                attrDesc = attr
-                            }
-                            hasInit = hasInit || initFlag
+            guard let clauseType = IfClauseType(cl) else {
+                continue
+            }
+
+            var subModels = [Model]()
+            if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
+                for element in list {
+                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
+                        subModels.append(item)
+                        if let attr = attr, attr.contains(String.available) {
+                            attrDesc = attr
                         }
+                        hasInit = hasInit || initFlag
                     }
                 }
             }
-        }
-        
-        let uniqueSubModels = uniqueEntities(
-            in: subModels,
-            exclude: [:],
-            fullnames: []
-        ).sorted(path: \.value.offset, fallback: \.key)
 
-        let macroModel = IfMacroModel(name: name, offset: self.offset, entities: uniqueSubModels)
+            // Process entities for this clause
+            let uniqueSubModels = uniqueEntities(
+                in: subModels,
+                exclude: [:],
+                fullnames: []
+            ).sorted(path: \.value.offset, fallback: \.key)
+
+            clauseList.append(IfMacroModel.Clause(
+                type: clauseType,
+                entities: uniqueSubModels
+            ))
+        }
+
+        let macroModel = IfMacroModel(clauses: clauseList, offset: self.offset)
         return (macroModel, attrDesc, hasInit)
     }
 }
@@ -431,13 +438,16 @@ extension VariableDeclSyntax {
         // Need to access pattern bindings to get name, type, and other info of a var decl
         let varmodels = self.bindings.compactMap { (v: PatternBindingSyntax) -> Model in
             let name = v.pattern.trimmedDescription
-            var typeName: String?
+            var swiftType: SwiftType?
             var potentialInitParam = false
 
             // Get the type info and whether it can be a var param for an initializer
-            if let vtype = v.typeAnnotation?.type.trimmedDescription {
-                potentialInitParam = name.canBeInitParam(type: vtype, isStatic: isStatic)
-                typeName = vtype
+            if let vtype = v.typeAnnotation?.type {
+                let type = SwiftType(typeSyntax: vtype)
+                potentialInitParam = name.canBeInitParam(type: type, isStatic: isStatic)
+                swiftType = type
+            } else {
+                swiftType = nil
             }
 
             let storageKind: VariableModel.MockStorageKind
@@ -473,7 +483,7 @@ extension VariableDeclSyntax {
             }
 
             return VariableModel(name: name,
-                                 type: typeName.map { SwiftType($0) },
+                                 type: swiftType,
                                  acl: acl,
                                  isStatic: isStatic,
                                  storageKind: storageKind,
@@ -499,9 +509,28 @@ extension SubscriptDeclSyntax {
         let genericTypeParams = self.genericParameterClause?.parameters.compactMap { $0.model(inInit: false) } ?? []
         let genericWhereClause = self.genericWhereClause?.description
 
+        let access: SubscriptAccess
+        switch self.accessorBlock?.accessors {
+        case .accessors(let accessorDecls):
+            let hasWriteAccessor = accessorDecls.contains(where: {
+                switch $0.accessorSpecifier.tokenKind {
+                case .keyword(.set), .keyword(._modify):
+                    return true
+                default:
+                    // Also match "modify" which is behind @_spi(ExperimentalLanguageFeatures)
+                    return $0.accessorSpecifier.text == "modify"
+                }
+            })
+            access = hasWriteAccessor ? .getSet : .get
+        case .getter:
+            access = .get
+        case nil:
+            access = .getSet // fallback
+        }
+
         let subscriptModel = MethodModel(name: self.subscriptKeyword.text,
-                                         typeName: self.returnClause.type.description,
-                                         kind: .subscriptKind,
+                                         returnType: SwiftType(typeSyntax: self.returnClause.type),
+                                         kind: .subscriptKind(access),
                                          acl: acl,
                                          genericTypeParams: genericTypeParams,
                                          genericWhereClause: genericWhereClause,
@@ -531,7 +560,7 @@ extension FunctionDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         let funcmodel = MethodModel(name: self.name.description,
-                                    typeName: self.signature.returnClause?.type.description,
+                                    returnType: (self.signature.returnClause?.type).map { SwiftType(typeSyntax: $0) },
                                     kind: .funcKind,
                                     acl: acl,
                                     genericTypeParams: genericTypeParams,
@@ -575,7 +604,7 @@ extension InitializerDeclSyntax {
         let genericWhereClause = self.genericWhereClause?.description
 
         return MethodModel(name: "init",
-                           typeName: nil,
+                           returnType: nil,
                            kind: .initKind(required: requiredInit, override: declKind == .class),
                            acl: acl,
                            genericTypeParams: genericTypeParams,
@@ -599,7 +628,8 @@ extension GenericParameterSyntax {
     func model(inInit: Bool) -> ParamModel {
         return ParamModel(label: "",
                           name: self.name.text,
-                          type: SwiftType(self.inheritedType?.trimmedDescription ?? .voidType),
+                          // .Void is not correct but this is due to the old implementation. see: https://github.com/uber/mockolo/blob/8c628aaa552bea925e67002dfa48e5338e2d3b26/Sources/MockoloFramework/Templates/ParamTemplate.swift#L30
+                          type: self.inheritedType.map { SwiftType(typeSyntax: $0) } ?? .Void,
                           isGeneric: true,
                           inInit: inInit,
                           needsVarDecl: false,
@@ -631,14 +661,12 @@ extension FunctionParameterSyntax {
             }
         }
 
-        var type = self.type.trimmedDescription
-        if ellipsis != nil {
-            type.append("...")
-        }
+        var type = SwiftType(typeSyntax: self.type)
+        type.hasEllipsis = ellipsis != nil
 
         return ParamModel(label: label,
                           name: name,
-                          type: SwiftType(type),
+                          type: type,
                           isGeneric: false,
                           inInit: inInit,
                           needsVarDecl: declKind == .protocol,
@@ -653,7 +681,7 @@ extension AssociatedTypeDeclSyntax {
         if let overrideType = overrides?[self.name.text] {
             return TypeAliasModel(
                 name: self.name.text,
-                typeName: overrideType,
+                type: .init(kind: .nominal(.init(name: overrideType))),
                 acl: acl,
                 offset: self.offset,
                 length: self.length,
@@ -664,7 +692,7 @@ extension AssociatedTypeDeclSyntax {
 
         return AssociatedTypeModel(name: self.name.text,
                                    inheritances: self.inheritanceClause?.inheritedTypes.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
-                                   defaultTypeName: self.initializer?.value.trimmedDescription,
+                                   defaultType: (self.initializer?.value).map { SwiftType(typeSyntax: $0) },
                                    whereConstraints: self.genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? [],
                                    acl: acl,
                                    offset: self.offset,
@@ -674,8 +702,12 @@ extension AssociatedTypeDeclSyntax {
 
 extension TypeAliasDeclSyntax {
     func model(with acl: String, declKind: NominalTypeDeclKind, overrides: [String: String]?, processed: Bool) -> Model {
+        let type = overrides?[self.name.text].map {
+            SwiftType(kind: .nominal(.init(name: $0)))
+        } ?? SwiftType(typeSyntax: self.initializer.value)
+
         return TypeAliasModel(name: self.name.text,
-                              typeName: overrides?[self.name.text] ?? self.initializer.value.description,
+                              type: type,
                               acl: acl,
                               offset: self.offset,
                               length: self.length,
@@ -687,16 +719,18 @@ extension TypeAliasDeclSyntax {
 
 final class EntityVisitor: SyntaxVisitor {
     var entities: [Entity] = []
-    var imports: [String: [String]] = [:]
+    var imports: [ImportContent] = []
     let annotation: String
     let fileMacro: String
     let path: String
     let declType: FindTargetDeclType
-    init(_ path: String, annotation: String = "", fileMacro: String?, declType: FindTargetDeclType) {
+    let scanAsMockfile: Bool
+    init(_ path: String, annotation: String = "", fileMacro: String?, declType: FindTargetDeclType, scanAsMockfile: Bool = false) {
         self.annotation = annotation
         self.fileMacro = fileMacro ?? ""
         self.path = path
         self.declType = declType
+        self.scanAsMockfile = scanAsMockfile
         super.init(viewMode: .sourceAccurate)
     }
 
@@ -717,7 +751,7 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        if node.nameText.hasSuffix("Mock") {
+        if scanAsMockfile || node.nameText.hasSuffix("Mock") {
             // this mock class node must be public else wouldn't have compiled before
             if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
                 entities.append(ent)
@@ -738,46 +772,58 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
-        if let ret = node.path.firstToken(viewMode: .sourceAccurate)?.text {
-            let desc = node.importKeyword.text + " " + ret
-            imports["", default: []].append(desc)
+        // Top-level import (not inside #if)
+        if let `import` = Import(line: node.trimmedDescription) {
+            imports.append(.simple(`import`))
         }
         return .skipChildren
     }
 
     override func visit(_ node: IfConfigDeclSyntax) -> SyntaxVisitorContinueKind {
+        // Check if this is a file macro that should be ignored
+        if let firstCondition = node.clauses.first?.condition?.trimmedDescription,
+           firstCondition == fileMacro {
+            return .visitChildren
+        }
+
+        // Parse conditional import block recursively
+        let block = parseIfConfigDecl(node)
+        imports.append(.conditional(block))
+        return .skipChildren
+    }
+
+    /// Recursively parses an IfConfigDeclSyntax into a ConditionalImportBlock
+    private func parseIfConfigDecl(_ node: IfConfigDeclSyntax) -> ConditionalImportBlock {
+        var clauseList = [ConditionalImportBlock.Clause]()
+
         for cl in node.clauses {
-            let macroName: String
-            if let conditionDescription = cl.condition?.trimmedDescription {
-                macroName = conditionDescription
-            } else {
-                return .visitChildren
+            guard let clauseType = IfClauseType(cl) else {
+                continue
             }
 
-            guard macroName != fileMacro else { return .visitChildren }
-
+            var contents = [ImportContent]()
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
+                        // Simple import
+                        if let imp = Import(line: importItem.trimmedDescription) {
+                            contents.append(.simple(imp))
                         }
-                        imports[key]?.append(importItem.trimmedDescription)
-
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
-                        let key = macroName
-                        if imports[key] == nil {
-                            imports[key] = []
-                        }
-                        imports[key]?.append(nested.trimmedDescription)
-                    } else {
-                        return .visitChildren
+                        // Nested #if block (recursive)
+                        let nestedBlock = parseIfConfigDecl(nested)
+                        contents.append(.conditional(nestedBlock))
                     }
                 }
             }
+
+            clauseList.append(ConditionalImportBlock.Clause(
+                type: clauseType,
+                contents: contents
+            ))
         }
-        return .skipChildren
+
+        return ConditionalImportBlock(clauses: clauseList, offset: node.offset)
     }
 
     override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
@@ -918,7 +964,7 @@ extension Trivia {
 }
 
 extension ThrowingKind {
-    fileprivate init(_ syntax: ThrowsClauseSyntax?) {
+    init(_ syntax: ThrowsClauseSyntax?) {
         guard let syntax else {
             self = .none
             return
@@ -931,6 +977,21 @@ extension ThrowingKind {
             } else {
                 self = .any
             }
+        }
+    }
+}
+
+extension IfClauseType {
+    init?(_ syntax: IfConfigClauseSyntax) {
+        switch syntax.poundKeyword.tokenKind {
+        case .poundIf:
+            self = .if(syntax.condition?.trimmedDescription ?? "")
+        case .poundElseif:
+            self = .elseif(syntax.condition?.trimmedDescription ?? "")
+        case .poundElse:
+            self = .else
+        default:
+            return nil
         }
     }
 }

@@ -66,6 +66,18 @@ class MockoloTestCase: XCTestCase {
         try? verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
     }
     
+    func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+        let dstFilePath = dstFilePath ?? defaultDstFilePath
+        var mockList: [String]?
+        if let mock = mockContent {
+            if mockList == nil {
+                mockList = [String]()
+            }
+            mockList?.append(mock)
+        }
+        try? verify(srcContents: srcContents, mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
+    }
+    
     func verifyThrows(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, errorHandler: (Error) -> Void = { _ in }, file: StaticString = #filePath, line: UInt = #line) {
         let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
@@ -114,7 +126,6 @@ class MockoloTestCase: XCTestCase {
 
         try generate(sourceDirs: [],
                      sourceFiles: srcFilePaths,
-                     parser: SourceParser(),
                      exclusionSuffixes: ["Mocks", "Tests"],
                      mockFilePaths: mockFilePaths,
                      annotation: String.mockAnnotation,
@@ -147,13 +158,13 @@ class MockoloTestCase: XCTestCase {
         let diff = lightDiff(old: outputContents, new: fixtureContents)
         if !diff.isEmpty {
             print("output:\n\(output)")
-            XCTFail("diff:\n" + "\(diff.joined(separator: "\n"))", file: file, line: line)
+            XCTFail("diff:\n" + "\(diff)", file: file, line: line)
         }
     }
 }
 
-func lightDiff(old: [String], new: [String]) -> [String] {
-    return new.difference(from: old)
+func lightDiff(old: [String], new: [String]) -> String {
+    return old.difference(from: new)
         .sorted { l, r in
             return l.offset < r.offset
         }
@@ -165,6 +176,7 @@ func lightDiff(old: [String], new: [String]) -> [String] {
                 return "+ \(element)"
             }
         }
+        .joined(separator: "\n")
 }
 
 extension CollectionDifference.Change {
@@ -175,22 +187,5 @@ extension CollectionDifference.Change {
         case .remove(let offset, _, _):
             return offset
         }
-    }
-}
-
-extension Array where Element: Equatable {
-    fileprivate func contains(subArray: [Element]) -> Bool {
-        guard subArray.count <= self.count else {
-            return false
-        }
-
-        for i in 0...(self.count - subArray.count) {
-            let slice = self[i..<i + subArray.count]
-            if slice.elementsEqual(subArray) {
-                return true
-            }
-        }
-
-        return false
     }
 }

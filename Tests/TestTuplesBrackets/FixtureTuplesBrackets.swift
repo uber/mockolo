@@ -75,7 +75,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
         if let updateObservableItemTypeOptionalHandler = updateObservableItemTypeOptionalHandler {
             return updateObservableItemTypeOptionalHandler()
         }
-        return Observable<(ItemType, ())>.empty()
+        return nil
     }
 
     private(set) var updateObservableSomeKeySomeTypeCallCount = 0
@@ -135,7 +135,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
         if let updateStringArrayIntHandler = updateStringArrayIntHandler {
             return updateStringArrayIntHandler()
         }
-        fatalError("updateStringArrayIntHandler returns can't have a default value thus its handler must be set")
+        return [String: Array<Int>]()
     }
 
     private(set) var updateStringDictionaryIntDoubleCallCount = 0
@@ -145,7 +145,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
         if let updateStringDictionaryIntDoubleHandler = updateStringDictionaryIntDoubleHandler {
             return updateStringDictionaryIntDoubleHandler()
         }
-        fatalError("updateStringDictionaryIntDoubleHandler returns can't have a default value thus its handler must be set")
+        return [String: Dictionary<Int, Double>]()
     }
 
     private(set) var updateStringIntArrayStringCallCount = 0
@@ -249,7 +249,7 @@ class NonSimpleTypesMock: NonSimpleTypes {
     }
 
     private(set) var updateArgSomeIntCallCount = 0
-    var updateArgSomeIntHandler: ((Int, Float) -> ((String) -> Observable<Double>))?
+    var updateArgSomeIntHandler: ((Int, Float) -> (String) -> Observable<Double>)?
     func update(arg: Int, some: Float) -> (String) -> Observable<Double> {
         updateArgSomeIntCallCount += 1
         if let updateArgSomeIntHandler = updateArgSomeIntHandler {

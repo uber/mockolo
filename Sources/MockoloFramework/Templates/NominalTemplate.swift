@@ -14,8 +14,6 @@
 //  limitations under the License.
 //
 
-import Foundation
-
 extension NominalModel {
     func applyNominalTemplate(name: String,
                               accessLevel: String,
@@ -51,6 +49,7 @@ extension NominalModel {
                         overloadingResolvedName: uniqueId,
                         enclosingType: type,
                         annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+                        mockDeclKind: declKind,
                         requiresSendable: requiresSendable
                     ),
                     arguments: arguments
@@ -66,6 +65,7 @@ extension NominalModel {
             context: .init(
                 enclosingType: type,
                 annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+                mockDeclKind: declKind,
                 requiresSendable: requiresSendable
             ),
             arguments: arguments
@@ -152,14 +152,12 @@ extension NominalModel {
                     if let val = element.type?.defaultVal(with: element.rxTypes, overrideKey: element.name, isInitParam: true) {
                         return "\(element.name): \(element.type!.typeName) = \(val)"
                     }
-                    if let elementType = element.type {
-                        var prefix = ""
-                        if elementType.hasClosure == true {
-                            if !elementType.isOptional {
-                                prefix = String.escaping + " "
-                            }
+
+                    if var elementType = element.type {
+                        if !elementType.isEscapable {
+                            elementType.attributes.insert(.escaping, at: 0)
                         }
-                        return "\(element.name): \(prefix)\(elementType.typeName)"
+                        return "\(element.name): \(elementType)"
                     } else {
                         return nil
                     }

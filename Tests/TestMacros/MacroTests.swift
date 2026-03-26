@@ -9,6 +9,27 @@ final class MacroTests: MockoloTestCase {
                dstContent: macroInFuncWithOverloadMock)
     }
 
+    func testMacroElseIfInFunc() {
+        verify(
+            srcContent: macroElseIfInFunc._source,
+            dstContent: macroElseIfInFunc.expected._source
+        )
+    }
+    
+    func testMacroInVar() {
+        verify(
+            srcContent: macroInVar._source,
+            dstContent: macroInVar.expected._source
+        )
+    }
+    
+    func testMacroSamePreprocessorMacroName() {
+        verify(
+            srcContent: macroSamePreprocessorMacroName,
+            dstContent: macroSamePreprocessorMacroNameMock
+        )
+    }
+
     func testMacroImports() {
         verify(srcContent: macroImports,
                dstContent: macroImportsMock)
@@ -34,5 +55,20 @@ final class MacroTests: MockoloTestCase {
     func testNestedMacroImports() {
         verify(srcContent: nestedMacroImports,
                dstContent: nestedMacroImportsMock)
+    }
+    
+    func testDuplicatedImportsInMacro() {
+        verify(
+            srcContent: duplicatedImportsInMacro,
+            dstContent: duplicatedImportsInMacroMock
+        )
+    }
+    
+    func testNestedMacro() {
+        verify(
+            srcContent: nestedMacro,
+            dstContent: nestedMacroMock,
+            testableImports: ["W"]
+        )
     }
 }

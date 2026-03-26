@@ -1,5 +1,10 @@
 #if compiler(>=6.0)
 class SendableTests: MockoloTestCase {
+    func testSendableSubscript() {
+        verify(srcContent: sendableSubscript._source,
+               dstContent: sendableSubscript.expected._source)
+    }
+
     func testSendableProtocol() {
         verify(srcContent: sendableProtocol._source,
                dstContent: sendableProtocol.expected._source,

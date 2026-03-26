@@ -14,12 +14,15 @@
 //  limitations under the License.
 //
 
-import Foundation
+enum SubscriptAccess: Equatable {
+    case get
+    case getSet
+}
 
-public enum MethodKind: Equatable {
+enum MethodKind: Equatable {
     case funcKind
     case initKind(required: Bool, override: Bool)
-    case subscriptKind
+    case subscriptKind(SubscriptAccess)
 }
 
 final class MethodModel: Model {
@@ -146,11 +149,24 @@ final class MethodModel: Model {
                             params: params.map { ($0.name, $0.type) },
                             isAsync: isAsync,
                             throwing: throwing,
-                            returnType: returnType ?? .init(.voidType))
+                            returnType: returnType ?? .Void)
+    }
+
+    func setHandler() -> ClosureModel? {
+        // Setters only apply to subscripts; properties are handled by VariableModel.
+        guard case .subscriptKind(.getSet) = kind, let returnType else { return nil }
+        let elementType = returnType
+        var setParams = params.map { ($0.name, $0.type) }
+        setParams.append(("newValue", elementType))
+        return ClosureModel(genericTypeParams: genericTypeParams,
+                            params: setParams,
+                            isAsync: false,
+                            throwing: .none,
+                            returnType: .Void)
     }
 
     init(name: String,
-         typeName: String?,
+         returnType: SwiftType?,
          kind: MethodKind,
          acl: String,
          genericTypeParams: [ParamModel],
@@ -166,7 +182,7 @@ final class MethodModel: Model {
          modelDescription: String?,
          processed: Bool) {
         self.name = name.trimmingCharacters(in: .whitespaces)
-        self.returnType = typeName.map { SwiftType($0.trimmingCharacters(in: .whitespaces)) }
+        self.returnType = returnType
         self.isAsync = isAsync
         self.throwing = throwing
         self.offset = offset

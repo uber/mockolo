@@ -14,20 +14,32 @@
 //  limitations under the License.
 //
 
-/// Renders models with templates for output
+@propertyWrapper
+indirect enum CoW<Value> {
+    case storage(Value)
 
-func renderTemplates(entities: [ResolvedEntity],
-                     arguments: GenerationArguments,
-                     completion: @escaping (String, Int64) -> ()) {
-    scan(entities) { (resolvedEntity, lock) in
-        let mockModel = resolvedEntity.model()
-        if let mockString = mockModel.render(
-            context: .init(),
-            arguments: arguments
-        ), !mockString.isEmpty {
-            lock?.lock()
-            completion(mockString, mockModel.offset)
-            lock?.unlock()
+    init(_ value: Value) {
+        self = .storage(value)
+    }
+
+    init(wrappedValue: Value) {
+        self = .storage(wrappedValue)
+    }
+
+    var wrappedValue: Value {
+        get {
+            switch self {
+            case .storage(let v): return v
+            }
         }
+        set {
+            self = .storage(newValue)
+        }
+    }
+}
+
+extension CoW: Equatable where Value: Equatable {
+    static func == (lhs: CoW<Value>, rhs: CoW<Value>) -> Bool {
+        return lhs.wrappedValue == rhs.wrappedValue
     }
 }

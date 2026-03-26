@@ -14,20 +14,7 @@
 //  limitations under the License.
 //
 
-/// Renders models with templates for output
-
-func renderTemplates(entities: [ResolvedEntity],
-                     arguments: GenerationArguments,
-                     completion: @escaping (String, Int64) -> ()) {
-    scan(entities) { (resolvedEntity, lock) in
-        let mockModel = resolvedEntity.model()
-        if let mockString = mockModel.render(
-            context: .init(),
-            arguments: arguments
-        ), !mockString.isEmpty {
-            lock?.lock()
-            completion(mockString, mockModel.offset)
-            lock?.unlock()
-        }
-    }
+enum SomeOrAny: String, Equatable {
+    case some
+    case any
 }

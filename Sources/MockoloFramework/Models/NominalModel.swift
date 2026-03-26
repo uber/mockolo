@@ -34,7 +34,7 @@ final class NominalModel: Model {
         return .nominal
     }
     
-    init(name: String,
+    init(selfType: SwiftType.Nominal,
          namespaces: [String],
          acl: String,
          declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
@@ -47,8 +47,8 @@ final class NominalModel: Model {
          declaredInits: [MethodModel],
          entities: [(String, Model)],
          requiresSendable: Bool) {
-        self.name = name
-        self.type = SwiftType(self.name)
+        self.name = selfType.name
+        self.type = SwiftType(kind: .nominal(selfType))
         self.namespaces = namespaces
         self.declKindOfMockAnnotatedBaseType = declKindOfMockAnnotatedBaseType
         self.declKind = declKind
