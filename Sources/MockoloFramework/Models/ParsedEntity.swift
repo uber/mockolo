@@ -65,7 +65,6 @@ struct ResolvedEntity {
 
     func model() -> Model {
         let metadata = entity.metadata
-        // Combine protocol-level attributes with member-level attributes
         let protocolLevelAttributes =
             entity.entityNode.attributesDescription.isEmpty
             ? [] : [entity.entityNode.attributesDescription]
