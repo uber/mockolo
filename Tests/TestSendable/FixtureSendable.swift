@@ -210,28 +210,31 @@
 }
 
 @Fixture enum availableSendableProtocol {
+    @available(macOS 99.0, *)
+    struct Bar {}
+
     /// @mockable
-    @available(iOS 18.0, *)
-    public protocol Foo: Sendable {
-        func bar() -> String
+    @available(macOS 99.0, *)
+    protocol Foo: Sendable {
+        func bar() -> Bar
     }
 
     @Fixture(includesConcurrencyHelpers: true)
     enum expected {
-        @available(iOS 18.0, *)
-        public final class FooMock: Foo, @unchecked Sendable {
-            public init() { }
+        @available(macOS 99.0, *)
+        final class FooMock: Foo, @unchecked Sendable {
+            init() { }
 
 
-            private let barState = MockoloMutex(MockoloHandlerState<Never, @Sendable () -> String>())
-            public var barCallCount: Int {
+            private let barState = MockoloMutex(MockoloHandlerState<Never, @Sendable () -> Bar>())
+            var barCallCount: Int {
                 return barState.withLock(\.callCount)
             }
-            public var barHandler: (@Sendable () -> String)? {
+            var barHandler: (@Sendable () -> Bar)? {
                 get { barState.withLock(\.handler) }
                 set { barState.withLock { $0.handler = newValue } }
             }
-            public func bar() -> String {
+            func bar() -> Bar {
                 let barHandler = barState.withLock { state in
                     state.callCount += 1
                     return state.handler
@@ -239,7 +242,7 @@
                 if let barHandler = barHandler {
                     return barHandler()
                 }
-                return ""
+                fatalError("barHandler returns can't have a default value thus its handler must be set")
             }
         }
     }
