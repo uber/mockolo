@@ -786,10 +786,14 @@ final class EntityVisitor: SyntaxVisitor {
             return .visitChildren
         }
 
-        // Parse conditional import block recursively
-        let block = parseIfConfigDecl(node)
-        imports.append(.conditional(block))
-        return .skipChildren
+        if containsOnlyImports(node) {
+            // Parse conditional import block recursively
+            let block = parseIfConfigDecl(node)
+            imports.append(.conditional(block))
+            return .skipChildren
+        } else {
+            return .visitChildren
+        }
     }
 
     /// Recursively parses an IfConfigDeclSyntax into a ConditionalImportBlock
@@ -824,6 +828,28 @@ final class EntityVisitor: SyntaxVisitor {
         }
 
         return ConditionalImportBlock(clauses: clauseList, offset: node.offset)
+    }
+
+    /// Returns `true` when every element inside the `#if` block is either
+    /// an `import` statement or a nested `#if` that itself contains only imports.
+    private func containsOnlyImports(_ node: IfConfigDeclSyntax) -> Bool {
+        for clause in node.clauses {
+            guard let list = clause.elements?.as(CodeBlockItemListSyntax.self) else {
+                continue
+            }
+            for element in list {
+                if element.item.is(ImportDeclSyntax.self) {
+                    continue
+                } else if let nested = element.item.as(IfConfigDeclSyntax.self) {
+                    if !containsOnlyImports(nested) {
+                        return false
+                    }
+                } else {
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
