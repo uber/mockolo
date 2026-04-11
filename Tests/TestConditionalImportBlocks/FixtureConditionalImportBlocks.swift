@@ -11,9 +11,10 @@ enum FixtureConditionalImportBlocks {
         #endif
         """
 
-    /// Expected mock for protocol inside #if block
+    /// Expected mock for protocol inside #if block — mock is wrapped in the same #if
     static let protocolInIfBlockMock =
         """
+        #if os(iOS)
         public class PlatformProtocolMock: PlatformProtocol {
             public init() { }
 
@@ -27,6 +28,7 @@ enum FixtureConditionalImportBlocks {
                 }
             }
         }
+        #endif
         """
 
     /// Protocol inside a #if block containing only imports (should be treated as conditional import)
@@ -81,18 +83,36 @@ enum FixtureConditionalImportBlocks {
         #endif
         """
 
-    /// Expected mocks for both iOS and macOS protocols
+    /// Expected mocks for both protocols, preserving #if/#elseif structure
     static let nestedIfBlocksMock =
         """
         #if os(iOS)
-        /// @mockable
-        public protocol iOSProtocol {
-            func iosMethod()
+        public class iOSProtocolMock: iOSProtocol {
+            public init() { }
+
+
+            public private(set) var iosMethodCallCount = 0
+            public var iosMethodHandler: (() -> ())?
+            public func iosMethod() {
+                iosMethodCallCount += 1
+                if let iosMethodHandler = iosMethodHandler {
+                    iosMethodHandler()
+                }
+            }
         }
         #elseif os(macOS)
-        /// @mockable
-        public protocol macOSProtocol {
-            func macosMethod()
+        public class macOSProtocolMock: macOSProtocol {
+            public init() { }
+
+
+            public private(set) var macosMethodCallCount = 0
+            public var macosMethodHandler: (() -> ())?
+            public func macosMethod() {
+                macosMethodCallCount += 1
+                if let macosMethodHandler = macosMethodHandler {
+                    macosMethodHandler()
+                }
+            }
         }
         #endif
         """
@@ -109,9 +129,15 @@ enum FixtureConditionalImportBlocks {
         #endif
         """
 
-    /// Protocol should be discovered and mocked
+    /// Import is captured as conditional import, mock is wrapped in #if
     static let ifBlockWithImportsAndProtocolMock =
         """
+        #if DEBUG
+        import XCTest
+        #endif
+
+
+        #if DEBUG
         public class DebugProtocolMock: DebugProtocol {
             public init() { }
 
@@ -125,6 +151,7 @@ enum FixtureConditionalImportBlocks {
                 }
             }
         }
+        #endif
         """
 
     /// Nested #if blocks where inner only contains imports
@@ -141,9 +168,17 @@ enum FixtureConditionalImportBlocks {
         #endif
         """
 
-    /// Protocol should be discovered in mixed nested scenario
+    /// Nested import block preserved, mock wrapped in outer #if
     static let mixedNestedBlocksMock =
         """
+        #if os(iOS)
+        #if DEBUG
+        import XCTest
+        #endif
+        #endif
+
+
+        #if os(iOS)
         public class MixedProtocolMock: MixedProtocol {
             public init() { }
 
@@ -157,5 +192,6 @@ enum FixtureConditionalImportBlocks {
                 }
             }
         }
+        #endif
         """
 }
