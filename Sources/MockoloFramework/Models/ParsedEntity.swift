@@ -152,20 +152,12 @@ struct GenerationArguments {
 
 typealias ImportMap = [String: [ImportContent]]
 
-/// Tracks which #if clause an entity was found in at file scope
-struct IfConfigContext {
-    let blockOffset: Int64
-    let clauseType: IfClauseType
-    let clauseIndex: Int
-}
-
 /// Metadata for a type being mocked
 public final class Entity {
     let entityNode: EntityNode
     let filepath: String
     let metadata: AnnotationMetadata?
     let isProcessed: Bool
-    var ifConfigContext: IfConfigContext?
 
     var isAnnotated: Bool {
         return metadata != nil

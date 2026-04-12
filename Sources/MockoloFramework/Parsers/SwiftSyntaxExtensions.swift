@@ -735,7 +735,9 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ProtocolDeclSyntax) -> SyntaxVisitorContinueKind {
-        processProtocol(node, ifConfigContext: nil)
+        if let ent = makeProtocolEntity(node) {
+            entities.append(ent)
+        }
         return .skipChildren
     }
 
@@ -748,7 +750,9 @@ final class EntityVisitor: SyntaxVisitor {
     }
 
     override func visit(_ node: ClassDeclSyntax) -> SyntaxVisitorContinueKind {
-        processClass(node, ifConfigContext: nil)
+        if let ent = makeClassEntity(node) {
+            entities.append(ent)
+        }
         return node.genericParameterClause != nil ? .skipChildren : .visitChildren
     }
 
@@ -770,26 +774,24 @@ final class EntityVisitor: SyntaxVisitor {
             return .visitChildren
         }
 
-        let importClauses = processTopLevelIfConfig(node)
-        let hasImportContent = importClauses.contains { !$0.contents.isEmpty }
-        if hasImportContent {
-            imports.append(.conditional(ConditionalImportBlock(clauses: importClauses, offset: node.offset)))
+        let clauses = processTopLevelIfConfig(node)
+        let hasContent = clauses.contains { !$0.imports.isEmpty || !$0.entities.isEmpty }
+        if hasContent {
+            imports.append(.conditional(ConditionalBlock(clauses: clauses, offset: node.offset)))
         }
         return .skipChildren
     }
 
-    /// Processes a top-level #if block, collecting imports as conditional blocks
-    /// and tagging discovered entities with their #if context.
-    /// Returns the import clauses for this block (used for nesting).
-    @discardableResult
-    private func processTopLevelIfConfig(_ node: IfConfigDeclSyntax) -> [ConditionalImportBlock.Clause] {
-        var importClauses = [ConditionalImportBlock.Clause]()
+    /// Processes a top-level #if block, collecting imports and entities into clauses.
+    /// Entities are also added to `self.entities` so they appear in the protocol map.
+    private func processTopLevelIfConfig(_ node: IfConfigDeclSyntax) -> [ConditionalBlock.Clause] {
+        var result = [ConditionalBlock.Clause]()
 
-        for (clauseIndex, cl) in node.clauses.enumerated() {
+        for cl in node.clauses {
             guard let clauseType = IfClauseType(cl) else { continue }
-            let context = IfConfigContext(blockOffset: node.offset, clauseType: clauseType, clauseIndex: clauseIndex)
 
             var clauseImports = [ImportContent]()
+            var clauseEntities = [Entity]()
 
             if let list = cl.elements?.as(CodeBlockItemListSyntax.self) {
                 for el in list {
@@ -798,50 +800,45 @@ final class EntityVisitor: SyntaxVisitor {
                             clauseImports.append(.simple(imp))
                         }
                     } else if let protocolDecl = el.item.as(ProtocolDeclSyntax.self) {
-                        processProtocol(protocolDecl, ifConfigContext: context)
+                        if let ent = makeProtocolEntity(protocolDecl) {
+                            clauseEntities.append(ent)
+                        }
                     } else if let classDecl = el.item.as(ClassDeclSyntax.self) {
-                        processClass(classDecl, ifConfigContext: context)
+                        if let ent = makeClassEntity(classDecl) {
+                            clauseEntities.append(ent)
+                        }
                     } else if let nestedIfConfig = el.item.as(IfConfigDeclSyntax.self) {
-                        // Recurse: collect nested imports and discover nested entities
                         let nestedClauses = processTopLevelIfConfig(nestedIfConfig)
-                        let hasNestedImports = nestedClauses.contains { !$0.contents.isEmpty }
-                        if hasNestedImports {
-                            let nestedBlock = ConditionalImportBlock(clauses: nestedClauses, offset: nestedIfConfig.offset)
-                            clauseImports.append(.conditional(nestedBlock))
+                        let hasContent = nestedClauses.contains { !$0.imports.isEmpty || !$0.entities.isEmpty }
+                        if hasContent {
+                            clauseImports.append(.conditional(ConditionalBlock(clauses: nestedClauses, offset: nestedIfConfig.offset)))
                         }
                     }
                 }
             }
 
-            importClauses.append(ConditionalImportBlock.Clause(type: clauseType, contents: clauseImports))
+            // Also register clause entities in the flat list for the protocol map
+            entities.append(contentsOf: clauseEntities)
+
+            result.append(ConditionalBlock.Clause(type: clauseType, imports: clauseImports, entities: clauseEntities))
         }
 
-        return importClauses
+        return result
     }
 
-    private func processProtocol(_ node: ProtocolDeclSyntax, ifConfigContext: IfConfigContext?) {
+    private func makeProtocolEntity(_ node: ProtocolDeclSyntax) -> Entity? {
         let metadata = node.annotationMetadata(with: annotation)
-        if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false) {
-            ent.ifConfigContext = ifConfigContext
-            entities.append(ent)
-        }
+        return Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: metadata, processed: false)
     }
 
-    private func processClass(_ node: ClassDeclSyntax, ifConfigContext: IfConfigContext?) {
+    private func makeClassEntity(_ node: ClassDeclSyntax) -> Entity? {
         if scanAsMockfile || node.nameText.hasSuffix("Mock") {
-            if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true) {
-                ent.ifConfigContext = ifConfigContext
-                entities.append(ent)
-            }
-        } else {
-            if declType == .classType || declType == .all {
-                let metadata = node.annotationMetadata(with: annotation)
-                if let ent = Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: node.isFinal, metadata: metadata, processed: false) {
-                    ent.ifConfigContext = ifConfigContext
-                    entities.append(ent)
-                }
-            }
+            return Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: false, metadata: nil, processed: true)
+        } else if declType == .classType || declType == .all {
+            let metadata = node.annotationMetadata(with: annotation)
+            return Entity.node(with: node, filepath: path, isPrivate: node.isPrivate, isFinal: node.isFinal, metadata: metadata, processed: false)
         }
+        return nil
     }
 
     override func visit(_ node: InitializerDeclSyntax) -> SyntaxVisitorContinueKind {
