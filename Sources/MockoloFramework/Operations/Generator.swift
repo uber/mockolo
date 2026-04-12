@@ -148,8 +148,30 @@ public func generate(sourceDirs: [String],
     
     signpost_begin(name: "Render models")
     log("Render models with templates...", level: .info)
+
+    // Extract conditional blocks that contain entities from relevant source files
+    var conditionalEntityBlocks = [ConditionalBlock]()
+    func collectEntityBlocks(from contents: [ImportContent]) {
+        for content in contents {
+            if case .conditional(let block) = content {
+                if block.containsEntities {
+                    conditionalEntityBlocks.append(block)
+                }
+                for clause in block.clauses {
+                    collectEntityBlocks(from: clause.imports)
+                }
+            }
+        }
+    }
+    for (path, parsedImports) in pathToImportsMap {
+        guard relevantPaths.contains(path) else { continue }
+        collectEntityBlocks(from: parsedImports)
+    }
+    conditionalEntityBlocks.sort(by: { $0.offset < $1.offset })
+
     renderTemplates(
         entities: resolvedEntities,
+        conditionalBlocks: conditionalEntityBlocks,
         arguments: .init(
             useTemplateFunc: useTemplateFunc,
             allowSetCallCount: allowSetCallCount,
