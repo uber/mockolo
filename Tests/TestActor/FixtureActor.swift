@@ -100,8 +100,6 @@
             init() { }
         }
 
-        @MainActor
-        /// @mockable
         @available(iOS 18.0, *)
         class P1Mock: P1 {
             init() { }

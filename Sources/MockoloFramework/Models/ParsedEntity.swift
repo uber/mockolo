@@ -65,10 +65,7 @@ struct ResolvedEntity {
 
     func model() -> Model {
         let metadata = entity.metadata
-        let protocolLevelAttributes =
-            entity.entityNode.attributesDescription.isEmpty
-            ? [] : [entity.entityNode.attributesDescription]
-        let combinedAttributes = protocolLevelAttributes + attributes
+        let combinedAttributes = entity.entityNode.attributeDescriptions + attributes
         return NominalModel(selfType: .init(name: metadata?.nameOverride ?? (key + "Mock")),
                             namespaces: entity.entityNode.namespaces,
                             acl: entity.entityNode.accessLevel,
@@ -95,7 +92,7 @@ protocol EntityNode {
     var nameText: String { get }
     var mayHaveGlobalActor: Bool { get }
     var accessLevel: String { get }
-    var attributesDescription: String { get }
+    var attributeDescriptions: [String] { get }
     var declKind: NominalTypeDeclKind { get }
     var inheritedTypes: [String] { get }
     var genericWhereConstraints: [String] { get }

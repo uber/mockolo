@@ -303,8 +303,8 @@ extension ProtocolDeclSyntax: EntityNode {
         return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
-    var attributesDescription: String {
-        self.attributes.trimmedDescription
+    var attributeDescriptions: [String] {
+        return attributes.descriptions
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
@@ -354,8 +354,8 @@ extension ClassDeclSyntax: EntityNode {
         return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
-    var attributesDescription: String {
-        self.attributes.trimmedDescription
+    var attributeDescriptions: [String] {
+        return attributes.descriptions
     }
 
     var isFinal: Bool {
@@ -412,6 +412,15 @@ fileprivate func findNamespaces(parent: Syntax?) -> [String] {
 }
 
 extension AttributeListSyntax {
+    fileprivate var descriptions: [String] {
+        return compactMap { element in
+            guard case .attribute(let attribute) = element else {
+                return nil
+            }
+            return attribute.trimmedDescription
+        }
+    }
+
     fileprivate var mayHaveGlobalActor: Bool {
         let wellKnownGlobalActor: Set<String> = [.mainActor]
         return self.contains { element in
