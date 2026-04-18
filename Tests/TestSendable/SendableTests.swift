@@ -26,5 +26,10 @@ class SendableTests: MockoloTestCase {
         verify(srcContent: availableSendableProtocol._source,
                dstContent: availableSendableProtocol.expected._source)
     }
+
+    func testAvailableInheritedProtocol() {
+        verify(srcContent: availableInheritedProtocol._source,
+               dstContent: availableInheritedProtocol.expected._source)
+    }
 }
 #endif

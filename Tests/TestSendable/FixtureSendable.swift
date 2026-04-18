@@ -247,4 +247,37 @@
         }
     }
 }
+
+@Fixture enum availableInheritedProtocol {
+    @available(macOS 100.0, *)
+    struct Bar {}
+
+    @available(macOS 90.0, *)
+    protocol Foo {
+    }
+
+    /// @mockable
+    @available(macOS 100.0, *)
+    protocol Foo2: Foo {
+        var bar: Bar { get set }
+    }
+
+    @Fixture enum expected {
+        @available(macOS 100.0, *)
+        class Foo2Mock: Foo2 {
+            init() { }
+            init(bar: Bar) {
+                self._bar = bar
+            }
+
+
+            private(set) var barSetCallCount = 0
+            private var _bar: Bar! { didSet { barSetCallCount += 1 } }
+            var bar: Bar {
+                get { return _bar }
+                set { _bar = newValue }
+            }
+        }
+    }
+}
 #endif
