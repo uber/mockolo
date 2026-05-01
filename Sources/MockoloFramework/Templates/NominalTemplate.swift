@@ -272,8 +272,7 @@ extension NominalModel {
         renderedModelNames: Set<String>
     ) {
         let addAcl = declKindOfMockAnnotatedBaseType == .protocol ? acl : ""
-        let allWhereConstraints = genericWhereConstraints + models.flatMap { ($1 as? AssociatedTypeModel)?.whereConstraints ?? [] }
-        let hasWhereConstraints = !allWhereConstraints.isEmpty
+        var allWhereConstraints = genericWhereConstraints + models.flatMap { ($1 as? AssociatedTypeModel)?.whereConstraints ?? [] }
 
         let aliasModels = [String: [TypealiasRenderableModel]](
             grouping: models.compactMap { $1 as? TypealiasRenderableModel },
@@ -281,34 +280,27 @@ extension NominalModel {
         ).sorted(path: \.key)
 
         // If there is a where, do not output typealias as it may not satisfy the conditions
-        if hasWhereConstraints {
+        if !allWhereConstraints.isEmpty {
             // Find associated type names directly bound to concrete types by same-type constraints
-            // (e.g. "Value == Int").
+            // (e.g. Value == Int).
             let allAssociatedTypeNames = Set(aliasModels.map(\.key))
-            let sameTypeBoundNames: Set<String> = Set(allWhereConstraints.compactMap { constraint -> String? in
-                guard let eqRange = constraint.range(of: " == ") else { return nil }
-                let lhs = String(constraint[constraint.startIndex..<eqRange.lowerBound]).trimmingCharacters(in: .whitespaces)
-                // Only match simple type names (no member-access), and only known associated types.
-                guard !lhs.contains("."), allAssociatedTypeNames.contains(lhs) else { return nil }
-                // Do not bind when the RHS references another associated type (e.g. Iterator == AnyIterator<Element>).
-                let rhs = String(constraint[eqRange.upperBound...]).trimmingCharacters(in: .whitespaces)
-                let rhsTokens = rhs.split(whereSeparator: { !$0.isLetter && !$0.isNumber && $0 != "_" })
-                guard !rhsTokens.contains(where: { allAssociatedTypeNames.contains(String($0)) }) else { return nil }
-                return lhs
-            })
+            var sameTypeBoundNames: Set<String> = []
 
-            // Remove constraints that are now fully resolved by same-type binding.
-            // A constraint is removed if its LHS is exactly one of the bound names (word-boundary
-            // safe: the character immediately after the name must not be an identifier character).
-            let filteredConstraints = allWhereConstraints.filter { constraint in
-                let trimmed = constraint.trimmingCharacters(in: .whitespaces)
-                return !sameTypeBoundNames.contains(where: { boundName in
-                    guard trimmed.hasPrefix(boundName) else { return false }
-                    let afterName = trimmed.dropFirst(boundName.count)
-                    // Exact match: constraint is just the bound name itself.
-                    guard let firstAfter = afterName.first else { return true }
-                    return !firstAfter.isLetter && !firstAfter.isNumber && firstAfter != "_"
-                })
+            let eqConstraintRegex = /(.+)==(.+)/
+            allWhereConstraints.removeAll { constraint in
+                if let match = constraint.firstMatch(of: eqConstraintRegex) {
+                    let lhs = match.output.1.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if allAssociatedTypeNames.contains(lhs) {
+                        sameTypeBoundNames.insert(lhs)
+                        return true
+                    }
+                    let rhs = match.output.2.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if allAssociatedTypeNames.contains(rhs) {
+                        sameTypeBoundNames.insert(rhs)
+                        return true
+                    }
+                }
+                return false
             }
 
             let aliasItems = aliasModels.compactMap { (name, candidates) -> String? in
@@ -332,7 +324,7 @@ extension NominalModel {
             return (
                 aliasItems: aliasItems,
                 typeparameters: typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
-                whereClauses: filteredConstraints.isEmpty ? "" : "where \(filteredConstraints.joined(separator: ", ")) ",
+                whereClauses: allWhereConstraints.isEmpty ? "" : "where \(allWhereConstraints.joined(separator: ", ")) ",
                 renderedModelNames: Set(aliasModels.map(\.key))
             )
         }

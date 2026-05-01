@@ -151,8 +151,15 @@ import MockoloFramework
     /// @mockable
     public protocol NarrowFoo: Foo where Value == Int {}
 
+    /// @mockable
+    public protocol NarrowFooSwapped: Foo where Int == Value {}
+
     @Fixture enum expected {
         public class NarrowFooMock: NarrowFoo {
+            public init() { }
+        }
+
+        public class NarrowFooSwappedMock: NarrowFooSwapped {
             public init() { }
         }
     }
