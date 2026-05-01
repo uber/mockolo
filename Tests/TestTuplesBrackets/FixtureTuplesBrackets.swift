@@ -78,24 +78,34 @@ class NonSimpleTypesMock: NonSimpleTypes {
         return nil
     }
 
-    private(set) var updateObservableDictionarySomeKeySomeTCallCount = 0
-    var updateObservableDictionarySomeKeySomeTHandler: (() -> Observable<[SomeKey: SomeType]>)?
+    private(set) var updateObservableSomeKeySomeTypeDictionCallCount = 0
+    var updateObservableSomeKeySomeTypeDictionHandler: (() -> Observable<[SomeKey: SomeType]>)?
     func update() -> Observable<[SomeKey: SomeType]> {
-        updateObservableDictionarySomeKeySomeTCallCount += 1
-        if let updateObservableDictionarySomeKeySomeTHandler = updateObservableDictionarySomeKeySomeTHandler {
-            return updateObservableDictionarySomeKeySomeTHandler()
+        updateObservableSomeKeySomeTypeDictionCallCount += 1
+        if let updateObservableSomeKeySomeTypeDictionHandler = updateObservableSomeKeySomeTypeDictionHandler {
+            return updateObservableSomeKeySomeTypeDictionHandler()
         }
         return Observable<[SomeKey: SomeType]>.empty()
     }
 
-    private(set) var updateDictionaryStringIntCallCount = 0
-    var updateDictionaryStringIntHandler: (() -> [String: Int])?
+    private(set) var updateStringIntDictionaryCallCount = 0
+    var updateStringIntDictionaryHandler: (() -> [String: Int])?
     func update() -> [String: Int] {
+        updateStringIntDictionaryCallCount += 1
+        if let updateStringIntDictionaryHandler = updateStringIntDictionaryHandler {
+            return updateStringIntDictionaryHandler()
+        }
+        return [String: Int]()
+    }
+
+    private(set) var updateDictionaryStringIntCallCount = 0
+    var updateDictionaryStringIntHandler: (() -> Dictionary<String, Int>)?
+    func update() -> Dictionary<String, Int> {
         updateDictionaryStringIntCallCount += 1
         if let updateDictionaryStringIntHandler = updateDictionaryStringIntHandler {
             return updateDictionaryStringIntHandler()
         }
-        return [String: Int]()
+        return Dictionary<String, Int>()
     }
 
     private(set) var updateObservableDoubleFloatCallCount = 0
@@ -108,64 +118,74 @@ class NonSimpleTypesMock: NonSimpleTypes {
         return Observable<Double, Float>.empty()
     }
 
-    private(set) var updateArrayStringCallCount = 0
-    var updateArrayStringHandler: (() -> [String])?
+    private(set) var updateStringArrayCallCount = 0
+    var updateStringArrayHandler: (() -> [String])?
     func update() -> [String] {
-        updateArrayStringCallCount += 1
-        if let updateArrayStringHandler = updateArrayStringHandler {
-            return updateArrayStringHandler()
+        updateStringArrayCallCount += 1
+        if let updateStringArrayHandler = updateStringArrayHandler {
+            return updateStringArrayHandler()
         }
         return [String]()
     }
 
-    private(set) var updateArrayArrayStringCallCount = 0
-    var updateArrayArrayStringHandler: (() -> [[String]])?
+    private(set) var updateStringArrayArrayCallCount = 0
+    var updateStringArrayArrayHandler: (() -> [[String]])?
     func update() -> [[String]] {
-        updateArrayArrayStringCallCount += 1
-        if let updateArrayArrayStringHandler = updateArrayArrayStringHandler {
-            return updateArrayArrayStringHandler()
+        updateStringArrayArrayCallCount += 1
+        if let updateStringArrayArrayHandler = updateStringArrayArrayHandler {
+            return updateStringArrayArrayHandler()
         }
         return [[String]]()
     }
 
-    private(set) var updateDictionaryStringArrayIntCallCount = 0
-    var updateDictionaryStringArrayIntHandler: (() -> [String: Array<Int>])?
+    private(set) var updateStringArrayIntDictionaryCallCount = 0
+    var updateStringArrayIntDictionaryHandler: (() -> [String: Array<Int>])?
     func update() -> [String: Array<Int>] {
-        updateDictionaryStringArrayIntCallCount += 1
-        if let updateDictionaryStringArrayIntHandler = updateDictionaryStringArrayIntHandler {
-            return updateDictionaryStringArrayIntHandler()
+        updateStringArrayIntDictionaryCallCount += 1
+        if let updateStringArrayIntDictionaryHandler = updateStringArrayIntDictionaryHandler {
+            return updateStringArrayIntDictionaryHandler()
         }
         return [String: Array<Int>]()
     }
 
-    private(set) var updateDictionaryStringDictionaryIntDouCallCount = 0
-    var updateDictionaryStringDictionaryIntDouHandler: (() -> [String: Dictionary<Int, Double>])?
+    private(set) var updateStringDictionaryIntDoubleDictionCallCount = 0
+    var updateStringDictionaryIntDoubleDictionHandler: (() -> [String: Dictionary<Int, Double>])?
     func update() -> [String: Dictionary<Int, Double>] {
-        updateDictionaryStringDictionaryIntDouCallCount += 1
-        if let updateDictionaryStringDictionaryIntDouHandler = updateDictionaryStringDictionaryIntDouHandler {
-            return updateDictionaryStringDictionaryIntDouHandler()
+        updateStringDictionaryIntDoubleDictionCallCount += 1
+        if let updateStringDictionaryIntDoubleDictionHandler = updateStringDictionaryIntDoubleDictionHandler {
+            return updateStringDictionaryIntDoubleDictionHandler()
         }
         return [String: Dictionary<Int, Double>]()
     }
 
-    private(set) var updateArrayArrayStringArrayIntArrayArrCallCount = 0
-    var updateArrayArrayStringArrayIntArrayArrHandler: (() -> ([[String]], [Int], Array<[String]>))?
+    private(set) var updateStringArrayArrayIntArrayArrayStrCallCount = 0
+    var updateStringArrayArrayIntArrayArrayStrHandler: (() -> ([[String]], [Int], Array<[String]>))?
     func update() -> ([[String]], [Int], Array<[String]>) {
-        updateArrayArrayStringArrayIntArrayArrCallCount += 1
-        if let updateArrayArrayStringArrayIntArrayArrHandler = updateArrayArrayStringArrayIntArrayArrHandler {
-            return updateArrayArrayStringArrayIntArrayArrHandler()
+        updateStringArrayArrayIntArrayArrayStrCallCount += 1
+        if let updateStringArrayArrayIntArrayArrayStrHandler = updateStringArrayArrayIntArrayArrayStrHandler {
+            return updateStringArrayArrayIntArrayArrayStrHandler()
         }
         return ([[String]](), [Int](), Array<[String]>())
     }
 
-    private(set) var updateArrayDictionaryStringIntCallCount = 0
-    var updateArrayDictionaryStringIntHandler: (() -> Array<[String: Int]>)?
+    private(set) var updateArrayStringIntDictionaryCallCount = 0
+    var updateArrayStringIntDictionaryHandler: (() -> Array<[String: Int]>)?
     func update() -> Array<[String: Int]> {
+        updateArrayStringIntDictionaryCallCount += 1
+        if let updateArrayStringIntDictionaryHandler = updateArrayStringIntDictionaryHandler {
+            return updateArrayStringIntDictionaryHandler()
+        }
+        return Array<[String: Int]>()
+    }
+
+    private(set) var updateArrayDictionaryStringIntCallCount = 0
+    var updateArrayDictionaryStringIntHandler: (() -> Array<Dictionary<String, Int>>)?
+    func update() -> Array<Dictionary<String, Int>> {
         updateArrayDictionaryStringIntCallCount += 1
         if let updateArrayDictionaryStringIntHandler = updateArrayDictionaryStringIntHandler {
             return updateArrayDictionaryStringIntHandler()
         }
-        return Array<[String: Int]>()
+        return Array<Dictionary<String, Int>>()
     }
 
     private(set) var updateArrayStringArrayIntCallCount = 0
@@ -176,6 +196,16 @@ class NonSimpleTypesMock: NonSimpleTypes {
             return updateArrayStringArrayIntHandler()
         }
         return (Array<String>(), Array<Int>())
+    }
+
+    private(set) var updateArrayStringCallCount = 0
+    var updateArrayStringHandler: (() -> Array<String>)?
+    func update() -> Array<String> {
+        updateArrayStringCallCount += 1
+        if let updateArrayStringHandler = updateArrayStringHandler {
+            return updateArrayStringHandler()
+        }
+        return Array<String>()
     }
 
     private(set) var updateResultDoubleOptionalStatusBoolCallCount = 0

@@ -148,9 +148,9 @@ struct SwiftType: Equatable, CustomStringConvertible {
         case .nominal(let nominal):
             switch nominal.name {
             case .arrayTypeSugarName where nominal.genericParameterTypes.count == 1:
-                return "Array" + nominal.genericParameterTypes[0].displayName
+                return nominal.genericParameterTypes[0].displayName + "Array"
             case .dictionaryTypeSugarName where nominal.genericParameterTypes.count == 2:
-                return "Dictionary" + nominal.genericParameterTypes[0].displayName + nominal.genericParameterTypes[1].displayName
+                return nominal.genericParameterTypes[0].displayName + nominal.genericParameterTypes[1].displayName + "Dictionary"
             case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
                 return nominal.genericParameterTypes[0].displayName + "Optional"
             default:
