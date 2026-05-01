@@ -282,7 +282,33 @@ extension NominalModel {
 
         // If there is a where, do not output typealias as it may not satisfy the conditions
         if hasWhereConstraints {
-            let aliasItems = aliasModels.compactMap { (name, candidates) in
+            // Find associated type names directly bound to concrete types by same-type constraints
+            // (e.g. "Value == Int"). Such types must not appear as generic type parameters, since
+            // doing so produces "same-type requirement makes generic parameter non-generic", which
+            // is an error in Swift 6 language mode.
+            let allAssociatedTypeNames = Set(aliasModels.map(\.key))
+            let sameTypeBoundNames: Set<String> = Set(allWhereConstraints.compactMap { constraint -> String? in
+                guard let eqRange = constraint.range(of: " == ") else { return nil }
+                let lhs = String(constraint[constraint.startIndex..<eqRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+                // Only match simple type names (no member-access), and only known associated types.
+                guard !lhs.contains("."), allAssociatedTypeNames.contains(lhs) else { return nil }
+                // Do not bind when the RHS references another associated type (e.g. Iterator == AnyIterator<Element>).
+                let rhs = String(constraint[eqRange.upperBound...]).trimmingCharacters(in: .whitespaces)
+                let rhsTokens = rhs.split(whereSeparator: { !$0.isLetter && !$0.isNumber && $0 != "_" })
+                guard !rhsTokens.contains(where: { allAssociatedTypeNames.contains(String($0)) }) else { return nil }
+                return lhs
+            })
+
+            // Remove constraints that are now fully resolved by same-type binding.
+            let filteredConstraints = allWhereConstraints.filter { constraint in
+                let trimmed = constraint.trimmingCharacters(in: .whitespaces)
+                return !sameTypeBoundNames.contains(where: { boundName in
+                    trimmed.hasPrefix(boundName + " ") || trimmed.hasPrefix(boundName + ":")
+                })
+            }
+
+            let aliasItems = aliasModels.compactMap { (name, candidates) -> String? in
+                if sameTypeBoundNames.contains(name) { return nil }
                 if let defaultType = candidates.firstNonNil(\.defaultType) {
                     return """
                     \(1.tab)// Unavailable due to the presence of generic constraints
@@ -292,8 +318,9 @@ extension NominalModel {
                 }
                 return nil
             }.joined(separator: "\n")
-            let typeparameters = aliasModels.map { (name, candidates) in
-                mergeAssociatedTypes(
+            let typeparameters = aliasModels.compactMap { (name, candidates) -> String? in
+                if sameTypeBoundNames.contains(name) { return nil }
+                return mergeAssociatedTypes(
                     name: name,
                     models: candidates.compactMap { $0 as? AssociatedTypeModel }
                 )
@@ -301,7 +328,7 @@ extension NominalModel {
             return (
                 aliasItems: aliasItems,
                 typeparameters: typeparameters.isEmpty ? "" : "<\(typeparameters.joined(separator: ", "))>",
-                whereClauses: allWhereConstraints.isEmpty ? "" : "where \(allWhereConstraints.joined(separator: ", ")) ",
+                whereClauses: filteredConstraints.isEmpty ? "" : "where \(filteredConstraints.joined(separator: ", ")) ",
                 renderedModelNames: Set(aliasModels.map(\.key))
             )
         }

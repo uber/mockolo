@@ -142,6 +142,38 @@ import MockoloFramework
         }
     }
 }
+
+@Fixture enum patWithSameTypeConstraint {
+    public protocol Foo {
+        associatedtype Value
+    }
+
+    /// @mockable
+    public protocol NarrowFoo: Foo where Value == Int {}
+
+    @Fixture enum expected {
+        public class NarrowFooMock: NarrowFoo {
+            public init() { }
+        }
+    }
+}
+
+@Fixture enum patWithMixedConstraints {
+    public protocol Foo {
+        associatedtype T
+        associatedtype U
+    }
+
+    /// @mockable
+    public protocol Bar: Foo where T == Int, U: Equatable {}
+
+    @Fixture enum expected {
+        public class BarMock<U>: Bar where U: Equatable {
+            public init() { }
+        }
+    }
+}
+
 #if compiler(>=6.0)
 @Fixture enum patWithParentCondition {
     /// @mockable
