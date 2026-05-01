@@ -137,27 +137,34 @@ struct SwiftType: Equatable, CustomStringConvertible {
 
     /// variable safe name
     var displayName: String {
-        if case .nominal(let nominal) = kind,
-           nominal.name == .arrayTypeSugarName,
-           nominal.genericParameterTypes.count == 1 {
-            let inner = nominal.genericParameterTypes[0]
-            if case .nominal(let innerNominal) = inner.kind,
-               innerNominal.name == .arrayTypeSugarName {
-                // For nested array types (e.g. [[String]]), generate "Array" × nesting depth
-                // to distinguish them from single-level arrays (e.g. [String] → "String")
-                return "Array" + inner.nestedArrayDisplayName
+        switch kind {
+        case .tuple(let tuple):
+            return tuple.elements.map { element in
+                if let label = element.label {
+                    return label.capitalizeFirstLetter + element.type.displayName
+                }
+                return element.type.displayName
+            }.joined()
+        case .nominal(let nominal):
+            switch nominal.name {
+            case .arrayTypeSugarName where nominal.genericParameterTypes.count == 1:
+                return "Array" + nominal.genericParameterTypes[0].displayName
+            case .dictionaryTypeSugarName where nominal.genericParameterTypes.count == 2:
+                return "Dictionary" + nominal.genericParameterTypes[0].displayName + nominal.genericParameterTypes[1].displayName
+            case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
+                return nominal.genericParameterTypes[0].displayName + "Optional"
+            default:
+                var result = nominal.namespace.map(\.displayName) ?? ""
+                result += nominal.name.capitalizeFirstLetter
+                result += nominal.genericParameterTypes.map(\.displayName).joined()
+                return result
             }
+        case .closure(let closure):
+            return closure.arguments.map(\.type.displayName).joined()
+                + closure.returning.displayName
+        case .composition(let composition):
+            return composition.elements.map(\.displayName).joined()
         }
-        return typeName.displayableComponents.map(\.capitalizeFirstLetter).joined()
-    }
-
-    private var nestedArrayDisplayName: String {
-        if case .nominal(let nominal) = kind,
-           nominal.name == .arrayTypeSugarName,
-           nominal.genericParameterTypes.count == 1 {
-            return "Array" + nominal.genericParameterTypes[0].nestedArrayDisplayName
-        }
-        return ""
     }
 
     func includingIdentifiers() -> [String] {
