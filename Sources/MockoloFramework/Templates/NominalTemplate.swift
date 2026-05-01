@@ -283,9 +283,7 @@ extension NominalModel {
         // If there is a where, do not output typealias as it may not satisfy the conditions
         if hasWhereConstraints {
             // Find associated type names directly bound to concrete types by same-type constraints
-            // (e.g. "Value == Int"). Such types must not appear as generic type parameters, since
-            // doing so produces "same-type requirement makes generic parameter non-generic", which
-            // is an error in Swift 6 language mode.
+            // (e.g. "Value == Int").
             let allAssociatedTypeNames = Set(aliasModels.map(\.key))
             let sameTypeBoundNames: Set<String> = Set(allWhereConstraints.compactMap { constraint -> String? in
                 guard let eqRange = constraint.range(of: " == ") else { return nil }
