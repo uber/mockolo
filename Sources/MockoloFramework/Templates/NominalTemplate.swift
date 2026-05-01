@@ -300,10 +300,15 @@ extension NominalModel {
             })
 
             // Remove constraints that are now fully resolved by same-type binding.
+            // A constraint is removed if its LHS is exactly one of the bound names (word-boundary
+            // safe: the character immediately after the name must not be an identifier character).
             let filteredConstraints = allWhereConstraints.filter { constraint in
                 let trimmed = constraint.trimmingCharacters(in: .whitespaces)
                 return !sameTypeBoundNames.contains(where: { boundName in
-                    trimmed.hasPrefix(boundName + " ") || trimmed.hasPrefix(boundName + ":")
+                    guard trimmed.hasPrefix(boundName) else { return false }
+                    let afterName = trimmed.dropFirst(boundName.count)
+                    guard let firstAfter = afterName.first else { return false }
+                    return !firstAfter.isLetter && !firstAfter.isNumber && firstAfter != "_"
                 })
             }
 
