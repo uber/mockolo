@@ -307,7 +307,8 @@ extension NominalModel {
                 return !sameTypeBoundNames.contains(where: { boundName in
                     guard trimmed.hasPrefix(boundName) else { return false }
                     let afterName = trimmed.dropFirst(boundName.count)
-                    guard let firstAfter = afterName.first else { return false }
+                    // Exact match: constraint is just the bound name itself.
+                    guard let firstAfter = afterName.first else { return true }
                     return !firstAfter.isLetter && !firstAfter.isNumber && firstAfter != "_"
                 })
             }
