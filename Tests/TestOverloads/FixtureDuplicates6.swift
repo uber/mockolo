@@ -20,12 +20,12 @@
                 return [String]()
             }
 
-            private(set) var fooStringArrayArrayCallCount = 0
-            var fooStringArrayArrayHandler: (() -> [[String]])?
+            private(set) var fooArrayArrayStringCallCount = 0
+            var fooArrayArrayStringHandler: (() -> [[String]])?
             func foo() -> [[String]] {
-                fooStringArrayArrayCallCount += 1
-                if let fooStringArrayArrayHandler = fooStringArrayArrayHandler {
-                    return fooStringArrayArrayHandler()
+                fooArrayArrayStringCallCount += 1
+                if let fooArrayArrayStringHandler = fooArrayArrayStringHandler {
+                    return fooArrayArrayStringHandler()
                 }
                 return [[String]]()
             }

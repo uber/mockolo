@@ -146,19 +146,21 @@ struct SwiftType: Equatable, CustomStringConvertible {
                 return element.type.displayName
             }.joined()
         case .nominal(let nominal):
+            let name: String
             switch nominal.name {
-            case .arrayTypeSugarName where nominal.genericParameterTypes.count == 1:
-                return nominal.genericParameterTypes[0].displayName + "Array"
-            case .dictionaryTypeSugarName where nominal.genericParameterTypes.count == 2:
-                return nominal.genericParameterTypes[0].displayName + nominal.genericParameterTypes[1].displayName + "Dictionary"
-            case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
-                return nominal.genericParameterTypes[0].displayName + "Optional"
+            case .arrayTypeSugarName: 
+                name = "Array"
+            case .dictionaryTypeSugarName:
+                name = "Dictionary"
+            case .optionalTypeSugarName:
+                name = "Optional"
             default:
-                var result = nominal.namespace.map(\.displayName) ?? ""
-                result += nominal.name.capitalizeFirstLetter
-                result += nominal.genericParameterTypes.map(\.displayName).joined()
-                return result
+                name = nominal.name.capitalizeFirstLetter
             }
+            var result = nominal.namespace.map(\.displayName) ?? ""
+            result += name
+            result += nominal.genericParameterTypes.map(\.displayName).joined()
+            return result
         case .closure(let closure):
             return closure.arguments.map(\.type.displayName).joined()
                 + closure.returning.displayName
