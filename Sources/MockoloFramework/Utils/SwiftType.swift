@@ -137,7 +137,27 @@ struct SwiftType: Equatable, CustomStringConvertible {
 
     /// variable safe name
     var displayName: String {
+        if case .nominal(let nominal) = kind,
+           nominal.name == .arrayTypeSugarName,
+           nominal.genericParameterTypes.count == 1 {
+            let inner = nominal.genericParameterTypes[0]
+            if case .nominal(let innerNominal) = inner.kind,
+               innerNominal.name == .arrayTypeSugarName {
+                // For nested array types (e.g. [[String]]), generate "Array" × nesting depth
+                // to distinguish them from single-level arrays (e.g. [String] → "String")
+                return "Array" + inner.nestedArrayDisplayName
+            }
+        }
         return typeName.displayableComponents.map(\.capitalizeFirstLetter).joined()
+    }
+
+    private var nestedArrayDisplayName: String {
+        if case .nominal(let nominal) = kind,
+           nominal.name == .arrayTypeSugarName,
+           nominal.genericParameterTypes.count == 1 {
+            return "Array" + nominal.genericParameterTypes[0].nestedArrayDisplayName
+        }
+        return ""
     }
 
     func includingIdentifiers() -> [String] {

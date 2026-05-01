@@ -128,6 +128,16 @@ class NonSimpleTypesMock: NonSimpleTypes {
         return [String]()
     }
 
+    private(set) var updateArrayArrayCallCount = 0
+    var updateArrayArrayHandler: (() -> [[String]])?
+    func update() -> [[String]] {
+        updateArrayArrayCallCount += 1
+        if let updateArrayArrayHandler = updateArrayArrayHandler {
+            return updateArrayArrayHandler()
+        }
+        return [[String]]()
+    }
+
     private(set) var updateStringArrayIntCallCount = 0
     var updateStringArrayIntHandler: (() -> [String: Array<Int>])?
     func update() -> [String: Array<Int>] {
