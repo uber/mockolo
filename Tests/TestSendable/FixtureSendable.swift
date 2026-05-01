@@ -208,4 +208,76 @@
         }
     }
 }
+
+@Fixture enum availableSendableProtocol {
+    @available(macOS 99.0, *)
+    struct Bar {}
+
+    /// @mockable
+    @available(macOS 99.0, *)
+    protocol Foo: Sendable {
+        func bar() -> Bar
+    }
+
+    @Fixture(includesConcurrencyHelpers: true)
+    enum expected {
+        @available(macOS 99.0, *)
+        final class FooMock: Foo, @unchecked Sendable {
+            init() { }
+
+
+            private let barState = MockoloMutex(MockoloHandlerState<Never, @Sendable () -> Bar>())
+            var barCallCount: Int {
+                return barState.withLock(\.callCount)
+            }
+            var barHandler: (@Sendable () -> Bar)? {
+                get { barState.withLock(\.handler) }
+                set { barState.withLock { $0.handler = newValue } }
+            }
+            func bar() -> Bar {
+                let barHandler = barState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
+                if let barHandler = barHandler {
+                    return barHandler()
+                }
+                fatalError("barHandler returns can't have a default value thus its handler must be set")
+            }
+        }
+    }
+}
+
+@Fixture enum availableInheritedProtocol {
+    @available(macOS 100.0, *)
+    struct Bar {}
+
+    @available(macOS 90.0, *)
+    protocol Foo {
+    }
+
+    /// @mockable
+    @available(macOS 100.0, *)
+    protocol Foo2: Foo {
+        var bar: Bar { get set }
+    }
+
+    @Fixture enum expected {
+        @available(macOS 100.0, *)
+        class Foo2Mock: Foo2 {
+            init() { }
+            init(bar: Bar) {
+                self._bar = bar
+            }
+
+
+            private(set) var barSetCallCount = 0
+            private var _bar: Bar! { didSet { barSetCallCount += 1 } }
+            var bar: Bar {
+                get { return _bar }
+                set { _bar = newValue }
+            }
+        }
+    }
+}
 #endif
