@@ -137,7 +137,36 @@ struct SwiftType: Equatable, CustomStringConvertible {
 
     /// variable safe name
     var displayName: String {
-        return typeName.displayableComponents.map(\.capitalizeFirstLetter).joined()
+        switch kind {
+        case .tuple(let tuple):
+            return tuple.elements.map { element in
+                if let label = element.label {
+                    return label.capitalizeFirstLetter + element.type.displayName
+                }
+                return element.type.displayName
+            }.joined()
+        case .nominal(let nominal):
+            let name: String
+            switch nominal.name {
+            case .arrayTypeSugarName: 
+                name = "Array"
+            case .dictionaryTypeSugarName:
+                name = "Dictionary"
+            case .optionalTypeSugarName:
+                name = "Optional"
+            default:
+                name = nominal.name.capitalizeFirstLetter
+            }
+            var result = nominal.namespace.map(\.displayName) ?? ""
+            result += name
+            result += nominal.genericParameterTypes.map(\.displayName).joined()
+            return result
+        case .closure(let closure):
+            return closure.arguments.map(\.type.displayName).joined()
+                + closure.returning.displayName
+        case .composition(let composition):
+            return composition.elements.map(\.displayName).joined()
+        }
     }
 
     func includingIdentifiers() -> [String] {

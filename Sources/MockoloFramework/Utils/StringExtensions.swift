@@ -224,14 +224,7 @@ extension String {
     }
 }
 
-let separatorsForDisplay = CharacterSet(charactersIn: "<>[] :,()_-.&@#!{}@+\"\'")
-let separatorsForLiterals = CharacterSet(charactersIn: "?<>[] :,()_-.&@#!{}@+\"\'")
-
 extension StringProtocol {
-    var isNotEmpty: Bool {
-        return !isEmpty
-    }
-
     var capitalizeFirstLetter: String {
         return prefix(1).capitalized + dropFirst()
     }
@@ -250,19 +243,6 @@ extension StringProtocol {
         }
 
         return false
-    }
-
-    var literalComponents: [String] {
-        return self.components(separatedBy: separatorsForLiterals)
-    }
-
-    var displayableComponents: [String] {
-        let ret = self.replacingOccurrences(of: "?", with: "Optional")
-        return ret.components(separatedBy: separatorsForDisplay).filter {!$0.isEmpty}
-    }
-
-    var components: [String] {
-        return self.components(separatedBy: separatorsForDisplay).filter {!$0.isEmpty}
     }
 
     var asTestableImport: String {
