@@ -272,8 +272,7 @@ extension NominalModel {
         renderedModelNames: Set<String>
     ) {
         let addAcl = declKindOfMockAnnotatedBaseType == .protocol ? acl : ""
-        let allWhereConstraints = genericWhereConstraints + models.flatMap { ($1 as? AssociatedTypeModel)?.whereConstraints ?? [] }
-        let hasWhereConstraints = !allWhereConstraints.isEmpty
+        var allWhereConstraints = genericWhereConstraints + models.flatMap { ($1 as? AssociatedTypeModel)?.whereConstraints ?? [] }
 
         let aliasModels = [String: [TypealiasRenderableModel]](
             grouping: models.compactMap { $1 as? TypealiasRenderableModel },
@@ -281,8 +280,31 @@ extension NominalModel {
         ).sorted(path: \.key)
 
         // If there is a where, do not output typealias as it may not satisfy the conditions
-        if hasWhereConstraints {
-            let aliasItems = aliasModels.compactMap { (name, candidates) in
+        if !allWhereConstraints.isEmpty {
+            // Find associated type names directly bound to concrete types by same-type constraints
+            // (e.g. Value == Int).
+            let allAssociatedTypeNames = Set(aliasModels.map(\.key))
+            var sameTypeBoundNames: Set<String> = []
+
+            let eqConstraintRegex = /(.+)==(.+)/
+            allWhereConstraints.removeAll { constraint in
+                if let match = constraint.firstMatch(of: eqConstraintRegex) {
+                    let lhs = match.output.1.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if allAssociatedTypeNames.contains(lhs) {
+                        sameTypeBoundNames.insert(lhs)
+                        return true
+                    }
+                    let rhs = match.output.2.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if allAssociatedTypeNames.contains(rhs) {
+                        sameTypeBoundNames.insert(rhs)
+                        return true
+                    }
+                }
+                return false
+            }
+
+            let aliasItems = aliasModels.compactMap { (name, candidates) -> String? in
+                if sameTypeBoundNames.contains(name) { return nil }
                 if let defaultType = candidates.firstNonNil(\.defaultType) {
                     return """
                     \(1.tab)// Unavailable due to the presence of generic constraints
@@ -292,8 +314,9 @@ extension NominalModel {
                 }
                 return nil
             }.joined(separator: "\n")
-            let typeparameters = aliasModels.map { (name, candidates) in
-                mergeAssociatedTypes(
+            let typeparameters = aliasModels.compactMap { (name, candidates) -> String? in
+                if sameTypeBoundNames.contains(name) { return nil }
+                return mergeAssociatedTypes(
                     name: name,
                     models: candidates.compactMap { $0 as? AssociatedTypeModel }
                 )

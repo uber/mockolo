@@ -29,6 +29,17 @@ class ProtocolAssociatedTypeTests: MockoloTestCase {
         verify(srcContent: patWithConditions._source,
                dstContent: patWithConditions.expected._source)
     }
+
+    func testPATWithSameTypeConstraint() {
+        verify(srcContent: patWithSameTypeConstraint._source,
+               dstContent: patWithSameTypeConstraint.expected._source)
+    }
+
+    func testPATWithMixedConstraints() {
+        verify(srcContent: patWithMixedConstraints._source,
+               dstContent: patWithMixedConstraints.expected._source)
+    }
+
 #if compiler(>=6.0)
     func testPATWithParentCondition() {
         verify(srcContent: patWithParentCondition._source,
