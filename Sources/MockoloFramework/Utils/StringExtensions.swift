@@ -24,6 +24,13 @@ extension Int {
     }
 }
 
+extension [String] {
+    var asAttributePrefix: String {
+        guard !isEmpty else { return "" }
+        return map { "\(1.tab)\($0)" }.joined(separator: "\n") + "\n"
+    }
+}
+
 extension String {
     static public let protocolDecl = "protocol ".data(using: .utf8)
     static public let classDecl = "class ".data(using: .utf8)

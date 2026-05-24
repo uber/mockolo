@@ -159,6 +159,7 @@ extension MethodModel {
             """
 
             let getter = getterBacking
+            let attrPrefix = model.attributes.asAttributePrefix
             let decls: [String?] = [
                 renderStateVarDecl(getter),
                 renderCallCountVarDecl(getter),
@@ -169,7 +170,7 @@ extension MethodModel {
                 setter.map { renderHandlerVarDecl($0) },
                 functionDecl,
             ]
-            return "\n" + decls.compactMap { $0 }.joined(separator: "\n")
+            return "\n" + decls.compactMap { $0 }.map { attrPrefix + $0 }.joined(separator: "\n")
         }
 
         var declModifiers: String {
