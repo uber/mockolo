@@ -23,9 +23,7 @@ import MockoloFramework
                 return ""
             }
 
-            @available(*, deprecated, message: "Use bar()")
             private(set) var bazCallCount = 0
-            @available(*, deprecated, message: "Use bar()")
             var bazHandler: (() -> String)?
             @available(*, deprecated, message: "Use bar()")
             func baz() -> String {
@@ -64,9 +62,7 @@ import MockoloFramework
                 return ""
             }
 
-            @available(*, deprecated, message: "Use bar()")
             private(set) var bazCallCount = 0
-            @available(*, deprecated, message: "Use bar()")
             var bazHandler: (() -> String)?
             @available(*, deprecated, message: "Use bar()")
             func baz() -> String {
@@ -93,11 +89,7 @@ import MockoloFramework
             init() { }
 
 
-            @available(*, noasync)
-            @available(*, deprecated, message: "Use async version")
             private(set) var barCallCount = 0
-            @available(*, noasync)
-            @available(*, deprecated, message: "Use async version")
             var barHandler: (() -> String)?
             @available(*, noasync)
             @available(*, deprecated, message: "Use async version")
@@ -130,7 +122,6 @@ import MockoloFramework
 
             var name: String = ""
 
-            @available(*, deprecated, message: "Use name")
             private(set) var dataSetCallCount = 0
             @available(*, deprecated, message: "Use name")
             var data: String = "" { didSet { dataSetCallCount += 1 } }
@@ -171,13 +162,10 @@ import MockoloFramework
                 return ""
             }
 
-            @available(*, deprecated, message: "Use bar()")
             private let bazState = MockoloMutex(MockoloHandlerState<Never, @Sendable () -> String>())
-            @available(*, deprecated, message: "Use bar()")
             var bazCallCount: Int {
                 return bazState.withLock(\.callCount)
             }
-            @available(*, deprecated, message: "Use bar()")
             var bazHandler: (@Sendable () -> String)? {
                 get { bazState.withLock(\.handler) }
                 set { bazState.withLock { $0.handler = newValue } }
@@ -236,21 +224,13 @@ import MockoloFramework
                 return ""
             }
 
-            @available(*, noasync)
-            @available(*, deprecated, message: "Use get(for:) async throws")
             private let getForState = MockoloMutex(MockoloHandlerState<String, @Sendable (String) -> Result<String, Error>>())
-            @available(*, noasync)
-            @available(*, deprecated, message: "Use get(for:) async throws")
             var getForCallCount: Int {
                 return getForState.withLock(\.callCount)
             }
-            @available(*, noasync)
-            @available(*, deprecated, message: "Use get(for:) async throws")
             var getForArgValues: [String] {
                 return getForState.withLock(\.argValues).map(\.value)
             }
-            @available(*, noasync)
-            @available(*, deprecated, message: "Use get(for:) async throws")
             var getForHandler: (@Sendable (String) -> Result<String, Error>)? {
                 get { getForState.withLock(\.handler) }
                 set { getForState.withLock { $0.handler = newValue } }
@@ -268,6 +248,129 @@ import MockoloFramework
                     return getForHandler(key)
                 }
                 fatalError("getForHandler returns can't have a default value thus its handler must be set")
+            }
+        }
+    }
+}
+
+@Fixture enum duplicatedAttributes {
+    /// @mockable
+    protocol StorageInput: Sendable {
+        func put(_ value: String, for key: String) async throws
+        func string(for key: String) async throws -> String
+
+        @available(*, noasync)
+        @available(*, deprecated, message: "Use put(_:for:) async throws")
+        @discardableResult func set(_ value: String, for key: String) -> Result<Void, Error>
+
+        @available(*, noasync)
+        @available(*, deprecated, message: "Use string(for:) async throws")
+        func string(for key: String) -> Result<String, Error>
+    }
+
+    @Fixture(includesConcurrencyHelpers: true) enum expected {
+        final class StorageInputMock: StorageInput, @unchecked Sendable {
+            init() { }
+
+
+            private let putState = MockoloMutex(MockoloHandlerState<(value: String, key: String), @Sendable (String, String) async throws -> ()>())
+            var putCallCount: Int {
+                return putState.withLock(\.callCount)
+            }
+            var putArgValues: [(value: String, key: String)] {
+                return putState.withLock(\.argValues).map(\.value)
+            }
+            var putHandler: (@Sendable (String, String) async throws -> ())? {
+                get { putState.withLock(\.handler) }
+                set { putState.withLock { $0.handler = newValue } }
+            }
+            func put(_ value: String, for key: String) async throws {
+                warnIfNotSendable(value, key)
+                let putHandler = putState.withLock { state in
+                    state.callCount += 1
+                    state.argValues.append(.init((value, key)))
+                    return state.handler
+                }
+                if let putHandler = putHandler {
+                    try await putHandler(value, key)
+                }
+
+            }
+
+            private let stringState = MockoloMutex(MockoloHandlerState<String, @Sendable (String) async throws -> String>())
+            var stringCallCount: Int {
+                return stringState.withLock(\.callCount)
+            }
+            var stringArgValues: [String] {
+                return stringState.withLock(\.argValues).map(\.value)
+            }
+            var stringHandler: (@Sendable (String) async throws -> String)? {
+                get { stringState.withLock(\.handler) }
+                set { stringState.withLock { $0.handler = newValue } }
+            }
+            func string(for key: String) async throws -> String {
+                warnIfNotSendable(key)
+                let stringHandler = stringState.withLock { state in
+                    state.callCount += 1
+                    state.argValues.append(.init((key)))
+                    return state.handler
+                }
+                if let stringHandler = stringHandler {
+                    return try await stringHandler(key)
+                }
+                return ""
+            }
+
+            private let setState = MockoloMutex(MockoloHandlerState<(value: String, key: String), @Sendable (String, String) -> Result<Void, Error>>())
+            var setCallCount: Int {
+                return setState.withLock(\.callCount)
+            }
+            var setArgValues: [(value: String, key: String)] {
+                return setState.withLock(\.argValues).map(\.value)
+            }
+            var setHandler: (@Sendable (String, String) -> Result<Void, Error>)? {
+                get { setState.withLock(\.handler) }
+                set { setState.withLock { $0.handler = newValue } }
+            }
+            @available(*, noasync)
+            @available(*, deprecated, message: "Use put(_:for:) async throws")
+            func set(_ value: String, for key: String) -> Result<Void, Error> {
+                warnIfNotSendable(value, key)
+                let setHandler = setState.withLock { state in
+                    state.callCount += 1
+                    state.argValues.append(.init((value, key)))
+                    return state.handler
+                }
+                if let setHandler = setHandler {
+                    return setHandler(value, key)
+                }
+                fatalError("setHandler returns can't have a default value thus its handler must be set")
+            }
+
+            private let stringForState = MockoloMutex(MockoloHandlerState<String, @Sendable (String) -> Result<String, Error>>())
+            var stringForCallCount: Int {
+                return stringForState.withLock(\.callCount)
+            }
+            var stringForArgValues: [String] {
+                return stringForState.withLock(\.argValues).map(\.value)
+            }
+            var stringForHandler: (@Sendable (String) -> Result<String, Error>)? {
+                get { stringForState.withLock(\.handler) }
+                set { stringForState.withLock { $0.handler = newValue } }
+            }
+            @available(*, noasync)
+            @available(*, deprecated, message: "Use string(for:) async throws")
+            func string(for key: String) -> Result<String, Error> {
+                warnIfNotSendable(key)
+                let stringForHandler = stringForState.withLock { state in
+                    state.callCount += 1
+                    state.argValues.append(.init((key)))
+                    return state.handler
+                }
+                if let stringForHandler = stringForHandler {
+                    return stringForHandler(key)
+                }
+                fatalError("stringForHandler returns can't have a default value thus its handler must be set")
             }
         }
     }

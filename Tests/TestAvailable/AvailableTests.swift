@@ -30,6 +30,12 @@ class AvailableTests: MockoloTestCase {
                dstContent: reportedIssue.expected._source,
                enableFuncArgsHistory: true)
     }
+
+    func testDuplicatedAttributes() {
+        verify(srcContent: duplicatedAttributes._source,
+               dstContent: duplicatedAttributes.expected._source,
+               enableFuncArgsHistory: true)
+    }
     #endif
 
     func testMemberPlatformAvailable() {
