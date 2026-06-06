@@ -34,6 +34,7 @@ public func generate(sourceDirs: [String],
                      useTemplateFunc: Bool,
                      allowSetCallCount: Bool,
                      enableFuncArgsHistory: Bool,
+                     enableGetterHistory: Bool,
                      disableCombineDefaultValues: Bool,
                      mockFinal: Bool,
                      testableImports: [String],
@@ -155,7 +156,8 @@ public func generate(sourceDirs: [String],
             allowSetCallCount: allowSetCallCount,
             mockFinal: mockFinal,
             enableFuncArgsHistory: enableFuncArgsHistory,
-            disableCombineDefaultValues: disableCombineDefaultValues
+            disableCombineDefaultValues: disableCombineDefaultValues,
+            enableGetterHistory: enableGetterHistory
         )
     ) { (mockString: String, offset: Int64) in
                         candidates.append((mockString, offset))

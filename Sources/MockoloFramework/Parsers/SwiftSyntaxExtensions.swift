@@ -491,6 +491,13 @@ extension VariableDeclSyntax {
                 storageKind = .stored(needsSetCount: true)
             }
 
+            let getterHistory: VariableModel.GetterHistory
+            switch metadata?.varsWithGetterHistory?[name] ?? metadata?.varsWithGetterHistory?[String.all] {
+            case .some(true): getterHistory = .enabled
+            case .some(false): getterHistory = .disabled
+            case .none: getterHistory = .unspecified
+            }
+
             return VariableModel(name: name,
                                  type: swiftType,
                                  acl: acl,
@@ -500,6 +507,7 @@ extension VariableDeclSyntax {
                                  offset: v.offset,
                                  rxTypes: metadata?.varTypes,
                                  customModifiers: metadata?.modifiers,
+                                 getterHistory: getterHistory,
                                  modelDescription: self.description,
                                  combineType: metadata?.combineTypes?[name] ?? metadata?.combineTypes?["all"],
                                  processed: processed)
@@ -898,6 +906,10 @@ extension Trivia {
         if let arguments = parseArguments(argsStr, identifier: .historyColon) {
 
             ret.funcsWithArgsHistory = arguments.compactMap { k, v in v == "true" ? k : nil }
+        }
+        if let arguments = parseArguments(argsStr, identifier: .getterColon) {
+
+            ret.varsWithGetterHistory = arguments.compactMapValues { Bool($0) }
         }
         if let arguments = parseArguments(argsStr, identifier: .combineColon) {
 

@@ -54,7 +54,7 @@ class MockoloTestCase: XCTestCase {
         }
     }
 
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, enableGetterHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
         if let mock = mockContent {
@@ -63,10 +63,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        try? verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
+        try? verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, enableGetterHistory: enableGetterHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
     }
-    
-    func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+
+    func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, enableGetterHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
         if let mock = mockContent {
@@ -75,10 +75,10 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        try? verify(srcContents: srcContents, mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
+        try? verify(srcContents: srcContents, mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, enableGetterHistory: enableGetterHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
     }
-    
-    func verifyThrows(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, errorHandler: (Error) -> Void = { _ in }, file: StaticString = #filePath, line: UInt = #line) {
+
+    func verifyThrows(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, enableGetterHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, errorHandler: (Error) -> Void = { _ in }, file: StaticString = #filePath, line: UInt = #line) {
         let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
         if let mock = mockContent {
@@ -88,13 +88,13 @@ class MockoloTestCase: XCTestCase {
             mockList?.append(mock)
         }
         XCTAssertThrowsError(
-            try verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line),
+            try verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, enableGetterHistory: enableGetterHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line),
             "No error was thrown",
             errorHandler
         )
     }
 
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: FindTargetDeclType, useTemplateFunc: Bool, testableImports: [String] = [], allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, dstFilePath: String, concurrencyLimit: Int?, disableCombineDefaultValues: Bool, file: StaticString = #filePath, line: UInt = #line) throws {
+    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: FindTargetDeclType, useTemplateFunc: Bool, testableImports: [String] = [], allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, enableGetterHistory: Bool = false, dstFilePath: String, concurrencyLimit: Int?, disableCombineDefaultValues: Bool, file: StaticString = #filePath, line: UInt = #line) throws {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
@@ -135,6 +135,7 @@ class MockoloTestCase: XCTestCase {
                      useTemplateFunc: useTemplateFunc,
                      allowSetCallCount: allowSetCallCount,
                      enableFuncArgsHistory: enableFuncArgsHistory,
+                     enableGetterHistory: enableGetterHistory,
                      disableCombineDefaultValues: disableCombineDefaultValues,
                      mockFinal: mockFinal,
                      testableImports: testableImports,

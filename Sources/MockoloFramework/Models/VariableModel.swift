@@ -10,6 +10,13 @@ final class VariableModel: Model {
         case computed(GetterEffects)
     }
 
+    // Resolved getter-tracking opt-in; `.unspecified` defers to `--enable-getter-history`.
+    enum GetterHistory {
+        case enabled
+        case disabled
+        case unspecified
+    }
+
     let name: String
     let type: SwiftType?
     let offset: Int64
@@ -22,6 +29,7 @@ final class VariableModel: Model {
     let storageKind: MockStorageKind
     let rxTypes: [String: String]?
     let customModifiers: [String: Modifier]?
+    let getterHistory: GetterHistory
     let modelDescription: String?
 
     var combineType: CombineType?
@@ -52,6 +60,7 @@ final class VariableModel: Model {
          offset: Int64,
          rxTypes: [String: String]?,
          customModifiers: [String: Modifier]?,
+         getterHistory: GetterHistory,
          modelDescription: String?,
          combineType: CombineType?,
          processed: Bool) {
@@ -64,6 +73,7 @@ final class VariableModel: Model {
         self.processed = processed
         self.rxTypes = rxTypes
         self.customModifiers = customModifiers
+        self.getterHistory = getterHistory
         self.accessLevel = acl ?? ""
         self.attributes = nil
         self.modelDescription = modelDescription
@@ -130,5 +140,51 @@ final class VariableModel: Model {
                                      accessLevel: accessLevel,
                                      context: context,
                                      arguments: arguments)
+    }
+}
+
+extension VariableModel {
+    // Combine `AnyPublisher` intercepted by the publisher template (no `_name` backing).
+    var isCombineVariable: Bool {
+        return type?.isNominal(named: .anyPublisher) == true
+    }
+
+    // Rx stream intercepted by the Rx template (`rx:` override or bare `Observable<…>`).
+    // Direct `BehaviorSubject`/`ReplaySubject`/`BehaviorRelay` props stay eligible.
+    var isRxVariable: Bool {
+        if let rxTypes, !rxTypes.isEmpty,
+           type?.parseRxVar(overrides: rxTypes, overrideKey: name, isInitParam: true) != nil {
+            return true
+        }
+        return type?.typeName.range(of: String.observableLeftAngleBracket) != nil
+    }
+
+    // Protocol-mock stored getters only; intercepted, property-wrapped, weak/dynamic and processed props are excluded.
+    func shouldTrackGetter(force: Bool, context: RenderContext) -> Bool {
+        guard !processed,
+              context.annotatedTypeKind == .protocol,
+              case .stored = storageKind,
+              !isCombineVariable,
+              !isRxVariable,
+              propertyWrapper == nil,
+              customModifiers?[name] == nil
+        else {
+            return false
+        }
+        switch getterHistory {
+        case .enabled: return true
+        case .disabled: return false
+        case .unspecified: return force
+        }
+    }
+
+    // `_name` when a stored getter is tracked, else the existing name; computed/untracked props are unchanged.
+    func backingName(force: Bool, context: RenderContext) -> String {
+        guard case .stored = storageKind,
+              shouldTrackGetter(force: force, context: context)
+        else {
+            return underlyingName
+        }
+        return "\(String.underlyingVarPrefix)\(name)"
     }
 }

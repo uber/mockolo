@@ -57,11 +57,31 @@ extension VariableModel {
 
         let staticSpace = isStatic ? "\(String.static) " : ""
 
+        let trackGetter = shouldTrackGetter(force: arguments.enableGetterHistory, context: context)
+
         switch storageKind {
         case .stored(let needSetCount):
             let setCallCountVarDecl = needSetCount ? """
             \(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(underlyingSetCallCount) = 0
             """ : ""
+
+            if trackGetter {
+                // Counting computed accessor over `_name`; `set` is kept so the property stays stubbable.
+                let getCallCountVar = "\(name)\(String.getCallCountSuffix)"
+                let backing = backingName(force: arguments.enableGetterHistory, context: context)
+                let getCallCountVarDecl = "\(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(getCallCountVar) = 0"
+                let setIncrement = needSetCount ? "; \(underlyingSetCallCount) += 1" : ""
+                return """
+
+                \(setCallCountVarDecl)
+                \(getCallCountVarDecl)
+                \(1.tab)\(propertyWrapper)\(staticSpace)private var \(backing): \(underlyingType)\(assignVal)
+                \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
+                \(2.tab)get { \(getCallCountVar) += 1; return \(backing) }
+                \(2.tab)set { \(backing) = newValue\(setIncrement) }
+                \(1.tab)}
+                """
+            }
 
             var accessorBlockItems: [String] = []
             if needSetCount {

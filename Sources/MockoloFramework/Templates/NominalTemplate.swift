@@ -24,8 +24,24 @@ extension NominalModel {
                               entities: [(String, Model)]) -> String {
 
         processCombineAliases(entities: entities)
-        
+
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
+
+        // `_name` backings for getter-tracked stored props: used to dedup init-param vars and to
+        // assign the backing in init. Computed after `processCombineAliases` so wrapper exclusions resolve.
+        let initRenderContext = RenderContext(
+            enclosingType: type,
+            annotatedTypeKind: declKindOfMockAnnotatedBaseType,
+            mockDeclKind: declKind,
+            requiresSendable: requiresSendable
+        )
+        let getterTrackedBackingNames = Set(entities.compactMap { (_, model) -> String? in
+            guard let v = model as? VariableModel, !v.isStatic,
+                  case .stored = v.storageKind,
+                  v.shouldTrackGetter(force: arguments.enableGetterHistory, context: initRenderContext)
+            else { return nil }
+            return v.backingName(force: arguments.enableGetterHistory, context: initRenderContext)
+        })
 
         let (aliasItems,
              typeparameters,
@@ -62,12 +78,8 @@ extension NominalModel {
             declaredInits: declaredInits,
             acl: acl,
             declKindOfMockAnnotatedBaseType: declKindOfMockAnnotatedBaseType,
-            context: .init(
-                enclosingType: type,
-                annotatedTypeKind: declKindOfMockAnnotatedBaseType,
-                mockDeclKind: declKind,
-                requiresSendable: requiresSendable
-            ),
+            getterTrackedBackingNames: getterTrackedBackingNames,
+            context: initRenderContext,
             arguments: arguments
         )
 
@@ -110,6 +122,7 @@ extension NominalModel {
         declaredInits: [MethodModel],
         acl: String,
         declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
+        getterTrackedBackingNames: Set<String>,
         context: RenderContext,
         arguments: GenerationArguments
     ) -> String {
@@ -167,7 +180,7 @@ extension NominalModel {
             paramsAssign = initParamCandidates.map { (element: VariableModel) in
                 switch element.storageKind {
                 case .stored:
-                    return "\(2.tab)self.\(element.underlyingName) = \(element.name.safeName)"
+                    return "\(2.tab)self.\(element.backingName(force: arguments.enableGetterHistory, context: context)) = \(element.name.safeName)"
                 case .computed:
                     return "\(2.tab)self.\(element.name)\(String.handlerSuffix) = { \(element.name.safeName) }"
                 }
@@ -187,7 +200,11 @@ extension NominalModel {
             },
             by: \.name
         )
-            .compactMap { (name: String, params: [ParamModel]) in
+            .compactMap { (name: String, params: [ParamModel]) -> String? in
+                // Skip a `_name` the variable template already emits for a tracked getter.
+                if getterTrackedBackingNames.contains(params[0].underlyingName) {
+                    return nil
+                }
                 let shouldErase = params.contains { params[0].type.typeName != $0.type.typeName }
                 return params[0].asInitVarDecl(eraseType: shouldErase)
             }
@@ -218,7 +235,7 @@ extension NominalModel {
                     """
                 } else {
                     let paramsAssign = m.params.map { param in
-                        let underVars = initParamCandidates.compactMap { return $0.name.safeName == param.name.safeName ? $0.underlyingName : nil}
+                        let underVars = initParamCandidates.compactMap { return $0.name.safeName == param.name.safeName ? $0.backingName(force: arguments.enableGetterHistory, context: context) : nil}
                         if let underVar = underVars.first {
                             return "\(2.tab)self.\(underVar) = \(param.name.safeName)"
                         } else {

@@ -48,6 +48,10 @@ struct Executor: ParsableCommand {
     private  var enableArgsHistory: Bool = false
 
     @Flag(name: .long,
+          help: "Whether to enable getter call-count tracking for all protocol properties (default = false). To enable per property, use the 'getter' keyword in the annotation argument.")
+    private var enableGetterHistory: Bool = false
+
+    @Flag(name: .long,
           help: "Whether to disable generating Combine streams in mocks (default = false). Set this to true to control how your streams are created in your mocks.")
     private var disableCombineDefaultValues: Bool = false
 
@@ -201,6 +205,7 @@ struct Executor: ParsableCommand {
                          useTemplateFunc: useTemplateFunc,
                          allowSetCallCount: allowSetCallCount,
                          enableFuncArgsHistory: enableArgsHistory,
+                         enableGetterHistory: enableGetterHistory,
                          disableCombineDefaultValues: disableCombineDefaultValues,
                          mockFinal: mockFinal,
                          testableImports: testableImports,

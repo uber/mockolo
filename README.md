@@ -146,6 +146,7 @@ OPTIONS:
   --custom-imports <custom-imports>
                           If set, custom module imports (separated by a space) will be added to the final import statement list.
   --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
+  --enable-getter-history Whether to enable getter call-count tracking for all protocol properties (default = false). To enable per property, use the 'getter' keyword in the annotation argument.
   --disable-combine-default-values
                           Whether to disable generating Combine streams in mocks (default = false). Set this to true to control how your streams are created in your mocks.
   --exclude-imports <exclude-imports>
@@ -357,6 +358,34 @@ public class FooMock: Foo {
 
 and also, enable the arguments captor for all functions if you passed `--enable-args-history` arg to `mockolo` command.
 > NOTE: The arguments captor only supports singular types (e.g. variable, tuple). The closure variable is not supported.
+
+### Getter Call Count History
+
+Get-only properties are rendered as plain stored properties that record no reads. To count getter calls (the analogue of a setter's `…SetCallCount`), opt in with the `getter` keyword:
+
+```swift
+/// @mockable(getter: state = true)
+public protocol Foo {
+    var state: Int { get }
+}
+```
+
+This will generate:
+
+```swift
+public class FooMock: Foo {
+    public private(set) var stateGetCallCount = 0
+    private var _state: Int = 0
+    public var state: Int {
+        get { stateGetCallCount += 1; return _state }
+        set { _state = newValue }   // still settable, so it can be stubbed
+    }
+}
+```
+
+Use `all = true` to opt every property in, and `name = false` to opt one back out. The `--enable-getter-history` flag enables tracking project-wide; an explicit `name = false` (or `all = false`) still wins over it. This mirrors SwiftyMocky's `Verify(mock, .once, .someProperty)`, which maps onto `mock.somePropertyGetCallCount`.
+
+> NOTE: Protocol mocks only (a no-op for `--mock-all` class mocks). Combine/Rx/`@Published`-intercepted properties (`AnyPublisher`, `Observable`, `rx:`/`combine:`-annotated) and `weak`/`dynamic` properties are never tracked, since they cannot be backed by a computed accessor.
 
 ### Combine's AnyPublisher
 

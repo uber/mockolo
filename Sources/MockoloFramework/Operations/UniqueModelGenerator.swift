@@ -45,6 +45,10 @@ private func generateUniqueModels(key: String,
         if let rng = name.range(of: String.setCallCountSuffix) {
             return (String(name[name.startIndex..<rng.lowerBound]), element)
         }
+        // Before the generic `CallCount` strip, else `stateGetCallCount` keys to `stateGet`.
+        if let rng = name.range(of: String.getCallCountSuffix) {
+            return (String(name[name.startIndex..<rng.lowerBound]), element)
+        }
         if let rng = name.range(of: String.callCountSuffix) {
             return (String(name[name.startIndex..<rng.lowerBound]), element)
         }

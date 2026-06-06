@@ -132,6 +132,7 @@ struct AnnotationMetadata {
     var typeAliases: [String: String]?
     var varTypes: [String: String]?
     var funcsWithArgsHistory: [String]?
+    var varsWithGetterHistory: [String: Bool]?
     var modifiers: [String: Modifier]?
     var combineTypes: [String: CombineType]?
 }
@@ -142,12 +143,14 @@ struct GenerationArguments {
     var mockFinal: Bool
     var enableFuncArgsHistory: Bool
     var disableCombineDefaultValues: Bool
+    var enableGetterHistory: Bool
     static let `default` = GenerationArguments(
         useTemplateFunc: false,
         allowSetCallCount: false,
         mockFinal: false,
         enableFuncArgsHistory: false,
-        disableCombineDefaultValues: false
+        disableCombineDefaultValues: false,
+        enableGetterHistory: false
     )
 }
 
