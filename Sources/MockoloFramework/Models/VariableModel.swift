@@ -159,11 +159,10 @@ extension VariableModel {
         return type?.typeName.range(of: String.observableLeftAngleBracket) != nil
     }
 
-    // Protocol-mock stored getters only; intercepted, property-wrapped, weak/dynamic and processed props are excluded.
+    // Protocol-mock getters only; intercepted, property-wrapped, weak/dynamic and processed props are excluded.
     func shouldTrackGetter(force: Bool, context: RenderContext) -> Bool {
         guard !processed,
               context.annotatedTypeKind == .protocol,
-              case .stored = storageKind,
               !isCombineVariable,
               !isRxVariable,
               propertyWrapper == nil,

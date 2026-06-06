@@ -137,12 +137,25 @@ extension VariableModel {
             ), arguments: arguments) ?? "")
                 .addingIndent(1)
 
+            // Async/throwing getters have no backing store: bump the counter first in the getter body
+            // (before any `await`/`throw`, so a read that throws is still counted).
+            let getCallCountVarDecl: String
+            let getIncrement: String
+            if trackGetter {
+                let getCallCountVar = "\(name)\(String.getCallCountSuffix)"
+                getCallCountVarDecl = "\(1.tab)\(acl)\(staticSpace)\(privateSetSpace)var \(getCallCountVar) = 0\n"
+                getIncrement = "\(3.tab)\(getCallCountVar) += 1\n"
+            } else {
+                getCallCountVarDecl = ""
+                getIncrement = ""
+            }
+
             return """
 
-            \(1.tab)\(acl)\(staticSpace)var \(name)\(String.handlerSuffix): (() \(effects.applyTemplate())-> \(type.typeName))?
+            \(getCallCountVarDecl)\(1.tab)\(acl)\(staticSpace)var \(name)\(String.handlerSuffix): (() \(effects.applyTemplate())-> \(type.typeName))?
             \(1.tab)\(acl)\(staticSpace)\(overrideStr)\(modifierTypeStr)var \(name): \(type.typeName) {
             \(2.tab)get \(effects.applyTemplate()){
-            \(body)
+            \(getIncrement)\(body)
             \(2.tab)}
             \(1.tab)}
             """

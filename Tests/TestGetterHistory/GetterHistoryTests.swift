@@ -153,5 +153,30 @@ extension GetterHistoryTests {
                dstContent: getterHistorySendable.expected._source,
                enableGetterHistory: true)
     }
+
+    func testGetterHistoryAsync() {
+        verify(srcContent: getterHistoryAsync._source,
+               dstContent: getterHistoryAsync.expected._source)
+    }
+
+    func testRuntimeAsyncGetterIncrementsOnRead() async {
+        let mock = getterHistoryAsync.expected.GHAsyncMock()
+        mock.valueHandler = { 7 }
+        XCTAssertEqual(mock.valueGetCallCount, 0)
+        for expected in 1...3 {
+            let value = await mock.value
+            XCTAssertEqual(value, 7)
+            XCTAssertEqual(mock.valueGetCallCount, expected)
+        }
+    }
+
+    func testRuntimeThrowingGetterCountsBeforeThrow() {
+        // The counter bumps before the throw, so a read that throws still counts.
+        struct GetterError: Error {}
+        let mock = getterHistoryAsync.expected.GHAsyncMock()
+        mock.nameHandler = { throw GetterError() }
+        XCTAssertThrowsError(try mock.name)
+        XCTAssertEqual(mock.nameGetCallCount, 1)
+    }
 }
 #endif
