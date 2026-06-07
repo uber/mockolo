@@ -9,6 +9,11 @@ class BasicFuncTests: MockoloTestCase {
                dstContent: subscripts.expected._source)
     }
 
+    func testIUOFuncs() {
+        verify(srcContent: iuoFuncs._source,
+               dstContent: iuoFuncs.expected._source)
+    }
+
     func testGetOnlySubscripts() {
         verify(srcContent: getOnlySubscripts._source,
                dstContent: getOnlySubscripts.expected._source)

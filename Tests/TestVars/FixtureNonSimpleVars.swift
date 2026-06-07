@@ -47,3 +47,25 @@ import MockoloFramework
         }
     }
 }
+
+// An implicitly-unwrapped optional property renders as `Int!` (not `Int?!`) and conforms.
+@Fixture enum iuoVars {
+    /// @mockable
+    public protocol IUOVar {
+        var a: Int! { get }
+        var b: Int! { get set }
+    }
+
+    @Fixture enum expected {
+        public class IUOVarMock: IUOVar {
+            public init() { }
+            public init(a: Int! = nil, b: Int! = nil) {
+                self.a = a
+                self.b = b
+            }
+            public var a: Int! = nil
+            public private(set) var bSetCallCount = 0
+            public var b: Int! = nil { didSet { bSetCallCount += 1 } }
+        }
+    }
+}

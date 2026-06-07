@@ -87,7 +87,9 @@ struct SwiftType: Equatable, CustomStringConvertible {
 
             switch nominal.name {
             case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
-                repr += "\(nominal.genericParameterTypes[0])?"
+                // For an IUO (`T!`, stored as Optional<T> + isIUO) the `!` is appended by the isIUO
+                // block below; emitting `?` here too would wrongly render `T?!`.
+                repr += "\(nominal.genericParameterTypes[0])\(isIUO ? "" : "?")"
             case .arrayTypeSugarName where nominal.genericParameterTypes.count == 1:
                 repr += "[\(nominal.genericParameterTypes[0])]"
             case .dictionaryTypeSugarName where nominal.genericParameterTypes.count == 2:
@@ -476,11 +478,19 @@ struct SwiftType: Equatable, CustomStringConvertible {
             returnTypeCast = " as! " + .`Self`
         }
 
+        // `!` (IUO) is illegal inside a closure type, so an IUO param/return must render as a plain
+        // optional here (it still witnesses the IUO requirement). Clearing `isIUO` is a no-op for
+        // every non-IUO type, so existing handlers are unaffected.
+        displayableReturnType.isIUO = false
         var resultType = SwiftType(
             kind: .closure(.init(
                 isAsync: isAsync,
                 throwing: throwing,
-                arguments: params.map { .init(type: $0.processTypeParams(with: typeParams)) },
+                arguments: params.map {
+                    var argType = $0.processTypeParams(with: typeParams)
+                    argType.isIUO = false
+                    return .init(type: argType)
+                },
                 returning: displayableReturnType
             ))
         )

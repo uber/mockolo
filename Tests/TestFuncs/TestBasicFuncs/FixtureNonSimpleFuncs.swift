@@ -35,6 +35,42 @@ import MockoloFramework
     }
 }
 
+// IUO func/subscript params and returns: the synthesized handler closure renders `Int?` (IUO is
+// illegal inside a closure type), while the signature keeps `Int!` and conforms.
+@Fixture enum iuoFuncs {
+    /// @mockable
+    public protocol IUOFunc {
+        func f(x: Int!) -> Int!
+        subscript(i: Int) -> Int! { get }
+    }
+
+    @Fixture enum expected {
+        public class IUOFuncMock: IUOFunc {
+            public init() { }
+            public private(set) var fCallCount = 0
+            public var fHandler: ((Int?) -> Int?)?
+            public func f(x: Int!) -> Int! {
+                fCallCount += 1
+                if let fHandler = fHandler {
+                    return fHandler(x)
+                }
+                return nil
+            }
+            public private(set) var subscriptCallCount = 0
+            public var subscriptHandler: ((Int) -> Int?)?
+            public subscript(i: Int) -> Int! {
+                get {
+                subscriptCallCount += 1
+                if let subscriptHandler = subscriptHandler {
+                    return subscriptHandler(i)
+                }
+                return nil
+                }
+            }
+        }
+    }
+}
+
 @Fixture enum subscripts {
     /// @mockable
     protocol SubscriptProtocol {
