@@ -48,7 +48,6 @@ import MockoloFramework
     }
 }
 
-// An implicitly-unwrapped optional property renders as `Int!` (not `Int?!`) and conforms.
 @Fixture enum iuoVars {
     /// @mockable
     public protocol IUOVar {

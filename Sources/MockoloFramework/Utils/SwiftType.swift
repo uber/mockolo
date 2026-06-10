@@ -57,7 +57,6 @@ struct SwiftType: Equatable, CustomStringConvertible {
     var kind: Kind
     var attributes: [String] = []
     var someOrAny: SomeOrAny?
-    var isIUO: Bool = false
     var hasEllipsis: Bool = false
 
     var typeName: String {
@@ -87,9 +86,9 @@ struct SwiftType: Equatable, CustomStringConvertible {
 
             switch nominal.name {
             case .optionalTypeSugarName where nominal.genericParameterTypes.count == 1:
-                // For an IUO (`T!`, stored as Optional<T> + isIUO) the `!` is appended by the isIUO
-                // block below; emitting `?` here too would wrongly render `T?!`.
-                repr += "\(nominal.genericParameterTypes[0])\(isIUO ? "" : "?")"
+                repr += "\(nominal.genericParameterTypes[0])?"
+            case .optionalAutounwrappedTypeSugarName where nominal.genericParameterTypes.count == 1:
+                repr += "\(nominal.genericParameterTypes[0])!"
             case .arrayTypeSugarName where nominal.genericParameterTypes.count == 1:
                 repr += "[\(nominal.genericParameterTypes[0])]"
             case .dictionaryTypeSugarName where nominal.genericParameterTypes.count == 2:
@@ -122,14 +121,6 @@ struct SwiftType: Equatable, CustomStringConvertible {
             repr += closureDesc
         case .composition(let composition):
             repr += composition.elements.map(\.description).joined(separator: " & ")
-        }
-        if isIUO {
-            switch kind {
-            case .tuple, .nominal:
-                repr += "!"
-            case .closure, .composition:
-                repr = "(\(repr))!"
-            }
         }
         if hasEllipsis {
             repr += "..."
@@ -193,7 +184,11 @@ struct SwiftType: Equatable, CustomStringConvertible {
     }
 
     var isOptional: Bool {
-        isNominal(named: .optional) || isNominal(named: .optionalTypeSugarName)
+        isNominal(named: .optional) || isNominal(named: .optionalTypeSugarName) || isNominal(named: .optionalAutounwrappedTypeSugarName)
+    }
+
+    var isIUO: Bool {
+        isNominal(named: .optionalAutounwrappedTypeSugarName)
     }
 
     var isSelf: Bool {
@@ -288,9 +283,8 @@ struct SwiftType: Equatable, CustomStringConvertible {
                 ret = unwrapped
             }
         }
-        ret.isIUO = true
 
-        return ret.description
+        return ret.iuoWrapped().description
     }
 
     func defaultVal(with overrides: [String: String]? = nil, overrideKey: String = "", isInitParam: Bool = false) -> String? {
@@ -345,7 +339,7 @@ struct SwiftType: Equatable, CustomStringConvertible {
             var processedType = subtype.processTypeParams(with: typeParams)
             processedType.attributes.removeAll(where: { $0 == .inout })
             processedType.attributes.removeAll(where: { $0 == .escaping })
-            processedType.isIUO = false
+            processedType.unwrapIUO()
             return processedType
         }
 
@@ -458,10 +452,9 @@ struct SwiftType: Equatable, CustomStringConvertible {
                 returnAsType = unwrapped
                 asSuffix = "?"
             } else if returnType.isIUO {
-                displayableReturnType = .Any
-                displayableReturnType.isIUO = true
+                displayableReturnType = .Any.iuoWrapped()
                 var asType = returnType
-                asType.isIUO = false
+                asType.unwrapIUO()
                 returnAsType = asType
             } else if returnType.isSelf {
                 returnAsType = .Self
@@ -479,16 +472,15 @@ struct SwiftType: Equatable, CustomStringConvertible {
         }
 
         // `!` (IUO) is illegal inside a closure type, so an IUO param/return must render as a plain
-        // optional here (it still witnesses the IUO requirement). Clearing `isIUO` is a no-op for
-        // every non-IUO type, so existing handlers are unaffected.
-        displayableReturnType.isIUO = false
+        // optional here (it still witnesses the IUO requirement).
+        displayableReturnType.unwrapIUO()
         var resultType = SwiftType(
             kind: .closure(.init(
                 isAsync: isAsync,
                 throwing: throwing,
                 arguments: params.map {
                     var argType = $0.processTypeParams(with: typeParams)
-                    argType.isIUO = false
+                    argType.unwrapIUO()
                     return .init(type: argType)
                 },
                 returning: displayableReturnType
@@ -640,8 +632,7 @@ extension SwiftType {
         case .implicitlyUnwrappedOptionalType(let syntax):
             // T!
             let base = SwiftType(typeSyntax: syntax.wrappedType)
-            self = base.optionalWrapped()
-            self.isIUO = true
+            self = base.iuoWrapped()
 
         case .identifierType(let syntax):
             // T<U>
@@ -730,6 +721,12 @@ extension SwiftType {
         )
     }
 
+    func iuoWrapped() -> SwiftType {
+        return copy(
+            kind: .nominal(.init(name: .optionalAutounwrappedTypeSugarName, genericParameterTypes: [.init(kind: kind)]))
+        )
+    }
+
     func optionalUnwrapped() -> SwiftType? {
         guard isOptional else {
             return nil
@@ -738,6 +735,17 @@ extension SwiftType {
             return nil
         }
         return nominal.genericParameterTypes.first
+    }
+
+    mutating func unwrapIUO() {
+        guard isNominal(named: .optionalAutounwrappedTypeSugarName) else {
+            return
+        }
+        guard case .nominal(let nominal) = kind,
+            let wrapped = nominal.genericParameterTypes.first else {
+            return
+        }
+        self = wrapped
     }
 
     func copy(kind: Kind) -> Self {

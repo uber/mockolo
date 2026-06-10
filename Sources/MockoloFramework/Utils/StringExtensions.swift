@@ -119,6 +119,7 @@ extension String {
     static let arrayTypeSugarName = "[]"
     static let dictionaryTypeSugarName = "[:]"
     static let optionalTypeSugarName = "?"
+    static let optionalAutounwrappedTypeSugarName = "!"
 
     var safeName: String {
         var text = self
