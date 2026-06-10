@@ -227,6 +227,28 @@ struct CustomThing {}
     }
 }
 
+// Global flag on, but `all = false` opts the whole protocol out — proves the protocol-wide
+// opt-out wins over the flag, same as a per-name `false`.
+@Fixture enum getterHistoryGlobalFlagAllOptOut {
+    /// @mockable(getter: all = false)
+    public protocol GHGlobalAllOptOut {
+        var state: Int { get }
+        var token: String { get }
+    }
+
+    @Fixture enum expected {
+        public class GHGlobalAllOptOutMock: GHGlobalAllOptOut {
+            public init() { }
+            public init(state: Int = 0, token: String = "") {
+                self.state = state
+                self.token = token
+            }
+            public var state: Int = 0
+            public var token: String = ""
+        }
+    }
+}
+
 // `--allow-set-call-count` composes: both counters drop `private(set)`.
 @Fixture enum getterHistoryAllowSetCallCount {
     /// @mockable(getter: session = true)
@@ -460,6 +482,63 @@ struct CustomThing {}
             public var iuo: Int! {
                 get { iuoGetCallCount += 1; return _iuo }
                 set { _iuo = newValue }
+            }
+        }
+    }
+}
+
+// Inherited members keep the metadata of the protocol that declared them: the child's
+// `getter: all = true` tracks its own property but NOT the inherited, un-annotated one —
+// same per-declaring-protocol semantics as `history:`/`rx:`/`combine:`. Track inherited
+// members by annotating the parent, or globally via `--enable-getter-history`.
+@Fixture enum getterHistoryInheritedUntracked {
+    public protocol GHBase {
+        var value: Int { get }
+    }
+
+    /// @mockable(getter: all = true)
+    public protocol GHDerived: GHBase {
+        var own: Int { get }
+    }
+
+    @Fixture enum expected {
+        public class GHDerivedMock: GHDerived {
+            public init() { }
+            public init(value: Int = 0, own: Int = 0) {
+                self.value = value
+                self._own = own
+            }
+            public var value: Int = 0
+            public private(set) var ownGetCallCount = 0
+            private var _own: Int = 0
+            public var own: Int {
+                get { ownGetCallCount += 1; return _own }
+                set { _own = newValue }
+            }
+        }
+    }
+}
+
+// An associatedtype-typed property: the tracked backing store renders against the mock's typealias.
+@Fixture enum getterHistoryAssociatedType {
+    /// @mockable(typealias: T = String; getter: item = true)
+    public protocol GHPat {
+        associatedtype T
+        var item: T { get }
+    }
+
+    @Fixture enum expected {
+        public class GHPatMock: GHPat {
+            public init() { }
+            public init(item: T) {
+                self._item = item
+            }
+            public typealias T = String
+            public private(set) var itemGetCallCount = 0
+            private var _item: T!
+            public var item: T {
+                get { itemGetCallCount += 1; return _item }
+                set { _item = newValue }
             }
         }
     }

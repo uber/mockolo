@@ -63,6 +63,12 @@ class GetterHistoryTests: MockoloTestCase {
                enableGetterHistory: true)
     }
 
+    func testGetterHistoryGlobalFlagAllOptOutWins() {
+        verify(srcContent: getterHistoryGlobalFlagAllOptOut._source,
+               dstContent: getterHistoryGlobalFlagAllOptOut.expected._source,
+               enableGetterHistory: true)
+    }
+
     func testGetterHistoryAllowSetCallCount() {
         verify(srcContent: getterHistoryAllowSetCallCount._source,
                dstContent: getterHistoryAllowSetCallCount.expected._source,
@@ -99,6 +105,16 @@ class GetterHistoryTests: MockoloTestCase {
     func testGetterHistoryEdgeTypes() {
         verify(srcContent: getterHistoryEdgeTypes._source,
                dstContent: getterHistoryEdgeTypes.expected._source)
+    }
+
+    func testGetterHistoryInheritedUntracked() {
+        verify(srcContent: getterHistoryInheritedUntracked._source,
+               dstContent: getterHistoryInheritedUntracked.expected._source)
+    }
+
+    func testGetterHistoryAssociatedType() {
+        verify(srcContent: getterHistoryAssociatedType._source,
+               dstContent: getterHistoryAssociatedType.expected._source)
     }
 
     // MARK: - Runtime behavior

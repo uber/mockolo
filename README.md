@@ -385,7 +385,7 @@ public class FooMock: Foo {
 
 Use `all = true` to opt every property in, and `name = false` to opt one back out. The `--enable-getter-history` flag enables tracking project-wide; an explicit `name = false` (or `all = false`) still wins over it. This mirrors SwiftyMocky's `Verify(mock, .once, .someProperty)`, which maps onto `mock.somePropertyGetCallCount`.
 
-> NOTE: Protocol mocks only (a no-op for `--mock-all` class mocks). Combine/Rx/`@Published`-intercepted properties (`AnyPublisher`, `Observable`, `rx:`/`combine:`-annotated) and `weak`/`dynamic` properties are never tracked, since they cannot be backed by a computed accessor. Async/throwing getters are supported.
+> NOTE: Protocol mocks only (a no-op for `--mock-all` class mocks). Combine/Rx/`@Published`-intercepted properties (`AnyPublisher`, `Observable`, `rx:`/`combine:`-annotated) and `weak`/`dynamic` properties are never tracked, since they cannot be backed by a computed accessor. Async/throwing getters are supported. Like the existing `…SetCallCount`, the counter is a plain unsynchronized property, so concurrent reads on a `Sendable` mock carry the same data-race caveat as setter counters.
 
 ### Combine's AnyPublisher
 
