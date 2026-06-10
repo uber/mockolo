@@ -21,6 +21,11 @@ class VarTests: MockoloTestCase {
                allowSetCallCount: true)
     }
 
+    func testIUOVars() {
+        verify(srcContent: iuoVars._source,
+               dstContent: iuoVars.expected._source)
+    }
+
 #if compiler(>=6.0)
     func testAsyncThrows() {
         verify(srcContent: asyncThrowsVars._source,
