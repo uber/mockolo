@@ -426,20 +426,22 @@ struct CustomThing {}
     }
 }
 
-// Existential `any` and namespaced types render valid backing stores when tracked.
+// Existential `any`, namespaced, and IUO types render valid backing stores when tracked.
 @Fixture enum getterHistoryEdgeTypes {
     /// @mockable(getter: all = true)
     public protocol GHTypes {
         var anyVal: any Sequence { get }
         var nsVal: Swift.Int { get }
+        var iuo: Int! { get }
     }
 
     @Fixture enum expected {
         public class GHTypesMock: GHTypes {
             public init() { }
-            public init(anyVal: any Sequence, nsVal: Swift.Int) {
+            public init(anyVal: any Sequence, nsVal: Swift.Int, iuo: Int! = nil) {
                 self._anyVal = anyVal
                 self._nsVal = nsVal
+                self._iuo = iuo
             }
             public private(set) var anyValGetCallCount = 0
             private var _anyVal: (any Sequence)!
@@ -452,6 +454,12 @@ struct CustomThing {}
             public var nsVal: Swift.Int {
                 get { nsValGetCallCount += 1; return _nsVal }
                 set { _nsVal = newValue }
+            }
+            public private(set) var iuoGetCallCount = 0
+            private var _iuo: Int! = nil
+            public var iuo: Int! {
+                get { iuoGetCallCount += 1; return _iuo }
+                set { _iuo = newValue }
             }
         }
     }
