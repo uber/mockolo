@@ -33,12 +33,3 @@ class ReplaySubject<Element>: Observable<Element> {
 class BehaviorRelay<Element>: Observable<Element> {}
 protocol Disposable {}
 // ----
-
-// ---- Dummy Combine types (Combine is unavailable on Linux) -----
-struct AnyPublisher<Output, Failure: Error> {}
-class PassthroughSubject<Output, Failure: Error> {
-    init() {}
-    func eraseToAnyPublisher() -> AnyPublisher<Output, Failure> {
-        AnyPublisher()
-    }
-}
