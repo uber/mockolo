@@ -104,6 +104,7 @@ import MockoloFramework
     }
 }
 
+// The generated `self.data = data` assignment intentionally warns: seeding a deprecated property is deprecated usage.
 @Fixture enum memberAvailableVar {
     /// @mockable
     protocol Foo {
@@ -398,6 +399,211 @@ import MockoloFramework
                     return barHandler()
                 }
                 return ""
+            }
+        }
+    }
+}
+
+@Fixture enum mixedPlatformAndBehavioralAvailable {
+    /// @mockable
+    protocol Foo {
+        @available(iOS 15.0, *)
+        @available(*, deprecated, message: "Use newBar()")
+        func bar() -> String
+    }
+
+    @Fixture enum expected {
+        @available(iOS 15.0, *)
+        class FooMock: Foo {
+            init() { }
+
+
+            private(set) var barCallCount = 0
+            var barHandler: (() -> String)?
+            @available(*, deprecated, message: "Use newBar()")
+            func bar() -> String {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    return barHandler()
+                }
+                return ""
+            }
+        }
+    }
+}
+
+// Platform-scoped deprecation is warning-only, so it stays on the member instead of deprecating the whole mock.
+@Fixture enum platformScopedDeprecation {
+    /// @mockable
+    protocol Foo {
+        @available(iOS, deprecated: 12.0, message: "Use newBar()")
+        func bar() -> String
+        @available(swift, deprecated: 99.0)
+        var legacy: String { get }
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            init(legacy: String = "") {
+                self.legacy = legacy
+            }
+
+            private(set) var barCallCount = 0
+            var barHandler: (() -> String)?
+            @available(iOS, deprecated: 12.0, message: "Use newBar()")
+            func bar() -> String {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    return barHandler()
+                }
+                return ""
+            }
+
+            @available(swift, deprecated: 99.0)
+            var legacy: String = ""
+        }
+    }
+}
+
+// `introduced:` gates existence, so it wins over `deprecated:` and the attribute hoists to the class.
+@Fixture enum gatingAvailabilityStillHoisted {
+    /// @mockable
+    protocol Foo {
+        @available(iOS, introduced: 10.0, deprecated: 12.0)
+        func bar() -> String
+    }
+
+    @Fixture enum expected {
+        @available(iOS, introduced: 10.0, deprecated: 12.0)
+        class FooMock: Foo {
+            init() { }
+
+
+            private(set) var barCallCount = 0
+            var barHandler: (() -> String)?
+            func bar() -> String {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    return barHandler()
+                }
+                return ""
+            }
+        }
+    }
+}
+
+@Fixture enum unavailableStillHoisted {
+    /// @mockable
+    protocol Foo {
+        @available(iOS, unavailable)
+        func bar() -> String
+    }
+
+    @Fixture enum expected {
+        @available(iOS, unavailable)
+        class FooMock: Foo {
+            init() { }
+
+
+            private(set) var barCallCount = 0
+            var barHandler: (() -> String)?
+            func bar() -> String {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    return barHandler()
+                }
+                return ""
+            }
+        }
+    }
+}
+
+@Fixture enum memberAvailableCombineVar {
+    /// @mockable
+    protocol Foo {
+        @available(*, deprecated, message: "Use newPub")
+        var pub: AnyPublisher<Int, Never> { get }
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+
+
+            @available(*, deprecated, message: "Use newPub")
+            var pub: AnyPublisher<Int, Never> { return self.pubSubject.eraseToAnyPublisher() }
+            private(set) var pubSubject = PassthroughSubject<Int, Never>()
+        }
+    }
+}
+
+@Fixture enum memberAvailableRxVar {
+    /// @mockable(rx: stream = PublishSubject)
+    protocol Foo {
+        @available(*, deprecated, message: "Use newStream")
+        var stream: Observable<Int> { get }
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            init(stream: Observable<Int> = PublishSubject<Int>()) {
+                self.stream = stream
+            }
+
+            private(set) var streamSubjectSetCallCount = 0
+            var _stream: Observable<Int>? { didSet { streamSubjectSetCallCount += 1 } }
+            var streamSubject = PublishSubject<Int>() { didSet { streamSubjectSetCallCount += 1 } }
+            @available(*, deprecated, message: "Use newStream")
+            var stream: Observable<Int> {
+                get { return _stream ?? streamSubject }
+                set { if let val = newValue as? PublishSubject<Int> { streamSubject = val } else { _stream = newValue } }
+            }
+        }
+    }
+}
+
+@Fixture enum memberAvailableSubscript {
+    /// @mockable
+    protocol Foo {
+        @available(*, deprecated, message: "Use values(for:)")
+        subscript(key: String) -> Int { get }
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            private(set) var subscriptCallCount = 0
+            var subscriptHandler: ((String) -> Int)?
+            @available(*, deprecated, message: "Use values(for:)")
+            subscript(key: String) -> Int {
+                get {
+                subscriptCallCount += 1
+                if let subscriptHandler = subscriptHandler {
+                    return subscriptHandler(key)
+                }
+                return 0
+                }
+            }
+        }
+    }
+}
+
+@Fixture enum memberAvailableInit {
+    /// @mockable
+    protocol Foo {
+        @available(*, deprecated, message: "Use init() instead")
+        init(token: String)
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            private var _token: String!
+            init() { }
+            @available(*, deprecated, message: "Use init() instead")
+            required init(token: String = "") {
+                self._token = token
             }
         }
     }

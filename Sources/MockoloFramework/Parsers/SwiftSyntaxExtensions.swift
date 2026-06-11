@@ -180,6 +180,8 @@ extension MemberBlockItemSyntax {
         } else if let patMember = self.decl.as(AssociatedTypeDeclSyntax.self) {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declKind)
             let item = patMember.model(with: acl, declKind: declKind, overrides: metadata?.typeAliases)
+            // Behavioral attributes are deliberately dropped: the generated typealias is referenced
+            // throughout the mock's infrastructure, so keeping them would spread warnings through generated code.
             return (item, patMember.attributes.platformAvailableString, false)
         } else if let taMember = self.decl.as(TypeAliasDeclSyntax.self) {
             let acl = memberAcl(taMember.modifiers, encloserAcl, declKind)
@@ -424,12 +426,47 @@ extension AttributeListSyntax {
     private func isBehavioralAvailable(_ element: AttributeListSyntax.Element) -> Bool {
         guard case .attribute(let attr) = element,
               attr.attributeName.trimmedDescription == "available",
-              case .availability(let args) = attr.arguments,
-              let first = args.first,
-              case .token(let token) = first.argument,
-              token.tokenKind == .binaryOperator("*")
+              case .availability(let args) = attr.arguments
         else { return false }
-        return true
+
+        // Wildcard form (`@available(*, deprecated)`, `(*, noasync)`, ...) is always behavioral.
+        if let first = args.first,
+           case .token(let token) = first.argument,
+           token.tokenKind == .binaryOperator("*") {
+            return true
+        }
+
+        // Extended platform form (`@available(iOS, deprecated: 12.0)`): behavioral only if it
+        // deprecates without gating existence. Existence-gating forms must keep hoisting to
+        // the class, since the mock's infrastructure references the member's types unconditionally.
+        var deprecates = false
+        for arg in args {
+            switch arg.argument {
+            case .availabilityVersionRestriction(let platformVersion):
+                if platformVersion.version != nil {
+                    return false
+                }
+            case .availabilityLabeledArgument(let labeled):
+                switch labeled.label.text {
+                case "deprecated":
+                    deprecates = true
+                case "introduced", "obsoleted":
+                    return false
+                default:
+                    break
+                }
+            case .token(let token):
+                switch token.text {
+                case "deprecated", "noasync":
+                    deprecates = true
+                case "unavailable":
+                    return false
+                default:
+                    break
+                }
+            }
+        }
+        return deprecates
     }
 
     var behavioralAvailableDescriptions: [String] {
@@ -657,6 +694,7 @@ extension InitializerDeclSyntax {
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
+                           attributes: self.attributes.behavioralAvailableDescriptions,
                            funcsWithArgsHistory: [],
                            customModifiers: [:],
                            modelDescription: self.description,

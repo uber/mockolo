@@ -206,13 +206,14 @@ extension NominalModel {
                     throwing: m.throwing
                 )
 
+                let attrPrefix = m.attributes.asAttributePrefix
                 if override {
                     let paramsList = m.params.map { param in
                         return "\(param.name): \(param.name.safeName)"
                     }.joined(separator: ", ")
 
                     return """
-                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr){
+                    \(attrPrefix)\(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr){
                     \(2.tab)super.init(\(paramsList))
                     \(1.tab)}
                     """
@@ -227,7 +228,7 @@ extension NominalModel {
                     }.joined(separator: "\n")
 
                     return """
-                    \(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr){
+                    \(attrPrefix)\(1.tab)\(modifier)\(mAcl)init\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr){
                     \(paramsAssign)
                     \(1.tab)}
                     """
