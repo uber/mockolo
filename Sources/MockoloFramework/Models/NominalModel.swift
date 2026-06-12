@@ -21,7 +21,7 @@ final class NominalModel: Model {
     let inheritedTypeName: String
     let genericWhereConstraints: [String]
     let type: SwiftType
-    let attribute: String
+    let attributes: [Attribute]
     let accessLevel: String
     let declKindOfMockAnnotatedBaseType: NominalTypeDeclKind
     let entities: [(String, Model)]
@@ -39,7 +39,7 @@ final class NominalModel: Model {
          acl: String,
          declKindOfMockAnnotatedBaseType: NominalTypeDeclKind,
          declKind: NominalTypeDeclKind,
-         attributes: [String],
+         attributes: [Attribute],
          offset: Int64,
          inheritedTypeName: String,
          genericWhereConstraints: [String],
@@ -58,7 +58,7 @@ final class NominalModel: Model {
         self.offset = offset
         self.inheritedTypeName = inheritedTypeName
         self.genericWhereConstraints = genericWhereConstraints
-        self.attribute = Set(attributes.filter {$0.contains(String.available)}).joined(separator: " ")
+        self.attributes = attributes
         self.accessLevel = acl
         self.requiresSendable = requiresSendable
     }
@@ -70,7 +70,6 @@ final class NominalModel: Model {
         return applyNominalTemplate(
             name: name,
             accessLevel: accessLevel,
-            attribute: attribute,
             arguments: arguments,
             initParamCandidates: initParamCandidates,
             declaredInits: declaredInits,

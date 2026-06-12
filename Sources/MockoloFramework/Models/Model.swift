@@ -57,6 +57,9 @@ protocol Model: AnyObject {
     /// Offset where this type is declared
     var offset: Int64 { get }
 
+    /// Attributes (e.g. `@available`) to be rendered with this model
+    var attributes: [Attribute] { get }
+
     /// Applies a corresponding template to this model to output mocks
     func render(
         context: RenderContext,
@@ -81,6 +84,8 @@ extension Model {
     var processed: Bool {
         return false
     }
+
+    var attributes: [Attribute] { [] }
 }
 
 protocol TypealiasRenderableModel: Model {

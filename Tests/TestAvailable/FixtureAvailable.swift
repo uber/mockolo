@@ -141,7 +141,7 @@ import MockoloFramework
     }
 
     @Fixture enum expected {
-        @available(iOS 99.0, *) @available(macOS 99.0, *) @available(macOS 80.0, *)
+        @available(macOS 99.0, *) @available(macOS 80.0, *) @available(iOS 99.0, *)
         class FooMock: Foo {
             init() { }
             init(ccc: CCC) {

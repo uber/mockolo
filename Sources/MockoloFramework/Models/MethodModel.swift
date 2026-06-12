@@ -40,7 +40,7 @@ final class MethodModel: Model {
     let isStatic: Bool
     let isAsync: Bool
     let throwing: ThrowingKind
-    let attributes: [String]
+    let attributes: [Attribute]
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
     var modelType: ModelType {
@@ -178,7 +178,7 @@ final class MethodModel: Model {
          isStatic: Bool,
          offset: Int64,
          length: Int64,
-         attributes: [String] = [],
+         attributes: [Attribute] = [],
          funcsWithArgsHistory: [String],
          customModifiers: [String: Modifier],
          modelDescription: String?,

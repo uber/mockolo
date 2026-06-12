@@ -17,14 +17,14 @@
 extension NominalModel {
     func applyNominalTemplate(name: String,
                               accessLevel: String,
-                              attribute: String,
                               arguments: GenerationArguments,
                               initParamCandidates: [VariableModel],
                               declaredInits: [MethodModel],
                               entities: [(String, Model)]) -> String {
 
         processCombineAliases(entities: entities)
-        
+
+        let attribute = attributes.map(\.description).joined(separator: " ")
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
 
         let (aliasItems,
@@ -206,7 +206,7 @@ extension NominalModel {
                     throwing: m.throwing
                 )
 
-                let attrPrefix = m.attributes.asAttributePrefix
+                let attrPrefix = m.attributes.applyAttributeTemplate()
                 if override {
                     let paramsList = m.params.map { param in
                         return "\(param.name): \(param.name.safeName)"

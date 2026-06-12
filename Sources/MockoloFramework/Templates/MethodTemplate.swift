@@ -152,7 +152,7 @@ extension MethodModel {
             )
             let genericWhereStr = model.genericWhereClause.map { "\($0) " } ?? ""
 
-            let attrPrefix = model.attributes.asAttributePrefix
+            let attrPrefix = model.attributes.applyAttributeTemplate()
             let functionDecl = """
             \(attrPrefix)\(1.tab)\(declModifiers)\(overrideStr)\(modifierTypeStr)\(keyword)\(model.name)\(genericTypesStr)(\(paramDeclsStr)) \(suffixStr)\(returnClause)\(genericWhereStr){
             \(wrapped)

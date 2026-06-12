@@ -23,10 +23,9 @@ extension VariableModel {
                                allowSetCallCount: Bool,
                                shouldOverride: Bool,
                                accessLevel: String,
-                               attributes: [String],
                                context: RenderContext,
                                arguments: GenerationArguments) -> String {
-        let attrPrefix = attributes.asAttributePrefix
+        let attrPrefix = attributes.applyAttributeTemplate()
         let underlyingSetCallCount = "\(name)\(String.setCallCountSuffix)"
         let underlyingVarDefaultVal = type.defaultVal()
         var underlyingType = type.typeName
@@ -136,9 +135,8 @@ extension VariableModel {
                                       encloser: String,
                                       shouldOverride: Bool,
                                       isStatic: Bool,
-                                      accessLevel: String,
-                                      attributes: [String]) -> String? {
-        let attrPrefix = attributes.asAttributePrefix
+                                      accessLevel: String) -> String? {
+        let attrPrefix = attributes.applyAttributeTemplate()
         let typeName = type.typeName
 
         guard
@@ -229,9 +227,8 @@ extension VariableModel {
                                  shouldOverride: Bool,
                                  allowSetCallCount: Bool,
                                  isStatic: Bool,
-                                 accessLevel: String,
-                                 attributes: [String]) -> String? {
-        let attrPrefix = attributes.asAttributePrefix
+                                 accessLevel: String) -> String? {
+        let attrPrefix = attributes.applyAttributeTemplate()
 
         let staticSpace = isStatic ? "\(String.static) " : ""
         let privateSetSpace = allowSetCallCount ? "" : "\(String.privateSet) "

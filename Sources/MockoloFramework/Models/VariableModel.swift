@@ -14,7 +14,7 @@ final class VariableModel: Model {
     let type: SwiftType?
     let offset: Int64
     let accessLevel: String
-    let attributes: [String]
+    let attributes: [Attribute]
     /// Indicates whether this model can be used as a parameter to an initializer
     let canBeInitParam: Bool
     let processed: Bool
@@ -50,7 +50,7 @@ final class VariableModel: Model {
          storageKind: MockStorageKind,
          canBeInitParam: Bool,
          offset: Int64,
-         attributes: [String] = [],
+         attributes: [Attribute] = [],
          rxTypes: [String: String]?,
          customModifiers: [String: Modifier]?,
          modelDescription: String?,
@@ -105,8 +105,7 @@ final class VariableModel: Model {
                                                              encloser: enclosingType.typeName,
                                                              shouldOverride: shouldOverride,
                                                              isStatic: isStatic,
-                                                             accessLevel: accessLevel,
-                                                             attributes: attributes) {
+                                                             accessLevel: accessLevel) {
                 return combineVar
             }
         }
@@ -118,8 +117,7 @@ final class VariableModel: Model {
                                                shouldOverride: shouldOverride,
                                                allowSetCallCount: arguments.allowSetCallCount,
                                                isStatic: isStatic,
-                                               accessLevel: accessLevel,
-                                               attributes: attributes) {
+                                               accessLevel: accessLevel) {
             return rxVar
         }
 
@@ -131,7 +129,6 @@ final class VariableModel: Model {
                                      allowSetCallCount: arguments.allowSetCallCount,
                                      shouldOverride: shouldOverride,
                                      accessLevel: accessLevel,
-                                     attributes: attributes,
                                      context: context,
                                      arguments: arguments)
     }

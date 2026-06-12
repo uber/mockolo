@@ -24,13 +24,6 @@ extension Int {
     }
 }
 
-extension [String] {
-    var asAttributePrefix: String {
-        guard !isEmpty else { return "" }
-        return map { "\(1.tab)\($0)" }.joined(separator: "\n") + "\n"
-    }
-}
-
 extension String {
     static public let protocolDecl = "protocol ".data(using: .utf8)
     static public let classDecl = "class ".data(using: .utf8)
@@ -62,7 +55,6 @@ extension String {
     static let anyObject = "AnyObject"
     static let optional = "Optional"
     static let fatalError = "fatalError"
-    static let available = "available"
     static let `public` = "public"
     static let `open` = "open"
     static let initializer = "init"
