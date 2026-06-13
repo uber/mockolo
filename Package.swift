@@ -46,6 +46,8 @@ let package = Package(
         .testTarget(
             name: "MockoloTests",
             dependencies: [
+                .product(name: "SwiftSyntax", package: "swift-syntax"),
+                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
                 "MockoloFramework",
                 "MockoloTestSupportMacros",
             ],
