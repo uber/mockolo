@@ -14,29 +14,40 @@
 //  limitations under the License.
 //
 
-/// Represents an attribute attached to a declaration, parsed from an `AttributeList`.
-struct Attribute: Hashable {
-    enum Kind: Hashable {
-        /// Any attribute other than `@available` (e.g. `@objc`, `@MainActor`).
-        case regular
-        /// An `@available` that only affects usage diagnostics
-        /// (e.g. `@available(*, deprecated)`); kept on the generated member.
-        case behavioralAvailable
-        /// An `@available` that gates the existence of the declaration
-        /// (e.g. `@available(iOS 15.0, *)`, `introduced:`, `obsoleted:`,
-        /// platform-scoped `unavailable`); hoisted to the mock declaration
-        /// since the mock's infrastructure references the member's types
-        /// unconditionally.
-        case platformAvailable
+/// Represents an attribute attached to a declaration
+struct Attribute: Hashable, CustomStringConvertible {
+    var description: String
+
+    enum KnownKind: Hashable {
+        enum AvailableKind {
+            /// `@available(*, deprecated)`, `@available(*, noasync)`
+            case behavioral
+
+            /// `@available(iOS 26.0, *)`, `@available(iOS, introduced: 26.0)`
+            case platform
+        }
+        case available(AvailableKind)
+    }
+    var kind: KnownKind?
+
+    var isAvailable: Bool {
+        if case .available = kind {
+            return true
+        }
+        return false
     }
 
-    /// Source text of the attribute, e.g. `@available(iOS 15.0, *)`.
-    let description: String
-    let kind: Kind
+    var isBehavioralAvailable: Bool {
+        if case .available(.behavioral) = kind {
+            return true
+        }
+        return false
+    }
 
-    var isAvailable: Bool { kind != .regular }
-
-    var isBehavioralAvailable: Bool { kind == .behavioralAvailable }
-
-    var isPlatformAvailable: Bool { kind == .platformAvailable }
+    var isPlatformAvailable: Bool {
+        if case .available(.platform) = kind {
+            return true
+        }
+        return false
+    }
 }

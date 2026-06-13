@@ -24,7 +24,6 @@ extension NominalModel {
 
         processCombineAliases(entities: entities)
 
-        let attribute = attributes.map(\.description).joined(separator: " ")
         let acl = accessLevel.isEmpty ? "" : accessLevel + " "
 
         let (aliasItems,
@@ -86,6 +85,7 @@ extension NominalModel {
             uncheckedSendableStr = ", @unchecked Sendable"
         }
 
+        let attribute = attributes.map(\.description).joined(separator: " ")
         let finalStr = arguments.mockFinal || requiresSendable ? String.final.withSpace : ""
         let template = """
         \(attribute)

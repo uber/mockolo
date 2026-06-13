@@ -15,8 +15,6 @@
 //
 
 extension [Attribute] {
-    /// Renders each attribute on its own indented line (with a trailing newline)
-    /// for prefixing a member declaration.
     func applyAttributeTemplate() -> String {
         guard !isEmpty else { return "" }
         return map { "\(1.tab)\($0.description)" }.joined(separator: "\n") + "\n"

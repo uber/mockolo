@@ -413,61 +413,39 @@ fileprivate func findNamespaces(parent: Syntax?) -> [String] {
 
 extension AttributeListSyntax {
     var parsedAttributes: [Attribute] {
-        return compactMap { element in
+        return compactMap { element -> Attribute? in
             guard case .attribute(let attr) = element else {
                 return nil
             }
-            let kind: Attribute.Kind
-            if attr.attributeName.trimmedDescription == "available" {
-                kind = isBehavioral(availabilityAttribute: attr) ? .behavioralAvailable : .platformAvailable
-            } else {
-                kind = .regular
+            let kind: Attribute.KnownKind?
+            switch attr.attributeName.description {
+            case "available":
+                kind = .available(Self.isPlatformAvailability(attr: attr) ? .platform : .behavioral)
+            default:
+                kind = nil
             }
             return Attribute(description: attr.trimmedDescription, kind: kind)
         }
     }
 
-    private func isBehavioral(availabilityAttribute attr: AttributeSyntax) -> Bool {
+    private static func isPlatformAvailability(attr: AttributeSyntax) -> Bool {
         guard case .availability(let args) = attr.arguments else { return false }
 
-        // Wildcard form (`@available(*, deprecated)`, `(*, noasync)`, ...) is always behavioral.
-        if let first = args.first,
-           case .token(let token) = first.argument,
-           token.tokenKind == .binaryOperator("*") {
+        switch args.first?.argument {
+        case .token(let token) where token.tokenKind == .binaryOperator("*"):
+            // Wildcard form (`@available(*, deprecated)`, `(*, noasync)`, ...) is always behavioral.
+            return false
+        case .availabilityVersionRestriction(let platformVersion) where platformVersion.version != nil:
+            // Version specified with a platform (`@available(iOS 26.0, *)`), always platform
             return true
+        default:
+            break
         }
 
-        // Extended platform form (`@available(iOS, deprecated: 12.0)`): behavioral only if it
-        // deprecates without gating existence. Existence-gating forms must keep hoisting to
-        // the class, since the mock's infrastructure references the member's types unconditionally.
-        var deprecates = false
-        for arg in args {
-            switch arg.argument {
-            case .availabilityVersionRestriction(let platformVersion):
-                if platformVersion.version != nil {
-                    return false
-                }
-            case .availabilityLabeledArgument(let labeled):
-                switch labeled.label.text {
-                case "deprecated":
-                    deprecates = true
-                case "introduced", "obsoleted":
-                    return false
-                default:
-                    break
-                }
-            case .token(let token):
-                switch token.text {
-                case "deprecated", "noasync":
-                    deprecates = true
-                case "unavailable":
-                    return false
-                default:
-                    break
-                }
-            }
+        let platformLimitationLabels: Set<String> = ["introduced", "obsoleted", "unavailable"]
+        return args.contains { arg in
+            platformLimitationLabels.contains(arg.trimmedDescription)
         }
-        return deprecates
     }
 
     fileprivate var mayHaveGlobalActor: Bool {
