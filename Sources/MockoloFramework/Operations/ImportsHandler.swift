@@ -22,7 +22,7 @@ func handleImports(pathToImportsMap: ImportMap,
                    testableImports: [String]?,
                    relevantPaths: [String]) -> String {
     var topLevelImports: [Import] = []
-    var conditionalBlocks: [ConditionalImportBlock] = []
+    var conditionalBlocks: [ConditionalBlock] = []
 
     // 1. Collect imports from all relevant files
     for (path, parsedImports) in pathToImportsMap {
@@ -98,7 +98,12 @@ private func renderImportContents(
             resolveAccumulatedSimpleImports()
 
             var result = ""
+            var hasImportOutput = false
             for clause in block.clauses {
+                let rendered = renderImportContents(clause.imports, excludeImports: excludeImports, testableImports: testableImports)
+                if !rendered.isEmpty {
+                    hasImportOutput = true
+                }
                 switch clause.type {
                 case .if(let condition):
                     result += "#if \(condition)\n"
@@ -107,12 +112,13 @@ private func renderImportContents(
                 case .else:
                     result += "#else\n"
                 }
-                // Recursively render nested block
-                result += renderImportContents(clause.contents, excludeImports: excludeImports, testableImports: testableImports)
+                result += rendered
                 result += "\n"
             }
             result += "#endif"
-            clauseLines.append(result)
+            if hasImportOutput {
+                clauseLines.append(result)
+            }
         }
     }
     resolveAccumulatedSimpleImports()
@@ -126,7 +132,7 @@ private func visitModuleName(_ contents: [ImportContent]) -> [String] {
         case .simple(let `import`):
             return [`import`.moduleName]
         case .conditional(let block):
-            return visitModuleName(block.clauses.flatMap(\.contents))
+            return visitModuleName(block.clauses.flatMap(\.imports))
         }
     }
 }
