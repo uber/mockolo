@@ -14,7 +14,7 @@ final class VariableModel: Model {
     let type: SwiftType?
     let offset: Int64
     let accessLevel: String
-    let attributes: [String]?
+    let attributes: [Attribute]
     /// Indicates whether this model can be used as a parameter to an initializer
     let canBeInitParam: Bool
     let processed: Bool
@@ -50,6 +50,7 @@ final class VariableModel: Model {
          storageKind: MockStorageKind,
          canBeInitParam: Bool,
          offset: Int64,
+         attributes: [Attribute] = [],
          rxTypes: [String: String]?,
          customModifiers: [String: Modifier]?,
          modelDescription: String?,
@@ -65,7 +66,7 @@ final class VariableModel: Model {
         self.rxTypes = rxTypes
         self.customModifiers = customModifiers
         self.accessLevel = acl ?? ""
-        self.attributes = nil
+        self.attributes = attributes
         self.modelDescription = modelDescription
         self.combineType = combineType
     }

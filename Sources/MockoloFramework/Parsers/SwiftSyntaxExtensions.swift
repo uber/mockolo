@@ -151,43 +151,45 @@ extension MemberBlockItemSyntax {
         return modifiers?.acl ?? ""
     }
 
-    func transformToModel(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool)? {
+    func transformToModel(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, [Attribute], Bool)? {
         if let varMember = self.decl.as(VariableDeclSyntax.self) {
             if validateMember(varMember.modifiers, declKind, processed: processed) {
                 let acl = memberAcl(varMember.modifiers, encloserAcl, declKind)
                 if let item = varMember.models(with: acl, metadata: metadata, processed: processed).first {
-                    return (item, varMember.attributes.trimmedDescription, false)
+                    return (item, varMember.attributes.parsedAttributes.filter(\.isPlatformAvailable), false)
                 }
             }
         } else if let funcMember = self.decl.as(FunctionDeclSyntax.self) {
             if validateMember(funcMember.modifiers, declKind, processed: processed) {
                 let acl = memberAcl(funcMember.modifiers, encloserAcl, declKind)
                 let item = funcMember.model(with: acl, declKind: declKind, funcsWithArgsHistory: metadata?.funcsWithArgsHistory, customModifiers: metadata?.modifiers, processed: processed)
-                return (item, funcMember.attributes.trimmedDescription, false)
+                return (item, funcMember.attributes.parsedAttributes.filter(\.isPlatformAvailable), false)
             }
         } else if let subscriptMember = self.decl.as(SubscriptDeclSyntax.self) {
             if validateMember(subscriptMember.modifiers, declKind, processed: processed) {
                 let acl = memberAcl(subscriptMember.modifiers, encloserAcl, declKind)
                 let item = subscriptMember.model(with: acl, declKind: declKind, processed: processed)
-                return (item, subscriptMember.attributes.trimmedDescription, false)
+                return (item, subscriptMember.attributes.parsedAttributes.filter(\.isPlatformAvailable), false)
             }
         } else if let initMember = self.decl.as(InitializerDeclSyntax.self) {
             if validateInit(initMember, declKind, processed: processed) {
                 let acl = memberAcl(initMember.modifiers, encloserAcl, declKind)
                 let item = initMember.model(with: acl, declKind: declKind, processed: processed)
-                return (item, initMember.attributes.trimmedDescription, true)
+                return (item, initMember.attributes.parsedAttributes.filter(\.isPlatformAvailable), true)
             }
         } else if let patMember = self.decl.as(AssociatedTypeDeclSyntax.self) {
             let acl = memberAcl(patMember.modifiers, encloserAcl, declKind)
             let item = patMember.model(with: acl, declKind: declKind, overrides: metadata?.typeAliases)
-            return (item, patMember.attributes.trimmedDescription, false)
+            // Behavioral attributes are deliberately dropped: the generated typealias is referenced
+            // throughout the mock's infrastructure, so keeping them would spread warnings through generated code.
+            return (item, patMember.attributes.parsedAttributes.filter(\.isPlatformAvailable), false)
         } else if let taMember = self.decl.as(TypeAliasDeclSyntax.self) {
             let acl = memberAcl(taMember.modifiers, encloserAcl, declKind)
             let item = taMember.model(with: acl, declKind: declKind, overrides: metadata?.typeAliases, processed: processed)
-            return (item, taMember.attributes.trimmedDescription, false)
+            return (item, taMember.attributes.parsedAttributes.filter(\.isPlatformAvailable), false)
         } else if let ifMacroMember = self.decl.as(IfConfigDeclSyntax.self) {
-            let (item, attr, initFlag) = ifMacroMember.model(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed)
-            return (item, attr, initFlag)
+            let (item, attrs, initFlag) = ifMacroMember.model(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed)
+            return (item, attrs, initFlag)
         }
 
         return nil
@@ -211,16 +213,14 @@ extension MemberBlockItemListSyntax {
     }
 
     func memberData(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> EntityNodeSubContainer {
-        var attributeList = [String]()
+        var attributeList = [Attribute]()
         var memberList = [Model]()
         var hasInit = false
 
         for m in self {
-            if let (item, attr, initFlag) = m.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
+            if let (item, attrs, initFlag) = m.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
                 memberList.append(item)
-                if let attrDesc = attr {
-                    attributeList.append(attrDesc)
-                }
+                attributeList.append(contentsOf: attrs)
                 hasInit = hasInit || initFlag
             }
         }
@@ -229,9 +229,9 @@ extension MemberBlockItemListSyntax {
 }
 
 extension IfConfigDeclSyntax {
-    func model(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, String?, Bool) {
+    func model(with encloserAcl: String, declKind: NominalTypeDeclKind, metadata: AnnotationMetadata?, processed: Bool) -> (Model, [Attribute], Bool) {
         var clauseList = [IfMacroModel.Clause]()
-        var attrDesc: String?
+        var attributes = [Attribute]()
         var hasInit = false
 
         for cl in self.clauses {
@@ -242,10 +242,10 @@ extension IfConfigDeclSyntax {
             var subModels = [Model]()
             if let list = cl.elements?.as(MemberBlockItemListSyntax.self) {
                 for element in list {
-                    if let (item, attr, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
+                    if let (item, attrs, initFlag) = element.transformToModel(with: encloserAcl, declKind: declKind, metadata: metadata, processed: processed) {
                         subModels.append(item)
-                        if let attr = attr, attr.contains(String.available) {
-                            attrDesc = attr
+                        if !attrs.isEmpty {
+                            attributes = attrs
                         }
                         hasInit = hasInit || initFlag
                     }
@@ -266,7 +266,7 @@ extension IfConfigDeclSyntax {
         }
 
         let macroModel = IfMacroModel(clauses: clauseList, offset: self.offset)
-        return (macroModel, attrDesc, hasInit)
+        return (macroModel, attributes, hasInit)
     }
 }
 
@@ -303,8 +303,8 @@ extension ProtocolDeclSyntax: EntityNode {
         return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
-    var attributeDescriptions: [String] {
-        return attributes.descriptions
+    var parsedAttributes: [Attribute] {
+        attributes.parsedAttributes
     }
 
     func annotationMetadata(with annotation: String) -> AnnotationMetadata? {
@@ -354,8 +354,8 @@ extension ClassDeclSyntax: EntityNode {
         return genericWhereClause?.requirements.map { $0.with(\.trailingComma, nil).trimmedDescription } ?? []
     }
 
-    var attributeDescriptions: [String] {
-        return attributes.descriptions
+    var parsedAttributes: [Attribute] {
+        attributes.parsedAttributes
     }
 
     var isFinal: Bool {
@@ -412,13 +412,45 @@ fileprivate func findNamespaces(parent: Syntax?) -> [String] {
 }
 
 extension AttributeListSyntax {
-    fileprivate var descriptions: [String] {
-        return compactMap { element in
-            guard case .attribute(let attribute) = element else {
+    var parsedAttributes: [Attribute] {
+        return compactMap { element -> Attribute? in
+            guard case .attribute(let attr) = element else {
                 return nil
             }
-            return attribute.trimmedDescription
+            let kind: Attribute.KnownKind?
+            switch attr.attributeName.description {
+            case "available":
+                kind = .available(Self.isPlatformAvailability(attr: attr) ? .platform : .behavioral)
+            default:
+                kind = nil
+            }
+            return Attribute(description: attr.trimmedDescription, kind: kind)
         }
+    }
+
+    private static func isPlatformAvailability(attr: AttributeSyntax) -> Bool {
+        guard case .availability(let args) = attr.arguments else { return false }
+
+        switch args.first?.argument {
+        case .token(let token) where token.tokenKind == .binaryOperator("*"):
+            // Wildcard form (`@available(*, deprecated)`, `(*, noasync)`, ...) is always behavioral.
+            return false
+        case .availabilityVersionRestriction(let platformVersion) where platformVersion.version != nil:
+            // Version specified with a platform (`@available(iOS 26.0, *)`), always platform
+            return true
+        default:
+            break
+        }
+
+        let platformLimitationLabels: Set<String> = ["introduced", "obsoleted", "unavailable"]
+        return args.contains(where: { arg in
+            switch arg.argument {
+            case .availabilityLabeledArgument(let labeled):
+                return platformLimitationLabels.contains(labeled.label.text)
+            default:
+                return platformLimitationLabels.contains(arg.trimmedDescription)
+            }
+        })
     }
 
     fileprivate var mayHaveGlobalActor: Bool {
@@ -498,6 +530,7 @@ extension VariableDeclSyntax {
                                  storageKind: storageKind,
                                  canBeInitParam: potentialInitParam,
                                  offset: v.offset,
+                                 attributes: self.attributes.parsedAttributes.filter(\.isBehavioralAvailable),
                                  rxTypes: metadata?.varTypes,
                                  customModifiers: metadata?.modifiers,
                                  modelDescription: self.description,
@@ -549,6 +582,7 @@ extension SubscriptDeclSyntax {
                                          isStatic: isStatic,
                                          offset: self.offset,
                                          length: self.length,
+                                         attributes: self.attributes.parsedAttributes.filter(\.isBehavioralAvailable),
                                          funcsWithArgsHistory: [],
                                          customModifiers: [:],
                                          modelDescription: self.description,
@@ -580,6 +614,7 @@ extension FunctionDeclSyntax {
                                     isStatic: isStatic,
                                     offset: self.offset,
                                     length: self.length,
+                                    attributes: self.attributes.parsedAttributes.filter(\.isBehavioralAvailable),
                                     funcsWithArgsHistory: funcsWithArgsHistory ?? [],
                                     customModifiers: customModifiers ?? [:],
                                     modelDescription: self.description,
@@ -624,6 +659,7 @@ extension InitializerDeclSyntax {
                            isStatic: false,
                            offset: self.offset,
                            length: self.length,
+                           attributes: self.attributes.parsedAttributes.filter(\.isBehavioralAvailable),
                            funcsWithArgsHistory: [],
                            customModifiers: [:],
                            modelDescription: self.description,

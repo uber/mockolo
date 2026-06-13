@@ -40,6 +40,7 @@ final class MethodModel: Model {
     let isStatic: Bool
     let isAsync: Bool
     let throwing: ThrowingKind
+    let attributes: [Attribute]
     let funcsWithArgsHistory: [String]
     let customModifiers: [String : Modifier]
     var modelType: ModelType {
@@ -177,6 +178,7 @@ final class MethodModel: Model {
          isStatic: Bool,
          offset: Int64,
          length: Int64,
+         attributes: [Attribute] = [],
          funcsWithArgsHistory: [String],
          customModifiers: [String: Modifier],
          modelDescription: String?,
@@ -193,6 +195,7 @@ final class MethodModel: Model {
         self.genericTypeParams = genericTypeParams
         self.genericWhereClause = genericWhereClause
         self.processed = processed
+        self.attributes = attributes
         self.funcsWithArgsHistory = funcsWithArgsHistory
         self.customModifiers = customModifiers
         self.modelDescription = modelDescription

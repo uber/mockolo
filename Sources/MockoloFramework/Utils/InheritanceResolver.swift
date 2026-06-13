@@ -29,14 +29,14 @@ func lookupEntities(key: String,
                     declKind: NominalTypeDeclKind,
                     protocolMap: [String: Entity],
                     inheritanceMap: [String: Entity],
-                    inheritanceByProtocolMap: [String: Entity]) -> ([Model], [Model], [String], Set<String>, [String]) {
+                    inheritanceByProtocolMap: [String: Entity]) -> ([Model], [Model], [Attribute], Set<String>, [String]) {
 
     // Used to keep track of types to be mocked
     var models = [Model]()
     // Used to keep track of types that were already mocked
     var processedModels = [Model]()
     // Gather attributes declared in current or parent protocols
-    var attributes = [String]()
+    var attributes = [Attribute]()
     // Gather inherited types declared in current or parent protocols
     var inheritedTypes = Set<String>()
     // Gather filepaths used for imports

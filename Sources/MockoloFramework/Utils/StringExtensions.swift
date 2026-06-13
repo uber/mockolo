@@ -55,7 +55,6 @@ extension String {
     static let anyObject = "AnyObject"
     static let optional = "Optional"
     static let fatalError = "fatalError"
-    static let available = "available"
     static let `public` = "public"
     static let `open` = "open"
     static let initializer = "init"
