@@ -443,9 +443,14 @@ extension AttributeListSyntax {
         }
 
         let platformLimitationLabels: Set<String> = ["introduced", "obsoleted", "unavailable"]
-        return args.contains { arg in
-            platformLimitationLabels.contains(arg.trimmedDescription)
-        }
+        return args.contains(where: { arg in
+            switch arg.argument {
+            case .availabilityLabeledArgument(let labeled):
+                return platformLimitationLabels.contains(labeled.label.text)
+            default:
+                return platformLimitationLabels.contains(arg.trimmedDescription)
+            }
+        })
     }
 
     fileprivate var mayHaveGlobalActor: Bool {
