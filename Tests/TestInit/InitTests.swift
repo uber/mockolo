@@ -55,4 +55,11 @@ class InitTests: MockoloTestCase {
             dstContent: typedThrowableInitMock
         )
     }
+
+    func testInitWithDictionaryThatHasFunction() {
+        verify(
+            srcContent: initWithDictionaryThatHasFunction._source,
+            dstContent: initWithDictionaryThatHasFunction.expected._source
+        )
+    }
 }

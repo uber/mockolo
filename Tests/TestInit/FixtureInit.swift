@@ -354,3 +354,21 @@ class MyProtocolMock: MyProtocol {
     }
 }
 """
+
+@Fixture enum initWithDictionaryThatHasFunction {
+    /// @mockable
+    protocol Tester {
+        var testDictionary: [String: () -> String] { get }
+    }
+
+    @Fixture enum expected {
+        class TesterMock: Tester {
+            init() { }
+            init(testDictionary: [String: () -> String] = [String: () -> String]()) {
+                self.testDictionary = testDictionary
+            }
+
+            var testDictionary: [String: () -> String] = [String: () -> String]()
+        }
+    }
+}
