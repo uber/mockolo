@@ -34,7 +34,7 @@ struct Executor: ParsableCommand {
 
     @Option(name: [.customShort("j"), .long],
             help: ArgumentHelp(
-                "Maximum number of threads to execute concurrently (default = number of cores on the running machine).",
+                "Maximum number of threads to execute concurrently (default = 1).",
                 valueName: "n"))
     private var concurrencyLimit: Int?
 
