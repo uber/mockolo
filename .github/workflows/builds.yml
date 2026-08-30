@@ -25,9 +25,9 @@ jobs:
             version: "6.1"
           - os: ubuntu-latest
             version: "6.2"
-          - os: macos-latest
+          - os: macos-15
             version: "16.2" # Swift 6.0
-          - os: macos-latest
+          - os: macos-15
             version: "16.4" # Swift 6.1
           - os: macos-latest
             version: "26.1" # Swift 6.2
