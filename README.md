@@ -142,7 +142,7 @@ OPTIONS:
   --annotation <annotation>
                           A custom annotation string used to indicate if a type should be mocked (default = @mockable). (default: @mockable)
   -j, --concurrency-limit <n>
-                          Maximum number of threads to execute concurrently (default = number of cores on the running machine).
+                          Maximum number of threads to execute concurrently (default = 1).
   --custom-imports <custom-imports>
                           If set, custom module imports (separated by a space) will be added to the final import statement list.
   --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
@@ -456,4 +456,3 @@ Mockolo is licensed under Apache License 2.0. See [LICENSE](LICENSE.txt) for mor
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-
