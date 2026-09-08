@@ -12,7 +12,7 @@
 
 
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [Int]()
+            var fooFuncArgValues: [Int] = []
             var fooFuncHandler: ((Int) -> ())?
             func fooFunc(val: Int) {
                 fooFuncCallCount += 1
@@ -23,7 +23,7 @@
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [[Int]]()
+            var barFuncArgValues: [[Int]] = []
             var barFuncHandler: (([Int]) -> ())?
             func barFunc(for: [Int]) {
                 barFuncCallCount += 1
@@ -34,7 +34,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [(arg: String, default: Float)]()
+            var bazFuncArgValues: [(arg: String, default: Float)] = []
             var bazFuncHandler: ((String, Float) -> ())?
             func bazFunc(arg: String, default: Float) {
                 bazFuncCallCount += 1
@@ -61,7 +61,7 @@
 
 
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [Int]()
+            var fooFuncArgValues: [Int] = []
             var fooFuncHandler: ((Int) -> ())?
             func fooFunc(val: Int) {
                 fooFuncCallCount += 1
@@ -83,7 +83,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [(arg: String, default: Float)]()
+            var bazFuncArgValues: [(arg: String, default: Float)] = []
             var bazFuncHandler: ((String, Float) -> ())?
             func bazFunc(arg: String, default: Float) {
                 bazFuncCallCount += 1
@@ -122,7 +122,7 @@
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [Int]()
+            var barFuncArgValues: [Int] = []
             var barFuncHandler: ((Int) -> ())?
             func barFunc(val: Int) {
                 barFuncCallCount += 1
@@ -134,7 +134,7 @@
             }
 
             private(set) var bazFuncCallCount = 0
-            var bazFuncArgValues = [Int]()
+            var bazFuncArgValues: [Int] = []
             var bazFuncHandler: ((Int) -> ())?
             func bazFunc(_ val: Int) {
                 bazFuncCallCount += 1
@@ -146,7 +146,7 @@
             }
 
             private(set) var quxFuncCallCount = 0
-            var quxFuncArgValues = [Int]()
+            var quxFuncArgValues: [Int] = []
             var quxFuncHandler: ((Int) -> String)?
             func quxFunc(val: Int) -> String {
                 quxFuncCallCount += 1
@@ -159,7 +159,7 @@
             }
 
             private(set) var quuxFuncCallCount = 0
-            var quuxFuncArgValues = [(val1: String, val2: Float)]()
+            var quuxFuncArgValues: [(val1: String, val2: Float)] = []
             var quuxFuncHandler: ((String, Float) -> ())?
             func quuxFunc(val1: String, val2: Float) {
                 quuxFuncCallCount += 1
@@ -185,7 +185,7 @@
             init() { }
 
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [(Int, String)]()
+            var fooFuncArgValues: [(Int, String)] = []
             var fooFuncHandler: (((Int, String)) -> ())?
             func fooFunc(val: (Int, String)) {
                 fooFuncCallCount += 1
@@ -197,7 +197,7 @@
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))]()
+            var barFuncArgValues: [(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String))] = []
             var barFuncHandler: (((bar1: Int, String), (bar3: Int, bar4: String)) -> ())?
             func barFunc(val1: (bar1: Int, String), val2: (bar3: Int, bar4: String)) {
                 barFuncCallCount += 1
@@ -235,7 +235,7 @@
             }
 
             private(set) var fooFuncVal1CallCount = 0
-            var fooFuncVal1ArgValues = [Int]()
+            var fooFuncVal1ArgValues: [Int] = []
             var fooFuncVal1Handler: ((Int) -> ())?
             func fooFunc(val1: Int) {
                 fooFuncVal1CallCount += 1
@@ -248,7 +248,7 @@
             }
 
             private(set) var fooFuncVal1StringCallCount = 0
-            var fooFuncVal1StringArgValues = [String]()
+            var fooFuncVal1StringArgValues: [String] = []
             var fooFuncVal1StringHandler: ((String) -> ())?
             func fooFunc(val1: String) {
                 fooFuncVal1StringCallCount += 1
@@ -260,7 +260,7 @@
             }
 
             private(set) var fooFuncVal2CallCount = 0
-            var fooFuncVal2ArgValues = [Int]()
+            var fooFuncVal2ArgValues: [Int] = []
             var fooFuncVal2Handler: ((Int) -> ())?
             func fooFunc(val2: Int) {
                 fooFuncVal2CallCount += 1
@@ -286,7 +286,7 @@
             init() { }
             
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [(val1: Any, val2: Any?)]()
+            var fooFuncArgValues: [(val1: Any, val2: Any?)] = []
             var fooFuncHandler: ((Any, Any?) -> ())?
             func fooFunc<T: StringProtocol>(val1: T, val2: T?) {
                 fooFuncCallCount += 1
@@ -298,7 +298,7 @@
             }
             
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [Any]()
+            var barFuncArgValues: [Any] = []
             var barFuncHandler: ((Any) -> Any)?
             func barFunc<T: Sequence, U: Collection>(val: T) -> U {
                 barFuncCallCount += 1
@@ -326,7 +326,7 @@
 
 
             private(set) var fooFuncCallCount = 0
-            var fooFuncArgValues = [Int]()
+            var fooFuncArgValues: [Int] = []
             var fooFuncHandler: ((inout Int) -> ())?
             func fooFunc(val: inout Int) {
                 fooFuncCallCount += 1
@@ -338,7 +338,7 @@
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [Int]()
+            var barFuncArgValues: [Int] = []
             var barFuncHandler: ((inout Int) -> ())?
             func barFunc(into val: inout Int) {
                 barFuncCallCount += 1
@@ -374,7 +374,7 @@
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [Int]()
+            var barFuncArgValues: [Int] = []
             var barFuncHandler: ((Int, (String) -> Void) -> ())?
             func barFunc(val: Int, handler: (String) -> Void) {
                 barFuncCallCount += 1
@@ -413,7 +413,7 @@
             }
 
             private(set) var barFuncCallCount = 0
-            var barFuncArgValues = [Int]()
+            var barFuncArgValues: [Int] = []
             var barFuncHandler: ((Int, @escaping BarHandler) -> ())?
             func barFunc(val: Int, handler: @escaping BarHandler) {
                 barFuncCallCount += 1
@@ -461,7 +461,7 @@
             init() { }
 
             static private(set) var fooFuncCallCount = 0
-            static var fooFuncArgValues = [Int]()
+            static var fooFuncArgValues: [Int] = []
             static var fooFuncHandler: ((Int) -> ())?
             static func fooFunc(val: Int) {
                 fooFuncCallCount += 1
@@ -487,7 +487,7 @@
             init() { }
 
             private(set) var fooCallCount = 0
-            var fooArgValues = [(arg0: Int, arg1: Double, throws: String)]()
+            var fooArgValues: [(arg0: Int, arg1: Double, throws: String)] = []
             var fooHandler: ((Int, Double, String) -> ())?
             func foo(arg0: Int, _ arg1: Double, first throws: String) {
                 fooCallCount += 1
@@ -499,13 +499,59 @@
             }
 
             private(set) var barCallCount = 0
-            var barArgValues = [(_0: Int, _1: Void, _2: Void)]()
+            var barArgValues: [(_0: Int, _1: Void, _2: Void)] = []
             var barHandler: ((Int, Void, Void) -> ())?
             func bar(_ _0: Int, _ _1: Void, _ _2: Void) {
                 barCallCount += 1
                 barArgValues.append((_0, _1, _2))
                 if let barHandler = barHandler {
                     barHandler(_0, _1, _2)
+                }
+
+            }
+        }
+    }
+}
+
+@Fixture enum argumentsHistoryMemberShadowsTypeName {
+    struct Config {}
+
+    /// @mockable
+    protocol Foo {
+        var Config: Int { get }
+        func apply(config: Config?, force: Bool)
+        func log(event: (), verbose: Bool)
+    }
+
+    @Fixture enum expected {
+        class FooMock: Foo {
+            init() { }
+            init(Config: Int = 0) {
+                self.Config = Config
+            }
+
+            var Config: Int = 0
+
+            private(set) var applyCallCount = 0
+            var applyArgValues: [(config: Config?, force: Bool)] = []
+            var applyHandler: ((Config?, Bool) -> ())?
+            func apply(config: Config?, force: Bool) {
+                applyCallCount += 1
+                applyArgValues.append((config, force))
+                if let applyHandler = applyHandler {
+                    applyHandler(config, force)
+                }
+
+            }
+
+            private(set) var logCallCount = 0
+            var logArgValues: [(event: (), verbose: Bool)] = []
+            var logHandler: (((), Bool) -> ())?
+            func log(event: (), verbose: Bool) {
+                logCallCount += 1
+                logArgValues.append((event, verbose))
+                if let logHandler = logHandler {
+                    logHandler(event, verbose)
                 }
 
             }

@@ -334,7 +334,7 @@ This will generate:
 ```swift
 public class FooMock: Foo {
     var fooFuncCallCount = 0
-    var fooFuncArgValues = [Int]() // arguments captor
+    var fooFuncArgValues: [Int] = [] // arguments captor
     var fooFuncHandler: ((Int) -> ())?
     func fooFunc(val: Int) {
         fooFuncCallCount += 1
@@ -346,11 +346,11 @@ public class FooMock: Foo {
     }
 
     ...
-    var barFuncArgValues = [(a: String, Float)]() // tuple is also supported.
+    var barFuncArgValues: [(a: String, Float)] = [] // tuple is also supported.
     ...
 
     ...
-    var bazFuncArgValues = [(Int, String)]()
+    var bazFuncArgValues: [(val1: Int, val2: String)] = []
     ...
 }
 ```

@@ -301,7 +301,7 @@ extension MethodModel {
                 let capturedValueType = argsHistory.capturedValueType.typeName
 
                 if !requiresConcurrencySafeAccess {
-                    return "\(1.tab)\(declModifiers)var \(argsHistoryVarName) = [\(capturedValueType)]()"
+                    return "\(1.tab)\(declModifiers)var \(argsHistoryVarName): [\(capturedValueType)] = []"
                 } else {
                     return """
                     \(1.tab)\(nonisolatedSpace)\(declModifiers)var \(argsHistoryVarName): [\(capturedValueType)] {
