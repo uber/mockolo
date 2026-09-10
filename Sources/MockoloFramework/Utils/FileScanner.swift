@@ -132,12 +132,33 @@ public func scanDirs(_ paths: [String], with callBack: (String) -> Void) {
 }
 
 func scanDir(_ path: String, with callBack: (String) -> Void) {
+    let resourceKeys: Set<URLResourceKey> = [.isDirectoryKey, .isSymbolicLinkKey]
     let errorHandler = { (url: URL, error: Error) -> Bool in
         fatalError("Failed to traverse \(url) with error \(error).")
     }
-    if let enumerator = FileManager.default.enumerator(at: URL(fileURLWithPath: path, isDirectory: true), includingPropertiesForKeys: nil, options: [.skipsHiddenFiles], errorHandler: errorHandler) {
+    let directoryURL = URL(fileURLWithPath: path, isDirectory: true)
+    if let enumerator = FileManager.default.enumerator(
+        at: directoryURL,
+        includingPropertiesForKeys: Array(resourceKeys),
+        options: [.skipsHiddenFiles],
+        errorHandler: errorHandler
+    ) {
         while let nextObjc = enumerator.nextObject() {
             if let fileUrl = nextObjc as? URL {
+                let resourceValues: URLResourceValues
+                do {
+                    resourceValues = try fileUrl.resourceValues(forKeys: resourceKeys)
+                } catch {
+                    fatalError("Failed to retrieve attributes of \(fileUrl) with error \(error).")
+                }
+                guard resourceValues.isDirectory == false else { continue }
+                if resourceValues.isSymbolicLink == true {
+                    var targetIsDirectory: ObjCBool = false
+                    guard FileManager.default.fileExists(
+                        atPath: fileUrl.path,
+                        isDirectory: &targetIsDirectory
+                    ), !targetIsDirectory.boolValue else { continue }
+                }
                 callBack(fileUrl.path)
             }
         }
