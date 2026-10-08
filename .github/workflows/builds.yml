@@ -25,23 +25,31 @@ jobs:
             version: "6.1"
           - os: ubuntu-latest
             version: "6.2"
+          - os: ubuntu-latest
+            version: "6.3"
+          - os: ubuntu-latest
+            version: "6.4"
           - os: macos-15
             version: "16.2" # Swift 6.0
           - os: macos-15
             version: "16.4" # Swift 6.1
-          - os: macos-latest
+          - os: macos-26
             version: "26.1" # Swift 6.2
+          - os: macos-26
+            version: "26.4"  # Swift 6.3
+          - os: xcode-27
+            version: "27"  # Swift 6.4
     steps:
       - if: startsWith(matrix.os, 'ubuntu')
         uses: vapor/swiftly-action@v0.2
         with:
           toolchain: ${{ matrix.version }}
-      - if: startsWith(matrix.os, 'macos')
+      - if: runner.os == 'macOS'
         name: Select Xcode
         run: sudo xcode-select -s "/Applications/Xcode_${{ matrix.version }}.app"
 
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Build and Test
         run: swift test
         env:

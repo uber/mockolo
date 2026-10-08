@@ -37,7 +37,7 @@ jobs:
     - if: startsWith(matrix.destination.name, 'macos')
       run: sudo xcode-select -s /Applications/Xcode_26.3.app
 
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Update Version.swift
       run: echo "let version = \"${{ inputs.version }}\"" > Sources/Mockolo/Version.swift
     - name: Create the binary
@@ -80,7 +80,7 @@ jobs:
     outputs:
       checksum: ${{ steps.checksum.outputs.checksum }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
@@ -121,7 +121,7 @@ jobs:
           mockolo.artifactbundle.zip
 
     - name: Publish to GitHub Releases
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         name: ${{ inputs.version }}
         tag_name: ${{ inputs.version }}
