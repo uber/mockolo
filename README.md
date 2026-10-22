@@ -145,6 +145,12 @@ OPTIONS:
                           Maximum number of threads to execute concurrently (default = 1).
   --custom-imports <custom-imports>
                           If set, custom module imports (separated by a space) will be added to the final import statement list.
+  --dependency-sourcedirs <dependency-sourcedirs>
+                          Paths to the directories containing source files of modules this target depends on (separated by a space). Their declarations are used to resolve inherited types but are not mocked. If the --dependency-filelist or --dependency-sourcefiles values exist, they will be ignored.
+  --dependency-filelist <dependency-filelist>
+                          Path to a file containing a list of source file paths (delimited by a new line) of modules this target depends on. Their declarations are used to resolve inherited types but are not mocked. If the --dependency-sourcedirs value exists, this will be ignored.
+  --dependency-sourcefiles <dependency-sourcefiles>
+                          List of source files (separated by a space) of modules this target depends on. Their declarations are used to resolve inherited types but are not mocked. If the --dependency-sourcedirs or --dependency-filelist value exists, this will be ignored.
   --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
   --disable-combine-default-values
                           Whether to disable generating Combine streams in mocks (default = false). Set this to true to control how your streams are created in your mocks.
@@ -174,6 +180,16 @@ OPTIONS:
   --use-template-func     If set, a common template function will be called from all functions in mock classes (default is set to false).
   -h, --help              Show help information.
 ```
+
+### Protocols inheriting from other modules
+
+Mockolo resolves inherited requirements only from the declarations it parses. When a mocked protocol inherits from a protocol in a module that is mocked separately, pass that module's sources as dependencies:
+
+```
+./mockolo -s ModuleB -d ./ModuleBMocks.swift --dependency-sourcedirs ModuleA
+```
+
+Declarations in `ModuleA` are used to resolve inherited members, associated types and `where` clauses of the protocols in `ModuleB`, but no mocks are generated for them, even if they carry the mock annotation. A declaration in the source files is never replaced by a dependency declaration with the same name, and a parent declared in the dependencies is used instead of a parent mock passed with `--mockfiles`.
 
 
 ## Distribution

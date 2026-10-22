@@ -43,6 +43,23 @@ struct Executor: ParsableCommand {
             help: "If set, custom module imports (separated by a space) will be added to the final import statement list.")
     private var customImports: [String] = []
 
+    @Option(name: .customLong("dependency-sourcedirs"),
+            parsing: .upToNextOption,
+            help: "Paths to the directories containing source files of modules this target depends on (separated by a space). Their declarations are used to resolve inherited types but are not mocked. If the --dependency-filelist or --dependency-sourcefiles values exist, they will be ignored.",
+            completion: .file())
+    private var dependencySourceDirs: [String] = []
+
+    @Option(name: .customLong("dependency-filelist"),
+            help: "Path to a file containing a list of source file paths (delimited by a new line) of modules this target depends on. Their declarations are used to resolve inherited types but are not mocked. If the --dependency-sourcedirs value exists, this will be ignored.",
+            completion: .file())
+    private var dependencySourceFileList: String?
+
+    @Option(name: .customLong("dependency-sourcefiles"),
+            parsing: .upToNextOption,
+            help: "List of source files (separated by a space) of modules this target depends on. Their declarations are used to resolve inherited types but are not mocked. If the --dependency-sourcedirs or --dependency-filelist value exists, this will be ignored.",
+            completion: .file())
+    private var dependencySourceFiles: [String] = []
+
     @Flag(name: .long,
           help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
     private  var enableArgsHistory: Bool = false
@@ -147,23 +164,30 @@ struct Executor: ParsableCommand {
         }
 
         srcDirs = self.sourceDirs.map(fullPath)
-
-        // If source file list exists, source files value will be overridden (see the usage in setupArguments above)
-        if let srcList = sourceFileList {
-            let text = try? String(contentsOfFile: srcList, encoding: String.Encoding.utf8)
-            srcs = text?.components(separatedBy: "\n").filter{!$0.isEmpty}.map(fullPath) ?? []
-        } else {
-            srcs = sourceFiles.map(fullPath)
-        }
+        srcs = filePaths(fileList: sourceFileList, files: sourceFiles)
 
         if srcDirs.isEmpty && srcs.isEmpty {
             throw ValidationError("Missing source files or directories")
         }
+
+        dependencySrcDirs = self.dependencySourceDirs.map(fullPath)
+        dependencySrcs = filePaths(fileList: dependencySourceFileList, files: dependencySourceFiles)
+    }
+
+    // If a file list exists, the files value will be overridden (see the usage in setupArguments above)
+    private func filePaths(fileList: String?, files: [String]) -> [String] {
+        if let fileList {
+            let text = try? String(contentsOfFile: fileList, encoding: String.Encoding.utf8)
+            return text?.components(separatedBy: "\n").filter{!$0.isEmpty}.map(fullPath) ?? []
+        }
+        return files.map(fullPath)
     }
 
     // Source paths to be used in `run`
     private var srcDirs: [String] = []
     private var srcs: [String] = []
+    private var dependencySrcDirs: [String] = []
+    private var dependencySrcs: [String] = []
 
     mutating func run() throws {
         let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
@@ -192,6 +216,8 @@ struct Executor: ParsableCommand {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
+                         dependencySourceDirs: dependencySrcDirs,
+                         dependencySourceFiles: dependencySrcs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,

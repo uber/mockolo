@@ -25,6 +25,8 @@ enum InputError: Error {
 @discardableResult
 public func generate(sourceDirs: [String],
                      sourceFiles: [String],
+                     dependencySourceDirs: [String] = [],
+                     dependencySourceFiles: [String] = [],
                      exclusionSuffixes: [String],
                      mockFilePaths: [String]?,
                      annotation: String,
@@ -106,6 +108,29 @@ public func generate(sourceDirs: [String],
                                 pathToImportsMap[path] = importMap
                             }
                         }
+    }
+
+    // Dependencies only resolve inherited types: never mocked, never replacing a source declaration.
+    let dependencyPaths = !dependencySourceDirs.isEmpty ? dependencySourceDirs : dependencySourceFiles
+    if !dependencyPaths.isEmpty {
+        log("Process dependency source files and add them to the protocol map...", level: .info)
+        parser.parseDecls(dependencyPaths,
+                          isDirs: !dependencySourceDirs.isEmpty,
+                          exclusionSuffixes: exclusionSuffixes,
+                          annotation: annotation,
+                          fileMacro: macro,
+                          declType: declType) { (elements, imports) in
+                            elements.forEach { element in
+                                if protocolMap[element.entityNode.nameText] == nil {
+                                    protocolMap[element.entityNode.nameText] = element
+                                }
+                            }
+                            if let imports = imports {
+                                for (path, importMap) in imports {
+                                    pathToImportsMap[path] = importMap
+                                }
+                            }
+        }
     }
     signpost_end(name: "Generate protocol map")
     let t2 = CFAbsoluteTimeGetCurrent()
