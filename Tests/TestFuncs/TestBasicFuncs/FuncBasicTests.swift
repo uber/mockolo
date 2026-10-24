@@ -4,6 +4,12 @@ class BasicFuncTests: MockoloTestCase {
                dstContent: inoutParams.expected._source)
     }
 
+    func testInoutParamsMockFuncs() {
+        verify(srcContent: inoutParams._source,
+               dstContent: inoutParams.mockFuncExpected._source,
+               useTemplateFunc: true)
+    }
+
     func testSubscripts() {
         verify(srcContent: subscripts._source,
                dstContent: subscripts.expected._source)

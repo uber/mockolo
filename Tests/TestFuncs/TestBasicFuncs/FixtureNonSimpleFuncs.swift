@@ -33,6 +33,25 @@ import MockoloFramework
             }
         }
     }
+
+    @Fixture enum mockFuncExpected {
+        public class FooMock: Foo {
+            public init() { }
+
+
+            public private(set) var hashCallCount = 0
+            public var hashHandler: ((inout Hasher) -> ())?
+            public func hash(into hasher: inout Hasher) {
+                mockFunc(&hashCallCount)("hash", hashHandler?(&hasher), .void)
+            }
+
+            public private(set) var barCallCount = 0
+            public var barHandler: ((inout String, inout Int) -> ())?
+            public func bar(lhs: inout String, rhs: inout Int) {
+                mockFunc(&barCallCount)("bar", barHandler?(&lhs, &rhs), .void)
+            }
+        }
+    }
 }
 
 @Fixture enum iuoFuncs {
