@@ -82,6 +82,20 @@ class OverloadTests: MockoloTestCase {
         )
     }
 
+    func testModuleQualifiedInheritance() {
+        verify(
+            srcContent: moduleQualifiedInheritance._source,
+            dstContent: moduleQualifiedInheritance.expected._source
+        )
+    }
+
+    func testModuleQualifiedInheritanceWithSameName() {
+        verify(
+            srcContent: sameNameQualifiedInheritance,
+            dstContent: sameNameQualifiedInheritanceMock
+        )
+    }
+
     func testOverloadReturningBracketType() {
         verify(
             srcContent: overloadReturningBracketType._source,

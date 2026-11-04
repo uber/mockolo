@@ -23,13 +23,15 @@ import Algorithms
 /// @param protocolMap Used to look up the current entity and its inheritance types
 /// @param inheritanceMap Used to look up inherited types if not contained in protocolMap
 /// @param inheritanceByProtocolMap Used to look up names of mock implementation for protocols
+/// @param ancestors Names already on the lookup path, skipped to avoid resolving a protocol as its own parent
 /// @returns a list of models representing sub-entities of the current entity, a list of models processed in dependent mock files if exists,
 ///          cumulated attributes, cumulated inherited types, and a map of filepaths and file contents (used for import lines lookup later).
 func lookupEntities(key: String,
                     declKind: NominalTypeDeclKind,
                     protocolMap: [String: Entity],
                     inheritanceMap: [String: Entity],
-                    inheritanceByProtocolMap: [String: Entity]) -> ([Model], [Model], [Attribute], Set<String>, [String]) {
+                    inheritanceByProtocolMap: [String: Entity],
+                    ancestors: Set<String> = []) -> ([Model], [Model], [Attribute], Set<String>, [String]) {
 
     // Used to keep track of types to be mocked
     var models = [Model]()
@@ -55,9 +57,11 @@ func lookupEntities(key: String,
         
         if declKind == .protocol { // TODO: remove this once parent protocol (current decl = classtype) handling is resolved.
             // If the protocol inherits other protocols, look up their entities as well.
+            // Skip names already on the lookup path: a qualified parent such as `Module.P` resolves by its bare name and can lead back to `P` itself.
+            let ancestors = ancestors.union(CollectionOfOne(key))
             for parent in current.entityNode.inheritedTypes {
-                if parent != .class, parent != .anyType, parent != .anyObject {
-                    let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths) = lookupEntities(key: parent, declKind: declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap)
+                if parent != .class, parent != .anyType, parent != .anyObject, !ancestors.contains(parent) {
+                    let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths) = lookupEntities(key: parent, declKind: declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap, ancestors: ancestors)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
                     attributes.append(contentsOf: parentAttributes)
