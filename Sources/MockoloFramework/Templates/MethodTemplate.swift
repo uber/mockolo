@@ -320,6 +320,9 @@ extension MethodModel {
                 if arg.type.typeName.hasPrefix(String.autoclosure) {
                     return arg.name.safeName + "()"
                 }
+                if arg.type.isInOut {
+                    return "&" + arg.name.safeName
+                }
                 return arg.name.safeName
             }
             let allParts = includeNewValue ? parts + ["newValue"] : parts
