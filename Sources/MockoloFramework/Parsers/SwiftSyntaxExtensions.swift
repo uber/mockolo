@@ -105,7 +105,7 @@ extension InheritanceClauseSyntax {
             return [simpleTypeIdentifier.name.text]
         } else if let memberType = type.as(MemberTypeSyntax.self) {
             // example: `protocol A: Module.B {}`
-            return [memberType.name.text]
+            return [memberType.name.text] // Discard the base type because the current lookup only supports unqualified names.
         } else if let tupleType = type.as(TupleTypeSyntax.self) {
             // example: `protocol A: (B) {}`
             return tupleType.elements.map(\.type).map(parseElementType(type:)).flatMap { $0 }

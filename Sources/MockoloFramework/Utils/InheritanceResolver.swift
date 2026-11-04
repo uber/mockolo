@@ -58,7 +58,7 @@ func lookupEntities(key: String,
         if declKind == .protocol { // TODO: remove this once parent protocol (current decl = classtype) handling is resolved.
             // If the protocol inherits other protocols, look up their entities as well.
             // Skip names already on the lookup path: a qualified parent such as `Module.P` resolves by its bare name and can lead back to `P` itself.
-            let ancestors = ancestors.union([key])
+            let ancestors = ancestors.union(CollectionOfOne(key))
             for parent in current.entityNode.inheritedTypes {
                 if parent != .class, parent != .anyType, parent != .anyObject, !ancestors.contains(parent) {
                     let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths) = lookupEntities(key: parent, declKind: declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap, ancestors: ancestors)
