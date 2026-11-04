@@ -17,19 +17,33 @@
 /// Represents import content: either a simple import statement or a nested conditional block
 indirect enum ImportContent {
     case simple(Import)
-    case conditional(ConditionalImportBlock)
+    case conditional(ConditionalBlock)
 }
 
-/// Represents a conditional import block (#if/#elseif/#else/#endif)
-struct ConditionalImportBlock {
-    /// Represents a single clause in a conditional import block
+/// Represents a conditional compilation block (#if/#elseif/#else/#endif) that owns
+/// both imports and entities found within its clauses.
+struct ConditionalBlock {
+    /// Represents a single clause in a conditional compilation block
     struct Clause {
         var type: IfClauseType
-        var contents: [ImportContent]
+        var imports: [ImportContent]
+        var entities: [Entity]
     }
 
     let clauses: [Clause]
     let offset: Int64
+
+    /// Whether any clause (including nested blocks) contains entities
+    var containsEntities: Bool {
+        clauses.contains { clause in
+            !clause.entities.isEmpty || clause.imports.contains { content in
+                if case .conditional(let nested) = content {
+                    return nested.containsEntities
+                }
+                return false
+            }
+        }
+    }
 
     init(clauses: [Clause], offset: Int64) {
         self.clauses = clauses
