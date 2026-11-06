@@ -146,11 +146,7 @@ OPTIONS:
   --custom-imports <custom-imports>
                           If set, custom module imports (separated by a space) will be added to the final import statement list.
   --dependency-sourcedirs <dependency-sourcedirs>
-                          Paths to the directories containing source files of modules this target depends on (separated by a space). Their declarations are used to resolve inherited types but are not mocked. If the --dependency-filelist or --dependency-sourcefiles values exist, they will be ignored.
-  --dependency-filelist <dependency-filelist>
-                          Path to a file containing a list of source file paths (delimited by a new line) of modules this target depends on. Their declarations are used to resolve inherited types but are not mocked. If the --dependency-sourcedirs value exists, this will be ignored.
-  --dependency-sourcefiles <dependency-sourcefiles>
-                          List of source files (separated by a space) of modules this target depends on. Their declarations are used to resolve inherited types but are not mocked. If the --dependency-sourcedirs or --dependency-filelist value exists, this will be ignored.
+                          Paths to the directories containing source files of modules this target depends on (separated by a space). Their declarations are used to resolve inherited types but are not mocked.
   --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
   --disable-combine-default-values
                           Whether to disable generating Combine streams in mocks (default = false). Set this to true to control how your streams are created in your mocks.
