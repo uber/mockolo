@@ -43,6 +43,12 @@ struct Executor: ParsableCommand {
             help: "If set, custom module imports (separated by a space) will be added to the final import statement list.")
     private var customImports: [String] = []
 
+    @Option(name: .customLong("dependency-sourcedirs"),
+            parsing: .upToNextOption,
+            help: "Paths to the directories containing source files of modules this target depends on (separated by a space). Their declarations are used to resolve inherited types but are not mocked.",
+            completion: .file())
+    private var dependencySourceDirs: [String] = []
+
     @Flag(name: .long,
           help: "Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.")
     private  var enableArgsHistory: Bool = false
@@ -159,11 +165,14 @@ struct Executor: ParsableCommand {
         if srcDirs.isEmpty && srcs.isEmpty {
             throw ValidationError("Missing source files or directories")
         }
+
+        dependencySrcDirs = self.dependencySourceDirs.map(fullPath)
     }
 
     // Source paths to be used in `run`
     private var srcDirs: [String] = []
     private var srcs: [String] = []
+    private var dependencySrcDirs: [String] = []
 
     mutating func run() throws {
         let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
@@ -192,6 +201,7 @@ struct Executor: ParsableCommand {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
+                         dependencySourceDirs: dependencySrcDirs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,

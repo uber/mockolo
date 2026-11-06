@@ -165,6 +165,35 @@ import MockoloFramework
     }
 }
 
+@Fixture enum patWithSameTypeConstraintInDependency {
+    /// @mockable
+    public protocol Foo {
+        associatedtype Value
+        func reset()
+    }
+
+    @Fixture enum dependent {
+        /// @mockable
+        public protocol NarrowFoo: Foo where Value == Int {}
+
+        @Fixture enum expected {
+            public class NarrowFooMock: NarrowFoo {
+                public init() { }
+
+
+                public private(set) var resetCallCount = 0
+                public var resetHandler: (() -> ())?
+                public func reset() {
+                    resetCallCount += 1
+                    if let resetHandler = resetHandler {
+                        resetHandler()
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Fixture enum patWithMixedConstraints {
     public protocol Foo {
         associatedtype T
