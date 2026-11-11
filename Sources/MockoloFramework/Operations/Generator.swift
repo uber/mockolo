@@ -76,10 +76,18 @@ public func generate(sourceDirs: [String],
         }
     }
     // Build table mapping protocol name (inheritedType) => mock entity (entity)
+    // An inherited type shared by several mocks (e.g. `Sendable`) does not identify any of them as its mock,
+    // and keeping whichever was visited last would make the output depend on dictionary iteration order.
+    var sharedInheritedTypes = Set<String>()
     for entity in parentMocks.values {
         for inheritedType in entity.entityNode.inheritedTypes {
-            parentMocksByInheritedType[inheritedType] = entity
+            if parentMocksByInheritedType.updateValue(entity, forKey: inheritedType) != nil {
+                sharedInheritedTypes.insert(inheritedType)
+            }
         }
+    }
+    for inheritedType in sharedInheritedTypes {
+        parentMocksByInheritedType[inheritedType] = nil
     }
     signpost_end(name: "Process input")
     let t1 = CFAbsoluteTimeGetCurrent()

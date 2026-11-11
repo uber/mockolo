@@ -31,5 +31,17 @@ class SendableTests: MockoloTestCase {
         verify(srcContent: availableInheritedProtocol._source,
                dstContent: availableInheritedProtocol.expected._source)
     }
+
+    func testSendableProtocolIgnoresSendableParentMock() {
+        verify(srcContent: sendableProtocolWithSendableParentMock._source,
+               mockContent: sendableProtocolWithSendableParentMock.parentMock._source,
+               dstContent: sendableProtocolWithSendableParentMock.expected._source)
+    }
+
+    func testProtocolIgnoresTypeSharedByParentMocks() {
+        verify(srcContent: protocolWithTypeSharedByParentMocks._source,
+               mockContent: protocolWithTypeSharedByParentMocks.OtherModule._source,
+               dstContent: protocolWithTypeSharedByParentMocks.expected._source)
+    }
 }
 #endif

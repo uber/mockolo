@@ -59,8 +59,9 @@ func lookupEntities(key: String,
             // If the protocol inherits other protocols, look up their entities as well.
             // Skip names already on the lookup path: a qualified parent such as `Module.P` resolves by its bare name and can lead back to `P` itself.
             let ancestors = ancestors.union(CollectionOfOne(key))
+            // `Sendable` and `Error` have no members to mock; looking them up would match any input mock that merely conforms to them.
             for parent in current.entityNode.inheritedTypes {
-                if parent != .class, parent != .anyType, parent != .anyObject, !ancestors.contains(parent) {
+                if parent != .class, parent != .anyType, parent != .anyObject, parent != .sendable, parent != .error, !ancestors.contains(parent) {
                     let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths) = lookupEntities(key: parent, declKind: declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap, ancestors: ancestors)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)
