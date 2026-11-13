@@ -14,6 +14,8 @@
 //  limitations under the License.
 //
 
+import SwiftSyntax
+
 /// A structure defining an "import" statement parsed by `Generator`, including various modifiers.
 struct Import: CustomStringConvertible {
     
@@ -92,22 +94,26 @@ extension Import {
         return new
     }
     
-    /// Creates an `Import` by parsing a `String` provided by `Generator`.
-    init?(line: String) {
-        guard let importSpaceRange = line.range(of: String.importSpace) else { return nil }
-        
-        let firstNewlineIndex = line.firstIndex(of: "\n")
-        let lastNewlineIndex = line.lastIndex(of: "\n")
-        let startIndex = firstNewlineIndex ?? line.startIndex
-        let endIndex = lastNewlineIndex ?? line.endIndex
-        
-        moduleName = String(line[importSpaceRange.upperBound..<endIndex])
-        
-        if importSpaceRange.lowerBound == startIndex {
-            modifier = nil
+    /// Creates an `Import` from a parsed import declaration.
+    ///
+    /// Attributes other than `@testable` (e.g. `@preconcurrency`, `@_spi(...)`,
+    /// `@diagnose(...)`, or attributes wrapped in `#if`) are not carried over.
+    init(_ node: ImportDeclSyntax) {
+        var moduleName = node.path.trimmedDescription
+        if let kind = node.importKindSpecifier {
+            moduleName = "\(kind.text) \(moduleName)"
+        }
+        self.moduleName = moduleName
+
+        let isTestable = node.attributes.contains {
+            $0.as(AttributeSyntax.self)?.attributeName.trimmedDescription == "testable"
+        }
+        if isTestable {
+            modifier = .testable
+        } else if let acl = node.modifiers.lazy.compactMap({ ACL(rawValue: $0.name.text) }).first {
+            modifier = .acl(acl)
         } else {
-            let modifierEndIndex = line.index(before: importSpaceRange.lowerBound)
-            modifier = Modifier(rawValue: String(line[startIndex..<modifierEndIndex]))
+            modifier = nil
         }
     }
 }

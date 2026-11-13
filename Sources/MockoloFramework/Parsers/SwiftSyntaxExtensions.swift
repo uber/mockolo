@@ -821,9 +821,7 @@ final class EntityVisitor: SyntaxVisitor {
 
     override func visit(_ node: ImportDeclSyntax) -> SyntaxVisitorContinueKind {
         // Top-level import (not inside #if)
-        if let `import` = Import(line: node.trimmedDescription) {
-            imports.append(.simple(`import`))
-        }
+        imports.append(.simple(Import(node)))
         return .skipChildren
     }
 
@@ -854,9 +852,7 @@ final class EntityVisitor: SyntaxVisitor {
                 for el in list {
                     if let importItem = el.item.as(ImportDeclSyntax.self) {
                         // Simple import
-                        if let imp = Import(line: importItem.trimmedDescription) {
-                            contents.append(.simple(imp))
-                        }
+                        contents.append(.simple(Import(importItem)))
                     } else if let nested = el.item.as(IfConfigDeclSyntax.self) {
                         // Nested #if block (recursive)
                         let nestedBlock = parseIfConfigDecl(nested)

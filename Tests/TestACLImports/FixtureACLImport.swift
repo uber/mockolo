@@ -71,4 +71,71 @@ enum FixtureACLImport {
         
         \(FixtureHelpers.someProtocol2Mock)
         """
+
+    /// Input with attributes on imports, including attributes on their own line.
+    static let attributed =
+        """
+        @_spi(X) import A
+        @preconcurrency import B
+        @_implementationOnly import C
+        @testable import D
+        @_spi(Y) public import E
+        @preconcurrency
+        import F
+        @diagnose(UnusedImportAccess, as: ignored)
+        import G
+        #if canImport(H)
+        @preconcurrency
+        package import H
+        #endif
+
+        \(FixtureHelpers.someProtocol)
+        """
+
+    /// Attributes other than `@testable` are dropped; access levels are kept.
+    static let attributedMock =
+        """
+        import A
+        import B
+        import C
+        @testable import D
+        public import E
+        import F
+        import G
+        #if canImport(H)
+        package import H
+        #endif
+
+
+        \(FixtureHelpers.someProtocolMock)
+        """
+
+    /// Import header emitted by swift-openapi-generator 1.14+.
+    static let openAPIGeneratorHeader =
+        """
+        #if compiler(>=6.4)
+        @diagnose(UnusedImportAccess, as: ignored)
+        #endif
+        @_spi(Generated) public import OpenAPIRuntime
+        #if os(Linux)
+        @preconcurrency public import struct Foundation.URL
+        #else
+        public import struct Foundation.URL
+        #endif
+
+        \(FixtureHelpers.someProtocol)
+        """
+
+    static let openAPIGeneratorHeaderMock =
+        """
+        public import OpenAPIRuntime
+        #if os(Linux)
+        public import struct Foundation.URL
+        #else
+        public import struct Foundation.URL
+        #endif
+
+
+        \(FixtureHelpers.someProtocolMock)
+        """
 }
