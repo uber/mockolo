@@ -60,7 +60,7 @@ func lookupEntities(key: String,
             // Skip names already on the lookup path: a qualified parent such as `Module.P` resolves by its bare name and can lead back to `P` itself.
             let ancestors = ancestors.union(CollectionOfOne(key))
             for parent in current.entityNode.inheritedTypes {
-                if parent != .class, parent != .anyType, parent != .anyObject, !ancestors.contains(parent) {
+                if parent != .class, parent != .anyType, parent != .anyObject, parent != .sendable, parent != .error, !ancestors.contains(parent) {
                     let (parentModels, parentProcessedModels, parentAttributes, parentInheritedTypes, parentPaths) = lookupEntities(key: parent, declKind: declKind, protocolMap: protocolMap, inheritanceMap: inheritanceMap, inheritanceByProtocolMap: inheritanceByProtocolMap, ancestors: ancestors)
                     models.append(contentsOf: parentModels)
                     processedModels.append(contentsOf: parentProcessedModels)

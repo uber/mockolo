@@ -280,4 +280,120 @@
         }
     }
 }
+
+@Fixture enum sendableProtocolWithSendableParentMock {
+    /// @mockable
+    public protocol Target: Sendable {
+        func run()
+    }
+
+    @Fixture enum parentMock {
+        public protocol Foo {
+            func foo()
+        }
+
+        public final class FooMock: Foo, @unchecked Sendable {
+            public init() { }
+
+            public private(set) var fooCallCount = 0
+            public var fooHandler: (() -> ())?
+            public func foo() {
+                fooCallCount += 1
+                if let fooHandler = fooHandler {
+                    fooHandler()
+                }
+            }
+        }
+    }
+
+    @Fixture(includesConcurrencyHelpers: true)
+    enum expected {
+        public final class TargetMock: Target, @unchecked Sendable {
+            public init() { }
+
+
+            private let runState = MockoloMutex(MockoloHandlerState<Never, @Sendable () -> ()>())
+            public var runCallCount: Int {
+                return runState.withLock(\.callCount)
+            }
+            public var runHandler: (@Sendable () -> ())? {
+                get { runState.withLock(\.handler) }
+                set { runState.withLock { $0.handler = newValue } }
+            }
+            public func run() {
+                let runHandler = runState.withLock { state in
+                    state.callCount += 1
+                    return state.handler
+                }
+                if let runHandler = runHandler {
+                    runHandler()
+                }
+
+            }
+        }
+    }
+}
+
+@Fixture enum protocolWithTypeSharedByParentMocks {
+    /// @mockable
+    protocol Target: OtherModule.Shared {
+        func run()
+    }
+
+    @Fixture enum OtherModule {
+        protocol Shared {
+        }
+
+        protocol Foo {
+            func foo()
+        }
+
+        protocol Bar {
+            func bar()
+        }
+
+        class FooMock: Foo, Shared {
+            init() { }
+
+            private(set) var fooCallCount = 0
+            var fooHandler: (() -> ())?
+            func foo() {
+                fooCallCount += 1
+                if let fooHandler = fooHandler {
+                    fooHandler()
+                }
+            }
+        }
+
+        class BarMock: Bar, Shared {
+            init() { }
+
+            private(set) var barCallCount = 0
+            var barHandler: (() -> ())?
+            func bar() {
+                barCallCount += 1
+                if let barHandler = barHandler {
+                    barHandler()
+                }
+            }
+        }
+    }
+
+    @Fixture enum expected {
+        class TargetMock: Target {
+            init() { }
+
+
+            private(set) var runCallCount = 0
+            var runHandler: (() -> ())?
+            func run() {
+                runCallCount += 1
+                if let runHandler = runHandler {
+                    runHandler()
+                }
+
+            }
+        }
+    }
+}
 #endif
