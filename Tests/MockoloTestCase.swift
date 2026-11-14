@@ -4,6 +4,7 @@ import MockoloFramework
 class MockoloTestCase: XCTestCase {
     var srcFilePathsCount = 1
     var mockFilePathsCount = 1
+    var dependencyFilePathsCount = 1
 
     let bundle = Bundle(for: MockoloTestCase.self)
 
@@ -37,6 +38,19 @@ class MockoloTestCase: XCTestCase {
         return paths
     }()
 
+    lazy var dependencyFilePaths: [String] = {
+        var idx = 0
+        var paths = [String]()
+        let prefix = bundle.bundlePath + "/Dependency"
+        let suffix = ".swift"
+        while idx < dependencyFilePathsCount {
+            let path = prefix + "\(idx)" + suffix
+            paths.append(path)
+            idx += 1
+        }
+        return paths
+    }()
+
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         let created = FileManager.default.createFile(atPath: defaultDstFilePath, contents: nil, attributes: nil)
@@ -52,9 +66,12 @@ class MockoloTestCase: XCTestCase {
         for mockpath in mockFilePaths {
             try? FileManager.default.removeItem(atPath: mockpath)
         }
+        for dependencypath in dependencyFilePaths {
+            try? FileManager.default.removeItem(atPath: dependencypath)
+        }
     }
 
-    func verify(srcContent: String, mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
+    func verify(srcContent: String, mockContent: String? = nil, dependencyContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
         let dstFilePath = dstFilePath ?? defaultDstFilePath
         var mockList: [String]?
         if let mock = mockContent {
@@ -63,7 +80,7 @@ class MockoloTestCase: XCTestCase {
             }
             mockList?.append(mock)
         }
-        try? verify(srcContents: [srcContent], mockContents: mockList, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
+        try? verify(srcContents: [srcContent], mockContents: mockList, dependencyContents: dependencyContent.map { [$0] }, dstContent: dstContent, header: header, declType: declType, useTemplateFunc: useTemplateFunc, testableImports: testableImports, allowSetCallCount: allowSetCallCount, mockFinal: mockFinal, enableFuncArgsHistory: enableFuncArgsHistory, dstFilePath: dstFilePath, concurrencyLimit: concurrencyLimit, disableCombineDefaultValues: disableCombineDefaultValues, file: file, line: line)
     }
     
     func verify(srcContents: [String], mockContent: String? = nil, dstContent: String, header: String = "", declType: FindTargetDeclType = .protocolType, useTemplateFunc: Bool = false, testableImports: [String] = [], allowSetCallCount: Bool = false, mockFinal: Bool = false, enableFuncArgsHistory: Bool = false, dstFilePath: String? = nil, concurrencyLimit: Int? = 1, disableCombineDefaultValues: Bool = false, file: StaticString = #filePath, line: UInt = #line) {
@@ -94,10 +111,11 @@ class MockoloTestCase: XCTestCase {
         )
     }
 
-    func verify(srcContents: [String], mockContents: [String]?, dstContent: String, header: String, declType: FindTargetDeclType, useTemplateFunc: Bool, testableImports: [String] = [], allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, dstFilePath: String, concurrencyLimit: Int?, disableCombineDefaultValues: Bool, file: StaticString = #filePath, line: UInt = #line) throws {
+    func verify(srcContents: [String], mockContents: [String]?, dependencyContents: [String]? = nil, dstContent: String, header: String, declType: FindTargetDeclType, useTemplateFunc: Bool, testableImports: [String] = [], allowSetCallCount: Bool, mockFinal: Bool, enableFuncArgsHistory: Bool, dstFilePath: String, concurrencyLimit: Int?, disableCombineDefaultValues: Bool, file: StaticString = #filePath, line: UInt = #line) throws {
         var index = 0
         srcFilePathsCount = srcContents.count
         mockFilePathsCount = mockContents?.count ?? 0
+        dependencyFilePathsCount = dependencyContents?.count ?? 0
 
         for src in srcContents {
             if index < srcContents.count {
@@ -124,8 +142,14 @@ class MockoloTestCase: XCTestCase {
             }
         }
 
+        for (index, dependencyContent) in (dependencyContents ?? []).enumerated() {
+            let dependencyCreated = FileManager.default.createFile(atPath: dependencyFilePaths[index], contents: dependencyContent.data(using: .utf8), attributes: nil)
+            XCTAssert(dependencyCreated, file: file, line: line)
+        }
+
         try generate(sourceDirs: [],
                      sourceFiles: srcFilePaths,
+                     dependencySourceFiles: dependencyFilePaths,
                      exclusionSuffixes: ["Mocks", "Tests"],
                      mockFilePaths: mockFilePaths,
                      annotation: String.mockAnnotation,
