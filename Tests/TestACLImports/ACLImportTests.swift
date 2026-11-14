@@ -14,4 +14,14 @@ final class ACLImportTests: MockoloTestCase {
         verify(srcContents: [FixtureACLImport.primary, FixtureACLImport.secondary],
                dstContent: FixtureACLImport.primarySecondaryMock)
     }
+
+    func testAttributedImports() {
+        verify(srcContent: FixtureACLImport.attributed,
+               dstContent: FixtureACLImport.attributedMock)
+    }
+
+    func testOpenAPIGeneratorImportHeader() {
+        verify(srcContent: FixtureACLImport.openAPIGeneratorHeader,
+               dstContent: FixtureACLImport.openAPIGeneratorHeaderMock)
+    }
 }
