@@ -25,6 +25,7 @@ enum InputError: Error {
 @discardableResult
 public func generate(sourceDirs: [String],
                      sourceFiles: [String],
+                     dependencySourceFiles: [String] = [],
                      exclusionSuffixes: [String],
                      mockFilePaths: [String]?,
                      annotation: String,
@@ -68,11 +69,7 @@ public func generate(sourceDirs: [String],
                                         parentMocks[element.entityNode.nameText] = element
                                     }
                                     
-                                    if let imports = imports {
-                                        for (path, importMap) in imports {
-                                            pathToImportsMap[path] = importMap
-                                        }
-                                    }
+                                    pathToImportsMap.merge(imports ?? [:]) { $1 }
         }
     }
     // Build table mapping protocol name (inheritedType) => mock entity (entity)
@@ -109,11 +106,30 @@ public func generate(sourceDirs: [String],
                                 annotatedProtocolMap[element.entityNode.nameText] = element
                             }
                         }
-                        if let imports = imports {
-                            for (path, importMap) in imports {
-                                pathToImportsMap[path] = importMap
+                        pathToImportsMap.merge(imports ?? [:]) { $1 }
+    }
+
+    // Dependencies only resolve inherited types: never mocked, never replacing a source declaration.
+    if !dependencySourceFiles.isEmpty {
+        log("Process dependency source files and add them to the protocol map...", level: .info)
+        var dependencyElements = [String: [Entity]]()
+        parser.parseDecls(dependencySourceFiles,
+                          isDirs: false,
+                          exclusionSuffixes: exclusionSuffixes,
+                          annotation: annotation,
+                          fileMacro: macro,
+                          declType: declType) { (elements, imports) in
+                            elements.forEach { element in
+                                dependencyElements[element.filepath, default: []].append(element)
                             }
-                        }
+                            pathToImportsMap.merge(imports ?? [:]) { $1 }
+        }
+        // Files may finish parsing in any order, so the earliest file in the list wins.
+        for path in dependencySourceFiles {
+            for element in dependencyElements[path] ?? [] where protocolMap[element.entityNode.nameText] == nil {
+                protocolMap[element.entityNode.nameText] = element
+            }
+        }
     }
     signpost_end(name: "Generate protocol map")
     let t2 = CFAbsoluteTimeGetCurrent()
