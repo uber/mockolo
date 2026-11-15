@@ -52,5 +52,9 @@ let package = Package(
                 "MockoloTestSupportMacros",
             ]
         ),
+        .testTarget(
+            name: "MockoloTests",
+            dependencies: ["Mockolo"]
+        ),
     ]
 )

@@ -135,7 +135,7 @@ Use --help to see the complete argument options.
 
 OVERVIEW: Mockolo: Swift mock generator.
 
-USAGE: mockolo [<options>] --destination <destination>
+USAGE: mockolo <options>
 
 OPTIONS:
   --allow-set-call-count  If set, generated *CallCount vars will be allowed to set manually.
@@ -143,7 +143,8 @@ OPTIONS:
                           A custom annotation string used to indicate if a type should be mocked (default = @mockable). (default: @mockable)
   -j, --concurrency-limit <n>
                           Maximum number of threads to execute concurrently (default = 1).
-  --custom-imports <custom-imports>
+  --config <config>       Path to a JSON5 config file describing this run; the README lists how its keys combine with CLI options.
+  -c, --custom-imports <custom-imports>
                           If set, custom module imports (separated by a space) will be added to the final import statement list.
   --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
   --disable-combine-default-values
@@ -162,7 +163,7 @@ OPTIONS:
   -mocks, --mockfiles <mocks>
                           List of mock files (separated by a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.
   -d, --destination <destination>
-                          Output file path containing the generated Swift mock classes. If no value is given, the program will exit.
+                          Output file path containing the generated Swift mock classes. Required unless the config file sets 'destination'.
   -s, --sourcedirs <sourcedirs>
                           Paths to the directories containing source files to generate mocks for (separated by a space). If the --filelist or --sourcefiles values exist, they will be ignored.
   -f, --filelist <filelist>
@@ -174,6 +175,28 @@ OPTIONS:
   --use-template-func     If set, a common template function will be called from all functions in mock classes (default is set to false).
   -h, --help              Show help information.
 ```
+
+### Config file
+
+The options of a run can also be described in a [JSON5](https://json5.org) file passed with `--config`, one file per run:
+
+```json5
+{
+    sources: ["Sources/ModuleB", "Generated/Strings.swift"],
+    destination: "Mocks/ModuleBMocks.swift",
+}
+```
+
+```
+./mockolo --config mockolo.json5
+```
+
+| Key | CLI option | When both are given |
+| --- | --- | --- |
+| `sources` | `--sourcedirs`, `--filelist`, `--sourcefiles` | the CLI list replaces |
+| `destination` | `--destination` | the CLI value overrides |
+
+Paths are relative to the config file's directory (a leading `~` is expanded), and every path list can mix directories and files. Unknown keys, wrong types, `null` and missing paths are errors. Linux toolchains older than 6.0 read strict JSON only.
 
 
 ## Distribution

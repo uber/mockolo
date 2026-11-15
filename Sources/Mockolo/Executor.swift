@@ -38,6 +38,11 @@ struct Executor: ParsableCommand {
                 valueName: "n"))
     private var concurrencyLimit: Int?
 
+    @Option(name: .long,
+            help: "Path to a JSON5 config file describing this run; the README lists how its keys combine with CLI options.",
+            completion: .file())
+    private var config: String?
+
     @Option(name: [.customShort("c"), .long],
             parsing: .upToNextOption,
             help: "If set, custom module imports (separated by a space) will be added to the final import statement list.")
@@ -96,9 +101,9 @@ struct Executor: ParsableCommand {
     private var mockFilePaths: [String] = []
 
     @Option(name: [.customShort("d"), .customLong("destination")],
-            help: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.",
+            help: "Output file path containing the generated Swift mock classes. Required unless the config file sets 'destination'.",
             completion: .file())
-    private var outputFilePath: String
+    private var outputFilePath: String?
 
     @Option(name: [.customShort("s"), .customLong("sourcedirs")],
             parsing: .upToNextOption,
@@ -131,20 +136,29 @@ struct Executor: ParsableCommand {
     }
 
     private func fullPath(_ path: String) -> String {
-        if path.hasPrefix("/") {
-            return path
+        resolvePath(path, relativeTo: FileManager.default.currentDirectoryPath)
+    }
+
+    private mutating func apply(_ file: ConfigFile) throws {
+        outputFilePath = outputFilePath ?? file.destinationPath
+        if sourceDirs.isEmpty, sourceFileList == nil, sourceFiles.isEmpty {
+            sourceFiles = try file.sourceFiles()
         }
-        if path.hasPrefix("~") {
-            let home = FileManager.default.homeDirectoryForCurrentUser.path
-            return path.replacingOccurrences(of: "~", with: home, range: path.range(of: "~"))
-        }
-        return FileManager.default.currentDirectoryPath + "/" + path
     }
 
     mutating func validate() throws {
         guard Executor.validLoggingLevels.contains(loggingLevel) else {
             throw ValidationError("Please specify a valid logging level in the range: \(Executor.validLoggingLevels)")
         }
+
+        if let config {
+            try apply(ConfigFile.load(from: fullPath(config)))
+        }
+
+        guard let outputFilePath else {
+            throw ValidationError("Missing destination: pass --destination or set 'destination' in the config file")
+        }
+        dstFilePath = fullPath(outputFilePath)
 
         srcDirs = self.sourceDirs.map(fullPath)
 
@@ -161,9 +175,10 @@ struct Executor: ParsableCommand {
         }
     }
 
-    // Source paths to be used in `run`
+    // Resolved values to be used in `run`
     private var srcDirs: [String] = []
     private var srcs: [String] = []
+    private var dstFilePath = ""
 
     mutating func run() throws {
         let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
@@ -176,8 +191,6 @@ struct Executor: ParsableCommand {
                 print("Done.")
             }
         }
-
-        let outputFilePath = fullPath(self.outputFilePath)
 
         var mockFilePaths: [String]?
         // First see if a list of mock files are stored in a file
@@ -206,7 +219,7 @@ struct Executor: ParsableCommand {
                          testableImports: testableImports,
                          customImports: customImports,
                          excludeImports: excludeImports,
-                         to: outputFilePath,
+                         to: dstFilePath,
                          loggingLevel: loggingLevel,
                          concurrencyLimit: concurrencyLimit)
             log("Done. Exiting program.", level: .info)
