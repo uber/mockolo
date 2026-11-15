@@ -83,6 +83,7 @@ enum ConfigSchema {
         "testableImports": .array(.string),
         "excludeImports": .array(.string),
         "excludeSuffixes": .array(.string),
+        "mockfiles": .array(.string),
     ]
 
     static func decode(_ data: Data, path: String) throws -> Config {

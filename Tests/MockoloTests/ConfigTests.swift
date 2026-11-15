@@ -85,6 +85,28 @@ import Testing
         #expect(!result.mocks.contains("import A"))
     }
 
+    @Test func mockfilesProvideParentMocks() throws {
+        let result = try runMockolo(
+            config: #"{ sources: ["Sources"], destination: "Mocks.swift", mockfiles: ["ParentMocks"] }"#,
+            files: [
+                "Sources/Bar.swift": mockable("protocol Bar: Foo {}"),
+                "ParentMocks/FooMock.swift": """
+                public class FooMock: Foo {
+                    public init() { }
+                    public var resetCallCount = 0
+                    public func reset() {
+                        resetCallCount += 1
+                    }
+                }
+                """,
+            ]
+        )
+
+        #expect(result.status == 0)
+        #expect(result.mocks.contains("class BarMock"))
+        #expect(result.mocks.contains("resetCallCount"))
+    }
+
     @Test(arguments: [
         (#"{ sourcez: [] }"#, "sourcez: unknown key"),
         (#"{ sources: "x" }"#, "sources: expected"),

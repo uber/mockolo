@@ -146,6 +146,9 @@ struct Executor: ParsableCommand {
             sourceFiles = try file.sourceFiles()
         }
         dependencySrcs = try file.dependencyFiles()
+        if mockFileList == nil, mockFilePaths.isEmpty {
+            mockFilePaths = try file.mockFiles()
+        }
         annotation = annotation ?? config.annotation
         header = header ?? config.header
         macro = macro ?? config.macro

@@ -22,6 +22,7 @@ struct Config: Decodable {
     var testableImports: [String]?
     var excludeImports: [String]?
     var excludeSuffixes: [String]?
+    var mockfiles: [String]?
 }
 
 struct ConfigFile {
@@ -61,6 +62,10 @@ struct ConfigFile {
         try (config.dependencies ?? [:]).sorted { $0.key < $1.key }.flatMap { module, paths in
             try files(paths, keyPath: "dependencies.\(module)")
         }
+    }
+
+    func mockFiles() throws -> [String] {
+        try files(config.mockfiles ?? [], keyPath: "mockfiles")
     }
 
     /// Resolves `paths` against the config file's directory and expands directories to the files they contain.
