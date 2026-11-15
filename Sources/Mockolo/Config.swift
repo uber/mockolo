@@ -12,6 +12,12 @@ struct Config: Decodable {
     var macro: String?
     var concurrencyLimit: Int?
     var loggingLevel: Int?
+    var mockFinal: Bool?
+    var enableArgsHistory: Bool?
+    var mockAll: Bool?
+    var allowSetCallCount: Bool?
+    var disableCombineDefaultValues: Bool?
+    var useTemplateFunc: Bool?
 }
 
 struct ConfigFile {

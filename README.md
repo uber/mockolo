@@ -206,6 +206,12 @@ The options of a run can also be described in a [JSON5](https://json5.org) file 
 | `macro` | `--macro` | the CLI value overrides |
 | `concurrencyLimit` | `--concurrency-limit` | the CLI value overrides |
 | `loggingLevel` | `--logging-level` | the CLI value overrides |
+| `mockFinal` | `--mock-final` | either turns it on |
+| `enableArgsHistory` | `--enable-args-history` | either turns it on |
+| `mockAll` | `--mock-all` | either turns it on |
+| `allowSetCallCount` | `--allow-set-call-count` | either turns it on |
+| `disableCombineDefaultValues` | `--disable-combine-default-values` | either turns it on |
+| `useTemplateFunc` | `--use-template-func` | either turns it on |
 
 Paths are relative to the config file's directory (a leading `~` is expanded), and every path list can mix directories and files. Unknown keys, wrong types, `null` and missing paths are errors. Linux toolchains older than 6.0 read strict JSON only.
 

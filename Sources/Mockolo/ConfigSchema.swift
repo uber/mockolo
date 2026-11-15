@@ -5,6 +5,7 @@ enum ConfigSchema {
     private indirect enum Shape: CustomStringConvertible {
         case string
         case integer
+        case boolean
         case array(Shape)
         case map(Shape)
 
@@ -12,6 +13,7 @@ enum ConfigSchema {
             switch self {
             case .string: "string"
             case .integer: "integer"
+            case .boolean: "boolean"
             case .array(let element): "array of \(element)s"
             case .map: "object"
             }
@@ -71,6 +73,12 @@ enum ConfigSchema {
         "macro": .string,
         "concurrencyLimit": .integer,
         "loggingLevel": .integer,
+        "mockFinal": .boolean,
+        "enableArgsHistory": .boolean,
+        "mockAll": .boolean,
+        "allowSetCallCount": .boolean,
+        "disableCombineDefaultValues": .boolean,
+        "useTemplateFunc": .boolean,
     ]
 
     static func decode(_ data: Data, path: String) throws -> Config {
@@ -105,7 +113,7 @@ enum ConfigSchema {
     /// Returns "<key path>: expected <shape>" for the first value in `value` that does not match `shape`.
     private static func mismatch(_ value: JSONValue, _ shape: Shape, at keyPath: String) -> String? {
         switch (shape, value) {
-        case (.string, .string), (.integer, .integer):
+        case (.string, .string), (.integer, .integer), (.boolean, .bool):
             return nil
         case (.array(let element), .array(let values)):
             return values.indices.lazy.compactMap { mismatch(values[$0], element, at: "\(keyPath)[\($0)]") }.first

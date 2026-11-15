@@ -151,6 +151,12 @@ struct Executor: ParsableCommand {
         macro = macro ?? config.macro
         concurrencyLimit = concurrencyLimit ?? config.concurrencyLimit
         loggingLevel = loggingLevel ?? config.loggingLevel
+        mockFinal = mockFinal || config.mockFinal == true
+        enableArgsHistory = enableArgsHistory || config.enableArgsHistory == true
+        mockAll = mockAll || config.mockAll == true
+        allowSetCallCount = allowSetCallCount || config.allowSetCallCount == true
+        disableCombineDefaultValues = disableCombineDefaultValues || config.disableCombineDefaultValues == true
+        useTemplateFunc = useTemplateFunc || config.useTemplateFunc == true
     }
 
     mutating func validate() throws {

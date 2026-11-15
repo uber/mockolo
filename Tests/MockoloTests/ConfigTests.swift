@@ -60,6 +60,19 @@ import Testing
         #expect(!result.mocks.contains("BMock"))
     }
 
+    @Test func eitherCommandLineOrConfigTurnsFlagOn() throws {
+        let result = try runMockolo(
+            config: #"{ sources: ["Sources"], destination: "Mocks.swift", mockFinal: false, allowSetCallCount: true }"#,
+            files: ["Sources/A.swift": mockable("protocol A { func a() }")],
+            arguments: { _ in ["--mock-final"] }
+        )
+
+        #expect(result.status == 0)
+        #expect(result.mocks.contains("final class AMock"))
+        #expect(result.mocks.contains("    var aCallCount = 0"))
+        #expect(!result.mocks.contains("private(set) var aCallCount"))
+    }
+
     @Test(arguments: [
         (#"{ sourcez: [] }"#, "sourcez: unknown key"),
         (#"{ sources: "x" }"#, "sources: expected"),
