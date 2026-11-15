@@ -7,6 +7,11 @@ struct Config: Decodable {
     var destination: String?
     var module: String?
     var dependencies: [String: [String]]?
+    var annotation: String?
+    var header: String?
+    var macro: String?
+    var concurrencyLimit: Int?
+    var loggingLevel: Int?
 }
 
 struct ConfigFile {
@@ -31,6 +36,9 @@ struct ConfigFile {
         }
         if config.dependencies?.keys.contains("") == true {
             throw ValidationError("\(path): dependencies: module name must not be empty")
+        }
+        if let loggingLevel = config.loggingLevel, !Executor.validLoggingLevels.contains(loggingLevel) {
+            throw ValidationError("\(path): loggingLevel: expected 0, 1, 2 or 3")
         }
         return ConfigFile(path: path, config: config)
     }

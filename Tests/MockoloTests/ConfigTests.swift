@@ -44,11 +44,28 @@ import Testing
         #expect(!result.mocks.contains("class FooMock"))
     }
 
+    @Test func configValueAppliesUnlessCommandLineOverrides() throws {
+        let result = try runMockolo(
+            config: #"{ sources: ["Sources"], destination: "Mocks.swift", annotation: "@custom", header: "// config header" }"#,
+            files: [
+                "Sources/A.swift": mockable("protocol A {}", annotation: "@custom"),
+                "Sources/B.swift": mockable("protocol B {}"),
+            ],
+            arguments: { _ in ["--header", "// cli header"] }
+        )
+
+        #expect(result.status == 0)
+        #expect(result.mocks.hasPrefix("// cli header"))
+        #expect(result.mocks.contains("class AMock"))
+        #expect(!result.mocks.contains("BMock"))
+    }
+
     @Test(arguments: [
         (#"{ sourcez: [] }"#, "sourcez: unknown key"),
         (#"{ sources: "x" }"#, "sources: expected"),
         (#"{ sources: ["Missing"], destination: "Mocks.swift" }"#, "sources[0]: no such file or directory"),
         (#"{ dependencies: { "": [] } }"#, "dependencies: module name must not be empty"),
+        (#"{ loggingLevel: 1.5 }"#, "loggingLevel: expected integer"),
     ])
     func invalidConfigFails(config: String, message: String) throws {
         let result = try runMockolo(config: config)

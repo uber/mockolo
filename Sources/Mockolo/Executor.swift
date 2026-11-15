@@ -30,7 +30,7 @@ struct Executor: ParsableCommand {
     private var allowSetCallCount: Bool = false
 
     @Option(help: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
-    private var annotation: String = String.mockAnnotation
+    private var annotation: String?
 
     @Option(name: [.customShort("j"), .long],
             help: ArgumentHelp(
@@ -71,12 +71,12 @@ struct Executor: ParsableCommand {
             help: "A custom header documentation to be added to the beginning of a generated mock file.")
     private var header: String?
 
-    private static let validLoggingLevels = [0, 1, 2, 3]
+    static let validLoggingLevels = [0, 1, 2, 3]
     @Option(name: [.short, .long],
             help: ArgumentHelp(
                 "The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.",
                 valueName: "n"))
-    private var loggingLevel: Int = 0
+    private var loggingLevel: Int?
 
     @Option(help: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
     private var macro: String?
@@ -140,15 +140,21 @@ struct Executor: ParsableCommand {
     }
 
     private mutating func apply(_ file: ConfigFile) throws {
+        let config = file.config
         outputFilePath = outputFilePath ?? file.destinationPath
         if sourceDirs.isEmpty, sourceFileList == nil, sourceFiles.isEmpty {
             sourceFiles = try file.sourceFiles()
         }
         dependencySrcs = try file.dependencyFiles()
+        annotation = annotation ?? config.annotation
+        header = header ?? config.header
+        macro = macro ?? config.macro
+        concurrencyLimit = concurrencyLimit ?? config.concurrencyLimit
+        loggingLevel = loggingLevel ?? config.loggingLevel
     }
 
     mutating func validate() throws {
-        guard Executor.validLoggingLevels.contains(loggingLevel) else {
+        if let loggingLevel, !Executor.validLoggingLevels.contains(loggingLevel) {
             throw ValidationError("Please specify a valid logging level in the range: \(Executor.validLoggingLevels)")
         }
 
@@ -183,7 +189,7 @@ struct Executor: ParsableCommand {
     private var dependencySrcs: [String] = []
 
     mutating func run() throws {
-        let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
+        let shouldOutputRunStatusMessages: Bool = (loggingLevel ?? 0) < 3
 
         if shouldOutputRunStatusMessages {
             print("Start...")
@@ -210,7 +216,7 @@ struct Executor: ParsableCommand {
                          dependencySourceFiles: dependencySrcs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
-                         annotation: annotation,
+                         annotation: annotation ?? .mockAnnotation,
                          header: header,
                          macro: macro,
                          declType: mockAll ? .all : .protocolType,
@@ -223,7 +229,7 @@ struct Executor: ParsableCommand {
                          customImports: customImports,
                          excludeImports: excludeImports,
                          to: dstFilePath,
-                         loggingLevel: loggingLevel,
+                         loggingLevel: loggingLevel ?? 0,
                          concurrencyLimit: concurrencyLimit)
             log("Done. Exiting program.", level: .info)
         } catch {

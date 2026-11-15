@@ -140,7 +140,7 @@ USAGE: mockolo <options>
 OPTIONS:
   --allow-set-call-count  If set, generated *CallCount vars will be allowed to set manually.
   --annotation <annotation>
-                          A custom annotation string used to indicate if a type should be mocked (default = @mockable). (default: @mockable)
+                          A custom annotation string used to indicate if a type should be mocked (default = @mockable).
   -j, --concurrency-limit <n>
                           Maximum number of threads to execute concurrently (default = 1).
   --config <config>       Path to a JSON5 config file describing this run; the README lists how its keys combine with CLI options.
@@ -154,7 +154,7 @@ OPTIONS:
   -x, --exclude-suffixes <exclude-suffixes>
                           List of filename suffix(es) without the file extensions to exclude from parsing (separated by a space).
   --header <header>       A custom header documentation to be added to the beginning of a generated mock file.
-  -l, --logging-level <n> The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error. (default: 0)
+  -l, --logging-level <n> The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
   --macro <macro>         If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
   --mock-all              If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).
   --mock-filelist <mock-filelist>
@@ -201,6 +201,11 @@ The options of a run can also be described in a [JSON5](https://json5.org) file 
 | `destination` | `--destination` | the CLI value overrides |
 | `module` | none | reserved |
 | `dependencies` | none | config only |
+| `annotation` | `--annotation` | the CLI value overrides |
+| `header` | `--header` | the CLI value overrides |
+| `macro` | `--macro` | the CLI value overrides |
+| `concurrencyLimit` | `--concurrency-limit` | the CLI value overrides |
+| `loggingLevel` | `--logging-level` | the CLI value overrides |
 
 Paths are relative to the config file's directory (a leading `~` is expanded), and every path list can mix directories and files. Unknown keys, wrong types, `null` and missing paths are errors. Linux toolchains older than 6.0 read strict JSON only.
 
