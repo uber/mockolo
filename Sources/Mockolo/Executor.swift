@@ -157,6 +157,10 @@ struct Executor: ParsableCommand {
         allowSetCallCount = allowSetCallCount || config.allowSetCallCount == true
         disableCombineDefaultValues = disableCombineDefaultValues || config.disableCombineDefaultValues == true
         useTemplateFunc = useTemplateFunc || config.useTemplateFunc == true
+        if customImports.isEmpty { customImports = config.customImports ?? [] }
+        if testableImports.isEmpty { testableImports = config.testableImports ?? [] }
+        if excludeImports.isEmpty { excludeImports = config.excludeImports ?? [] }
+        if exclusionSuffixes.isEmpty { exclusionSuffixes = config.excludeSuffixes ?? [] }
     }
 
     mutating func validate() throws {

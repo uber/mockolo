@@ -73,6 +73,18 @@ import Testing
         #expect(!result.mocks.contains("private(set) var aCallCount"))
     }
 
+    @Test func commandLineListReplacesConfigList() throws {
+        let result = try runMockolo(
+            config: #"{ sources: ["Sources"], destination: "Mocks.swift", customImports: ["A"] }"#,
+            files: ["Sources/P.swift": mockable("protocol P {}")],
+            arguments: { _ in ["--custom-imports", "B"] }
+        )
+
+        #expect(result.status == 0)
+        #expect(result.mocks.contains("import B"))
+        #expect(!result.mocks.contains("import A"))
+    }
+
     @Test(arguments: [
         (#"{ sourcez: [] }"#, "sourcez: unknown key"),
         (#"{ sources: "x" }"#, "sources: expected"),

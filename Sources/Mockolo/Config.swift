@@ -18,6 +18,10 @@ struct Config: Decodable {
     var allowSetCallCount: Bool?
     var disableCombineDefaultValues: Bool?
     var useTemplateFunc: Bool?
+    var customImports: [String]?
+    var testableImports: [String]?
+    var excludeImports: [String]?
+    var excludeSuffixes: [String]?
 }
 
 struct ConfigFile {

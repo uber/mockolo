@@ -212,6 +212,10 @@ The options of a run can also be described in a [JSON5](https://json5.org) file 
 | `allowSetCallCount` | `--allow-set-call-count` | either turns it on |
 | `disableCombineDefaultValues` | `--disable-combine-default-values` | either turns it on |
 | `useTemplateFunc` | `--use-template-func` | either turns it on |
+| `customImports` | `--custom-imports` | the CLI list replaces |
+| `testableImports` | `--testable-imports` | the CLI list replaces |
+| `excludeImports` | `--exclude-imports` | the CLI list replaces |
+| `excludeSuffixes` | `--exclude-suffixes` | the CLI list replaces |
 
 Paths are relative to the config file's directory (a leading `~` is expanded), and every path list can mix directories and files. Unknown keys, wrong types, `null` and missing paths are errors. Linux toolchains older than 6.0 read strict JSON only.
 

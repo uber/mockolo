@@ -79,6 +79,10 @@ enum ConfigSchema {
         "allowSetCallCount": .boolean,
         "disableCombineDefaultValues": .boolean,
         "useTemplateFunc": .boolean,
+        "customImports": .array(.string),
+        "testableImports": .array(.string),
+        "excludeImports": .array(.string),
+        "excludeSuffixes": .array(.string),
     ]
 
     static func decode(_ data: Data, path: String) throws -> Config {
