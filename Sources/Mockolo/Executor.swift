@@ -144,6 +144,7 @@ struct Executor: ParsableCommand {
         if sourceDirs.isEmpty, sourceFileList == nil, sourceFiles.isEmpty {
             sourceFiles = try file.sourceFiles()
         }
+        dependencySrcs = try file.dependencyFiles()
     }
 
     mutating func validate() throws {
@@ -179,6 +180,7 @@ struct Executor: ParsableCommand {
     private var srcDirs: [String] = []
     private var srcs: [String] = []
     private var dstFilePath = ""
+    private var dependencySrcs: [String] = []
 
     mutating func run() throws {
         let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
@@ -205,6 +207,7 @@ struct Executor: ParsableCommand {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
+                         dependencySourceFiles: dependencySrcs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
                          annotation: annotation,

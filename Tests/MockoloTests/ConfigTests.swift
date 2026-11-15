@@ -30,10 +30,25 @@ import Testing
         #expect(!result.mocks.contains("class AMock"))
     }
 
+    @Test func dependenciesResolveInheritedTypes() throws {
+        let result = try runMockolo(
+            config: #"{ sources: ["Sources"], destination: "Mocks.swift", dependencies: { ModuleA: ["ModuleA"] } }"#,
+            files: [
+                "Sources/Bar.swift": mockable("protocol Bar: Foo {}"),
+                "ModuleA/Foo.swift": mockable("public protocol Foo { func reset() }"),
+            ]
+        )
+
+        #expect(result.status == 0)
+        #expect(result.mocks.contains("func reset()"))
+        #expect(!result.mocks.contains("class FooMock"))
+    }
+
     @Test(arguments: [
         (#"{ sourcez: [] }"#, "sourcez: unknown key"),
         (#"{ sources: "x" }"#, "sources: expected"),
         (#"{ sources: ["Missing"], destination: "Mocks.swift" }"#, "sources[0]: no such file or directory"),
+        (#"{ dependencies: { "": [] } }"#, "dependencies: module name must not be empty"),
     ])
     func invalidConfigFails(config: String, message: String) throws {
         let result = try runMockolo(config: config)

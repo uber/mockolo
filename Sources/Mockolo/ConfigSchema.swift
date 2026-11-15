@@ -5,11 +5,13 @@ enum ConfigSchema {
     private indirect enum Shape: CustomStringConvertible {
         case string
         case array(Shape)
+        case map(Shape)
 
         var description: String {
             switch self {
             case .string: "string"
             case .array(let element): "array of \(element)s"
+            case .map: "object"
             }
         }
     }
@@ -60,6 +62,8 @@ enum ConfigSchema {
     private static let schema: [String: Shape] = [
         "sources": .array(.string),
         "destination": .string,
+        "module": .string,
+        "dependencies": .map(.array(.string)),
     ]
 
     static func decode(_ data: Data, path: String) throws -> Config {
@@ -98,6 +102,10 @@ enum ConfigSchema {
             return nil
         case (.array(let element), .array(let values)):
             return values.indices.lazy.compactMap { mismatch(values[$0], element, at: "\(keyPath)[\($0)]") }.first
+        case (.map(let element), .object(let values)):
+            return values.sorted { $0.key < $1.key }.lazy.compactMap { key, value in
+                mismatch(value, element, at: "\(keyPath).\(key)")
+            }.first
         default:
             return "\(keyPath): expected \(shape)"
         }

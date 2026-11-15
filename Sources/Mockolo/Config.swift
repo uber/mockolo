@@ -5,6 +5,8 @@ import MockoloFramework
 struct Config: Decodable {
     var sources: [String]?
     var destination: String?
+    var module: String?
+    var dependencies: [String: [String]]?
 }
 
 struct ConfigFile {
@@ -24,11 +26,23 @@ struct ConfigFile {
             throw ValidationError("\(path): could not read file")
         }
         let config = try ConfigSchema.decode(data, path: path)
+        if config.module?.isEmpty == true {
+            throw ValidationError("\(path): module: must not be empty")
+        }
+        if config.dependencies?.keys.contains("") == true {
+            throw ValidationError("\(path): dependencies: module name must not be empty")
+        }
         return ConfigFile(path: path, config: config)
     }
 
     func sourceFiles() throws -> [String] {
         try files(config.sources ?? [], keyPath: "sources")
+    }
+
+    func dependencyFiles() throws -> [String] {
+        try (config.dependencies ?? [:]).sorted { $0.key < $1.key }.flatMap { module, paths in
+            try files(paths, keyPath: "dependencies.\(module)")
+        }
     }
 
     /// Resolves `paths` against the config file's directory and expands directories to the files they contain.

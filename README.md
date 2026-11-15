@@ -182,8 +182,12 @@ The options of a run can also be described in a [JSON5](https://json5.org) file 
 
 ```json5
 {
+    module: "ModuleB",
     sources: ["Sources/ModuleB", "Generated/Strings.swift"],
     destination: "Mocks/ModuleBMocks.swift",
+    dependencies: {
+        ModuleA: ["Sources/ModuleA"],
+    },
 }
 ```
 
@@ -195,8 +199,14 @@ The options of a run can also be described in a [JSON5](https://json5.org) file 
 | --- | --- | --- |
 | `sources` | `--sourcedirs`, `--filelist`, `--sourcefiles` | the CLI list replaces |
 | `destination` | `--destination` | the CLI value overrides |
+| `module` | none | reserved |
+| `dependencies` | none | config only |
 
 Paths are relative to the config file's directory (a leading `~` is expanded), and every path list can mix directories and files. Unknown keys, wrong types, `null` and missing paths are errors. Linux toolchains older than 6.0 read strict JSON only.
+
+### Protocols inheriting from other modules
+
+Mockolo resolves inherited requirements only from the declarations it parses. When a mocked protocol inherits from a protocol in another module, list that module's sources under `dependencies`, keyed by module name (as `ModuleA` in the example above). Their declarations resolve inherited members, associated types and `where` clauses, but are never mocked, even when annotated. A declaration in `sources` is never replaced by a dependency declaration with the same name, and a parent declared in `dependencies` is used instead of a parent mock passed with `--mockfiles`. Module names are not used yet: types are resolved by name alone.
 
 
 ## Distribution
