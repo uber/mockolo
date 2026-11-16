@@ -44,14 +44,17 @@ let package = Package(
             ]
         ),
         .testTarget(
-            name: "MockoloTests",
+            name: "MockoloFrameworkTests",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
                 "MockoloFramework",
                 "MockoloTestSupportMacros",
-            ],
-            path: "Tests"
+            ]
+        ),
+        .testTarget(
+            name: "MockoloTests",
+            dependencies: ["Mockolo"]
         ),
     ]
 )

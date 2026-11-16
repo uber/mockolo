@@ -135,15 +135,16 @@ Use --help to see the complete argument options.
 
 OVERVIEW: Mockolo: Swift mock generator.
 
-USAGE: mockolo [<options>] --destination <destination>
+USAGE: mockolo <options>
 
 OPTIONS:
   --allow-set-call-count  If set, generated *CallCount vars will be allowed to set manually.
   --annotation <annotation>
-                          A custom annotation string used to indicate if a type should be mocked (default = @mockable). (default: @mockable)
+                          A custom annotation string used to indicate if a type should be mocked (default = @mockable).
   -j, --concurrency-limit <n>
                           Maximum number of threads to execute concurrently (default = 1).
-  --custom-imports <custom-imports>
+  --config <config>       Path to a JSON5 config file describing this run; the README lists how its keys combine with CLI options.
+  -c, --custom-imports <custom-imports>
                           If set, custom module imports (separated by a space) will be added to the final import statement list.
   --enable-args-history   Whether to enable args history for all functions (default = false). To enable history per function, use the 'history' keyword in the annotation argument.
   --disable-combine-default-values
@@ -153,7 +154,7 @@ OPTIONS:
   -x, --exclude-suffixes <exclude-suffixes>
                           List of filename suffix(es) without the file extensions to exclude from parsing (separated by a space).
   --header <header>       A custom header documentation to be added to the beginning of a generated mock file.
-  -l, --logging-level <n> The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error. (default: 0)
+  -l, --logging-level <n> The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.
   --macro <macro>         If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.
   --mock-all              If set, it will mock all types (protocols and classes) with a mock annotation (default is set to false and only mocks protocols with a mock annotation).
   --mock-filelist <mock-filelist>
@@ -162,7 +163,7 @@ OPTIONS:
   -mocks, --mockfiles <mocks>
                           List of mock files (separated by a space) from modules this target depends on. If the --mock-filelist value exists, this will be ignored.
   -d, --destination <destination>
-                          Output file path containing the generated Swift mock classes. If no value is given, the program will exit.
+                          Output file path containing the generated Swift mock classes. Required unless the config file sets 'destination'.
   -s, --sourcedirs <sourcedirs>
                           Paths to the directories containing source files to generate mocks for (separated by a space). If the --filelist or --sourcefiles values exist, they will be ignored.
   -f, --filelist <filelist>
@@ -174,6 +175,54 @@ OPTIONS:
   --use-template-func     If set, a common template function will be called from all functions in mock classes (default is set to false).
   -h, --help              Show help information.
 ```
+
+### Config file
+
+The options of a run can also be described in a [JSON5](https://json5.org) file passed with `--config`, one file per run:
+
+```json5
+{
+    module: "ModuleB",
+    sources: ["Sources/ModuleB", "Generated/Strings.swift"],
+    destination: "Mocks/ModuleBMocks.swift",
+    dependencies: {
+        ModuleA: ["Sources/ModuleA"],
+    },
+}
+```
+
+```
+./mockolo --config mockolo.json5
+```
+
+| Key | CLI option | When both are given |
+| --- | --- | --- |
+| `sources` | `--sourcedirs`, `--filelist`, `--sourcefiles` | the CLI list replaces |
+| `destination` | `--destination` | the CLI value overrides |
+| `module` | none | reserved |
+| `dependencies` | none | config only |
+| `annotation` | `--annotation` | the CLI value overrides |
+| `header` | `--header` | the CLI value overrides |
+| `macro` | `--macro` | the CLI value overrides |
+| `concurrencyLimit` | `--concurrency-limit` | the CLI value overrides |
+| `loggingLevel` | `--logging-level` | the CLI value overrides |
+| `mockFinal` | `--mock-final` | either turns it on |
+| `enableArgsHistory` | `--enable-args-history` | either turns it on |
+| `mockAll` | `--mock-all` | either turns it on |
+| `allowSetCallCount` | `--allow-set-call-count` | either turns it on |
+| `disableCombineDefaultValues` | `--disable-combine-default-values` | either turns it on |
+| `useTemplateFunc` | `--use-template-func` | either turns it on |
+| `customImports` | `--custom-imports` | the CLI list replaces |
+| `testableImports` | `--testable-imports` | the CLI list replaces |
+| `excludeImports` | `--exclude-imports` | the CLI list replaces |
+| `excludeSuffixes` | `--exclude-suffixes` | the CLI list replaces |
+| `mockfiles` | `--mockfiles`, `--mock-filelist` | the CLI list replaces |
+
+Paths are relative to the config file's directory (a leading `~` is expanded), and every path list can mix directories and files. Unknown keys, wrong types, `null` and missing paths are errors. Linux toolchains older than 6.0 read strict JSON only.
+
+### Protocols inheriting from other modules
+
+Mockolo resolves inherited requirements only from the declarations it parses. When a mocked protocol inherits from a protocol in another module, list that module's sources under `dependencies`, keyed by module name (as `ModuleA` in the example above). Their declarations resolve inherited members, associated types and `where` clauses, but are never mocked, even when annotated. A declaration in `sources` is never replaced by a dependency declaration with the same name, and a parent declared in `dependencies` is used instead of a parent mock passed with `--mockfiles`. Module names are not used yet: types are resolved by name alone.
 
 
 ## Distribution

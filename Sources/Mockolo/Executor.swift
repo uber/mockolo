@@ -30,13 +30,18 @@ struct Executor: ParsableCommand {
     private var allowSetCallCount: Bool = false
 
     @Option(help: "A custom annotation string used to indicate if a type should be mocked (default = @mockable).")
-    private var annotation: String = String.mockAnnotation
+    private var annotation: String?
 
     @Option(name: [.customShort("j"), .long],
             help: ArgumentHelp(
                 "Maximum number of threads to execute concurrently (default = 1).",
                 valueName: "n"))
     private var concurrencyLimit: Int?
+
+    @Option(name: .long,
+            help: "Path to a JSON5 config file describing this run; the README lists how its keys combine with CLI options.",
+            completion: .file())
+    private var config: String?
 
     @Option(name: [.customShort("c"), .long],
             parsing: .upToNextOption,
@@ -66,12 +71,12 @@ struct Executor: ParsableCommand {
             help: "A custom header documentation to be added to the beginning of a generated mock file.")
     private var header: String?
 
-    private static let validLoggingLevels = [0, 1, 2, 3]
+    static let validLoggingLevels = [0, 1, 2, 3]
     @Option(name: [.short, .long],
             help: ArgumentHelp(
                 "The logging level to use. Default is set to 0 (info only). Set 1 for verbose, 2 for warning, and 3 for error.",
                 valueName: "n"))
-    private var loggingLevel: Int = 0
+    private var loggingLevel: Int?
 
     @Option(help: "If set, #if [macro] / #endif will be added to the generated mock file content to guard compilation.")
     private var macro: String?
@@ -96,9 +101,9 @@ struct Executor: ParsableCommand {
     private var mockFilePaths: [String] = []
 
     @Option(name: [.customShort("d"), .customLong("destination")],
-            help: "Output file path containing the generated Swift mock classes. If no value is given, the program will exit.",
+            help: "Output file path containing the generated Swift mock classes. Required unless the config file sets 'destination'.",
             completion: .file())
-    private var outputFilePath: String
+    private var outputFilePath: String?
 
     @Option(name: [.customShort("s"), .customLong("sourcedirs")],
             parsing: .upToNextOption,
@@ -131,20 +136,49 @@ struct Executor: ParsableCommand {
     }
 
     private func fullPath(_ path: String) -> String {
-        if path.hasPrefix("/") {
-            return path
+        resolvePath(path, relativeTo: FileManager.default.currentDirectoryPath)
+    }
+
+    private mutating func apply(_ file: ConfigFile) throws {
+        let config = file.config
+        outputFilePath = outputFilePath ?? file.destinationPath
+        if sourceDirs.isEmpty, sourceFileList == nil, sourceFiles.isEmpty {
+            sourceFiles = try file.sourceFiles()
         }
-        if path.hasPrefix("~") {
-            let home = FileManager.default.homeDirectoryForCurrentUser.path
-            return path.replacingOccurrences(of: "~", with: home, range: path.range(of: "~"))
+        dependencySrcs = try file.dependencyFiles()
+        if mockFileList == nil, mockFilePaths.isEmpty {
+            mockFilePaths = try file.mockFiles()
         }
-        return FileManager.default.currentDirectoryPath + "/" + path
+        annotation = annotation ?? config.annotation
+        header = header ?? config.header
+        macro = macro ?? config.macro
+        concurrencyLimit = concurrencyLimit ?? config.concurrencyLimit
+        loggingLevel = loggingLevel ?? config.loggingLevel
+        mockFinal = mockFinal || config.mockFinal == true
+        enableArgsHistory = enableArgsHistory || config.enableArgsHistory == true
+        mockAll = mockAll || config.mockAll == true
+        allowSetCallCount = allowSetCallCount || config.allowSetCallCount == true
+        disableCombineDefaultValues = disableCombineDefaultValues || config.disableCombineDefaultValues == true
+        useTemplateFunc = useTemplateFunc || config.useTemplateFunc == true
+        if customImports.isEmpty { customImports = config.customImports ?? [] }
+        if testableImports.isEmpty { testableImports = config.testableImports ?? [] }
+        if excludeImports.isEmpty { excludeImports = config.excludeImports ?? [] }
+        if exclusionSuffixes.isEmpty { exclusionSuffixes = config.excludeSuffixes ?? [] }
     }
 
     mutating func validate() throws {
-        guard Executor.validLoggingLevels.contains(loggingLevel) else {
+        if let loggingLevel, !Executor.validLoggingLevels.contains(loggingLevel) {
             throw ValidationError("Please specify a valid logging level in the range: \(Executor.validLoggingLevels)")
         }
+
+        if let config {
+            try apply(ConfigFile.load(from: fullPath(config)))
+        }
+
+        guard let outputFilePath else {
+            throw ValidationError("Missing destination: pass --destination or set 'destination' in the config file")
+        }
+        dstFilePath = fullPath(outputFilePath)
 
         srcDirs = self.sourceDirs.map(fullPath)
 
@@ -161,12 +195,14 @@ struct Executor: ParsableCommand {
         }
     }
 
-    // Source paths to be used in `run`
+    // Resolved values to be used in `run`
     private var srcDirs: [String] = []
     private var srcs: [String] = []
+    private var dstFilePath = ""
+    private var dependencySrcs: [String] = []
 
     mutating func run() throws {
-        let shouldOutputRunStatusMessages: Bool = loggingLevel < 3
+        let shouldOutputRunStatusMessages: Bool = (loggingLevel ?? 0) < 3
 
         if shouldOutputRunStatusMessages {
             print("Start...")
@@ -176,8 +212,6 @@ struct Executor: ParsableCommand {
                 print("Done.")
             }
         }
-
-        let outputFilePath = fullPath(self.outputFilePath)
 
         var mockFilePaths: [String]?
         // First see if a list of mock files are stored in a file
@@ -192,9 +226,10 @@ struct Executor: ParsableCommand {
         do {
             try generate(sourceDirs: srcDirs,
                          sourceFiles: srcs,
+                         dependencySourceFiles: dependencySrcs,
                          exclusionSuffixes: exclusionSuffixes,
                          mockFilePaths: mockFilePaths,
-                         annotation: annotation,
+                         annotation: annotation ?? .mockAnnotation,
                          header: header,
                          macro: macro,
                          declType: mockAll ? .all : .protocolType,
@@ -206,8 +241,8 @@ struct Executor: ParsableCommand {
                          testableImports: testableImports,
                          customImports: customImports,
                          excludeImports: excludeImports,
-                         to: outputFilePath,
-                         loggingLevel: loggingLevel,
+                         to: dstFilePath,
+                         loggingLevel: loggingLevel ?? 0,
                          concurrencyLimit: concurrencyLimit)
             log("Done. Exiting program.", level: .info)
         } catch {
